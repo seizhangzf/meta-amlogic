@@ -1,0 +1,51 @@
+From 8697c0aee46cd40b30605349eaa7ad2aa55ace2a Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Tue, 6 Dec 2016 11:24:05 +0800
+Subject: [PATCH 2/3] fix sdcard to /dev/mmcblk0
+
+---
+ drivers/amlogic/mmc/emmc_partitions.c |    2 +-
+ drivers/mmc/card/block.c              |    7 ++++++-
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/mmc/emmc_partitions.c b/drivers/amlogic/mmc/emmc_partitions.c
+index 1925423..e35b19e 100644
+--- a/drivers/amlogic/mmc/emmc_partitions.c
++++ b/drivers/amlogic/mmc/emmc_partitions.c
+@@ -503,7 +503,7 @@ static int add_emmc_partition(struct gendisk *disk,
+ 	return 0;
+ }
+ 
+-static int is_card_emmc(struct mmc_card *card)
++int is_card_emmc(struct mmc_card *card)
+ {
+ 	struct mmc_host *mmc = card->host;
+ 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index fd4928c..aa6107b 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2071,6 +2071,8 @@ static inline int mmc_blk_readonly(struct mmc_card *card)
+ 	       !(card->csd.cmdclass & CCC_BLOCK_WRITE);
+ }
+ 
++int is_card_emmc(struct mmc_card *card);
++
+ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 					      struct device *parent,
+ 					      sector_t size,
+@@ -2099,7 +2101,10 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 * index anymore so we keep track of a name index.
+ 	 */
+ 	if (!subname) {
+-		md->name_idx = find_first_zero_bit(name_use, max_devices);
++		if (!is_card_emmc(card))
++			md->name_idx  = find_first_zero_bit(name_use, max_devices);
++		else
++			md->name_idx  = 1;
+ 		__set_bit(md->name_idx, name_use);
+ 	} else
+ 		md->name_idx = ((struct mmc_blk_data *)
+-- 
+1.7.9.5
+

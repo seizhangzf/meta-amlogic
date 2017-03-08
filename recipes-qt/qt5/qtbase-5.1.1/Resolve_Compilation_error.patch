@@ -1,0 +1,22 @@
+--- qtbase-opensource-src-5.1.1/mkspecs/devices/linux-arm-amlogic-8726M-g++/qeglfshooks_8726m.cpp	2013-08-25 23:33:47.000000000 +0530
++++ qtbase-opensource-src-5.1.1/mkspecs/devices/linux-arm-amlogic-8726M-g++/qeglfshooks_8726m.cpp	2017-02-14 17:14:24.003005380 +0530
+@@ -48,6 +48,8 @@
+ #include <fcntl.h>
+ #include <linux/fb.h>
+ 
++#include<unistd.h>
++
+ QT_BEGIN_NAMESPACE
+ 
+ class QEglFS8726MHooks : public QEglFSHooks
+--- qtbase-opensource-src-5.1.1/src/gui/kernel/qplatformtheme.cpp	2013-08-25 23:33:33.000000000 +0530
++++ qtbase-opensource-src-5.1.1/src/gui/kernel/qplatformtheme.cpp	2017-02-14 17:28:16.742982579 +0530
+@@ -48,7 +48,7 @@
+ #include <QtCore/qfileinfo.h>
+ #include <qpalette.h>
+ #include <qtextformat.h>
+-#include <qiconloader_p.h>
++#include <private/qiconloader_p.h>
+ 
+ QT_BEGIN_NAMESPACE
+ 

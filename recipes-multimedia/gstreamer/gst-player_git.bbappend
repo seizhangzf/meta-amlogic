@@ -1,0 +1,2 @@
+DEPENDS_remove = "gtk+3"
+ANY_OF_DISTRO_FEATURES =""

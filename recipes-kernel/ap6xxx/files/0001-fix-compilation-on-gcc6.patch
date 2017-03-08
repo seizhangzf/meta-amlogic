@@ -1,0 +1,61 @@
+From f721e8e0bb1e267a7df9c1b5e46f392e7eb8c1fe Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Fri, 9 Dec 2016 13:42:21 +0800
+Subject: [PATCH] fix compilation on gcc6
+
+---
+ bcmdhd_1_201_59_x/dhd_sdio.c    | 2 +-
+ bcmdhd_1_201_59_x/siutils.c     | 3 ++-
+ bcmdhd_1_201_59_x/wl_cfg80211.c | 4 ++--
+ 3 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/bcmdhd_1_201_59_x/dhd_sdio.c b/bcmdhd_1_201_59_x/dhd_sdio.c
+index 02e1f6d..31d91e7 100644
+--- a/bcmdhd_1_201_59_x/dhd_sdio.c
++++ b/bcmdhd_1_201_59_x/dhd_sdio.c
+@@ -9273,7 +9273,7 @@ dhd_bus_devreset(dhd_pub_t *dhdp, uint8 flag)
+ 			} else
+ 				bcmerror = BCME_SDIO_ERROR;
+ 
+-				dhd_os_sdunlock(dhdp);
++			dhd_os_sdunlock(dhdp);
+ 		} else {
+ 			bcmerror = BCME_SDIO_ERROR;
+ 			printf("%s called when dongle is not in reset\n",
+diff --git a/bcmdhd_1_201_59_x/siutils.c b/bcmdhd_1_201_59_x/siutils.c
+index 29d6dc2..af3d359 100644
+--- a/bcmdhd_1_201_59_x/siutils.c
++++ b/bcmdhd_1_201_59_x/siutils.c
+@@ -467,12 +467,13 @@ si_doattach(si_info_t *sii, uint devid, osl_t *osh, void *regs,
+ 	}
+ 
+ 	sih->bustype = bustype;
++#if 0 /* always false: -Werror=tautological-compare */
+ 	if (bustype != BUSTYPE(bustype)) {
+ 		SI_ERROR(("si_doattach: bus type %d does not match configured bus type %d\n",
+ 			bustype, BUSTYPE(bustype)));
+ 		return NULL;
+ 	}
+-
++#endif
+ 	/* bus/core/clk setup for register access */
+ 	if (!si_buscore_prep(sii, bustype, devid, sdh)) {
+ 		SI_ERROR(("si_doattach: si_core_clk_prep failed %d\n", bustype));
+diff --git a/bcmdhd_1_201_59_x/wl_cfg80211.c b/bcmdhd_1_201_59_x/wl_cfg80211.c
+index 7f10d51..3419458 100644
+--- a/bcmdhd_1_201_59_x/wl_cfg80211.c
++++ b/bcmdhd_1_201_59_x/wl_cfg80211.c
+@@ -6348,8 +6348,8 @@ wl_cfg80211_mgmt_tx(struct wiphy *wiphy, bcm_struct_cfgdev *cfgdev,
+ #endif
+ 			if ((dev == bcmcfg_to_prmry_ndev(cfg)) && cfg->p2p)
+ 				bssidx = wl_to_p2p_bss_bssidx(cfg, P2PAPI_BSSCFG_DEVICE);
+-				wl_cfgp2p_set_management_ie(cfg, dev, bssidx,
+-				VNDR_IE_PRBRSP_FLAG, (u8 *)(buf + ie_offset), ie_len);
++			wl_cfgp2p_set_management_ie(cfg, dev, bssidx,
++			VNDR_IE_PRBRSP_FLAG, (u8 *)(buf + ie_offset), ie_len);
+ 			cfg80211_mgmt_tx_status(cfgdev, *cookie, buf, len, true, GFP_KERNEL);
+ 			goto exit;
+ 		} else if (ieee80211_is_disassoc(mgmt->frame_control) ||
+-- 
+2.11.0
+
