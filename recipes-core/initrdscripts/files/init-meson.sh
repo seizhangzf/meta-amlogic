@@ -122,6 +122,7 @@ format_and_install() {
     if [ -f "/${ROOT_MOUNT}/${FIRMWARE}" ] ; then
         echo "formating file system"
         export LD_LIBRARY_PATH=/usr/lib
+        umount /dev/system
         mkfs.ext4 -F /dev/system
         mkdir -p system
     	if ! mount -o rw,noatime,nodiratime -t ext4 /dev/system /system ; then

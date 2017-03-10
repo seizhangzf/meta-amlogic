@@ -224,7 +224,8 @@ def sdk_command_variables(d):
 
 do_kernel_checkout_append() {
         cd ${WORKDIR}/git
-        git checkout -b master
+        git checkout ${SRCREV}
+        git checkout -b amlogic-3.14
         cd -
 }
 
