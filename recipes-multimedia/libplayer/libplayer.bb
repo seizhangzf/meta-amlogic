@@ -14,6 +14,9 @@ SRC_URI += "\
            file://audio_codec_Makfile_changes.patch \
            "
 
+CC_remove += "-fno-omit-frame-pointer"
+EXTRA_OECONF_remove += "-fno-omit-frame-pointer"
+
 EXTRA_OEMAKE = "LIBPLAYER_STAGING_DIR=${D} CROSS=${TARGET_PREFIX} TARGET_DIR=${D} STAGING_DIR=${D} DESTDIR=${D}"
 EXTRA_OECONF = " \
     --disable-stripping \
@@ -33,7 +36,7 @@ EXTRA_OECONF = " \
     --cc="${CC} " \
     --arch=${TARGET_ARCH} \
     --target-os="linux" \
-    --extra-cflags="${TARGET_CFLAGS} ${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS} -I${D}/usr/include/" \
+    --extra-cflags="${TARGET_CFLAGS} ${HOST_CC_ARCH} ${TOOLCHAIN_OPTIONS} -I${D}/usr/include/" \
     --extra-ldflags="-L${D}/usr/lib -lamavutils -ldl" \
     --extra-libs="-lamavutils -ldl -lpthread" \ 
     --incdir=${includedir} \ 
@@ -53,11 +56,12 @@ do_configure(){
 do_compile () {
 	install -m 0755 -d ${D}/bin
 	install -m 0755 -d ${D}/usr/lib
-	install -m 0755 -d ${D}/usr/bin 
+	install -m 0755 -d ${D}/usr/bin
 	install -m 0755 -d ${D}/usr/include
 	install -m 0755 -d ${D}/usr/include/sys
 	oe_runmake ${EXTRA_OEMAKE} all
 	install ${S}/examples/kplayer ${D}/usr/bin
+        install ${S}/amffmpeg/ffprobe ${D}/usr/bin
 }
 
 pkg_postinst_${PN} () {
@@ -85,5 +89,6 @@ do_install[noexec] = "1"
 #INHIBIT_PACKAGE_STRIP = "1"
 #INHIBIT_SYSROOT_STRIP = "1"
 #INHIBIT_PACKAGE_DEBUG_SPLIT = "1" 
-FILES_${PN} += "/usr/share/lib* /usr/lib/amplayer/*.so /bin /usr/bin/"
+
+FILES_${PN} += "/usr/share/lib* /usr/lib/amplayer/*.so /bin/ /usr/bin/"
 INSANE_SKIP_${PN} = "ldflags dev-so"
