@@ -42,7 +42,7 @@ bitbake_secondary_image () {
         key="$1"
         case $key in
             --rootfs-machine)
-            MACHINE_ROOTFS="$2"
+            ROOTFS_MACHINE="$2"
             shift
             ;;
             --kernel-image)
