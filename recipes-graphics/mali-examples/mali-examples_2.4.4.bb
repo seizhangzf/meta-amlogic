@@ -4,7 +4,7 @@ LICENSE = "ARM"
 LIC_FILES_CHKSUM = "file://Mali_OpenGL_ES_SDK_v2.4.4_Documentation.html;md5=561d0b7167db0f2048c175658731c52e"
 
 SRC_HASH = "71fdbd"
-SRC_URI = "http://malideveloper.arm.com/downloads/SDK/LINUX/${PV}/Mali_OpenGL_ES_SDK_v${PV}.${SRC_HASH}_Linux_x86.tar.gz"
+SRC_URI = "http://openlinux.amlogic.com:8000/download/GPL_code_release/ThirdParty/Mali_OpenGL_ES_SDK_v2.4.4.71fdbd_Linux_x86.tar.gz"
 SRC_URI[md5sum] = "441f89136e4fc1137214610aff0f7021"
 
 SRC_URI += "file://CMakeLists.patch"
