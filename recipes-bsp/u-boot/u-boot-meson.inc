@@ -92,4 +92,4 @@ do_copy_lic() {
 	cp ${THISDIR}/common/COPYING  ${S}
 }
 
-addtask copy_lic before do_populate_lic after do_patch
+addtask copy_lic before do_patch after do_unpack
