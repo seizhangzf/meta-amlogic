@@ -13,8 +13,9 @@ SRC_URI += "file://meson.scc \
             file://meson-user-patches.scc"
 
 SRC_URI += "file://0001-Remove-git-hook-from-Makefile.patch  \
-			file://0002-fix-sdcard-to-dev-mmcblk0.patch     \
-			file://0003-fix-compilation-error-for-gcc6.patch.patch"
+	    file://0002-fix-sdcard-to-dev-mmcblk0.patch     \
+	    file://0003-fix-compilation-error-for-gcc6.patch.patch  \
+	    file://0004-Enable-H264-CC-parser-on-905D.patch"
 
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 
