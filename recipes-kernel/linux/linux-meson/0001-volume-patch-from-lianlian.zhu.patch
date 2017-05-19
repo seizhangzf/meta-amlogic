@@ -1,0 +1,236 @@
+From efa22012b13fdd57eae62bc28606ce4f67a66604 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 18 May 2017 11:53:56 +0800
+Subject: [PATCH] volume patch from lianlian.zhu
+
+---
+ sound/soc/aml/m8/aml_i2s.c | 115 ++++++++++++++++++++++++++++++++++++++-------
+ sound/soc/aml/m8/aml_i2s.h |   9 ++++
+ 2 files changed, 108 insertions(+), 16 deletions(-)
+
+diff --git a/sound/soc/aml/m8/aml_i2s.c b/sound/soc/aml/m8/aml_i2s.c
+index a2bf64e66ac0..f433ba148ef5 100644
+--- a/sound/soc/aml/m8/aml_i2s.c
++++ b/sound/soc/aml/m8/aml_i2s.c
+@@ -51,6 +51,9 @@
+ #define XRUN_NUM 10 /*10ms*10=100ms timeout*/
+ #endif
+ 
++#define VOLUME_SCALE	100
++#define VOLUME_SHIFT	15
++#define VOL_CTL(s) ((unsigned int)(((signed short)(s))*(vol))>>VOLUME_SHIFT)
+ unsigned long aml_i2s_playback_start_addr = 0;
+ EXPORT_SYMBOL(aml_i2s_playback_start_addr);
+ 
+@@ -63,6 +66,20 @@ EXPORT_SYMBOL(aml_i2s_alsa_write_addr);
+ unsigned int aml_i2s_playback_channel = 2;
+ EXPORT_SYMBOL(aml_i2s_playback_channel);
+ 
++static struct audio_mixer_control audio_mixer_ctl;
++int get_mixer_output_volume(void)
++{
++	int val;
++	val = audio_mixer_ctl.output_volume;
++	return val;
++}
++
++int set_mixer_output_volume(int volume)
++{
++	audio_mixer_ctl.output_volume = volume;
++	return 0;
++}
++
+ static int trigger_underrun;
+ void aml_audio_hw_trigger(void)
+ {
+@@ -599,10 +616,13 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 	void *ubuf = tmp_buf->buffer_start;
+ 	struct audio_stream *s = &prtd->s;
+ 	struct device *dev = substream->pcm->card->dev;
++	register unsigned int vol =
++		(audio_mixer_ctl.output_volume*(1<<VOLUME_SHIFT))/VOLUME_SCALE;
+ #ifndef CONFIG_SND_AML_SPLIT_MODE
+ 	int cached_len = tmp_buf->cached_len;
+ 	char *cache_buffer_bytes = tmp_buf->cache_buffer_bytes;
+ #endif
++
+ 	n = frames_to_bytes(runtime, count);
+ 	if (n > tmp_buf->buffer_size) {
+ 		dev_err(dev, "FATAL_ERR:UserData/%d > buffer_size/%d\n",
+@@ -650,12 +670,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 	/*end of mask*/
+ #endif
+ 
++
+ 	if (s->device_type == AML_AUDIO_I2SOUT)
+ 		aml_i2s_alsa_write_addr = offset;
+ 
+ 	if (access_ok(VERIFY_READ, buf, frames_to_bytes(runtime, count))) {
+ #ifdef CONFIG_SND_AML_SPLIT_MODE
+-		memcpy(hwbuf, ubuf, n);
++		if (runtime->format == SNDRV_PCM_FORMAT_S16_LE) {
++			int16_t *tfrom, *to;
++			int i = 0;
++			tfrom = (int16_t *) ubuf;
++			to = (int16_t *) hwbuf;
++			for (i = 0; i < n/2; i++)
++				*to++ = (int16_t)(VOL_CTL(*tfrom++));
++		} else {
++			memcpy(hwbuf, ubuf, n);
++		}
+ #else
+ 		if (runtime->format == SNDRV_PCM_FORMAT_S16_LE) {
+ 
+@@ -668,8 +698,8 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 
+ 			for (j = 0; j < n; j += 64) {
+ 				for (i = 0; i < 16; i++) {
+-					*left++ = (*tfrom++);
+-					*right++ = (*tfrom++);
++					*left++ = (int16_t)(VOL_CTL(*tfrom++));
++					*right++ = (int16_t)(VOL_CTL(*tfrom++));
+ 				}
+ 				left += 16;
+ 				right += 16;
+@@ -685,8 +715,8 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 
+ 			for (j = 0; j < n; j += 64) {
+ 				for (i = 0; i < 8; i++) {
+-					*left++ = (*tfrom++);
+-					*right++ = (*tfrom++);
++					*left++  = (int32_t)(VOL_CTL(*tfrom++));
++					*right++ = (int32_t)(VOL_CTL(*tfrom++));
+ 				}
+ 				left += 8;
+ 				right += 8;
+@@ -713,14 +743,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 				sbr = to + 8 * 7;
+ 				for (j = 0; j < n; j += 256) {
+ 					for (i = 0; i < 8; i++) {
+-						*lf++ = (*tfrom++) >> 8;
+-						*cf++ = (*tfrom++) >> 8;
+-						*rf++ = (*tfrom++) >> 8;
+-						*ls++ = (*tfrom++) >> 8;
+-						*rs++ = (*tfrom++) >> 8;
+-						*lef++ = (*tfrom++) >> 8;
+-						*sbl++ = (*tfrom++) >> 8;
+-						*sbr++ = (*tfrom++) >> 8;
++						*lf++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*cf++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*rf++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*ls++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*rs++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*lef++ = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*sbl++ = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*sbr++ = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
+ 					}
+ 					lf += 7 * 8;
+ 					cf += 7 * 8;
+@@ -734,8 +772,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 			} else {
+ 				for (j = 0; j < n; j += 64) {
+ 					for (i = 0; i < 8; i++) {
+-						*left++ = (*tfrom++) >> 8;
+-						*right++ = (*tfrom++) >> 8;
++						*left++  = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
++						*right++ = (int32_t)(VOL_CTL(
++							    (*tfrom++)>>8));
+ 					}
+ 					left += 8;
+ 					right += 8;
+@@ -994,6 +1034,35 @@ static int aml_i2s_probe(struct snd_soc_platform *platform)
+ 			aml_i2s_controls, ARRAY_SIZE(aml_i2s_controls));
+ }
+ 
++static ssize_t show_volume(struct class *class,
++		struct class_attribute *attr, char *buf)
++{
++	ssize_t size = sprintf(buf, "volume=%d\n",
++			audio_mixer_ctl.output_volume);
++	return size;
++}
++
++static ssize_t store_volume(struct class *class, struct class_attribute *attr,
++		const char *buf, size_t size) {
++	unsigned val;
++	ssize_t ret;
++
++	ret = sscanf(buf, "%d", &val);
++
++	if (ret != 1)
++		return -EINVAL;
++
++	if ((val >= 0) && (val <= 100))
++		audio_mixer_ctl.output_volume = val;
++
++	return size;
++}
++
++static struct class_attribute aml_i2s_class_attrs[] = {
++	__ATTR(volume, S_IRUGO | S_IWUGO, show_volume, store_volume),
++	__ATTR_NULL
++};
++
+ struct snd_soc_platform_driver aml_soc_platform = {
+ 	.probe = aml_i2s_probe,
+ 	.ops = &aml_i2s_ops,
+@@ -1005,12 +1074,26 @@ struct snd_soc_platform_driver aml_soc_platform = {
+ 
+ static int aml_soc_platform_probe(struct platform_device *pdev)
+ {
+-	return snd_soc_register_platform(&pdev->dev, &aml_soc_platform);
++	int ret = 0;
++	snd_soc_register_platform(&pdev->dev, &aml_soc_platform);
++	pr_info(KERN_INFO "enter aml_soc_platform_probe\n");
++	audio_mixer_ctl.output_volume = 100;
++
++	audio_mixer_ctl.aml_i2s_class.name = "aml_i2s";
++	audio_mixer_ctl.aml_i2s_class.class_attrs = aml_i2s_class_attrs;
++	ret = class_register(&audio_mixer_ctl.aml_i2s_class);
++	if (ret)
++		pr_err("aml_i2s_class register fail\n");
++
++	pr_info("registed audio mixer controls class\n");
++
++	return ret;
+ }
+ 
+ static int aml_soc_platform_remove(struct platform_device *pdev)
+ {
+ 	snd_soc_unregister_platform(&pdev->dev);
++	class_unregister(&audio_mixer_ctl.aml_i2s_class);
+ 	return 0;
+ }
+ 
+diff --git a/sound/soc/aml/m8/aml_i2s.h b/sound/soc/aml/m8/aml_i2s.h
+index 20d3a8b97bc9..336b94467adc 100644
+--- a/sound/soc/aml/m8/aml_i2s.h
++++ b/sound/soc/aml/m8/aml_i2s.h
+@@ -53,6 +53,15 @@ struct aml_audio_buffer {
+ 	int cached_len;
+ };
+ 
++struct audio_mixer_control {
++	struct class aml_i2s_class;
++	int output_devide;
++	int input_device;
++	int direction;
++	int input_volume;
++	int output_volume;
++};
++
+ struct aml_i2s_dma_params {
+ 	char *name;			/* stream identifier */
+ 	struct snd_pcm_substream *substream;
+-- 
+2.11.0
+

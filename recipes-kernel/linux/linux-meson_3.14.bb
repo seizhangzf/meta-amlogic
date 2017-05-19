@@ -17,6 +17,9 @@ SRC_URI += "file://0001-Remove-git-hook-from-Makefile.patch  \
 	    file://0003-fix-compilation-error-for-gcc6.patch.patch  \
 	    file://0004-Enable-H264-CC-parser-on-905D.patch"
 
+SRC_URI += "file://0001-PD-131806-osd-adjust-scaler-phase-to-improve-the-pic.patch \
+	    file://0001-volume-patch-from-lianlian.zhu.patch"
+
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 
 LINUX_VERSION ?= "3.14.29"
