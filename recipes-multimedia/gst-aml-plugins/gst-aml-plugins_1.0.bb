@@ -9,7 +9,7 @@ MIRRORS_prepend += "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.gi
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e431e272f5b8a6a4f948a910812f235e"
 GBANCH = "yocto-gstplugin1.x"
-SRCREV="cf88dbf029ce3b9fcad32c19a8d090c0e07fe01b"
+SRCREV="32381e6b3c1234ccb8b4eb373a2d7db1b91da2b2"
 S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE = "CROSS=${TARGET_PREFIX} TARGET_DIR=${STAGING_DIR_TARGET} STAGING_DIR=${D} DESTDIR=${D}"
