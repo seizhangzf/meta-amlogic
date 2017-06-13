@@ -37,6 +37,19 @@ do_rootfs_append () {
     shutil.rmtree(bootdir)
 }
 
+BOOTIMG_SRC_URI = "file://mkbootimg"
+python do_install_mkbootimg() {
+    import shutil
+    src_uri = (d.getVar('BOOTIMG_SRC_URI', True) or "").split()
+    if len(src_uri) == 0:
+        return
+    fetcher = bb.fetch2.Fetch(src_uri, d)
+    fetcher.unpack(d.getVar('STAGING_BINDIR_NATIVE', True))
+}
+
+do_install_mkbootimg[nostamp] = "1"
+addtask install_mkbootimg before do_bundle_initramfs_dtb
+
 do_bundle_initramfs_dtb() {
 	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE_FOR_MAKE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
 }

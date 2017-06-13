@@ -11,4 +11,3 @@ do_install_mkbootimg() {
 }
 
 addtask copy_dtb before do_install after do_compile
-addtask install_mkbootimg before do_install after do_copy_dtb
