@@ -14,8 +14,8 @@ SRC_URI += "file://meson.scc \
 
 SRC_URI += "file://0001-Remove-git-hook-from-Makefile.patch  \
 	    file://0002-fix-sdcard-to-dev-mmcblk0.patch     \
-	    file://0003-fix-compilation-error-for-gcc6.patch.patch  \
-	    file://0004-Enable-H264-CC-parser-on-905D.patch"
+	    file://0003-fix-compilation-error-for-gcc6.patch.patch \
+	    file://0005-merge-PD-141751-CC-Support-AVS-H264-MPEG2-Close.patch"
 
 SRC_URI += "file://0001-PD-131806-osd-adjust-scaler-phase-to-improve-the-pic.patch \
 	    file://0001-volume-patch-from-lianlian.zhu.patch"
