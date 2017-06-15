@@ -82,6 +82,15 @@ boot_root() {
     # Watches the udev event queue, and exits if all current events are handled
     udevadm settle
 
+    # The rootfs does not yet contain kernel modules.  Copy it!
+    if [ ! -d ${ROOT_MOUNT}/lib/modules ];
+    then
+        cp -rf /lib/modules ${ROOT_MOUNT}/lib/
+        cp -rf /etc/modprobe.d ${ROOT_MOUNT}/etc/
+        cp -rf /etc/modules-load.d ${ROOT_MOUNT}/etc/
+        cp -rf /etc/modules ${ROOT_MOUNT}/etc/
+	fi
+
     mount -n --move /proc ${ROOT_MOUNT}/proc
     mount -n --move /sys ${ROOT_MOUNT}/sys
     mount -n --move /dev ${ROOT_MOUNT}/dev
