@@ -16,7 +16,7 @@ SRC_URI += "file://gxb_p200_v1.h.patch \
            file://gxm_q201_v1.h.patch"
 
 MIRRORS_prepend += "git://git.myamlogic.com/uboot.git git://git@openlinux.amlogic.com/yocto/uboot.git;protocol=ssh; \n"
-SRCREV="6842d86957f5904c68947e5df213bfc3ccb08578"
+SRCREV="4b70594ef24035e5b543c11ab1a6bc87bc601b52"
 
 S = "${WORKDIR}/git"
 

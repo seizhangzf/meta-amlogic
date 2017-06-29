@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/arm/gpu.git;nobranch=1"
 
-SRCREV = "deb77fae759b645ab802f872d8dba02d7f5db21e"
+SRCREV = "902adbb7488609afa53d125ed2a264cd723560c7"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/arm/gpu.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/gpu.git;protocol=ssh; \n"
 

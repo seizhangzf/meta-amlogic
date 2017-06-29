@@ -12,9 +12,9 @@ EXCLUDE_FROM_WORLD = "1"
 PROVIDES = "virtual/libgles1 virtual/libgles2 virtual/egl"
 RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 
-SRCREV = "75feb5891bf82806a8dcaa77c0e5a45a2100bc87"
+SRCREV = "ff2ef217a995bba2fd9b4337f38bb0dfcf3f3ccc"
 SRC_URI = "git://git.myamlogic.com/linux/amlogic/mali-linux.git;nobranch=1"
-#SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;nobranch=1"
+VERSION = "r7p0"
 MIRRORS_prepend += "git://git.myamlogic.com/linux/amlogic/mali-linux.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh; \n"
 
 S = "${WORKDIR}/git"
@@ -42,7 +42,7 @@ do_install() {
     install -d ${D}${includedir}
 
 
-    install -m 0755 ${S}/arm32/libMali.so ${D}${libdir}/libMali.so
+    install -m 0755 ${S}/arm32/${VERSION}/libMali.so ${D}${libdir}/libMali.so
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4
     ln -s libEGL.so.1.4 ${D}${libdir}/libEGL.so.1

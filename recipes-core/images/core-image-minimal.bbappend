@@ -10,7 +10,6 @@ PACKAGE_INSTALL += "\
                    initramfs-meson-boot \
                    e2fsprogs \
                    kernel-modules \
-                   nftl \
                    gpu \
                    kmod \
                    "

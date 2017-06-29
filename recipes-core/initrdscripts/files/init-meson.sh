@@ -33,9 +33,6 @@ early_setup() {
     mount -t sysfs sysfs /sys
     mount -t devtmpfs none /dev
 
-    #insert our precious NFTL
-    modprobe aml_nftl_dev
-
     mkdir -p /run
     mkdir -p /var/run
 
@@ -86,6 +83,7 @@ boot_root() {
     if [ ! -d ${ROOT_MOUNT}/lib/modules ];
     then
         cp -rf /lib/modules ${ROOT_MOUNT}/lib/
+        cp -rf /lib/firmware ${ROOT_MOUNT}/lib/
         cp -rf /etc/modprobe.d ${ROOT_MOUNT}/etc/
         cp -rf /etc/modules-load.d ${ROOT_MOUNT}/etc/
         cp -rf /etc/modules ${ROOT_MOUNT}/etc/
@@ -153,6 +151,7 @@ format_and_install() {
         sync
         echo "copying existing modules to rootfs"
         cp -rf /lib/modules /system/lib/
+        cp -rf /lib/firmware /system/lib/
         cp -rf /etc/modprobe.d /system/etc/
         cp -rf /etc/modules-load.d /system/etc/
         cp -rf /etc/modules /system/etc/

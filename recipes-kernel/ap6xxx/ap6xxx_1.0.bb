@@ -7,7 +7,7 @@ SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xx
 
 SRC_URI += "file://0001-fix-compilation-on-gcc6.patch"
 
-SRCREV = "0adaa230aadca3a6020d8f4437fad1bf8da7f17f"
+SRCREV = "99b34594c08f8dcc9c6ef66fbe2a110207d83cb6"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=ssh; \n"
 
@@ -20,18 +20,17 @@ do_install() {
     WIFIDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/broadcom/wifi
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${WIFIDIR}
-    install -m 0666 ${WORKDIR}/git/bcmdhd_1_201_59_x/dhd.ko ${WIFIDIR}
-    install -m 0666 ${WORKDIR}/git/bcmdhd-usb.1.201.88.27.x/bcmdhd.ko ${WIFIDIR}
+    install -m 0666 ${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn/dhd.ko ${WIFIDIR}
 }
 
 do_compile_append() {
-    oe_runmake -C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd-usb.1.201.88.27.x" ${AP6XXX_KCONFIGS} modules
+    oe_runmake -C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules
 }
 
-FILES_${PN} = "dhd.ko bcmdhd.ko"
+FILES_${PN} = "dhd.ko"
 # Header file provided by a separate package
 DEPENDS += ""
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd_1_201_59_x" ${AP6XXX_KCONFIGS} modules'
+EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules'

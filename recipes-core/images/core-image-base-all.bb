@@ -25,7 +25,6 @@ PACKAGE_INSTALL += "\
                    gst-player \
                    playscripts \
                    kernel-modules \
-                   nftl \
                    gpu \
                    ntfsprogs \
                    ntfs-3g \

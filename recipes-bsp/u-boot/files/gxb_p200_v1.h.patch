@@ -31,12 +31,12 @@ index 7d6819a7dd..8e32f71aee 100644
              "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
              "\0"\
 +        "sdcardargs="\
-+            "setenv bootargs root=/dev/mmcblk0p1 rootfstype=ext2 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
++            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=ext2 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
 +	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
 +            "run cmdline_keys;"\
 +            "\0"\
 +        "bootupdateargs="\
-+            "setenv bootargs root=/dev/mmcblk0p1 rootfstype=vfat ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag} firmware=rootfs.tar.gz;"\
++            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=vfat ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag} firmware=rootfs.tar.gz;"\
 +	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
 +             "run cmdline_keys;"\
 +             "\0"\
