@@ -1,0 +1,27 @@
+From 318020d26e546cc199042bc1ed87dfd22674d954 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 29 Jun 2017 18:15:52 +0800
+Subject: amlvideo2: fix crash
+
+---
+ drivers/amlogic/media/video_processor/video_dev/amlvideo.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/video_processor/video_dev/amlvideo.c b/drivers/amlogic/media/video_processor/video_dev/amlvideo.c
+index 9e49924a97b5..3765cc95fea9 100644
+--- a/drivers/amlogic/media/video_processor/video_dev/amlvideo.c
++++ b/drivers/amlogic/media/video_processor/video_dev/amlvideo.c
+@@ -404,7 +404,9 @@ static int vidioc_querycap(struct file *file, void *priv,
+ 	strcpy(cap->card, "amlvideo");
+ 	strlcpy(cap->bus_info, dev->v4l2_dev.name, sizeof(cap->bus_info));
+ 	cap->version = AMLVIDEO_VERSION;
+-	cap->capabilities = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING
++
++	cap->device_caps = V4L2_CAP_VIDEO_CAPTURE;
++	cap->capabilities = cap->capabilities | V4L2_CAP_STREAMING
+ 				| V4L2_CAP_READWRITE;
+ 	return 0;
+ }
+-- 
+2.11.0
+

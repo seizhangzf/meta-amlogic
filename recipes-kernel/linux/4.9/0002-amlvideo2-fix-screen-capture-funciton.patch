@@ -1,0 +1,31 @@
+From babf27616134e498b7d97b023956e26659023393 Mon Sep 17 00:00:00 2001
+From: Guosong Zhou <guosong.zhou@amlogic.com>
+Date: Mon, 12 Jun 2017 19:09:49 +0800
+Subject: amlvideo2: fix screen capture funciton
+
+PD#145804: fix screen capture function
+
+Change-Id: Icb857a889b53d74cfc85072cc88464fb46d283b3
+Signed-off-by: Guosong Zhou <guosong.zhou@amlogic.com>
+---
+ drivers/amlogic/media/video_processor/video_dev/amlvideo2.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
+index cc0723059405..16c525eaeb7f 100644
+--- a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
++++ b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
+@@ -4420,7 +4420,9 @@ static int vidioc_querycap(struct file *file, void *priv,
+ 		node->vid_dev->v4l2_dev.name,
+ 		sizeof(cap->bus_info));
+ 	cap->version = AMLVIDEO2_VERSION;
+-	cap->capabilities = V4L2_CAP_VIDEO_CAPTURE
++	cap->device_caps = V4L2_CAP_VIDEO_CAPTURE;
++	cap->capabilities = cap->device_caps
++		|V4L2_CAP_DEVICE_CAPS
+ 		|V4L2_CAP_STREAMING
+ 		| V4L2_CAP_READWRITE;
+ 	return 0;
+-- 
+2.11.0
+
