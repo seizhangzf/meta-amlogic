@@ -1,12 +1,12 @@
-From 8469677fd7936f59ddb8506c550f99bc844615b7 Mon Sep 17 00:00:00 2001
+From d6a6516f8a5c6219cb197ab2768e847a82604dc4 Mon Sep 17 00:00:00 2001
 From: Matthew Shyu <matthew.shyu@amlogic.com>
 Date: Thu, 29 Jun 2017 11:27:56 +0800
-Subject: dts: add p230 config
+Subject: [PATCH] dts: add p230 config
 
 ---
  MAINTAINERS                                 |    8 +
- arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 1170 +++++++++++++++++++++++++++
- 2 files changed, 1178 insertions(+)
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 1171 +++++++++++++++++++++++++++
+ 2 files changed, 1179 insertions(+)
  create mode 100644 arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
 
 diff --git a/MAINTAINERS b/MAINTAINERS
@@ -79,10 +79,10 @@ index bd8c7ffb79e5..e90a4604e7a2 100644
  F: arch/arm64/boot/dts/amlogic/gxm_q200_2g.dts
 diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
 new file mode 100644
-index 000000000000..1d7ad73bed40
+index 000000000000..cee8a9a375ce
 --- /dev/null
 +++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-@@ -0,0 +1,1170 @@
+@@ -0,0 +1,1171 @@
 +/*
 + * arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
 + *
@@ -102,11 +102,12 @@ index 000000000000..1d7ad73bed40
 +
 +/dts-v1/;
 +
++#include <dt-bindings/interrupt-controller/arm-gic.h>
 +#include "mesongxl.dtsi"
 +/ {
 +	model = "Amlogic";
 +	amlogic-dt-id = "gxl_p230_2g";
-+	compatible = "amlogic, Gxbb";
++	compatible = "amlogic, Gxl";
 +	interrupt-parent = <&gic>;
 +	#address-cells = <2>;
 +	#size-cells = <2>;
@@ -193,14 +194,14 @@ index 000000000000..1d7ad73bed40
 +		};
 +		/*  POST PROCESS MANAGER */
 +		ppmgr_reserved:linux,ppmgr {
-+			compatible = "amlogic, ppmgr_memory";
++			compatible = "shared-dma-pool";
 +			size = <0x0 0x0>;
 +		};
 +
 +		codec_mm_cma:linux,codec_mm_cma {
 +			compatible = "shared-dma-pool";
 +			reusable;
-+			size = <0x0 0x11400000>;
++			size = <0x0 0x10400000>;
 +			alignment = <0x0 0x400000>;
 +			linux,contiguous-region;
 +		};
@@ -225,7 +226,7 @@ index 000000000000..1d7ad73bed40
 +		dev_name = "aml_wifi";
 +		status = "okay";
 +		interrupt_pin = <&gpio       GPIOX_7       GPIO_ACTIVE_HIGH>;
-+		interrupts = <  0 68 4>;
++		interrupts = <	0 68 4>;
 +		irq_trigger_type = "GPIO_IRQ_LOW";
 +		power_on_pin = <&gpio       GPIOX_6       GPIO_ACTIVE_HIGH>;
 +		pinctrl-names = "wifi_32k_pins";
