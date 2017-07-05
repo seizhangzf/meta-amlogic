@@ -1,0 +1,28 @@
+From 8a9a665b333694fc80e2be617b065a8276b1c443 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Wed, 5 Jul 2017 16:21:39 +0800
+Subject: [PATCH] Fix dump_backtrace() caused by __might_sleep
+
+Use GFP_ATOMIC instead of GFP_KERNEL if kmalloc() is
+called outside a process's context, for instance,
+interrupt handler, kernel timer, and tasklets.
+---
+ drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/hdmi_tx_hw.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/hdmi_tx_hw.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/hdmi_tx_hw.c
+index e295be295307..5129f521533c 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/hdmi_tx_hw.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/hdmi_tx_hw.c
+@@ -3223,7 +3223,7 @@ static void hdcp_ksv_print(void)
+ 	unsigned int i, pos;
+ 	unsigned char *tmp_buf = NULL;
+ 
+-	tmp_buf = kmalloc(2000, GFP_KERNEL);
++	tmp_buf = kmalloc(2000, GFP_ATOMIC);
+ 	if (!tmp_buf)
+ 		return;
+ 
+-- 
+2.11.0
+
