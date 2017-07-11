@@ -21,6 +21,8 @@ SRC_URI += "\
 
 SRC_URI += "file://0004-volume-patch-from-lianlian.zhu.patch"
 SRC_URI += "file://0005-Fix-dump_backtrace-caused-by-__might_sleep.patch"
+SRC_URI += "file://0006-audio-audio-info-for-audio-license-query.patch"
+SRC_URI += "file://0007-Add-audio-info-into-dts.patch"
 
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 

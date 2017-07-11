@@ -1,0 +1,42 @@
+From 647f4e2327a971a63644f2a29d6272ca596f1a62 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Tue, 11 Jul 2017 11:23:57 +0800
+Subject: [PATCH] Add audio info into dts
+
+Signed-off-by: Matthew Shyu <matthew.shyu@amlogic.com>
+---
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 3 +++
+ arch/arm64/boot/dts/amlogic/mesongxl.dtsi   | 6 ++++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+index e570c98adaee..0a559981fd71 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+@@ -1168,3 +1168,6 @@
+ &efuse {
+ 	status = "ok";
+ };
++&audio_data{
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/amlogic/mesongxl.dtsi b/arch/arm64/boot/dts/amlogic/mesongxl.dtsi
+index 29b7ce16fbbd..84f57f41afd4 100644
+--- a/arch/arm64/boot/dts/amlogic/mesongxl.dtsi
++++ b/arch/arm64/boot/dts/amlogic/mesongxl.dtsi
+@@ -1009,6 +1009,12 @@ i2c_ao: i2c@c8100500{ /*I2C-AO*/
+ 		reg = <0x0 0xc883e000 0x0 0x28>;
+ 	};
+ 
++	audio_data:audio_data {
++		compatible = "amlogic, audio_data";
++		query_licence_cmd = <0x82000050>;
++		status = "disabled";
++	};
++
+ 	saradc: saradc {
+ 		compatible = "amlogic, saradc";
+ 		status = "okay";
+-- 
+2.11.0
+
