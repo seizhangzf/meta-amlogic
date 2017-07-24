@@ -24,6 +24,7 @@ SRC_URI += "file://0005-Fix-dump_backtrace-caused-by-__might_sleep.patch"
 SRC_URI += "file://0006-audio-audio-info-for-audio-license-query.patch"
 SRC_URI += "file://0007-Add-audio-info-into-dts.patch"
 SRC_URI += "file://0008-Add-product-code-and-serial-number-back.patch"
+SRC_URI += "file://0009-Fix-crash-of-amlvideo2-as-doing-open-close-quickly.patch"
 
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 
