@@ -9,3 +9,7 @@ PACKAGECONFIG += " \
 "
 
 DEPENDS += "virtual/libgles1 virtual/libgles2 virtual/egl"
+
+ALLOW_EMPTY_${PN}-examples = "1"
+ALLOW_EMPTY_${PN}-fonts = "1"
+PACKAGES += "${PN}-fonts"
