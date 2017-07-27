@@ -1,5 +1,5 @@
 inherit kernel
-inherit more-new
+#inherit more-new
 
 kernel_do_compile() {
 	echo "inside kernel_meson"

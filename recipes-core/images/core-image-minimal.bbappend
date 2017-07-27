@@ -1,6 +1,6 @@
 inherit image
-inherit more-image
-inherit more-new
+#inherit more-image
+#inherit more-new
 SDKEXTCLASS ?= "${@['populate_sdk', 'populate_sdk_ext']['linux' in d.getVar("SDK_OS", True)]}"
 inherit ${SDKEXTCLASS}
 
