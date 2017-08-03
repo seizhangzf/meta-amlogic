@@ -2,7 +2,7 @@ DEPENDS += "xz-native bc-native"
 DEPENDS_append_aarch64 = " libgcc"
 KERNEL_CC_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
 KERNEL_LD_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
-KERNEL_IMAGE_SYMLINK_NAME = "Image-${MACHINE}"
+#KERNEL_IMAGE_SYMLINK_NAME = "Image-${MACHINE}"
 
 ############from linux-dtb.inc
 do_compile_append() {
