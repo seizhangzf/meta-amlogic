@@ -1,0 +1,352 @@
+From 15668c2c88439e8522a447c529e68e694c9192ac Mon Sep 17 00:00:00 2001
+From: sstraarup <ba.sorenstraarup@tataelxsi.com>
+Date: Tue, 21 Oct 2014 18:49:50 +0000
+Subject: [PATCH 4/8] RDKDEVSCAL-24 : Add QT support to YOCTO ADSDK
+
+Reason for change:
+
+QT nativesdk was missing from Yocto ADSDK.
+There is a workaround that has to be applied at this point for the adsdk to build,
+The following to symbolic links has to be present:
+ln -s <path to yocto>/build-pacexi3v2/tmp/sysroots/x86_64-linux/usr/bin/qt5/rcc /opt/rdk/2.0/sysroots/x86_64-rdksdk-linux/usr/bin/qt5/rcc
+ln -s <path to yocto>/build-pacexi3v2/tmp/sysroots/x86_64-linux/usr/bin/qt5/moc /opt/rdk/2.0/sysroots/x86_64-rdksdk-linux/usr/bin/qt5/moc
+
+Test Procedure: Build for pacexi3v2, installed adsdk, build a QMake based module
+
+Risks: HIGH, Will break build till the workaround has been done or fixed.
+
+Change-Id: I1d0aebf43ba9f25fd22dd921c7b37d77f23166ce
+Signed-off-by: sstraarup <ba.sorenstraarup@tataelxsi.com>
+---
+ .../packagegroup-qt5-toolchain-target.bb           |   4 -
+ recipes-qt/qt5/nativesdk-qtbase_5.1.1.bb           |   8 +
+ recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc          | 226 +++++++++++++++++++++
+ recipes-qt/qt5/nativesdk-qttools_5.1.1.bb          |   3 +
+ recipes-qt/qt5/qtquickcontrols_5.1.1.bb            |   7 +
+ recipes-qt/qt5/qtserialport_5.1.1.bb               |   6 +
+ recipes-qt/qt5/qttools_5.1.1.bb                    |   6 +
+ 7 files changed, 256 insertions(+), 4 deletions(-)
+ create mode 100644 recipes-qt/qt5/nativesdk-qtbase_5.1.1.bb
+ create mode 100644 recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+ create mode 100644 recipes-qt/qt5/nativesdk-qttools_5.1.1.bb
+ create mode 100644 recipes-qt/qt5/qtquickcontrols_5.1.1.bb
+ create mode 100644 recipes-qt/qt5/qtserialport_5.1.1.bb
+ create mode 100644 recipes-qt/qt5/qttools_5.1.1.bb
+
+diff --git a/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bb b/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bb
+index b2c5474..ef13f5d 100644
+--- a/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bb
++++ b/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bb
+@@ -15,7 +15,6 @@ USE_RUBY = " \
+     qtquick1-qmlplugins \
+     qttools-dev \
+     qttools-mkspecs \
+-    qttools-plugins \
+     qttools-staticdev \
+     qttools-tools \
+     qtwebkit-dev \
+@@ -48,9 +47,6 @@ RDEPENDS_${PN} += " \
+     qtbase-mkspecs \
+     qtbase-plugins \
+     qtbase-staticdev \
+-    qtconnectivity-dev \
+-    qtconnectivity-mkspecs \
+-    qtconnectivity-qmlplugins \
+     qtdeclarative-dev \
+     qtdeclarative-mkspecs \
+     qtdeclarative-plugins \
+diff --git a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.bb b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.bb
+new file mode 100644
+index 0000000..20a0edb
+--- /dev/null
++++ b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.bb
+@@ -0,0 +1,8 @@
++require qt5-${PV}.inc
++require ${PN}_${PV}.inc
++#require ${PN}.inc
++
++FILESEXTRAPATHS =. "${FILE_DIRNAME}/qtbase-${PV}:"
++
++SRC_URI[md5sum] = "fa005301a2000b92b61b63edc042567b"
++SRC_URI[sha256sum] = "acdfd1aa2548ebea1d922e8e24e5c59f5fc3b2beae7c8003ba47d773bfcc94c0"
+diff --git a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+new file mode 100644
+index 0000000..8cf5290
+--- /dev/null
++++ b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+@@ -0,0 +1,226 @@
++DESCRIPTION = "SDK version of Qt/[X11|Mac|Embedded]"
++DEPENDS = "nativesdk-zlib nativesdk-dbus qtbase-native"
++SECTION = "libs"
++HOMEPAGE = "http://qt-project.org"
++
++QT_MODULE = "qtbase"
++
++require nativesdk-qt5.inc
++
++# it's already included with newer oe-core, but include it here for dylan
++FILESEXTRAPATHS =. "${FILE_DIRNAME}/qtbase:"
++
++PR = "r1"
++
++# common with -native and target version
++SRC_URI += "\
++    file://0001-Add-linux-oe-g-platform.patch \
++    file://0002-qlibraryinfo-allow-to-set-qt.conf-from-the-outside-u.patch \
++    file://0003-Add-external-hostbindir-option.patch \
++    file://0004-configureapp-Prefix-default-LIBDIRS-and-INCDIRS-with.patch \
++    file://0005-qt_module-Fix-pkgconfig-replacement.patch \
++    file://0006-configure-don-t-export-SYSTEM_VARIABLES-to-.qmake.va.patch \
++    file://0007-configure.prf-Allow-to-add-extra-arguments-to-make.patch \
++    file://0008-configure-make-pulseaudio-alsa-freetype-a-configurab.patch \
++    file://0009-cmake-Use-OE_QMAKE_PATH_EXTERNAL_HOST_BINS-to-determ.patch \
++"
++
++# common with -native
++SRC_URI += " \
++    file://0010-Always-build-uic.patch \
++"
++
++# specific for nativesdk version
++SRC_URI += " \
++    file://0011-configure-preserve-built-qmake-and-swap-with-native-.patch \
++"
++
++PACKAGES = "${PN}-tools-dbg ${PN}-tools-dev ${PN}-tools-staticdev ${PN}-tools"
++
++PACKAGE_DEBUG_SPLIT_STYLE = "debug-without-src"
++
++FILES_${PN}-tools-dev = " \
++    ${includedir} \
++    ${FILES_SOLIBSDEV} ${libdir}/*.la \
++    ${OE_QMAKE_PATH_ARCHDATA}/mkspecs \
++"
++
++FILES_${PN}-tools-staticdev = " \
++    ${libdir}/libQt5Bootstrap.a \
++"
++
++FILES_${PN}-tools-dbg = " \
++    ${libdir}/.debug \
++    ${OE_QMAKE_PATH_BINS}/.debug \
++"
++
++FILES_${PN}-tools = " \
++    ${libdir}/lib*${SOLIBS} \
++    ${OE_QMAKE_PATH_BINS}/* \
++"
++
++# qttools binaries are placed in a subdir of bin in order to avoid
++# collisions with qt4. This would trigger debian.bbclass to rename the
++# package, since it doesn't detect binaries in subdirs. Explicitly
++# disable package auto-renaming for the tools-package.
++DEBIAN_NOAUTONAME_${PN}-tools = "1"
++
++QT_CONFIG_FLAGS += " \
++    -reduce-relocations \
++    -shared \
++    -silent \
++    -no-pch \
++    -no-rpath \
++    -pkg-config \
++    ${EXTRA_OECONF} \
++"
++
++# qtbase is exception, as these are used as install path for sysroots
++OE_QMAKE_PATH_HOST_DATA = "${libdir}/${QT_DIR_NAME}"
++OE_QMAKE_PATH_HOST_LIBS = "${libdir}"
++
++do_generate_qt_config_file() {
++    cat > ${QT_CONF_PATH} <<EOF
++[Paths]
++Prefix = ${OE_QMAKE_PATH_PREFIX}
++Headers = ${OE_QMAKE_PATH_HEADERS}
++Libraries = ${OE_QMAKE_PATH_LIBS}
++ArchData = ${OE_QMAKE_PATH_ARCHDATA}
++Data = ${OE_QMAKE_PATH_DATA}
++Binaries = ${OE_QMAKE_PATH_BINS}
++LibraryExecutables = ${OE_QMAKE_PATH_LIBEXECS}
++Plugins = ${OE_QMAKE_PATH_PLUGINS}
++Imports = ${OE_QMAKE_PATH_IMPORTS}
++Qml2Imports = ${OE_QMAKE_PATH_QML}
++Translations = ${OE_QMAKE_PATH_TRANSLATIONS}
++Documentation = ${OE_QMAKE_PATH_DOCS}
++Settings = ${OE_QMAKE_PATH_SETTINGS}
++Examples = ${OE_QMAKE_PATH_EXAMPLES}
++Tests = ${OE_QMAKE_PATH_TESTS}
++HostBinaries = ${OE_QMAKE_PATH_HOST_BINS}
++HostData = ${OE_QMAKE_PATH_HOST_DATA}
++HostLibraries = ${OE_QMAKE_PATH_HOST_LIBS}
++HostSpec = ${OE_QMAKESPEC}
++TartgetSpec = ${OE_XQMAKESPEC}
++ExternalHostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
++Sysroot =
++EOF
++}
++
++# Even though moc  and rcc is in this path.
++#HostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
++
++do_generate_qt_config_file_append() {
++    cat >> ${QT_CONF_PATH} <<EOF
++
++[EffectivePaths]
++Prefix=..
++EOF
++}
++
++# qtbase is exception, we need to use mkspecs from ${S}
++QMAKE_MKSPEC_PATH = "${B}"
++
++# qtbase is exception, configure script is using our get(X)QEvalMakeConf and setBootstrapEvalVariable functions to read it from shell
++export OE_QMAKE_COMPILER
++export OE_QMAKE_CC
++export OE_QMAKE_CFLAGS
++export OE_QMAKE_CXX
++export OE_QMAKE_CXXFLAGS
++export OE_QMAKE_LINK
++export OE_QMAKE_LDFLAGS
++export OE_QMAKE_AR
++export OE_QMAKE_STRIP
++
++# another exception is that we need to run bin/qmake, because EffectivePaths are relative to qmake location
++OE_QMAKE_QMAKE_ORIG = "${STAGING_BINDIR_NATIVE}/${QT_DIR_NAME}/qmake"
++OE_QMAKE_QMAKE = "bin/qmake"
++
++do_configure() {
++    # we need symlink in path relative to source, because
++    # EffectivePaths:Prefix is relative to qmake location
++    # Also, configure expects qmake-native to swap with real one
++    if [ ! -e ${B}/bin/qmake-native ]; then
++        mkdir ${B}/bin
++        ln -sf ${OE_QMAKE_QMAKE_ORIG} ${B}/bin/qmake-native
++    fi
++
++    ${S}/configure -v \
++        -dont-process \
++        -opensource -confirm-license \
++        -sysroot ${STAGING_DIR_NATIVE} \
++        -no-gcc-sysroot \
++        -system-zlib \
++        -no-libjpeg \
++        -no-libpng \
++        -no-gif \
++        -no-accessibility \
++        -no-cups \
++        -no-nis \
++        -no-gui \
++        -no-qml-debug \
++        -no-sql-mysql \
++        -no-sql-sqlite \
++        -no-opengl \
++        -no-openssl \
++        -no-xcb \
++        -verbose \
++        -release \
++        -prefix ${OE_QMAKE_PATH_PREFIX} \
++        -bindir ${OE_QMAKE_PATH_BINS} \
++        -libdir ${OE_QMAKE_PATH_LIBS} \
++        -datadir ${OE_QMAKE_PATH_DATA} \
++        -sysconfdir ${OE_QMAKE_PATH_SETTINGS} \
++        -docdir ${OE_QMAKE_PATH_DOCS} \
++        -headerdir ${OE_QMAKE_PATH_HEADERS} \
++        -archdatadir ${OE_QMAKE_PATH_ARCHDATA} \
++        -libexecdir ${OE_QMAKE_PATH_LIBEXECS} \
++        -plugindir ${OE_QMAKE_PATH_PLUGINS} \
++        -importdir ${OE_QMAKE_PATH_IMPORTS} \
++        -qmldir ${OE_QMAKE_PATH_QML} \
++        -translationdir ${OE_QMAKE_PATH_TRANSLATIONS} \
++        -testsdir ${OE_QMAKE_PATH_TESTS} \
++        -hostbindir ${OE_QMAKE_PATH_HOST_BINS} \
++        -hostdatadir ${OE_QMAKE_PATH_HOST_DATA} \
++        -external-hostbindir ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS} \
++        -no-glib \
++        -no-iconv \
++        -silent \
++        -nomake examples \
++        -nomake tests \
++        -nomake libs \
++        -no-compile-examples \
++        -no-rpath \
++        -platform ${OE_QMAKESPEC} \
++        -xplatform linux-oe-g++ \
++        ${QT_CONFIG_FLAGS}
++
++    bin/qmake ${OE_QMAKE_DEBUG_OUTPUT} ${S} -o Makefile || die "Configuring qt with qmake failed. EXTRA_OECONF was ${EXTRA_OECONF}"
++
++}
++
++do_install() {
++    # Fix install paths for all
++    find -name "Makefile*" | xargs sed -i "s,(INSTALL_ROOT)${STAGING_DIR_NATIVE}${STAGING_DIR_NATIVE},(INSTALL_ROOT)${STAGING_DIR_NATIVE},g"
++
++    oe_runmake install INSTALL_ROOT=${D}
++
++    # replace the native qmake installed above with nativesdk version
++    rm -rf ${D}${OE_QMAKE_PATH_HOST_BINS}/qmake
++    install -m 755 ${B}/bin/qmake-real ${D}${OE_QMAKE_PATH_HOST_BINS}/qmake
++
++    # for modules which are still using syncqt and call qtPrepareTool(QMAKE_SYNCQT, syncqt)
++    # e.g. qt3d, qtwayland
++    ln -sf syncqt.pl ${D}${OE_QMAKE_PATH_QT_BINS}/syncqt
++
++    # remove things unused in nativesdk, we need the headers, Qt5Core
++    # and Qt5Bootstrap.
++    rm -rf ${D}${datadir} \
++           ${D}/${OE_QMAKE_PATH_PLUGINS} \
++           ${D}${libdir}/cmake \
++           ${D}${libdir}/pkgconfig
++    find ${D}${libdir} -maxdepth 1 -name 'lib*' -and \
++                                   -not -name 'libQt5Core.so*' -and \
++                                   -not -name 'libQt5Bootstrap.a' \
++                                   -exec rm '{}' ';'
++}
+diff --git a/recipes-qt/qt5/nativesdk-qttools_5.1.1.bb b/recipes-qt/qt5/nativesdk-qttools_5.1.1.bb
+new file mode 100644
+index 0000000..a38528b
+--- /dev/null
++++ b/recipes-qt/qt5/nativesdk-qttools_5.1.1.bb
+@@ -0,0 +1,3 @@
++require qt5-${PV}.inc
++require ${PN}.inc
++
+diff --git a/recipes-qt/qt5/qtquickcontrols_5.1.1.bb b/recipes-qt/qt5/qtquickcontrols_5.1.1.bb
+new file mode 100644
+index 0000000..672cfbf
+--- /dev/null
++++ b/recipes-qt/qt5/qtquickcontrols_5.1.1.bb
+@@ -0,0 +1,7 @@
++require qt5-${PV}.inc
++require ${PN}.inc
++
++SRC_URI[md5sum] = "6482ee0c4b11119ae5cb5080e61c18c0"
++SRC_URI[sha256sum] = "52fe58cb83f7b76d46abd12485713a7bd62a3b2739a7271098e0a1ea25d9fec3"
++
++
+diff --git a/recipes-qt/qt5/qtserialport_5.1.1.bb b/recipes-qt/qt5/qtserialport_5.1.1.bb
+new file mode 100644
+index 0000000..fd5d387
+--- /dev/null
++++ b/recipes-qt/qt5/qtserialport_5.1.1.bb
+@@ -0,0 +1,6 @@
++require qt5-${PV}.inc
++require ${PN}.inc
++
++SRC_URI[md5sum] = "83bba7e8f27d6d6d5a0d2fdcb5641d7f"
++SRC_URI[sha256sum] = "aee1a277b64dc70be6d7d0504e35f2df52a83b41ab65c344119e76222ceb063b"
++
+diff --git a/recipes-qt/qt5/qttools_5.1.1.bb b/recipes-qt/qt5/qttools_5.1.1.bb
+new file mode 100644
+index 0000000..9755735
+--- /dev/null
++++ b/recipes-qt/qt5/qttools_5.1.1.bb
+@@ -0,0 +1,6 @@
++require qt5-${PV}.inc
++require ${PN}.inc
++
++SRC_URI[md5sum] = "022073d32ff9d408de0182b5d1f01781"
++SRC_URI[sha256sum] = "2b42c6d5feeccffb67e890b86a150bae64dd2ff550be39a3cc449ee0e95462b6"
++
+-- 
+2.4.0
+

@@ -24,3 +24,32 @@ EOF
 fi
 
 . $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
+
+# TEMPORARY HACK: patch opensource layers.
+PATCH_DIR=../meta-meson/patches/rdk-oe
+patch_fail=0
+# Check that patches actually exist for this branch.
+check=$(ls -d ${PATCH_DIR}/*/ 2>/dev/null)
+if [ $? -eq 0 ]; then
+    components=$(ls -d ${PATCH_DIR}/*/ | sed 's:../meta-meson/patches/rdk-oe/::')
+    for component in ${components}; do
+        cd ../${component}/
+        git checkout -- .
+        git clean -qdf .
+        for patchfile in ${PATCH_DIR}/${component}/*.patch; do
+
+            # Check whether the patch has already been applied
+            patch -s --dry-run --reverse --force -p1 < $patchfile >/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+
+                # Apply the patch is it has not been applied previously
+                patch -s -Np1 < $patchfile
+                if [ $? -ne 0 ]; then
+                    patch_fail=1
+                    echo "WARNING: patch $patchfile failed to apply correctly."
+                fi
+            fi
+        done
+        cd - 2>&1 > /dev/null
+    done
+fi

@@ -1,0 +1,61 @@
+From 8438bdcaa6dd4ed51868ce02c563c13253b0fcc3 Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Fri, 6 Feb 2015 07:12:17 -0800
+Subject: [PATCH 8/8] XITHREE-5599: Fix typo in TargetSpec
+
+Reason for change: Fix cross building errors on cleansstate
+
+Test Procedure: built qtbase
+
+Risks: None
+
+Change-Id: I8f5326ee4e748cad59db7d13222cb80eed644517
+Signed-off-by: Khem Raj <khem_raj@cable.comcast.com>
+---
+ classes/qmake5_base.bbclass               | 2 +-
+ recipes-qt/qt5/nativesdk-qtbase.inc       | 2 +-
+ recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc | 2 +-
+ 5 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/classes/qmake5_base.bbclass b/classes/qmake5_base.bbclass
+index 3861cd0..71eec08 100644
+--- a/classes/qmake5_base.bbclass
++++ b/classes/qmake5_base.bbclass
+@@ -75,7 +75,7 @@ HostBinaries = ${OE_QMAKE_PATH_HOST_BINS}
+ HostData = ${OE_QMAKE_PATH_HOST_DATA}
+ HostLibraries = ${OE_QMAKE_PATH_HOST_LIBS}
+ HostSpec = ${OE_QMAKESPEC}
+-TartgetSpec = ${OE_XQMAKESPEC} 
++TargetSpec = ${OE_XQMAKESPEC}
+ ExternalHostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
+ Sysroot = ${STAGING_DIR_TARGET}
+ EOF
+diff --git a/recipes-qt/qt5/nativesdk-qtbase.inc b/recipes-qt/qt5/nativesdk-qtbase.inc
+index 5e80d30..46697a6 100644
+--- a/recipes-qt/qt5/nativesdk-qtbase.inc
++++ b/recipes-qt/qt5/nativesdk-qtbase.inc
+@@ -102,7 +102,7 @@ HostBinaries = ${OE_QMAKE_PATH_HOST_BINS}
+ HostData = ${OE_QMAKE_PATH_HOST_DATA}
+ HostLibraries = ${OE_QMAKE_PATH_HOST_LIBS}
+ HostSpec = ${OE_QMAKESPEC}
+-TartgetSpec = ${OE_XQMAKESPEC}
++TargetSpec = ${OE_XQMAKESPEC}
+ ExternalHostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
+ Sysroot =
+ EOF
+diff --git a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+index a3745bd..5b08d5c 100644
+--- a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
++++ b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+@@ -101,7 +101,7 @@ HostBinaries = ${OE_QMAKE_PATH_HOST_BINS}
+ HostData = ${OE_QMAKE_PATH_HOST_DATA}
+ HostLibraries = ${OE_QMAKE_PATH_HOST_LIBS}
+ HostSpec = ${OE_QMAKESPEC}
+-TartgetSpec = ${OE_XQMAKESPEC}
++TargetSpec = ${OE_XQMAKESPEC}
+ ExternalHostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
+ Sysroot =
+ EOF
+-- 
+2.4.0
+

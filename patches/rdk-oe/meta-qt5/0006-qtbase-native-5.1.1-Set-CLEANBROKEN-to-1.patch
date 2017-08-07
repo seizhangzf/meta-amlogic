@@ -1,0 +1,32 @@
+From 1c6992c7d82dff53e0fba0de3eba54f71c5ffb9c Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Tue, 3 Feb 2015 19:48:45 -0800
+Subject: [PATCH 6/8] qtbase-native-5.1.1: Set CLEANBROKEN to 1
+
+its not able to build with master due to internal
+clean target being broken
+
+Change-Id: I95fd42d09678f11ca727fd65bbc326f0376145ed
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ recipes-qt/qt5/qtbase-native-5.1.1.inc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/recipes-qt/qt5/qtbase-native-5.1.1.inc b/recipes-qt/qt5/qtbase-native-5.1.1.inc
+index 472bbb5..8824db8 100644
+--- a/recipes-qt/qt5/qtbase-native-5.1.1.inc
++++ b/recipes-qt/qt5/qtbase-native-5.1.1.inc
+@@ -7,7 +7,9 @@ QT_MODULE = "qtbase"
+ 
+ require qt5-native.inc
+ 
+-# shared with target qtbase, all except 
++CLEANBROKEN = "1"
++
++# shared with target qtbase, all except
+ # 0005-qmake-is-already-built-in-qtbase-native.patch
+ # 0006-Allow-building-a-separate-qmake-for-the-target.patch
+ 
+-- 
+2.4.0
+

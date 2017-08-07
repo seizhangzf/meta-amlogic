@@ -1,0 +1,29 @@
+From e081086654cad3bcfdfe245a9e8396a2bde75bea Mon Sep 17 00:00:00 2001
+From: Kannan Rajagopalan <kannanrajagopalan@tataelxsi.co.in>
+Date: Mon, 6 Jul 2015 17:37:33 +0000
+Subject: [PATCH 2/2] RDKDEV-6414 : Add coverity support for components Reason
+ for change: Coverity support not required for qt as for most part its an
+ opensource so need to revert 71950a9397ae6f75ba8ab30cc3e8aceabfbaaa5b Test
+ Procedure: check if coverity support is added to the build Risks: None
+
+Change-Id: I013b497787f3039ed8fd8692a316cacb3980105f
+---
+ recipes-qt/qt5/qt5.inc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/recipes-qt/qt5/qt5.inc b/recipes-qt/qt5/qt5.inc
+index 513bad3..bb0bcdc 100644
+--- a/recipes-qt/qt5/qt5.inc
++++ b/recipes-qt/qt5/qt5.inc
+@@ -1,7 +1,7 @@
+ # Copyright (C) 2012, 2014 O.S. Systems Software LTDA.
+ # Copyright (C) 2013 Martin Jansa <martin.jansa@gmail.com>
+ 
+-inherit qmake5 coverity
++inherit qmake5
+ 
+ PACKAGECONFIG_OPENSSL ?= "openssl"
+ 
+-- 
+2.4.5
+

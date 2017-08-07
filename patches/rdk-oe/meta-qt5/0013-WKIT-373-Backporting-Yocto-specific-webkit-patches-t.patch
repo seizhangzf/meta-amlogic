@@ -1,0 +1,106 @@
+From f834f132aa9d6ca8c27dd857090a8aa2397a756a Mon Sep 17 00:00:00 2001
+From: iivlev <iivlev@productengine.com>
+Date: Mon, 12 Oct 2015 14:38:33 +0000
+Subject: [PATCH 2/2] WKIT-373 : Backporting Yocto-specific webkit patches to
+ generic repo meta-qt5 part
+
+Reason for change: Otherwise we're getting merge conflict in STM patches
+Test Procedure: build, check for regressions
+Risks: Moderate
+Signed-off-by: iivlev <iivlev@productengine.com>
+
+Change-Id: I8cd6ae2d912d0cfa334e7a32f1a2480c81a79f26
+---
+ recipes-qt/qt5/qtwebkit-5.1.1.inc                  |  2 --
+ recipes-qt/qt5/qtwebkit-5.1.1/fix-rpath.patch      | 13 ---------
+ recipes-qt/qt5/qtwebkit.inc                        |  2 --
+ .../0001-qtwebkit-fix-QA-issue-bad-RPATH.patch     | 31 ----------------------
+ 4 files changed, 48 deletions(-)
+ delete mode 100644 recipes-qt/qt5/qtwebkit-5.1.1/fix-rpath.patch
+ delete mode 100644 recipes-qt/qt5/qtwebkit/0001-qtwebkit-fix-QA-issue-bad-RPATH.patch
+
+diff --git a/recipes-qt/qt5/qtwebkit-5.1.1.inc b/recipes-qt/qt5/qtwebkit-5.1.1.inc
+index c089454..cf805ce 100644
+--- a/recipes-qt/qt5/qtwebkit-5.1.1.inc
++++ b/recipes-qt/qt5/qtwebkit-5.1.1.inc
+@@ -35,8 +35,6 @@ EXTRA_QMAKEVARS_PRE += "${QTWEBKIT_DEBUG}"
+ # remove default ${PN}-examples-dbg ${PN}-examples set in qt5.inc, because it conflicts with ${PN} from separate webkit-examples recipe
+ PACKAGES = "${PN}-dbg ${PN}-staticdev ${PN}-dev ${PN}-doc ${PN}-locale ${PACKAGE_BEFORE_PN} ${PN} ${PN}-qmlplugins-dbg ${PN}-tools-dbg ${PN}-plugins-dbg ${PN}-qmlplugins ${PN}-tools ${PN}-plugins ${PN}-mkspecs "
+ 
+-SRC_URI += "file://fix-rpath.patch"
+-
+ # make sure rb files are used from sysroot, not from host
+ # ruby-1.9.3-always-use-i386.patch is doing target_cpu=`echo $target_cpu | sed s/i.86/i386/`
+ # we need to replace it too (a bit longer version without importing re)
+diff --git a/recipes-qt/qt5/qtwebkit-5.1.1/fix-rpath.patch b/recipes-qt/qt5/qtwebkit-5.1.1/fix-rpath.patch
+deleted file mode 100644
+index 5c20514..0000000
+--- a/recipes-qt/qt5/qtwebkit-5.1.1/fix-rpath.patch
++++ /dev/null
+@@ -1,13 +0,0 @@
+-Index: qtwebkit-opensource-src-5.1.0/Tools/qmake/mkspecs/features/unix/default_post.prf
+-===================================================================
+---- qtwebkit-opensource-src-5.1.0.orig/Tools/qmake/mkspecs/features/unix/default_post.prf
+-+++ qtwebkit-opensource-src-5.1.0/Tools/qmake/mkspecs/features/unix/default_post.prf
+-@@ -32,8 +32,6 @@ linux-*g++* {
+-     QMAKE_OBJECTIVE_CFLAGS += -Wno-c++11-extensions -Wno-c++0x-extensions
+- }
+- 
+--contains(TEMPLATE, app): CONFIG += rpath
+--
+- isEqual(QT_ARCH,i386):CONFIG(debug, debug|release) {
+-   # Make ld not cache the symbol tables of input files in memory to avoid memory exhaustion during the linking phase.
+-   config_gnuld: QMAKE_LFLAGS += -Wl,--no-keep-memory
+diff --git a/recipes-qt/qt5/qtwebkit.inc b/recipes-qt/qt5/qtwebkit.inc
+index cb652aa..76db595 100644
+--- a/recipes-qt/qt5/qtwebkit.inc
++++ b/recipes-qt/qt5/qtwebkit.inc
+@@ -38,8 +38,6 @@ EXTRA_QMAKEVARS_PRE += "${QTWEBKIT_DEBUG}"
+ # remove default ${PN}-examples-dbg ${PN}-examples set in qt5.inc, because it conflicts with ${PN} from separate webkit-examples recipe
+ PACKAGES = "${PN}-dbg ${PN}-staticdev ${PN}-dev ${PN}-doc ${PN}-locale ${PACKAGE_BEFORE_PN} ${PN} ${PN}-qmlplugins-dbg ${PN}-tools-dbg ${PN}-plugins-dbg ${PN}-qmlplugins ${PN}-tools ${PN}-plugins ${PN}-mkspecs "
+ 
+-SRC_URI += "file://0001-qtwebkit-fix-QA-issue-bad-RPATH.patch"
+-
+ # make sure rb files are used from sysroot, not from host
+ # ruby-1.9.3-always-use-i386.patch is doing target_cpu=`echo $target_cpu | sed s/i.86/i386/`
+ # we need to replace it too (a bit longer version without importing re)
+diff --git a/recipes-qt/qt5/qtwebkit/0001-qtwebkit-fix-QA-issue-bad-RPATH.patch b/recipes-qt/qt5/qtwebkit/0001-qtwebkit-fix-QA-issue-bad-RPATH.patch
+deleted file mode 100644
+index 07e4436..0000000
+--- a/recipes-qt/qt5/qtwebkit/0001-qtwebkit-fix-QA-issue-bad-RPATH.patch
++++ /dev/null
+@@ -1,31 +0,0 @@
+-From 89c132829d1a93d662f617c2a7be75c5e6eaa33a Mon Sep 17 00:00:00 2001
+-From: Trevor Woerner <trevor.woerner@linaro.org>
+-Date: Fri, 7 Feb 2014 04:07:17 +0100
+-Subject: [PATCH] qtwebkit: fix QA issue (bad RPATH)
+-
+-Building qtwebkit causes a QA issue such that QtWebPluginProcess and
+-QtWebProcess contain bad RPATHs which point into the build location. This fix
+-adds a patch to not include the rpath.prf which causes this problem.
+-
+-Signed-off-by: Trevor Woerner <trevor.woerner@linaro.org>
+-Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
+----
+- Tools/qmake/mkspecs/features/unix/default_post.prf | 2 --
+- 1 file changed, 2 deletions(-)
+-
+-diff --git a/Tools/qmake/mkspecs/features/unix/default_post.prf b/Tools/qmake/mkspecs/features/unix/default_post.prf
+-index 79b7208..6dff72b 100644
+---- a/Tools/qmake/mkspecs/features/unix/default_post.prf
+-+++ b/Tools/qmake/mkspecs/features/unix/default_post.prf
+-@@ -58,8 +58,6 @@ linux-*g++* {
+-     QMAKE_OBJECTIVE_CFLAGS += -Wno-c++11-extensions -Wno-c++0x-extensions
+- }
+- 
+--contains(TEMPLATE, app): CONFIG += rpath
+--
+- CONFIG(debug, debug|release)|force_debug_info|separate_debug_info {
+-     # Make ld not cache the symbol tables of input files in memory to avoid memory exhaustion during the linking phase.
+-     !force_static_libs_as_shared:config_gnuld: QMAKE_LFLAGS += -Wl,--no-keep-memory
+--- 
+-1.8.5.3
+-
+-- 
+2.7.0
+
