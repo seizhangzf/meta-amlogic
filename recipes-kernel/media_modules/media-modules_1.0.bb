@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;nobranch=1"
 SRC_URI += "file://COPYING.GPL"
+SRC_URI += "file://0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch"
 
 SRCREV = "b9164398172ee6bbcdbc70c4ac1d87b450bdf13b"
 
@@ -14,6 +15,11 @@ MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modu
 do_configure[noexec] = "1"
 
 MEDIA_MODULES_UCODE_BIN = "${S}/firmware/video_ucode.bin"
+
+do_patch() {
+    cd ${S}
+    git apply -p1 < ../0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch
+}
 
 do_install() {
     MEDIADIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/media
