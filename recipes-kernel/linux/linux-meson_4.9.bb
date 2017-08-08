@@ -25,6 +25,7 @@ SRC_URI += "file://0006-audio-audio-info-for-audio-license-query.patch"
 SRC_URI += "file://0007-Add-audio-info-into-dts.patch"
 SRC_URI += "file://0008-Add-product-code-and-serial-number-back.patch"
 SRC_URI += "file://0009-media-merged-code-from-43177e6a-on-the-amlogic-3.14-.patch"
+SRC_URI += "file://0010-Fix-amlvideo2-crash.patch"
 
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 

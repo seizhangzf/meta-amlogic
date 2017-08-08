@@ -1,16 +1,15 @@
-From 850398fe1b44297a832fd44ab34fdd10dec70a10 Mon Sep 17 00:00:00 2001
+From a282a170592aff3214cfdf5c4d1d00c2bc7dcbee Mon Sep 17 00:00:00 2001
 From: Mingyen Hung <mingyen.hung@amlogic.com>
-Date: Sat, 15 Jul 2017 14:07:22 +0800
-Subject: [PATCH] Fix crash of amlvideo2 as doing open/close quickly
+Date: Tue, 8 Aug 2017 11:31:54 +0800
+Subject: [PATCH] Fix amlvideo2 crash
 
-Change-Id: I6316177ef9e09b1b82ca207d0a9a611bcc729252
 Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
 ---
  .../media/video_processor/video_dev/amlvideo2.c    | 190 ++++++++++-----------
  1 file changed, 90 insertions(+), 100 deletions(-)
 
 diff --git a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
-index 16c525eaeb7f..7cb70dbb8afd 100644
+index 33468a3bc159..0bba4a5de0df 100644
 --- a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
 +++ b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
 @@ -321,9 +321,9 @@ struct v4l2_device v4l2_dev;
@@ -32,7 +31,7 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
  bool ge2d_multi_process_flag;
 +struct page *cma_pages;
  };
-
+ 
  struct amlvideo2_fh {
 @@ -2806,7 +2807,7 @@ int amlvideo2_ge2d_multi_pre_process(struct vframe_s *vf,
  	int cur_angle = 0;
@@ -43,10 +42,10 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
  		(CMA_ALLOC_SIZE * SZ_1M);
  	int temp_w = vf->width/4;
  	int temp_h = vf->height/4;
-@@ -5292,112 +5293,104 @@ static int vidioc_s_output(struct file *file, void *fh,
+@@ -5326,112 +5327,104 @@ static int vidioc_s_output(struct file *file, void *fh,
  	return 0;
  }
-
+ 
 -int amlvideo2_cma_buf_init(struct amlvideo2_device *vid_dev,  int node_id)
 +int amlvideo2_cma_buf_init(struct amlvideo2_device *vid_dev, const int node_id)
  {
@@ -61,7 +60,7 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
 +	node = vid_dev->node[node_id];
 +
 +	WARN_ON(!node);
-
+ 
  	if (!vid_dev->use_reserve) {
  		if (vid_dev->cma_mode == 0) {
 -			vid_dev->cma_pages = dma_alloc_from_contiguous(
@@ -162,7 +161,7 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
 -
  	return 0;
  }
-
+ 
  int amlvideo2_cma_buf_uninit(struct amlvideo2_device *vid_dev, int node_id)
  {
 +	struct amlvideo2_node *node = NULL;
@@ -229,7 +228,7 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
  	}
  	return 0;
  }
-@@ -5440,15 +5433,6 @@ static int amlvideo2_open(struct file *file)
+@@ -5474,16 +5467,6 @@ static int amlvideo2_open(struct file *file)
  		return -ENODEV;
  	}
  	#endif
@@ -239,13 +238,14 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
 -			pr_err("alloc amlvideo2.0 cma buffer failed.\n");
 -		else
 -			pr_err("alloc amlvideo2.1 cma buffer failed.\n");
+-		node->users--;
 -		mutex_unlock(&node->mutex);
 -		return -ENOMEM;
 -	}
-
+ 
  	fh = node->fh;
  	if (fh == NULL) {
-@@ -5468,9 +5452,15 @@ static int amlvideo2_open(struct file *file)
+@@ -5506,9 +5489,15 @@ static int amlvideo2_open(struct file *file)
  		node->res.start = reserve->start;
  		node->res.end = reserve->end;
  	} else {
@@ -263,17 +263,9 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
 +		}
  	}
  	mutex_unlock(&node->mutex);
-
-@@ -5483,7 +5473,6 @@ static int amlvideo2_open(struct file *file)
- 	fh->width = 1920;
- 	fh->height = 1080;
-
--
- 	fh->set_format_flag = false;
- 	fh->f_flags = file->f_flags;
- 	memset(&node->crop_info, 0, sizeof(struct crop_info_s));
-@@ -5535,7 +5524,8 @@ static int amlvideo2_close(struct file *file)
-
+ 
+@@ -5573,7 +5562,8 @@ static int amlvideo2_close(struct file *file)
+ 
  	videobuf_stop(&fh->vb_vidq);
  	videobuf_mmap_free(&fh->vb_vidq);
 -	amlvideo2_cma_buf_uninit(node->vid_dev, node->vid);
@@ -282,7 +274,7 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
  	mutex_lock(&node->mutex);
  	if (node->r_type == AML_RECEIVER_NONE) {
  		/* #if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON6 */
-@@ -5846,7 +5836,7 @@ static int amlvideo2_create_node(struct platform_device *pdev)
+@@ -5880,7 +5870,7 @@ static int amlvideo2_create_node(struct platform_device *pdev)
  		vid_node = kzalloc(sizeof(struct amlvideo2_node), GFP_KERNEL);
  		if (!vid_node)
  			break;
@@ -291,6 +283,6 @@ index 16c525eaeb7f..7cb70dbb8afd 100644
  		vid_node->res.magic = MAGIC_RE_MEM;
  		vid_node->res.priv = NULL;
  		vid_node->context = create_ge2d_work_queue();
---
+-- 
 2.11.0
 
