@@ -9,6 +9,13 @@
 #EOF
 #fi
 
+# Add meta-rdk-video only if not already present.
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-rdk-video[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-rdk-video"
+EOF
+fi
+
 # Add meta-aarch64 only if not already present.
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-linaro/meta-aarch64[^-]') -eq 0 ]; then
     cat >> conf/bblayers.conf <<EOF
