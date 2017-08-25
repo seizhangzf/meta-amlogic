@@ -1,15 +1,14 @@
-From a282a170592aff3214cfdf5c4d1d00c2bc7dcbee Mon Sep 17 00:00:00 2001
-From: Mingyen Hung <mingyen.hung@amlogic.com>
-Date: Tue, 8 Aug 2017 11:31:54 +0800
-Subject: [PATCH] Fix amlvideo2 crash
+From 6763d8cd85547bc1f067525005357f5020e69890 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Fri, 25 Aug 2017 15:07:37 +0800
+Subject: [PATCH] Fix-amlvideo2-crash
 
-Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
 ---
- .../media/video_processor/video_dev/amlvideo2.c    | 190 ++++++++++-----------
- 1 file changed, 90 insertions(+), 100 deletions(-)
+ .../media/video_processor/video_dev/amlvideo2.c    | 188 ++++++++++-----------
+ 1 file changed, 89 insertions(+), 99 deletions(-)
 
 diff --git a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
-index 33468a3bc159..0bba4a5de0df 100644
+index 3494e3d27eb4..500230c56c8f 100644
 --- a/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
 +++ b/drivers/amlogic/media/video_processor/video_dev/amlvideo2.c
 @@ -321,9 +321,9 @@ struct v4l2_device v4l2_dev;
@@ -24,7 +23,7 @@ index 33468a3bc159..0bba4a5de0df 100644
 +//struct page *cma_pages;
  struct resource memobj;
  int cma_mode;
- bool use_reserve;
+ int node_id;
 @@ -400,6 +400,7 @@ struct completion plug_sema;
  bool field_flag;
  bool field_condition_flag;
@@ -42,7 +41,7 @@ index 33468a3bc159..0bba4a5de0df 100644
  		(CMA_ALLOC_SIZE * SZ_1M);
  	int temp_w = vf->width/4;
  	int temp_h = vf->height/4;
-@@ -5326,112 +5327,104 @@ static int vidioc_s_output(struct file *file, void *fh,
+@@ -5333,77 +5334,57 @@ static int vidioc_s_output(struct file *file, void *fh,
  	return 0;
  }
  
@@ -158,9 +157,9 @@ index 33468a3bc159..0bba4a5de0df 100644
 +				(unsigned int)node->res.start,
 +				(unsigned int)alloc_size);
  	}
--
+ 
  	return 0;
- }
+@@ -5411,32 +5392,44 @@ int amlvideo2_cma_buf_init(struct amlvideo2_device *vid_dev,  int node_id)
  
  int amlvideo2_cma_buf_uninit(struct amlvideo2_device *vid_dev, int node_id)
  {
@@ -224,11 +223,8 @@ index 33468a3bc159..0bba4a5de0df 100644
 +
  			}
  		}
-+		pr_info("%s cma memory release succeed\n", dev_name);
  	}
- 	return 0;
- }
-@@ -5474,16 +5467,6 @@ static int amlvideo2_open(struct file *file)
+@@ -5481,16 +5474,6 @@ static int amlvideo2_open(struct file *file)
  		return -ENODEV;
  	}
  	#endif
@@ -245,7 +241,7 @@ index 33468a3bc159..0bba4a5de0df 100644
  
  	fh = node->fh;
  	if (fh == NULL) {
-@@ -5506,9 +5489,15 @@ static int amlvideo2_open(struct file *file)
+@@ -5513,9 +5496,15 @@ static int amlvideo2_open(struct file *file)
  		node->res.start = reserve->start;
  		node->res.end = reserve->end;
  	} else {
@@ -264,7 +260,7 @@ index 33468a3bc159..0bba4a5de0df 100644
  	}
  	mutex_unlock(&node->mutex);
  
-@@ -5573,7 +5562,8 @@ static int amlvideo2_close(struct file *file)
+@@ -5580,7 +5569,8 @@ static int amlvideo2_close(struct file *file)
  
  	videobuf_stop(&fh->vb_vidq);
  	videobuf_mmap_free(&fh->vb_vidq);
@@ -274,15 +270,15 @@ index 33468a3bc159..0bba4a5de0df 100644
  	mutex_lock(&node->mutex);
  	if (node->r_type == AML_RECEIVER_NONE) {
  		/* #if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON6 */
-@@ -5880,7 +5870,7 @@ static int amlvideo2_create_node(struct platform_device *pdev)
- 		vid_node = kzalloc(sizeof(struct amlvideo2_node), GFP_KERNEL);
- 		if (!vid_node)
- 			break;
+@@ -5886,7 +5876,7 @@ static int amlvideo2_create_node(struct platform_device *pdev, int node_id)
+ 	vid_node = kzalloc(sizeof(struct amlvideo2_node), GFP_KERNEL);
+ 	if (!vid_node)
+ 		return ret;
 -
-+		vid_node->cma_pages = NULL;
- 		vid_node->res.magic = MAGIC_RE_MEM;
- 		vid_node->res.priv = NULL;
- 		vid_node->context = create_ge2d_work_queue();
++	vid_node->cma_pages = NULL;
+ 	vid_node->res.magic = MAGIC_RE_MEM;
+ 	vid_node->res.priv = NULL;
+ 	vid_node->context = create_ge2d_work_queue();
 -- 
 2.11.0
 

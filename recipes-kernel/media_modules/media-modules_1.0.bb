@@ -8,7 +8,7 @@ SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;n
 SRC_URI += "file://COPYING.GPL"
 SRC_URI += "file://0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch"
 
-SRCREV = "b9164398172ee6bbcdbc70c4ac1d87b450bdf13b"
+SRCREV = "8cbee189679f5c755e1e8a1fabd24cd2159cc7ae"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 

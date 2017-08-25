@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/arm/gpu.git;nobranch=1"
 
-SRCREV = "902adbb7488609afa53d125ed2a264cd723560c7"
+SRCREV = "e0f58379ee32c96a38a9933ac1bb5cb2bab4c4f3"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/arm/gpu.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/gpu.git;protocol=ssh; \n"
 
@@ -16,11 +16,11 @@ do_install() {
     GPUDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/arm/gpu
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${GPUDIR}
-    install -m 0666 ${WORKDIR}/git/mali/mali.ko ${GPUDIR}
+    install -m 0666 ${WORKDIR}/git/utgard/r7p0/mali.ko ${GPUDIR}
 }
 FILES_${PN} = "mali.ko"
 # Header file provided by a separate package
 DEPENDS += ""
 
 S = "${WORKDIR}/git"
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/mali" EXTRA_CFLAGS+="-DCONFIG_MALI400=m -DCONFIG_MALI450=m" CONFIG_MALI400=m CONFIG_MALI450=m  modules'
+EXTRA_OEMAKE='-C ${WORKDIR}/git/utgard/ KDIR=${STAGING_KERNEL_DIR} GPU_DRV_VERSION=r7p0'

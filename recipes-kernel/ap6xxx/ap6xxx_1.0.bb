@@ -5,9 +5,7 @@ LICENSE = "GPLv2"
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;branch=m-amlogic-openlinux-20160907;nobranch=1"
 
-SRC_URI += "file://0001-fix-compilation-on-gcc6.patch"
-
-SRCREV = "99b34594c08f8dcc9c6ef66fbe2a110207d83cb6"
+SRCREV = "e410b9e03bb55733f5cf202db08a78e32afbb48b"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=ssh; \n"
 

@@ -1,5 +1,5 @@
 diff --git a/board/amlogic/configs/gxl_p212_v1.h b/board/amlogic/configs/gxl_p212_v1.h
-index 8ab9ea59af..58b46a6202 100644
+index 0c1e6c3df0..dbfe022869 100644
 --- a/board/amlogic/configs/gxl_p212_v1.h
 +++ b/board/amlogic/configs/gxl_p212_v1.h
 @@ -88,7 +88,7 @@
@@ -15,7 +15,7 @@ index 8ab9ea59af..58b46a6202 100644
          "active_slot=_a\0"\
          "boot_part=boot\0"\
          "initargs="\
--            "rootfstype=ramfs init=/init console=ttyS0,115200 no_console_suspend earlyprintk=aml-uart,0xc81004c0 ramoops.pstore_en=1 ramoops.record_size=0x8000 ramoops.console_size=0x4000 "\
+-            "rootfstype=ramfs init=/init console=ttyS0,115200 no_console_suspend earlycon=aml_uart,0xc81004c0 ramoops.pstore_en=1 ramoops.record_size=0x8000 ramoops.console_size=0x4000 "\
 +            "init=/sbin/init console=ttyS0,115200 no_console_suspend earlyprintk=aml-uart,0xc81004c0 ramoops.pstore_en=1 ramoops.record_size=0x8000 ramoops.console_size=0x4000 "\
              "\0"\
          "upgrade_check="\
@@ -56,7 +56,7 @@ index 8ab9ea59af..58b46a6202 100644
          "factory_reset_poweroff_protect="\
              "echo wipe_data=${wipe_data}; echo wipe_cache=${wipe_cache};"\
              "if test ${wipe_data} = failed; then "\
-@@ -452,6 +468,8 @@
+@@ -457,6 +473,8 @@
  #define CONFIG_FS_FAT 1
  #define CONFIG_FS_EXT4 1
  #define CONFIG_LZO 1
@@ -65,6 +65,3 @@ index 8ab9ea59af..58b46a6202 100644
  
  /* Cache Definitions */
  //#define CONFIG_SYS_DCACHE_OFF
--- 
-2.11.0
-

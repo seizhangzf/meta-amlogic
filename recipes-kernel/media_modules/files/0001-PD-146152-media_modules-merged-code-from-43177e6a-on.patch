@@ -1,8 +1,15 @@
-From f3d2d245e5e15fb86593f5808bdbb09b34788713 Mon Sep 17 00:00:00 2001
+From 0ccb759795f51ba13e8a733237c70354bef7e925 Mon Sep 17 00:00:00 2001
 From: Nanxin Qin <nanxin.qin@amlogic.com>
 Date: Mon, 19 Jun 2017 16:05:08 +0800
-Subject: [PATCH] PD#146152: media_modules: merged code from 43177e6a on the
+Subject: [PATCH] media_modules: merged code from 43177e6a on the
  amlogic-3.14-dev
+
+PD#146152: merged code from 43177e6a on the amlogic-3.14-dev
+
+1. support for multi-instance features
+2. some issures with the restoration of H.264/H.265/vp9 in
+multiple-instance mode
+3. optimized switch gate and decoder clk
 
 Change-Id: Iff829f6e4058c7001901e65c03e283a82fd1ec4a
 Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
@@ -20,7 +27,7 @@ Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
  .../frame_provider/decoder/h264_multi/h264_dpb.c   |  675 ++--
  .../frame_provider/decoder/h264_multi/h264_dpb.h   |   80 +-
  drivers/frame_provider/decoder/h264_multi/vmh264.c | 4193 ++++++++++++++++----
- drivers/frame_provider/decoder/h265/vh265.c        | 4013 ++++++++++++-------
+ drivers/frame_provider/decoder/h265/vh265.c        | 4031 ++++++++++++-------
  drivers/frame_provider/decoder/mjpeg/vmjpeg.c      |  304 +-
  .../frame_provider/decoder/mjpeg/vmjpeg_multi.c    |   88 +-
  drivers/frame_provider/decoder/mpeg12/vmpeg12.c    |  395 +-
@@ -38,7 +45,7 @@ Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
  drivers/frame_provider/decoder/utils/secprot.c     |   43 +
  drivers/frame_provider/decoder/utils/secprot.h     |   39 +
  drivers/frame_provider/decoder/utils/utils.c       |    5 +
- drivers/frame_provider/decoder/utils/vdec.c        | 1219 ++++--
+ drivers/frame_provider/decoder/utils/vdec.c        | 1239 +++---
  drivers/frame_provider/decoder/utils/vdec.h        |   80 +-
  drivers/frame_provider/decoder/utils/vdec_input.c  |  670 +++-
  drivers/frame_provider/decoder/utils/vdec_input.h  |   41 +-
@@ -50,7 +57,7 @@ Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
  drivers/frame_provider/decoder/vp9/vvp9.h          |    2 -
  drivers/stream_input/amports/adec.c                |  108 +-
  drivers/stream_input/amports/amports_priv.h        |    5 +-
- drivers/stream_input/amports/amstream.c            |  520 ++-
+ drivers/stream_input/amports/amstream.c            |  522 ++-
  drivers/stream_input/parser/esparser.c             |  280 +-
  drivers/stream_input/parser/esparser.h             |   11 +-
  drivers/stream_input/parser/psparser.c             |  156 +-
@@ -59,9 +66,9 @@ Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
  drivers/stream_input/parser/streambuf.c            |  102 +-
  drivers/stream_input/parser/streambuf.h            |    9 +-
  drivers/stream_input/parser/streambuf_reg.h        |    5 +-
- drivers/stream_input/parser/tsdemux.c              |  254 +-
+ drivers/stream_input/parser/tsdemux.c              |  256 +-
  firmware/video_ucode.bin                           |  Bin 420352 -> 424448 bytes
- 54 files changed, 13497 insertions(+), 5812 deletions(-)
+ 54 files changed, 13518 insertions(+), 5833 deletions(-)
  create mode 100644 drivers/frame_provider/decoder/utils/secprot.c
  create mode 100644 drivers/frame_provider/decoder/utils/secprot.h
  create mode 100644 drivers/frame_provider/decoder/utils/vdec_profile.c
@@ -10666,7 +10673,7 @@ index 59b7457..a0125b5 100644
  	&max_decode_instance_num, 0664);
  
 diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
-index 7e09b7b..72679c7 100644
+index 7e09b7b..4fbf730 100644
 --- a/drivers/frame_provider/decoder/h265/vh265.c
 +++ b/drivers/frame_provider/decoder/h265/vh265.c
 @@ -37,16 +37,21 @@
@@ -10885,7 +10892,7 @@ index 7e09b7b..72679c7 100644
  	/*
  	parser_sei_enable:
  	  bit 0, sei;
-@@ -357,23 +399,26 @@ static u32 interlace_enable = 1;
+@@ -357,25 +399,28 @@ static u32 interlace_enable = 1;
  	*/
  static u32 parser_sei_enable;
  #ifdef CONFIG_AM_VDEC_DV
@@ -10916,10 +10923,17 @@ index 7e09b7b..72679c7 100644
 +static unsigned int input_empty[MAX_DECODE_INSTANCE_NUM];
 +static unsigned int not_run_ready[MAX_DECODE_INSTANCE_NUM];
  
- #ifdef CONFIG_MULTI_DEC
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  static unsigned char get_idx(struct hevc_state_s *hevc);
-@@ -390,9 +435,11 @@ static u32 dv_debug;
- #ifdef CONFIG_MULTI_DEC
+ #endif
+ 
+@@ -387,12 +432,14 @@ static u32 dv_debug;
+ #endif
+ 
+ 
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  #define get_dbg_flag(hevc) ((debug_mask & (1 << hevc->index)) ? debug : 0)
  #define get_dbg_flag2(hevc) ((debug_mask & (1 << get_idx(hevc))) ? debug : 0)
 +#define is_log_enable(hevc) ((log_mask & (1 << hevc->index)) ? 1 : 0)
@@ -11379,7 +11393,7 @@ index 7e09b7b..72679c7 100644
  
  	unsigned int dec_status;
  
-@@ -1454,32 +1508,140 @@ struct hevc_state_s {
+@@ -1454,36 +1508,144 @@ struct hevc_state_s {
  
  #ifdef MULTI_INSTANCE_SUPPORT
  	int double_write_mode;
@@ -11445,7 +11459,8 @@ index 7e09b7b..72679c7 100644
 +
 +static int add_log(struct hevc_state_s *hevc,
 +	const char *fmt, ...)
-+{
+ {
+-	return hevc->double_write_mode;
 +#define HEVC_LOG_BUF		196
 +	struct debug_log_s *log_item;
 +	unsigned char buf[HEVC_LOG_BUF];
@@ -11489,8 +11504,7 @@ index 7e09b7b..72679c7 100644
 +
 +static unsigned char is_skip_decoding(struct hevc_state_s *hevc,
 +		struct PIC_s *pic)
- {
--	return hevc->double_write_mode;
++{
 +	if (pic->error_mark
 +		&& ((hevc->ignore_bufmgr_error & 0x1) == 0))
 +		return 1;
@@ -11510,7 +11524,7 @@ index 7e09b7b..72679c7 100644
  }
  
 -static int get_buf_alloc_height(struct hevc_state_s *hevc)
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +static int get_double_write_mode(struct hevc_state_s *hevc)
  {
 -	return hevc->buf_alloc_height;
@@ -11530,7 +11544,12 @@ index 7e09b7b..72679c7 100644
  }
  #endif
  
-@@ -1495,7 +1657,7 @@ static unsigned char get_idx(struct hevc_state_s *hevc)
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ static unsigned char get_idx(struct hevc_state_s *hevc)
+ {
+ 	return hevc->index;
+@@ -1495,10 +1657,10 @@ static unsigned char get_idx(struct hevc_state_s *hevc)
  static int hevc_print(struct hevc_state_s *hevc,
  	int flag, const char *fmt, ...)
  {
@@ -11538,16 +11557,40 @@ index 7e09b7b..72679c7 100644
 +#define HEVC_PRINT_BUF		256
  	unsigned char buf[HEVC_PRINT_BUF];
  	int len = 0;
- #ifdef CONFIG_MULTI_DEC
-@@ -1522,7 +1684,6 @@ static int hevc_print(struct hevc_state_s *hevc,
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	if (hevc == NULL ||
+ 		(flag == 0) ||
+ 		((debug_mask &
+@@ -1513,7 +1675,7 @@ static int hevc_print(struct hevc_state_s *hevc,
+ 		vsnprintf(buf + len, HEVC_PRINT_BUF - len, fmt, args);
+ 		pr_info("%s", buf);
+ 		va_end(args);
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	}
+ #endif
+ 	return 0;
+@@ -1522,10 +1684,9 @@ static int hevc_print(struct hevc_state_s *hevc,
  static int hevc_print_cont(struct hevc_state_s *hevc,
  	int flag, const char *fmt, ...)
  {
 -#define HEVC_PRINT_BUF		128
  	unsigned char buf[HEVC_PRINT_BUF];
  	int len = 0;
- #ifdef CONFIG_MULTI_DEC
-@@ -1543,19 +1704,79 @@ static int hevc_print_cont(struct hevc_state_s *hevc,
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	if (hevc == NULL ||
+ 		(flag == 0) ||
+ 		((debug_mask &
+@@ -1537,25 +1698,85 @@ static int hevc_print_cont(struct hevc_state_s *hevc,
+ 		vsnprintf(buf + len, HEVC_PRINT_BUF - len, fmt, args);
+ 		pr_info("%s", buf);
+ 		va_end(args);
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	}
+ #endif
  	return 0;
  }
  
@@ -11874,33 +11917,7 @@ index 7e09b7b..72679c7 100644
 -				}
 -				break;
 -			}
-+static int get_mv_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
-+{
-+#ifdef MV_USE_FIXED_BUF
-+	if (pic && pic->index >= 0)
-+		pic->mpred_mv_wr_start_addr =
-+			hevc->work_space_buf->mpred_mv.buf_start
-+			+ (pic->index * MPRED_MV_BUF_SIZE);
-+	return 0;
-+#else
-+	int i;
-+	int ret = -1;
-+	int new_size;
-+	if (pic->width > 1920 || pic->height > 1088)
-+		new_size = MPRED_MV_BUF_SIZE + 0x10000; /*0x120000*/
-+	else
-+		new_size = 0x40000 + 0x10000;
-+	if (new_size != hevc->mv_buf_size) {
-+		dealloc_mv_bufs(hevc);
-+		hevc->mv_buf_size = new_size;
-+	}
-+	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
-+		if (hevc->m_mv_BUF[i].start_adr &&
-+			hevc->m_mv_BUF[i].used_flag == 0) {
-+			hevc->m_mv_BUF[i].used_flag = 1;
-+			ret = i;
-+			break;
- 		}
+-		}
 -
 -
 -		if (!mmu_enable) {
@@ -11949,6 +11966,33 @@ index 7e09b7b..72679c7 100644
 -						"Max mc buffer or mpred_mv buffer is used\n");
 -					}
 -					break;
++static int get_mv_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
++{
++#ifdef MV_USE_FIXED_BUF
++	if (pic && pic->index >= 0)
++		pic->mpred_mv_wr_start_addr =
++			hevc->work_space_buf->mpred_mv.buf_start
++			+ (pic->index * MPRED_MV_BUF_SIZE);
++	return 0;
++#else
++	int i;
++	int ret = -1;
++	int new_size;
++	if (pic->width > 1920 || pic->height > 1088)
++		new_size = MPRED_MV_BUF_SIZE + 0x10000; /*0x120000*/
++	else
++		new_size = 0x40000 + 0x10000;
++	if (new_size != hevc->mv_buf_size) {
++		dealloc_mv_bufs(hevc);
++		hevc->mv_buf_size = new_size;
++	}
++	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
++		if (hevc->m_mv_BUF[i].start_adr &&
++			hevc->m_mv_BUF[i].used_flag == 0) {
++			hevc->m_mv_BUF[i].used_flag = 1;
++			ret = i;
++			break;
++		}
 +	}
 +	if (ret < 0) {
 +		for (i = 0; i < MAX_REF_PIC_NUM; i++) {
@@ -12098,11 +12142,11 @@ index 7e09b7b..72679c7 100644
  		mc_buffer_size_u_v_h = (mc_buffer_size_u_v + 0xffff) >> 16;
  			/*64k alignment*/
 -		buf_size = ((mc_buffer_size_u_v_h << 16) * 3);
--	}
--	if (mc_buffer_size & 0xffff) { /*64k alignment*/
--		mc_buffer_size_h += 1;
 +		buf_size += ((mc_buffer_size_u_v_h << 16) * 3);
  	}
+-	if (mc_buffer_size & 0xffff) { /*64k alignment*/
+-		mc_buffer_size_h += 1;
+-	}
 -	if (mmu_enable) {
 -		if (get_double_write_mode(hevc) == 1)
 -			buf_size += (mc_buffer_size_h << 16);
@@ -12121,7 +12165,10 @@ index 7e09b7b..72679c7 100644
 -			/*64k alignment*/
 -	buf_size = ((mc_buffer_size_u_v_h << 16) * 3);
 -#endif
--
+ 
++	/*in case start adr is not 64k alignment*/
++	if (buf_size > 0)
++		buf_size += 0x10000;
  
 -		if (mmu_enable) {
 -			if ((hevc->work_space_buf->cm_header.buf_start +
@@ -12133,10 +12180,7 @@ index 7e09b7b..72679c7 100644
 -					"MMU header_adr allocate fail\n");
 -				return -1;
 -		}
-+	/*in case start adr is not 64k alignment*/
-+	if (buf_size > 0)
-+		buf_size += 0x10000;
- 
+-
 -		   pic->header_adr = hevc->work_space_buf->cm_header.buf_start +
 -				(pic->index * MMU_COMPRESS_HEADER_SIZE);
 -	if (last_disp_addr && pic->header_adr == last_disp_addr) {
@@ -12457,17 +12501,7 @@ index 7e09b7b..72679c7 100644
 +	}
 +	return alloc_pic_count;
 +}
- 
--	if (!get_video0_frame_info(&vf)) {
--		spin_lock_irqsave(&lock, flags);
--		if (vf.type & VIDTYPE_SCATTER) {
--			/*sc only used header.*/
--			disp_addr = (VSYNC_RD_MPEG_REG(AFBC_HEAD_BADDR) << 4);
--		} else if (vf.type & VIDTYPE_COMPRESS) {
--			/*sc checked body.*/
--			disp_addr = (VSYNC_RD_MPEG_REG(AFBC_BODY_BADDR) << 4);
--		} else {
--			struct canvas_s cur_canvas;
++
 +static int config_pic(struct hevc_state_s *hevc, struct PIC_s *pic)
 +{
 +	int ret = -1;
@@ -12530,9 +12564,19 @@ index 7e09b7b..72679c7 100644
 +		((buf_stru.mc_buffer_size_u_v_h << 16) << 1);
 +	}
  
+-	if (!get_video0_frame_info(&vf)) {
+-		spin_lock_irqsave(&lock, flags);
+-		if (vf.type & VIDTYPE_SCATTER) {
+-			/*sc only used header.*/
+-			disp_addr = (VSYNC_RD_MPEG_REG(AFBC_HEAD_BADDR) << 4);
+-		} else if (vf.type & VIDTYPE_COMPRESS) {
+-			/*sc checked body.*/
+-			disp_addr = (VSYNC_RD_MPEG_REG(AFBC_BODY_BADDR) << 4);
+-		} else {
+-			struct canvas_s cur_canvas;
+ 
 -			canvas_read(vf.canvas0Addr & 0xff, &cur_canvas);
 -			disp_addr = cur_canvas.addr;
-+
 +	if (get_dbg_flag(hevc) & H265_DEBUG_BUFMGR) {
 +		hevc_print(hevc, 0,
 +		"%s index %d BUF_index %d mc_y_adr %x\n",
@@ -12949,8 +12993,10 @@ index 7e09b7b..72679c7 100644
 -		return;
 -
 +	struct PIC_s *pic;
-+	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
-+		pic = hevc->m_PIC[i];
+ 	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
+ 		pic = hevc->m_PIC[i];
+-		if (pic)
+-			pic->used_by_display = 0;
 +		if (pic == NULL || pic->index == -1)
 +			continue;
 +		alloc_pic_count++;
@@ -13004,10 +13050,8 @@ index 7e09b7b..72679c7 100644
 +{
 +	int i;
 +	struct PIC_s *pic;
- 	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
- 		pic = hevc->m_PIC[i];
--		if (pic)
--			pic->used_by_display = 0;
++	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
++		pic = hevc->m_PIC[i];
 +		if (pic == NULL || pic->index == -1)
 +			continue;
 +
@@ -13718,7 +13762,7 @@ index 7e09b7b..72679c7 100644
  
  			if (hevc->cur_pic->error_mark
  				&& ((hevc->ignore_bufmgr_error & 0x1) == 0)) {
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +				/*count info*/
 +				vdec_count_info(gvs, hevc->cur_pic->error_mark,
 +					hevc->cur_pic->stream_offset);
@@ -13742,7 +13786,7 @@ index 7e09b7b..72679c7 100644
  			hevc_print(hevc, 0,
  			"Discard this picture index %d\n",
  					hevc->cur_pic->index);
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		/*count info*/
 +		vdec_count_info(gvs, hevc->cur_pic->error_mark,
 +			hevc->cur_pic->stream_offset);
@@ -14526,7 +14570,7 @@ index 7e09b7b..72679c7 100644
 +				vf->pts, vf->pts_us64,
 +				vf->duration);
 +#endif
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		/*count info*/
 +		vdec_count_info(gvs, 0, stream_offset);
 +#endif
@@ -15018,7 +15062,7 @@ index 7e09b7b..72679c7 100644
 +						&hevc->notify_work);
 +
  				hevc->get_frame_dur = true;
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +				gvs->frame_dur = hevc->frame_dur;
 +#endif
  			}
@@ -15110,7 +15154,7 @@ index 7e09b7b..72679c7 100644
  #endif
  	} else {
  		/* skip, search next start code */
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		gvs->drop_frame_count++;
 +#endif
  		WRITE_VREG(HEVC_WAIT_FLAG, READ_VREG(HEVC_WAIT_FLAG) & (~0x2));
@@ -15421,7 +15465,7 @@ index 7e09b7b..72679c7 100644
 +		vstatus->frame_rate = -1;
  	vstatus->error_count = 0;
  	vstatus->status = hevc->stat | hevc->fatal_error;
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +	vstatus->bit_rate = gvs->bit_rate;
 +	vstatus->frame_dur = hevc->frame_dur;
 +	if (gvs) {
@@ -15563,7 +15607,7 @@ index 7e09b7b..72679c7 100644
  	hevc->frame_dur =
  		(hevc->vh265_amstream_dec_info.rate ==
  		 0) ? 3600 : hevc->vh265_amstream_dec_info.rate;
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +	gvs->frame_dur = hevc->frame_dur;
 +#endif
  	if (hevc->frame_width && hevc->frame_height)
@@ -16248,8 +16292,9 @@ index 7e09b7b..72679c7 100644
 +	if (hevc->mmu_enable &&
 +		(get_cpu_type() >= MESON_CPU_MAJOR_ID_GXL)) {
 +		if (amhevc_vdec_loadmc_ex(vdec, "vh265_mc_mmu") < 0) {
-+			amhevc_disable();
-+			hevc_print(hevc, 0,
+ 			amhevc_disable();
+ 			hevc_print(hevc, 0,
+-				"%s: Error amvdec_loadmc fail\n", __func__);
 +				"%s: Error amvdec_loadmc fail\n",
 +				__func__);
 +			return;
@@ -16257,9 +16302,8 @@ index 7e09b7b..72679c7 100644
 +	} else {
 +		if (amhevc_vdec_loadmc_ex
 +			(vdec, "vh265_mc") < 0) {
- 			amhevc_disable();
- 			hevc_print(hevc, 0,
--				"%s: Error amvdec_loadmc fail\n", __func__);
++			amhevc_disable();
++			hevc_print(hevc, 0,
 +				"%s: Error amvdec_loadmc fail\n",
 +				__func__);
  			return;
@@ -16396,7 +16440,7 @@ index 7e09b7b..72679c7 100644
  #ifdef MULTI_INSTANCE_SUPPORT
  	pdata->private = hevc;
  	pdata->dec_status = vh265_dec_status;
-@@ -8509,11 +9563,161 @@ static struct platform_driver amvdec_h265_driver = {
+@@ -8509,12 +9563,162 @@ static struct platform_driver amvdec_h265_driver = {
  };
  
  #ifdef MULTI_INSTANCE_SUPPORT
@@ -16554,10 +16598,12 @@ index 7e09b7b..72679c7 100644
  
  	struct vdec_s *pdata = *(struct vdec_s **)pdev->dev.platform_data;
  	struct hevc_state_s *hevc = NULL;
+-#ifdef CONFIG_MULTI_DEC
 +	int ret;
- #ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	int config_val;
  #endif
+ 	if (pdata == NULL) {
 @@ -8522,8 +9726,10 @@ static int ammvdec_h265_probe(struct platform_device *pdev)
  		return -EFAULT;
  	}
@@ -16613,7 +16659,7 @@ index 7e09b7b..72679c7 100644
 +
 +	if (((get_dbg_flag(hevc) & IGNORE_PARAM_FROM_CONFIG) == 0) &&
 +			pdata->config && pdata->config_len) {
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		/*use ptr config for doubel_write_mode, etc*/
 +		hevc_print(hevc, 0, "pdata->config=%s\n", pdata->config);
 +
@@ -19914,17 +19960,19 @@ index 33ab765..ea6f9f2 100644
  
  module_init(decoder_common_init);
 diff --git a/drivers/frame_provider/decoder/utils/vdec.c b/drivers/frame_provider/decoder/utils/vdec.c
-index 7c54882..ab10487 100644
+index 7c54882..c834c97 100644
 --- a/drivers/frame_provider/decoder/utils/vdec.c
 +++ b/drivers/frame_provider/decoder/utils/vdec.c
-@@ -37,6 +37,7 @@
+@@ -37,7 +37,8 @@
  
  #include <linux/amlogic/media/utils/vdec_reg.h>
  #include "vdec.h"
+-#ifdef CONFIG_MULTI_DEC
 +#include "vdec_trace.h"
- #ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  #include "vdec_profile.h"
  #endif
+ #include <linux/of.h>
 @@ -58,9 +59,12 @@
  
  #include "../../../common/media_clock/clk/clk.h"
@@ -20054,7 +20102,7 @@ index 7c54882..ab10487 100644
  /*
  * clk_config:
   *0:default
-@@ -221,11 +281,6 @@ struct device *get_codec_cma_device(void)
+@@ -221,12 +281,7 @@ struct device *get_codec_cma_device(void)
  	return vdec_core->cma_dev;
  }
  
@@ -20063,9 +20111,11 @@ index 7c54882..ab10487 100644
 -	return 1;//DEBUG_TMP
 -}
 -
- #ifdef CONFIG_MULTI_DEC
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  static const char * const vdec_device_name[] = {
  	"amvdec_mpeg12",     "ammvdec_mpeg12",
+ 	"amvdec_mpeg4",      "ammvdec_mpeg4",
 @@ -245,28 +300,6 @@ static const char * const vdec_device_name[] = {
  	"amvdec_vp9",        "ammvdec_vp9"
  };
@@ -20554,7 +20604,7 @@ index 7c54882..ab10487 100644
  
  void vdec_set_next_sched(struct vdec_s *vdec, struct vdec_s *next_vdec)
  {
-@@ -690,38 +894,99 @@ void vdec_set_next_sched(struct vdec_s *vdec, struct vdec_s *next_vdec)
+@@ -690,40 +894,101 @@ void vdec_set_next_sched(struct vdec_s *vdec, struct vdec_s *next_vdec)
  		next_vdec->sched = 1;
  	}
  }
@@ -20671,8 +20721,11 @@ index 7c54882..ab10487 100644
 -		&vdec->master->input : &vdec->input;
 +	struct vdec_input_s *input = &vdec->input;
  
- #ifdef CONFIG_MULTI_DEC
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	vdec_profile(vdec, VDEC_PROFILE_EVENT_SAVE_INPUT);
+ #endif
+ 
 @@ -733,16 +998,22 @@ void vdec_save_input_context(struct vdec_s *vdec)
  	if (input_stream_based(input) && (input->swap_needed)) {
  		if (input->target == VDEC_INPUT_TARGET_VLD) {
@@ -20814,8 +20867,12 @@ index 7c54882..ab10487 100644
  	if (vdec->status != VDEC_STATUS_DISCONNECTED)
  		return 0;
  
-@@ -884,6 +1195,7 @@ int vdec_disconnect(struct vdec_s *vdec)
- #ifdef CONFIG_MULTI_DEC
+@@ -881,9 +1192,10 @@ EXPORT_SYMBOL(vdec_connect);
+ /* remove vdec from vdec_core scheduling */
+ int vdec_disconnect(struct vdec_s *vdec)
+ {
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	vdec_profile(vdec, VDEC_PROFILE_EVENT_DISCONNECT);
  #endif
 +	//trace_vdec_disconnect(vdec);/*DEBUG_TMP*/
@@ -20832,7 +20889,8 @@ index 7c54882..ab10487 100644
 +
 +	vdec_input_release(&vdec->input);
  
- #ifdef CONFIG_MULTI_DEC
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	vdec_profile_flush(vdec);
  #endif
 -
@@ -20840,6 +20898,15 @@ index 7c54882..ab10487 100644
  	vfree(vdec);
  
  	atomic_dec(&vdec_core->vdec_nr);
+@@ -938,7 +1251,7 @@ EXPORT_SYMBOL(vdec_destroy);
+  */
+ static const char *get_dev_name(bool use_legacy_vdec, int format)
+ {
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	if (use_legacy_vdec)
+ 		return vdec_device_name[format * 2];
+ 	else
 @@ -948,26 +1261,6 @@ static const char *get_dev_name(bool use_legacy_vdec, int format)
  #endif
  }
@@ -21271,6 +21338,15 @@ index 7c54882..ab10487 100644
  static struct vdec_s *active_vdec(struct vdec_core_s *core)
  {
  	struct vdec_s *vdec;
+@@ -1446,7 +1606,7 @@ static void vdec_callback(struct vdec_s *vdec, void *data)
+ {
+ 	struct vdec_core_s *core = (struct vdec_core_s *)data;
+ 
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	vdec_profile(vdec, VDEC_PROFILE_EVENT_CB);
+ #endif
+ 
 @@ -1508,6 +1668,7 @@ static irqreturn_t vdec_thread_isr(int irq, void *dev_id)
  static inline bool vdec_ready_to_run(struct vdec_s *vdec)
  {
@@ -21305,6 +21381,22 @@ index 7c54882..ab10487 100644
  	if (step_mode) {
  		if ((step_mode & 0xff) != vdec->id)
  			return false;
+@@ -1526,13 +1706,13 @@ static inline bool vdec_ready_to_run(struct vdec_s *vdec)
+ 
+ 	step_mode &= ~0xff;
+ 
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	vdec_profile(vdec, VDEC_PROFILE_EVENT_CHK_RUN_READY);
+ #endif
+ 
+ 	r = vdec->run_ready(vdec);
+ 
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 	if (r)
+ 		vdec_profile(vdec, VDEC_PROFILE_EVENT_RUN_READY);
+ #endif
 @@ -1540,6 +1720,36 @@ static inline bool vdec_ready_to_run(struct vdec_s *vdec)
  	return r;
  }
@@ -21368,8 +21460,12 @@ index 7c54882..ab10487 100644
  
  		/* start the vdec instance */
  		if ((vdec) && (vdec->status != VDEC_STATUS_ACTIVE)) {
-@@ -1666,6 +1875,8 @@ static int vdec_core_thread(void *data)
- #ifdef CONFIG_MULTI_DEC
+@@ -1663,9 +1872,11 @@ static int vdec_core_thread(void *data)
+ 
+ 			/* activatate the decoder instance to run */
+ 			core->active_vdec = vdec;
+-#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  			vdec_profile(vdec, VDEC_PROFILE_EVENT_RUN);
  #endif
 +			vdec_prepare_run(vdec);
@@ -23789,7 +23885,7 @@ index 3495d92..64cd6bb 100644
  module_exit(amvdec_vc1_driver_remove_module);
  
 diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
-index 0e819e7..2f95b27 100644
+index 0e819e7..532d808 100644
 --- a/drivers/frame_provider/decoder/vp9/vvp9.c
 +++ b/drivers/frame_provider/decoder/vp9/vvp9.c
 @@ -48,6 +48,8 @@
@@ -25904,7 +26000,7 @@ index 0e819e7..2f95b27 100644
  		inc_vf_ref(pbi, pic_config->index);
  		kfifo_put(&pbi->display_q, (const struct vframe_s *)vf);
 +		pbi->vf_pre_count++;
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		/*count info*/
 +		gvs->frame_dur = pbi->frame_dur;
 +		vdec_count_info(gvs, 0, stream_offset);
@@ -26597,7 +26693,7 @@ index 0e819e7..2f95b27 100644
 -	vstatus->status = pbi->stat | pbi->fatal_error;
 +	vstatus->status = vp9->stat | vp9->fatal_error;
 +	vstatus->frame_dur = vp9->frame_dur;
-+#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +	vstatus->bit_rate = gvs->bit_rate;
 +	vstatus->frame_data = gvs->frame_data;
 +	vstatus->total_data = gvs->total_data;
@@ -27919,7 +28015,7 @@ index 4b6f96e..7ee7859 100644
  
  #endif
 diff --git a/drivers/stream_input/amports/amstream.c b/drivers/stream_input/amports/amstream.c
-index f1d2c74..ed2161e 100644
+index cb7292d..5277719 100644
 --- a/drivers/stream_input/amports/amstream.c
 +++ b/drivers/stream_input/amports/amstream.c
 @@ -80,6 +80,7 @@
@@ -27981,7 +28077,7 @@ index f1d2c74..ed2161e 100644
  		.type = PORT_TYPE_ES | PORT_TYPE_VIDEO,
  		.fops = &vbuf_fops,
  	},
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	{
  		.name = "amstream_vbuf_sched",
  		.type = PORT_TYPE_ES | PORT_TYPE_VIDEO |
@@ -28008,7 +28104,7 @@ index f1d2c74..ed2161e 100644
  			PORT_TYPE_AUDIO | PORT_TYPE_SUB,
  		.fops = &mpts_fops,
  	},
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	{
  		.name = "amstream_mpts_sched",
  		.type = PORT_TYPE_MPTS | PORT_TYPE_VIDEO |
@@ -28045,7 +28141,7 @@ index f1d2c74..ed2161e 100644
  		.vformat = VFORMAT_HEVC,
 -#endif
  	},
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  	{
  		.name = "amstream_hevc_frame",
  		.type = PORT_TYPE_ES | PORT_TYPE_VIDEO | PORT_TYPE_HEVC |
@@ -28605,7 +28701,7 @@ index f1d2c74..ed2161e 100644
  {
  	struct port_priv_s *priv = file->private_data;
  	struct stream_port_s *port = priv->port;
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +	u32 port_flag = 0;
 +	u32 is_4k = 0;
 +#endif
@@ -28616,7 +28712,7 @@ index f1d2c74..ed2161e 100644
  		amstream_port_release(priv);
  
  	if (priv->vdec) {
-+#ifdef CONFIG_MULTI_DEC
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +		port_flag = priv->vdec->port_flag;
 +#endif
 +		if ((priv->vdec->sys_info->height *
@@ -28625,7 +28721,14 @@ index f1d2c74..ed2161e 100644
  		if (priv->vdec->slave)
  			vdec_release(priv->vdec->slave);
  
-@@ -1603,11 +1713,12 @@ static int amstream_release(struct inode *inode, struct file *file)
+@@ -1597,17 +1707,18 @@ static int amstream_release(struct inode *inode, struct file *file)
+ 	if (get_cpu_type() >= MESON_CPU_MAJOR_ID_M6) {
+ 		if (port->type & PORT_TYPE_VIDEO) {
+ 			if (get_cpu_type() >= MESON_CPU_MAJOR_ID_M8) {
+-#ifndef CONFIG_MULTI_DEC
++#ifndef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ 				if (has_hevc_vdec())
+ 					vdec_poweroff(VDEC_HEVC);
  
  				vdec_poweroff(VDEC_1);
  #else
@@ -30334,12 +30437,12 @@ index f00c705..cb6ea63 100644
  #define _CLR_ST_REG_MASK(r, val) _WRITE_ST_REG(r, _READ_ST_REG(r)&~(val))
  #define _READ_VDEC2_ST_REG(r) (codec_dosbus_read(\
 diff --git a/drivers/stream_input/parser/tsdemux.c b/drivers/stream_input/parser/tsdemux.c
-index ba9a590..d7b9a18 100644
+index 476aed7..8046f39 100644
 --- a/drivers/stream_input/parser/tsdemux.c
 +++ b/drivers/stream_input/parser/tsdemux.c
-@@ -226,35 +226,35 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
+@@ -232,35 +232,35 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
+ 	u32 int_status = 0;
  	int id = (long)dev_id;
- 
  	if (!enable_demux_driver()) {
 -		int_status = READ_MPEG_REG(STB_INT_STATUS);
 +		int_status = READ_DEMUX_REG(STB_INT_STATUS);
@@ -30385,7 +30488,7 @@ index ba9a590..d7b9a18 100644
  
  			u32 pdts_status = DMX_READ_REG(id, STB_PTS_DTS_STATUS);
  
-@@ -269,13 +269,13 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
+@@ -275,13 +275,13 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
  					DMX_READ_REG(id, AUDIO_PTS_DEMUX));
  
  			if (id == 1)
@@ -30402,7 +30505,7 @@ index ba9a590..d7b9a18 100644
  							pdts_status);
  		}
  	}
-@@ -290,16 +290,16 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
+@@ -296,16 +296,16 @@ static irqreturn_t tsdemux_isr(int irq, void *dev_id)
  	}
  
  	if (!enable_demux_driver())
@@ -30422,7 +30525,7 @@ index ba9a590..d7b9a18 100644
  
  	if (int_status & PARSER_INTSTAT_FETCH_CMD) {
  		fetch_done = 1;
-@@ -344,22 +344,21 @@ static ssize_t _tsdemux_write(const char __user *buf, size_t count,
+@@ -350,22 +350,21 @@ static ssize_t _tsdemux_write(const char __user *buf, size_t count,
  
  		if (isphybuf) {
  			u32 buf_32 = (unsigned long)buf & 0xffffffff;
@@ -30449,7 +30552,7 @@ index ba9a590..d7b9a18 100644
  			pr_info("write timeout, retry\n");
  			return -EAGAIN;
  		} else if (ret < 0)
-@@ -408,19 +407,19 @@ static int reset_pcr_regs(void)
+@@ -414,19 +413,19 @@ static int reset_pcr_regs(void)
  		pr_info("[%s:%d] clk_81 = %x clk_unit =%x\n", __func__,
  				__LINE__, clk_81, clk_unit);
  
@@ -30477,7 +30580,7 @@ index ba9a590..d7b9a18 100644
  			pr_info("[tsdemux_init] To use device 1,pcr_num=%d\n",
  					pcr_num);
  		}
-@@ -448,19 +447,19 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -454,19 +453,19 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  
  	amports_switch_gate("demux", 1);
  
@@ -30504,7 +30607,7 @@ index ba9a590..d7b9a18 100644
  	}
  
  	/* set PID filter */
-@@ -472,48 +471,48 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -478,48 +477,48 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  		 sid, pcrid);
  
  	if (!enable_demux_driver()) {
@@ -30568,7 +30671,7 @@ index ba9a590..d7b9a18 100644
  				(1 << STB_DEMUX_ENABLE) |
  				(1 << KEEP_DUPLICATE_PACKAGE));
  	}
-@@ -525,12 +524,12 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -531,12 +530,12 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  
  	/* hook stream buffer with PARSER */
  	if (has_hevc_vdec() && is_hevc) {
@@ -30584,7 +30687,7 @@ index ba9a590..d7b9a18 100644
  					ES_VID_MAN_RD_PTR);
  			/* set vififo_vbuf_rp_sel=>hevc */
  			WRITE_VREG(DOS_GEN_CTRL0, 3 << 1);
-@@ -543,19 +542,18 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -549,19 +548,18 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  			SET_VREG_MASK(HEVC_STREAM_FIFO_CTL,
  					  (1 << 29));
  		} else {
@@ -30612,7 +30715,7 @@ index ba9a590..d7b9a18 100644
  					ES_VID_MAN_RD_PTR);
  
  			WRITE_VREG(VLD_MEM_VIFIFO_BUF_CNTL, MEM_BUFCTRL_INIT);
-@@ -565,30 +563,31 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -571,30 +569,31 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  			if (has_hevc_vdec())
  				WRITE_VREG(DOS_GEN_CTRL0, 0);
  		} else {
@@ -30659,7 +30762,7 @@ index ba9a590..d7b9a18 100644
  			(7 << ES_SUB_WR_ENDIAN_BIT) | ES_SUB_MAN_RD_PTR);
  
  	/* #if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON8 */
-@@ -615,12 +614,12 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -621,12 +620,12 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  	if (r)
  		goto err3;
  
@@ -30676,7 +30779,7 @@ index ba9a590..d7b9a18 100644
  
  	discontinued_counter = 0;
  
-@@ -630,7 +629,7 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
+@@ -636,7 +635,7 @@ s32 tsdemux_init(u32 vid, u32 aid, u32 sid, u32 pcrid, bool is_hevc,
  		r = vdec_request_irq(DEMUX_IRQ, tsdemux_isr,
  				"tsdemux-irq", (void *)tsdemux_irq_id);
  
@@ -30685,7 +30788,7 @@ index ba9a590..d7b9a18 100644
  					   | (1 << NEW_PDTS_READY)
  					   | (1 << DIS_CONTINUITY_PACKET));
  		if (r)
-@@ -687,14 +686,14 @@ void tsdemux_release(void)
+@@ -693,14 +692,14 @@ void tsdemux_release(void)
  	pcrscr_valid = 0;
  	first_pcr = 0;
  
@@ -30696,17 +30799,18 @@ index ba9a590..d7b9a18 100644
 +	WRITE_PARSER_REG(PARSER_VIDEO_HOLE, 0);
 +	WRITE_PARSER_REG(PARSER_AUDIO_HOLE, 0);
  
- #ifdef CONFIG_MULTI_DEC
+-#ifdef CONFIG_MULTI_DEC
 -	SET_MPEG_REG_MASK(PARSER_ES_CONTROL, ES_VID_MAN_RD_PTR);
 -	WRITE_MPEG_REG(PARSER_VIDEO_WP, 0);
 -	WRITE_MPEG_REG(PARSER_VIDEO_RP, 0);
++#ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
 +	SET_PARSER_REG_MASK(PARSER_ES_CONTROL, ES_VID_MAN_RD_PTR);
 +	WRITE_PARSER_REG(PARSER_VIDEO_WP, 0);
 +	WRITE_PARSER_REG(PARSER_VIDEO_RP, 0);
  #endif
  
  	/*TODO irq */
-@@ -702,7 +701,7 @@ void tsdemux_release(void)
+@@ -708,7 +707,7 @@ void tsdemux_release(void)
  	vdec_free_irq(PARSER_IRQ, (void *)tsdemux_fetch_id);
  
  	if (!enable_demux_driver()) {
@@ -30715,7 +30819,7 @@ index ba9a590..d7b9a18 100644
  		/*TODO irq */
  
  		vdec_free_irq(DEMUX_IRQ, (void *)tsdemux_irq_id);
-@@ -724,7 +723,7 @@ void tsdemux_release(void)
+@@ -730,7 +729,7 @@ void tsdemux_release(void)
  	pts_stop(PTS_TYPE_VIDEO);
  	pts_stop(PTS_TYPE_AUDIO);
  
@@ -30724,7 +30828,7 @@ index ba9a590..d7b9a18 100644
  
  	/* #if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON6 */
  	/*TODO clk */
-@@ -978,11 +977,11 @@ void tsdemux_class_unregister(void)
+@@ -984,11 +983,11 @@ void tsdemux_class_unregister(void)
  void tsdemux_change_avid(unsigned int vid, unsigned int aid)
  {
  	if (!enable_demux_driver()) {
@@ -30739,7 +30843,7 @@ index ba9a590..d7b9a18 100644
  			;
  	} else {
  		curr_vid_id = vid;
-@@ -999,11 +998,11 @@ void tsdemux_change_avid(unsigned int vid, unsigned int aid)
+@@ -1005,11 +1004,11 @@ void tsdemux_change_avid(unsigned int vid, unsigned int aid)
  void tsdemux_change_sid(unsigned int sid)
  {
  	if (!enable_demux_driver()) {
@@ -30754,7 +30858,7 @@ index ba9a590..d7b9a18 100644
  			;
  	} else {
  		curr_sub_id = sid;
-@@ -1023,19 +1022,19 @@ void tsdemux_audio_reset(void)
+@@ -1029,19 +1028,19 @@ void tsdemux_audio_reset(void)
  
  	spin_lock_irqsave(&lock, flags);
  
@@ -30785,7 +30889,7 @@ index ba9a590..d7b9a18 100644
  
  	spin_unlock_irqrestore(&lock, flags);
  
-@@ -1050,14 +1049,14 @@ void tsdemux_sub_reset(void)
+@@ -1056,14 +1055,14 @@ void tsdemux_sub_reset(void)
  
  	spin_lock_irqsave(&lock, flags);
  
@@ -30807,7 +30911,7 @@ index ba9a590..d7b9a18 100644
  			(7 << ES_SUB_WR_ENDIAN_BIT) | ES_SUB_MAN_RD_PTR);
  
  	spin_unlock_irqrestore(&lock, flags);
-@@ -1093,12 +1092,12 @@ u32 tsdemux_pcrscr_get(void)
+@@ -1099,12 +1098,12 @@ u32 tsdemux_pcrscr_get(void)
  	if (pcrscr_valid == 0)
  		return 0;
  
@@ -30825,7 +30929,7 @@ index ba9a590..d7b9a18 100644
  	if (first_pcr == 0)
  		first_pcr = pcr;
  	return pcr;
-@@ -1111,13 +1110,12 @@ u32 tsdemux_first_pcrscr_get(void)
+@@ -1117,13 +1116,12 @@ u32 tsdemux_first_pcrscr_get(void)
  
  	if (first_pcr == 0) {
  		u32 pcr;

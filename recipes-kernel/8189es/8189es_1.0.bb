@@ -5,7 +5,7 @@ LICENSE = "GPLv2"
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/realtek/drivers/8189es.git;branch=m-amlogic-openlinux-20160907;nobranch=1"
 
-SRCREV = "a7fc8d7615d0f2fba7e05e93fd593b43a390592c"
+SRCREV = "f971e4bcbfb5a6109fe2e65dab375f5c63712093"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/realtek/drivers/8189es.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/realtek/drivers/8189es.git;protocol=ssh; \n"
 
