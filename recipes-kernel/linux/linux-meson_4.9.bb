@@ -17,6 +17,7 @@ SRC_URI += "file://0004-volume-patch-from-lianlian.zhu.patch"
 SRC_URI += "file://0005-Fix-dump_backtrace-caused-by-__might_sleep.patch"
 SRC_URI += "file://0009-media-merged-code-from-43177e6a-on-the-amlogic-3.14-.patch"
 SRC_URI += "file://0010-Fix-amlvideo2-crash.patch"
+SRC_URI += "file://0011-dts-enable-meson-drm.patch"
 
 MIRRORS_prepend += "git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh git://git.myamlogic.com/kernel/common.git; \n"
 
