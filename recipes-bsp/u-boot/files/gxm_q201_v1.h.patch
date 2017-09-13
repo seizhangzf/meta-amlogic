@@ -1,7 +1,7 @@
-diff --git a/board/amlogic/configs/gxm_q201_v1.h b/board/amlogic/configs/gxm_q201_v1.h
-index 268403909c..5cc66f69d4 100644
---- a/board/amlogic/configs/gxm_q201_v1.h
-+++ b/board/amlogic/configs/gxm_q201_v1.h
+Index: git/board/amlogic/configs/gxm_q201_v1.h
+===================================================================
+--- git.orig/board/amlogic/configs/gxm_q201_v1.h	2017-09-13 15:38:33.721405847 +0800
++++ git/board/amlogic/configs/gxm_q201_v1.h	2017-09-13 15:39:46.000000000 +0800
 @@ -82,7 +82,7 @@
  #define CONFIG_SYS_MAXARGS  64
  #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -54,7 +54,7 @@ index 268403909c..5cc66f69d4 100644
          "factory_reset_poweroff_protect="\
              "echo wipe_data=${wipe_data}; echo wipe_cache=${wipe_cache};"\
              "if test ${wipe_data} = failed; then "\
-@@ -395,6 +409,8 @@
+@@ -399,6 +413,8 @@
  #define CONFIG_FS_FAT 1
  #define CONFIG_FS_EXT4 1
  #define CONFIG_LZO 1
@@ -63,6 +63,3 @@ index 268403909c..5cc66f69d4 100644
  
  /* Cache Definitions */
  //#define CONFIG_SYS_DCACHE_OFF
--- 
-2.11.0
-

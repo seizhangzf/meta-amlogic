@@ -1,7 +1,7 @@
-diff --git a/board/amlogic/configs/gxb_p200_v1.h b/board/amlogic/configs/gxb_p200_v1.h
-index 7d6819a7dd..8e32f71aee 100644
---- a/board/amlogic/configs/gxb_p200_v1.h
-+++ b/board/amlogic/configs/gxb_p200_v1.h
+Index: git/board/amlogic/configs/gxb_p200_v1.h
+===================================================================
+--- git.orig/board/amlogic/configs/gxb_p200_v1.h	2017-09-13 15:36:14.397403234 +0800
++++ git/board/amlogic/configs/gxb_p200_v1.h	2017-09-13 15:36:14.389403233 +0800
 @@ -83,7 +83,7 @@
  #define CONFIG_SYS_MAXARGS  64
  #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -20,7 +20,7 @@ index 7d6819a7dd..8e32f71aee 100644
              "\0"\
          "upgrade_check="\
              "echo upgrade_step=${upgrade_step}; "\
-@@ -123,11 +123,21 @@
+@@ -123,11 +123,19 @@
              "else fi;"\
              "\0"\
          "storeargs="\
@@ -32,18 +32,16 @@ index 7d6819a7dd..8e32f71aee 100644
              "\0"\
 +        "sdcardargs="\
 +            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=ext2 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
-+	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
 +            "run cmdline_keys;"\
 +            "\0"\
 +        "bootupdateargs="\
 +            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=vfat ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag} firmware=rootfs.tar.gz;"\
-+	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
 +             "run cmdline_keys;"\
 +             "\0"\
          "switch_bootmode="\
              "get_rebootmode;"\
              "if test ${reboot_mode} = factory_reset; then "\
-@@ -144,6 +154,12 @@
+@@ -144,6 +152,12 @@
              "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
              "run update;"\
              "\0"\
@@ -56,7 +54,7 @@ index 7d6819a7dd..8e32f71aee 100644
          "factory_reset_poweroff_protect="\
              "echo wipe_data=${wipe_data}; echo wipe_cache=${wipe_cache};"\
              "if test ${wipe_data} = failed; then "\
-@@ -396,6 +412,8 @@
+@@ -400,6 +414,8 @@
  #define CONFIG_FS_FAT 1
  #define CONFIG_FS_EXT4 1
  #define CONFIG_LZO 1
@@ -65,6 +63,3 @@ index 7d6819a7dd..8e32f71aee 100644
  
  /* Cache Definitions */
  //#define CONFIG_SYS_DCACHE_OFF
--- 
-2.11.0
-
