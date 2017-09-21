@@ -15,7 +15,7 @@ RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "25430b72d7bfab58e5e0a046c6e48e5ebff894eb"
+SRCREV = "eb5e0f9d406bf7196af290884e23a04319139b61"
 SRC_URI = "git://git.myamlogic.com/linux/amlogic/mali-linux.git;nobranch=1"
 VERSION = "r7p0"
 MIRRORS_prepend += "git://git.myamlogic.com/linux/amlogic/mali-linux.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh; \n"

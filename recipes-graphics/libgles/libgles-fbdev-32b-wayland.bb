@@ -15,7 +15,7 @@ RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "008230330db10b8c2eb352f8888e4c66afb0d566"
+SRCREV = "eb5e0f9d406bf7196af290884e23a04319139b61"
 SRC_URI = "git://git.myamlogic.com/linux/amlogic/mali-linux.git;nobranch=1"
 VERSION = "r7p0"
 MIRRORS_prepend += "git://git.myamlogic.com/linux/amlogic/mali-linux.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh; \n"
@@ -49,7 +49,7 @@ do_install() {
     install -d ${D}${includedir}
 
     # waylnad lib
-    install -m 0755 ${S}/arm32/${VERSION}/wayland/libMali.so ${D}${libdir}/libMali.so
+    install -m 0755 ${S}/arm32/${VERSION}/wayland-fbdev/libMali.so ${D}${libdir}/libMali.so
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4
     ln -s libEGL.so.1.4 ${D}${libdir}/libEGL.so.1
