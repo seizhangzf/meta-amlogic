@@ -16,12 +16,12 @@ BBLAYERS =+ "\${RDKROOT}/meta-rdk-video"
 EOF
 fi
 
-# Add meta-aarch64 only if not already present.
-if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-linaro/meta-aarch64[^-]') -eq 0 ]; then
-    cat >> conf/bblayers.conf <<EOF
-BBLAYERS =+ "\${RDKROOT}/meta-linaro/meta-aarch64"
-EOF
-fi
+## Add meta-aarch64 only if not already present.
+#if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-linaro/meta-aarch64[^-]') -eq 0 ]; then
+#    cat >> conf/bblayers.conf <<EOF
+#BBLAYERS =+ "\${RDKROOT}/meta-linaro/meta-aarch64"
+#EOF
+#fi
 
 # Add meta-rdk-bsp-amlogic only if not already present.
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-rdk-bsp-amlogic[^-]') -eq 0 ]; then
