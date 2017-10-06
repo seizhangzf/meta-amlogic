@@ -24,3 +24,6 @@ DEPENDS += ""
 S = "${WORKDIR}/git"
 
 EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/linuxdriver" modules'
+
+KERNEL_MODULE_AUTOLOAD += "optee_armtz"
+KERNEL_MODULE_AUTOLOAD += "optee"
