@@ -12,6 +12,7 @@ S = "${WORKDIR}/git"
 
 SRC_URI += "\
            file://audio_codec_Makfile_changes.patch \
+           file://0001-PD-151901-set-drmmode-flag-before-codec_init-for-MUL.patch \
            "
 
 CC_remove += "-fno-omit-frame-pointer"
