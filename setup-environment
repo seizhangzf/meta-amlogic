@@ -30,4 +30,11 @@ BBLAYERS =+ "\${RDKROOT}/meta-rdk-bsp-amlogic"
 EOF
 fi
 
+# Add meta-meson only if a machine configuration choosed from different layer
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-meson[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-meson"
+EOF
+fi
+
 . $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
