@@ -1,0 +1,11 @@
+[Unit]
+Description=Optee Tee-Supplicant
+
+[Service]
+ExecStartPre=/sbin/modprobe -q optee_armtz
+ExecStart=/usr/bin/tee-supplicant
+ExecStop=/bin/kill -KILL $MAINPID
+ExecStopPost=/sbin/modprobe -r optee_armtz
+
+[Install]
+WantedBy=multi-user.target
