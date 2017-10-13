@@ -50,7 +50,7 @@ do_install_mkbootimg[nostamp] = "1"
 addtask install_mkbootimg before do_bundle_initramfs_dtb
 
 do_bundle_initramfs_dtb() {
-	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE_FOR_MAKE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
+	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 addtask bundle_initramfs_dtb before do_image_complete after do_image_cpio
