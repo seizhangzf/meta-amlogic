@@ -1,0 +1,63 @@
+From 0c25c3d322eeea72da546a548763ef9690781d25 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Tue, 17 Oct 2017 12:17:26 +0800
+Subject: [PATCH] For compilation with arm-rdk-linux-gnueabi-gcc
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ demos/hello_world/Makefile    |  2 +-
+ demos/hello_world/ca/Makefile | 14 +++++++-------
+ ta_export/mk/link.mk          |  2 +-
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/demos/hello_world/Makefile b/demos/hello_world/Makefile
+index 15ad3e9..60eeb96 100644
+--- a/demos/hello_world/Makefile
++++ b/demos/hello_world/Makefile
+@@ -3,7 +3,7 @@ cur_dir=$(CURDIR)
+ 
+ export ARCH?=arm
+ export CROSS_COMPILE?=arm-linux-gnueabihf-
+-export TA_CROSS_COMPILE=arm-linux-gnueabihf-
++export TA_CROSS_COMPILE?=arm-linux-gnueabihf-
+ 
+ export TDK_DIR=$(cur_dir)/../..
+ 
+diff --git a/demos/hello_world/ca/Makefile b/demos/hello_world/ca/Makefile
+index 17ff508..d870642 100644
+--- a/demos/hello_world/ca/Makefile
++++ b/demos/hello_world/ca/Makefile
+@@ -1,10 +1,10 @@
+-CC      = $(CROSS_COMPILE)gcc
+-LD      = $(CROSS_COMPILE)ld
+-AR      = $(CROSS_COMPILE)ar
+-NM      = $(CROSS_COMPILE)nm
+-OBJCOPY = $(CROSS_COMPILE)objcopy
+-OBJDUMP = $(CROSS_COMPILE)objdump
+-READELF = $(CROSS_COMPILE)readelf
++CC      ?= $(CROSS_COMPILE)gcc
++LD      ?= $(CROSS_COMPILE)ld
++AR      ?= $(CROSS_COMPILE)ar
++NM      ?= $(CROSS_COMPILE)nm
++OBJCOPY ?= $(CROSS_COMPILE)objcopy
++OBJDUMP ?= $(CROSS_COMPILE)objdump
++READELF ?= $(CROSS_COMPILE)readelf
+ 
+ OBJS = hello_world.o
+ 
+diff --git a/ta_export/mk/link.mk b/ta_export/mk/link.mk
+index 04e94db..0d80d81 100644
+--- a/ta_export/mk/link.mk
++++ b/ta_export/mk/link.mk
+@@ -17,7 +17,7 @@ cleanfiles += $(link-script-pp) $(link-script-dep)
+ link-ldflags  = $(LDFLAGS)
+ link-ldflags += -pie
+ link-ldflags += -T $(link-script-pp) -Map=$(link-out-dir)/$(binary).map
+-link-ldflags += --sort-section=alignment
++#link-ldflags += --sort-section=alignment
+ 
+ # Macro to reverse a list
+ reverse = $(if $(wordlist 2,2,$(1)),$(call reverse,$(wordlist 2,$(words $(1)),$(1))) $(firstword $(1)),$(1))
+-- 
+2.11.0
+
