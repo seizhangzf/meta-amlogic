@@ -1,0 +1,145 @@
+From 21eeb4017f9cefcc0579d3008d2c62c391b381cd Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Mon, 30 Oct 2017 20:39:14 +0800
+Subject: [PATCH 13/16] Partial merge of
+ 905253988f3cd83d1b956cad8d5e1ca64236bd3d
+
+Pengcheng Chen <pengcheng.chen@amlogic.com>
+Date: Tue, 12 Sep 2017 17:08:06 +0800
+Subject: [PATCH] osd: create logo_reserved node in dts in Android O
+
+PD#150868: create logo_reserved node in dts in Android O
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ arch/arm64/boot/dts/amlogic/gxl_p212_2g_buildroot.dts | 17 +++++++----------
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts           | 15 +++++++++++----
+ drivers/amlogic/media/osd/osd_fb.c                    |  7 ++++---
+ 3 files changed, 22 insertions(+), 17 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g_buildroot.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g_buildroot.dts
+index c7dfaf718d77..80185fc19243 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g_buildroot.dts
+@@ -36,11 +36,6 @@
+ 		serial4 = &uart_AO_B;
+ 	};
+ 
+-	ion_dev {
+-		compatible = "amlogic, ion_dev";
+-		memory-region = <&ion_reserved>;
+-	};
+-
+ 	memory@00000000 {
+ 		device_type = "memory";
+ 		linux,usable-memory = <0x0 0x0100000 0x0 0x7ff00000>;
+@@ -79,11 +74,12 @@
+ 			alignment = <0x0 0x400000>;
+ 		};
+ 
+-		ion_reserved:linux,ion-dev {
++		fb_reserved:linux,meson-fb {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x0 0x2000000>;
++			size = <0x0 0x2400000>;
+ 			alignment = <0x0 0x400000>;
++			alloc-ranges = <0x0 0x7dc00000 0x0 0x2400000>;
+ 		};
+ 
+ 		/*  vdin0 CMA pool */
+@@ -685,19 +681,20 @@
+ 
+ 	meson-fb {
+ 		compatible = "amlogic, meson-fb";
++		memory-region = <&fb_reserved>;
+ 		dev_name = "meson-fb";
+ 		status = "okay";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";
+-		mem_size = <0x006AF000 0x01851000 0x00100000>;
+-		/* uboot logo,fb0/fb1 memory size */
++		mem_size = <0x00800000 0x1800000 0x00100000>;
++		/* uboot logo,fb0/fb1 memory size,if afbcd fb0=0x01851000 */
+ 		display_mode_default = "1080p60hz";
+ 		scale_mode = <1>;
+ 		/** 0:VPU free scale 1:OSD free scale 2:OSD super scale */
+ 		display_size_default = <1920 1080 1920 3240 32>;
+ 		/*1920*1080*4*3 = 0x17BB000*/
+-		logo_addr = "0x7e000000";
++		logo_addr = "0x7dc00000";
+ 	};
+ 	ge2d {
+ 		compatible = "amlogic, ge2d";
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+index 20e4d1293454..cf7bce559c6d 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+@@ -77,7 +77,13 @@
+ 			size = <0x0 0x2000000>;
+ 			alignment = <0x0 0x400000>;
+ 		};
+-
++		logo_reserved:linux,meson-fb {
++			compatible = "shared-dma-pool";
++			reusable;
++			size = <0x0 0x800000>;
++			alignment = <0x0 0x400000>;
++			alloc-ranges = <0x0 0x7f800000 0x0 0x800000>;
++		};
+ 		ion_reserved:linux,ion-dev {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+@@ -676,19 +682,20 @@
+ 
+ 	meson-fb {
+ 		compatible = "amlogic, meson-fb";
++		memory-region = <&logo_reserved>;
+ 		dev_name = "meson-fb";
+ 		status = "okay";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";
+-		mem_size = <0x006AF000 0x01851000 0x00100000>;
+-		/* uboot logo,fb0/fb1 memory size */
++		mem_size = <0x00800000 0x01800000 0x00100000>;
++		/* uboot logo,fb0/fb1 memory size,if afbcd fb0=0x01851000*/
+ 		display_mode_default = "1080p60hz";
+ 		scale_mode = <1>;
+ 		/** 0:VPU free scale 1:OSD free scale 2:OSD super scale */
+ 		display_size_default = <1920 1080 1920 3240 32>;
+ 		/*1920*1080*4*3 = 0x17BB000*/
+-		logo_addr = "0x7e000000";
++		logo_addr = "0x7f800000";
+ 	};
+ 	ge2d {
+ 		compatible = "amlogic, ge2d";
+diff --git a/drivers/amlogic/media/osd/osd_fb.c b/drivers/amlogic/media/osd/osd_fb.c
+index 10a85994c0b2..587b8b9213e5 100644
+--- a/drivers/amlogic/media/osd/osd_fb.c
++++ b/drivers/amlogic/media/osd/osd_fb.c
+@@ -1114,8 +1114,9 @@ static int osd_mmap(struct fb_info *info, struct vm_area_struct *vma)
+ 		var = &info->var;
+ 		/* read cma/fb-reserved memory first */
+ 		if ((b_reserved_mem == true) &&
+-			(fb_memsize[0] + fb_memsize[1] +
+-				fb_memsize[2]) <= size) {
++			((fb_memsize[0] + fb_memsize[1] +
++			fb_memsize[2] <= size) &&
++			(fb_memsize[fb_index + 1] > 0))) {
+ 			fb_rmem_size[fb_index] = fb_memsize[fb_index + 1];
+ 			if (fb_index == DEV_OSD0)
+ 				fb_rmem_paddr[fb_index] = base +
+@@ -3083,7 +3084,7 @@ static int __init rmem_fb_setup(struct reserved_mem *rmem)
+ 	fb_rmem.base = rmem->base;
+ 	fb_rmem.size = rmem->size;
+ 	rmem->ops = &rmem_fb_ops;
+-	osd_log_dbg("Reserved memory: created fb at 0x%p, size %ld MiB\n",
++	osd_log_info("Reserved memory: created fb at 0x%p, size %ld MiB\n",
+ 		     (void *)rmem->base, (unsigned long)rmem->size / SZ_1M);
+ 	return 0;
+ }
+-- 
+2.11.0
+

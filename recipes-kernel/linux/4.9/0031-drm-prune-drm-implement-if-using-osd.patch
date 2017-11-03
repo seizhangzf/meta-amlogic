@@ -1,0 +1,198 @@
+From 5fa3bbc4d1d2c92aa003f9626abc998ee50006d1 Mon Sep 17 00:00:00 2001
+From: Yalong Liu <yalong.liu@amlogic.com>
+Date: Tue, 31 Oct 2017 16:07:58 +0800
+Subject: [PATCH] drm: prune drm implement if using osd
+
+PD#152825: prune drm to only gem when using fbdev
+if using drm, drm must be complete
+
+Change-Id: I17beff6232ca4b5dbf7ce24798f6a638eab42ea7
+Signed-off-by: Yalong Liu <yalong.liu@amlogic.com>
+---
+ drivers/amlogic/drm/Kconfig     |   3 +-
+ drivers/amlogic/drm/meson_drv.c | 104 ++++++++++++++++++++++++++++++++++++----
+ 2 files changed, 97 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/amlogic/drm/Kconfig b/drivers/amlogic/drm/Kconfig
+index 6b2df202e23a..2a2a7d8e360c 100644
+--- a/drivers/amlogic/drm/Kconfig
++++ b/drivers/amlogic/drm/Kconfig
+@@ -20,7 +20,7 @@ config DRM_MESON_BYPASS_MODE
+ config DRM_MESON_USE_ION
+ 	bool "gem use ion to alloc/free graphic buffer."
+ 	default y
+-	depends on DRM_MESON
++	depends on DRM_MESON && DRM_MESON_BYPASS_MODE
+ 	help
+ 		MESON DRM use CMA HELPER to manage framebuffer.
+ 		It need reserve memory in CMA pool.
+@@ -32,5 +32,6 @@ config DRM_MESON_USE_ION
+ config DRM_MESON_EMULATE_FBDEV
+ 	bool "emulate framebuffer dev by drm."
+ 	default n
++	depends on DRM_MESON && DRM_MESON_BYPASS_MODE && DRM_MESON_USE_ION
+ 	help
+ 		Emulate framebuffer device for device which need use fbdev api.
+diff --git a/drivers/amlogic/drm/meson_drv.c b/drivers/amlogic/drm/meson_drv.c
+index 4e1f737e83ef..bd6f594f03ec 100644
+--- a/drivers/amlogic/drm/meson_drv.c
++++ b/drivers/amlogic/drm/meson_drv.c
+@@ -146,11 +146,8 @@ static const struct file_operations fops = {
+ };
+ 
+ static struct drm_driver meson_driver = {
+-
+-	.driver_features	= DRIVER_HAVE_IRQ | DRIVER_GEM |
+-				  DRIVER_MODESET | DRIVER_PRIME |
+-				  DRIVER_ATOMIC | DRIVER_IRQ_SHARED,
+-
++	/*driver_features setting move to probe functions*/
++	.driver_features	= 0,
+ 	/* Vblank */
+ 	.enable_vblank		= meson_enable_vblank,
+ 	.disable_vblank		= meson_disable_vblank,
+@@ -170,7 +167,6 @@ static struct drm_driver meson_driver = {
+ 	.dumb_create			= am_meson_gem_dumb_create,
+ 	.dumb_destroy		= am_meson_gem_dumb_destroy,
+ 	.dumb_map_offset		= am_meson_gem_dumb_map_offset,
+-
+ 	.gem_free_object_unlocked	= am_meson_gem_object_free,
+ 	.gem_vm_ops			= &drm_gem_cma_vm_ops,
+ #else
+@@ -226,17 +222,101 @@ static struct regmap_config meson_regmap_config = {
+ };
+ #endif
+ 
+-static int meson_drv_probe(struct platform_device *pdev)
++static bool meson_drv_use_osd(void)
++{
++	struct device_node *node;
++	const  char *str;
++	int ret;
++
++	node = of_find_node_by_path("/meson-fb");
++	if (node) {
++		ret = of_property_read_string(node, "status", &str);
++		if (ret) {
++			DRM_INFO("get 'status' failed:%d\n", ret);
++			return false;
++		}
++
++		if (strcmp(str, "okay") && strcmp(str, "ok")) {
++			DRM_INFO("device %s status is %s\n",
++				node->name, str);
++		} else {
++			DRM_INFO("device %s status is %s\n",
++				node->name, str);
++			return true;
++		}
++	}
++	return false;
++}
++
++static int meson_drv_probe_prune(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	struct meson_drm *priv;
+ 	struct drm_device *drm;
+ 	int ret;
+ 
++	/*driver_features reset to DRIVER_GEM | DRIVER_PRIME, for prune drm*/
++	meson_driver.driver_features = DRIVER_GEM | DRIVER_PRIME;
++
++	drm = drm_dev_alloc(&meson_driver, dev);
++	if (IS_ERR(drm))
++		return PTR_ERR(drm);
++
++	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv) {
++		ret = -ENOMEM;
++		goto free_drm;
++	}
++	drm->dev_private = priv;
++	priv->drm = drm;
++	priv->dev = dev;
++
++#ifdef CONFIG_DRM_MESON_USE_ION
++	am_meson_gem_create(priv);
++#endif
++
++	platform_set_drvdata(pdev, priv);
++
++	ret = drm_dev_register(drm, 0);
++	if (ret)
++		goto free_drm;
++
++	return 0;
++
++free_drm:
++	DRM_DEBUG("free-drm");
++	drm_dev_unref(drm);
++	return ret;
++}
++
++static int meson_drv_remove_prune(struct platform_device *pdev)
++{
++	struct drm_device *drm = dev_get_drvdata(&pdev->dev);
++
++	drm_dev_unregister(drm);
++#ifdef CONFIG_DRM_MESON_USE_ION
++	am_meson_gem_cleanup(drm->dev_private);
++#endif
++	drm_dev_unref(drm);
++
++	return 0;
++}
++
++static int meson_drv_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct meson_drm *priv;
++	struct drm_device *drm;
++	int ret;
+ #ifndef CONFIG_DRM_MESON_BYPASS_MODE
+ 	struct resource *res;
+ 	void __iomem *regs;
++#endif
+ 
++	if (meson_drv_use_osd())
++		return meson_drv_probe_prune(pdev);
++
++#ifndef CONFIG_DRM_MESON_BYPASS_MODE
+ 	/* Checks if an output connector is available */
+ 	if (!meson_vpu_has_available_connectors(dev)) {
+ 		dev_err(dev, "No output connector available\n");
+@@ -244,6 +324,10 @@ static int meson_drv_probe(struct platform_device *pdev)
+ 	}
+ #endif
+ 
++	meson_driver.driver_features = DRIVER_HAVE_IRQ | DRIVER_GEM |
++		DRIVER_MODESET | DRIVER_PRIME |
++		DRIVER_ATOMIC | DRIVER_IRQ_SHARED;
++
+ 	drm = drm_dev_alloc(&meson_driver, dev);
+ 	if (IS_ERR(drm))
+ 		return PTR_ERR(drm);
+@@ -360,7 +444,9 @@ static int meson_drv_probe(struct platform_device *pdev)
+ static int meson_drv_remove(struct platform_device *pdev)
+ {
+ 	struct drm_device *drm = dev_get_drvdata(&pdev->dev);
+-	struct meson_drm *priv = drm->dev_private;
++
++	if (meson_drv_use_osd())
++		return meson_drv_remove_prune(pdev);
+ 
+ #ifdef CONFIG_DRM_MESON_BYPASS_MODE
+ 	osd_drm_debugfs_exit();
+@@ -373,7 +459,7 @@ static int meson_drv_remove(struct platform_device *pdev)
+ 	drm_mode_config_cleanup(drm);
+ 	drm_vblank_cleanup(drm);
+ #ifdef CONFIG_DRM_MESON_USE_ION
+-	am_meson_gem_cleanup(priv);
++	am_meson_gem_cleanup(drm->dev_private);
+ #endif
+ 	drm_dev_unref(drm);
+ 
+-- 
+2.11.0
+

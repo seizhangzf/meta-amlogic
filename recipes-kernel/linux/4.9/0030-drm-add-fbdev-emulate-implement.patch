@@ -1,0 +1,573 @@
+From 5ab46dc70cc6597e462fa9fb977845980e53e744 Mon Sep 17 00:00:00 2001
+From: Yalong Liu <yalong.liu@amlogic.com>
+Date: Mon, 30 Oct 2017 10:54:27 +0800
+Subject: [PATCH] drm: add fbdev emulate implement
+
+PD#152825: add amlogic emulate fbdev implement
+it just support software renderring mode
+
+Change-Id: Iffb3b83bbfcc831608e46d9c176fc6c8da8e3ff4
+Signed-off-by: Yalong Liu <yalong.liu@amlogic.com>
+---
+ MAINTAINERS                          |   1 +
+ drivers/amlogic/drm/Makefile         |   4 +
+ drivers/amlogic/drm/am_meson_fb.c    |  61 +++++++++-
+ drivers/amlogic/drm/am_meson_fb.h    |   4 +
+ drivers/amlogic/drm/am_meson_fbdev.c | 217 +++++++++++++++++++++++++++++++++++
+ drivers/amlogic/drm/am_meson_fbdev.h |  24 ++++
+ drivers/amlogic/drm/am_meson_gem.c   |   9 +-
+ drivers/amlogic/drm/am_meson_gem.h   |   8 ++
+ drivers/amlogic/drm/am_meson_plane.c |   8 +-
+ drivers/amlogic/drm/meson_drv.c      |  21 ++--
+ drivers/amlogic/drm/meson_drv.h      |   2 +
+ 11 files changed, 336 insertions(+), 23 deletions(-)
+ create mode 100644 drivers/amlogic/drm/am_meson_fbdev.c
+ create mode 100644 drivers/amlogic/drm/am_meson_fbdev.h
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index dd3cc8255d99..e6224b196063 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -14114,3 +14114,4 @@ F: drivers/amlogic/media/video_processor/pic_dev/*
+ AMLOGIC DRM DRIVER
+ M: Sky Zhou <sky.zhou@amlogic.com>
+ F: driver/amlogic/drm/*
++F: driver/amlogic/drm/am_meson_fbdev.c
+diff --git a/drivers/amlogic/drm/Makefile b/drivers/amlogic/drm/Makefile
+index 8cd1b99f9435..658f28428804 100644
+--- a/drivers/amlogic/drm/Makefile
++++ b/drivers/amlogic/drm/Makefile
+@@ -12,4 +12,8 @@ ifeq ($(CONFIG_DRM_MESON_USE_ION),y)
+ 	ccflags-y += -Idrivers/staging/android/
+ endif
+ 
++ifeq ($(CONFIG_DRM_MESON_EMULATE_FBDEV),y)
++        meson-y += am_meson_fbdev.o
++endif
++
+ obj-$(CONFIG_DRM_MESON) += meson.o
+diff --git a/drivers/amlogic/drm/am_meson_fb.c b/drivers/amlogic/drm/am_meson_fb.c
+index 16cdb5852791..095f7acdd799 100644
+--- a/drivers/amlogic/drm/am_meson_fb.c
++++ b/drivers/amlogic/drm/am_meson_fb.c
+@@ -14,16 +14,18 @@
+  * more details.
+  *
+  */
++#include <drm/drm_atomic_helper.h>
++
+ #include "am_meson_fb.h"
+ 
+ #define to_am_meson_fb(x) container_of(x, struct am_meson_fb, base)
+ 
+-void am_meson_fb_destroy(struct drm_framebuffer *framebuffer)
++void am_meson_fb_destroy(struct drm_framebuffer *fb)
+ {
+-	struct am_meson_fb *meson_fb = to_am_meson_fb(framebuffer);
++	struct am_meson_fb *meson_fb = to_am_meson_fb(fb);
+ 
+ 	drm_gem_object_unreference_unlocked(&meson_fb->bufp->base);
+-	drm_framebuffer_cleanup(framebuffer);
++	drm_framebuffer_cleanup(fb);
+ 	kfree(meson_fb);
+ }
+ 
+@@ -31,8 +33,10 @@ int am_meson_fb_create_handle(struct drm_framebuffer *fb,
+ 	     struct drm_file *file_priv,
+ 	     unsigned int *handle)
+ {
+-	DRM_INFO("ERROR: am_meson_fb_create_handle NOT implement.\n");
+-	return 0;
++	struct am_meson_fb *meson_fb = to_am_meson_fb(fb);
++
++	return drm_gem_handle_create(file_priv,
++				     &meson_fb->bufp->base, handle);
+ }
+ 
+ struct drm_framebuffer_funcs am_meson_fb_funcs = {
+@@ -40,6 +44,39 @@ struct drm_framebuffer_funcs am_meson_fb_funcs = {
+ 	.destroy = am_meson_fb_destroy,
+ };
+ 
++struct drm_framebuffer *
++am_meson_fb_alloc(struct drm_device *dev,
++		  struct drm_mode_fb_cmd2 *mode_cmd,
++		  struct drm_gem_object *obj)
++{
++	struct am_meson_fb *meson_fb;
++	struct am_meson_gem_object *meson_gem;
++	int ret = 0;
++
++	meson_fb = kzalloc(sizeof(*meson_fb), GFP_KERNEL);
++	if (!meson_fb)
++		return ERR_PTR(-ENOMEM);
++
++	meson_gem = container_of(obj, struct am_meson_gem_object, base);
++	meson_fb->bufp = meson_gem;
++
++	drm_helper_mode_fill_fb_struct(&meson_fb->base, mode_cmd);
++
++	ret = drm_framebuffer_init(dev, &meson_fb->base,
++				   &am_meson_fb_funcs);
++	if (ret) {
++		dev_err(dev->dev, "Failed to initialize framebuffer: %d\n",
++			ret);
++		goto err_free_fb;
++	}
++
++	return &meson_fb->base;
++
++err_free_fb:
++	kfree(meson_fb);
++	return ERR_PTR(ret);
++}
++
+ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+ 				     struct drm_file *file_priv,
+ 				     const struct drm_mode_fb_cmd2 *mode_cmd)
+@@ -78,3 +115,17 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+ 
+ 	return &meson_fb->base;
+ }
++
++struct drm_framebuffer *
++am_meson_drm_framebuffer_init(struct drm_device *dev,
++			      struct drm_mode_fb_cmd2 *mode_cmd,
++			      struct drm_gem_object *obj)
++{
++	struct drm_framebuffer *fb;
++
++	fb = am_meson_fb_alloc(dev, mode_cmd, obj);
++	if (IS_ERR(fb))
++		return NULL;
++
++	return fb;
++}
+diff --git a/drivers/amlogic/drm/am_meson_fb.h b/drivers/amlogic/drm/am_meson_fb.h
+index 4b63e589d24f..faf0fce0e5da 100644
+--- a/drivers/amlogic/drm/am_meson_fb.h
++++ b/drivers/amlogic/drm/am_meson_fb.h
+@@ -32,4 +32,8 @@ struct am_meson_fb {
+ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+ 				     struct drm_file *file_priv,
+ 				     const struct drm_mode_fb_cmd2 *mode_cmd);
++struct drm_framebuffer *am_meson_drm_framebuffer_init(
++				     struct drm_device *dev,
++				     struct drm_mode_fb_cmd2 *mode_cmd,
++				     struct drm_gem_object *obj);
+ #endif
+diff --git a/drivers/amlogic/drm/am_meson_fbdev.c b/drivers/amlogic/drm/am_meson_fbdev.c
+new file mode 100644
+index 000000000000..32a01814cfd5
+--- /dev/null
++++ b/drivers/amlogic/drm/am_meson_fbdev.c
+@@ -0,0 +1,217 @@
++/*
++ * drivers/amlogic/drm/am_meson_fbdev.c
++ *
++ * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <drm/drm.h>
++#include <drm/drmP.h>
++#include <drm/drm_fb_helper.h>
++#include <drm/drm_crtc_helper.h>
++
++#include "meson_drv.h"
++#include "am_meson_gem.h"
++#include "am_meson_fb.h"
++#include "am_meson_fbdev.h"
++
++#define PREFERRED_BPP		32
++#define MESON_DRM_MAX_CONNECTOR	2
++
++static int meson_fbdev_mmap(struct fb_info *info,
++	struct vm_area_struct *vma)
++{
++	struct drm_fb_helper *helper = info->par;
++	struct meson_drm *private;
++	struct am_meson_gem_object *meson_gem;
++
++	private = helper->dev->dev_private;
++	meson_gem = container_of(private->fbdev_bo,
++		struct am_meson_gem_object, base);
++
++	return am_meson_gem_object_mmap(meson_gem, vma);
++}
++
++static int meson_drm_fbdev_sync(struct fb_info *info)
++{
++	return 0;
++}
++
++static int meson_drm_fbdev_ioctl(struct fb_info *info,
++	unsigned int cmd, unsigned long arg)
++{
++	return 0;
++}
++
++static struct fb_ops meson_drm_fbdev_ops = {
++	.owner		= THIS_MODULE,
++	.fb_mmap	= meson_fbdev_mmap,
++	.fb_fillrect	= drm_fb_helper_cfb_fillrect,
++	.fb_copyarea	= drm_fb_helper_cfb_copyarea,
++	.fb_imageblit	= drm_fb_helper_cfb_imageblit,
++	.fb_check_var	= drm_fb_helper_check_var,
++	.fb_set_par	= drm_fb_helper_set_par,
++	.fb_blank	= drm_fb_helper_blank,
++	.fb_pan_display	= drm_fb_helper_pan_display,
++	.fb_setcmap	= drm_fb_helper_setcmap,
++	.fb_sync	= meson_drm_fbdev_sync,
++	.fb_ioctl       = meson_drm_fbdev_ioctl,
++#ifdef CONFIG_COMPAT
++	.fb_compat_ioctl = meson_drm_fbdev_ioctl,
++#endif
++};
++
++static int meson_drm_fbdev_create(struct drm_fb_helper *helper,
++	struct drm_fb_helper_surface_size *sizes)
++{
++	struct meson_drm *private = helper->dev->dev_private;
++	struct drm_mode_fb_cmd2 mode_cmd = { 0 };
++	struct drm_device *dev = helper->dev;
++	struct am_meson_gem_object *meson_obj;
++	struct drm_framebuffer *fb;
++	struct ion_client *client;
++	unsigned int bytes_per_pixel;
++	unsigned long offset;
++	struct fb_info *fbi;
++	size_t size;
++	int ret;
++
++	bytes_per_pixel = DIV_ROUND_UP(sizes->surface_bpp, 8);
++
++	mode_cmd.width = sizes->surface_width;
++	mode_cmd.height = sizes->surface_height;
++	mode_cmd.pitches[0] = ALIGN(sizes->surface_width * bytes_per_pixel, 64);
++	mode_cmd.pixel_format = drm_mode_legacy_fb_format(sizes->surface_bpp,
++		sizes->surface_depth);
++
++	size = mode_cmd.pitches[0] * mode_cmd.height;
++
++	client = (struct ion_client *)private->gem_client;
++	meson_obj = am_meson_gem_object_create(dev, 0, size, client);
++	if (IS_ERR(meson_obj))
++		return -ENOMEM;
++
++	private->fbdev_bo = &meson_obj->base;
++
++	fbi = drm_fb_helper_alloc_fbi(helper);
++	if (IS_ERR(fbi)) {
++		dev_err(dev->dev, "Failed to create framebuffer info.\n");
++		ret = PTR_ERR(fbi);
++		goto err_meson_gem_free_object;
++	}
++
++	helper->fb = am_meson_drm_framebuffer_init(dev, &mode_cmd,
++						   private->fbdev_bo);
++	if (IS_ERR(helper->fb)) {
++		dev_err(dev->dev, "Failed to allocate DRM framebuffer.\n");
++		ret = PTR_ERR(helper->fb);
++		goto err_release_fbi;
++	}
++
++	fbi->par = helper;
++	fbi->flags = FBINFO_FLAG_DEFAULT;
++	fbi->fbops = &meson_drm_fbdev_ops;
++
++	fb = helper->fb;
++	drm_fb_helper_fill_fix(fbi, fb->pitches[0], fb->depth);
++	drm_fb_helper_fill_var(fbi, helper, sizes->fb_width, sizes->fb_height);
++
++	offset = fbi->var.xoffset * bytes_per_pixel;
++	offset += fbi->var.yoffset * fb->pitches[0];
++
++	dev->mode_config.fb_base = 0;
++	fbi->screen_size = size;
++	fbi->fix.smem_len = size;
++
++	DRM_DEBUG_KMS("FB [%dx%d]-%d offset=%ld size=%zu\n",
++		      fb->width, fb->height, fb->depth, offset, size);
++
++	fbi->skip_vt_switch = true;
++
++	return 0;
++
++err_release_fbi:
++	drm_fb_helper_release_fbi(helper);
++err_meson_gem_free_object:
++	am_meson_gem_object_free(&meson_obj->base);
++	return ret;
++}
++
++static const struct drm_fb_helper_funcs meson_drm_fb_helper_funcs = {
++	.fb_probe = meson_drm_fbdev_create,
++};
++
++int meson_drm_fbdev_init(struct drm_device *dev)
++{
++	struct meson_drm *private = dev->dev_private;
++	struct drm_fb_helper *helper;
++	unsigned int num_crtc;
++	int ret;
++
++	if (!dev->mode_config.num_crtc || !dev->mode_config.num_connector)
++		return -EINVAL;
++
++	num_crtc = dev->mode_config.num_crtc;
++
++	helper = devm_kzalloc(dev->dev, sizeof(*helper), GFP_KERNEL);
++	if (!helper)
++		return -ENOMEM;
++
++	drm_fb_helper_prepare(dev, helper, &meson_drm_fb_helper_funcs);
++
++	ret = drm_fb_helper_init(dev, helper, num_crtc,
++		MESON_DRM_MAX_CONNECTOR);
++	if (ret < 0) {
++		dev_err(dev->dev, "Failed to initialize drm fb helper - %d.\n",
++			ret);
++		goto err_free;
++	}
++
++	ret = drm_fb_helper_single_add_all_connectors(helper);
++	if (ret < 0) {
++		dev_err(dev->dev, "Failed to add connectors - %d.\n", ret);
++		goto err_drm_fb_helper_fini;
++	}
++
++	ret = drm_fb_helper_initial_config(helper, PREFERRED_BPP);
++	if (ret < 0) {
++		dev_err(dev->dev, "Failed to set initial hw config - %d.\n",
++			ret);
++		goto err_drm_fb_helper_fini;
++	}
++
++	private->fbdev_helper = helper;
++
++	return 0;
++
++err_drm_fb_helper_fini:
++	drm_fb_helper_fini(helper);
++err_free:
++	kfree(fbdev_cma);
++	return ret;
++}
++
++void meson_drm_fbdev_fini(struct drm_device *dev)
++{
++	struct meson_drm *private = dev->dev_private;
++	struct drm_fb_helper *helper = private->fbdev_helper;
++
++	if (!helper)
++		return;
++
++	drm_fb_helper_unregister_fbi(helper);
++	drm_fb_helper_release_fbi(helper);
++
++	if (helper->fb)
++		drm_framebuffer_unreference(helper->fb);
++
++	drm_fb_helper_fini(helper);
++}
+diff --git a/drivers/amlogic/drm/am_meson_fbdev.h b/drivers/amlogic/drm/am_meson_fbdev.h
+new file mode 100644
+index 000000000000..4547ef9b117c
+--- /dev/null
++++ b/drivers/amlogic/drm/am_meson_fbdev.h
+@@ -0,0 +1,24 @@
++/*
++ * drivers/amlogic/drm/am_meson_fbdev.h
++ *
++ * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef _MESON_DRM_FBDEV_H
++#define _MESON_DRM_FBDEV_H
++
++#ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
++int meson_drm_fbdev_init(struct drm_device *dev);
++void meson_drm_fbdev_fini(struct drm_device *dev);
++#endif
++
++#endif /* _MESON_DRM_FBDEV_H */
+diff --git a/drivers/amlogic/drm/am_meson_gem.c b/drivers/amlogic/drm/am_meson_gem.c
+index afe404b7c3fe..a53de21bd91c 100644
+--- a/drivers/amlogic/drm/am_meson_gem.c
++++ b/drivers/amlogic/drm/am_meson_gem.c
+@@ -81,7 +81,7 @@ static void am_meson_gem_free_ion_buf(
+ 	}
+ }
+ 
+-static struct am_meson_gem_object *am_meson_gem_object_create(
++struct am_meson_gem_object *am_meson_gem_object_create(
+ 	struct drm_device *dev,
+ 	unsigned int flags,
+ 	unsigned long size,
+@@ -207,7 +207,7 @@ int am_meson_gem_mmap(
+ 
+ 	obj = vma->vm_private_data;
+ 	meson_gem_obj = to_am_meson_gem_obj(obj);
+-	DRM_ERROR("am_meson_gem_mmap %p.\n", meson_gem_obj);
++	DRM_DEBUG("am_meson_gem_mmap %p.\n", meson_gem_obj);
+ 
+ 	ret = am_meson_gem_object_mmap(meson_gem_obj, vma);
+ 
+@@ -221,6 +221,11 @@ int am_meson_gem_object_get_phyaddr(
+ 	int addr;
+ 	size_t len;
+ 
++	if (!meson_gem->handle) {
++		DRM_INFO("%s handle null\n", __func__);
++		return -1;
++	}
++
+ 	ion_phys(drm->gem_client, meson_gem->handle,
+ 						(ion_phys_addr_t *)&addr, &len);
+ 
+diff --git a/drivers/amlogic/drm/am_meson_gem.h b/drivers/amlogic/drm/am_meson_gem.h
+index ddfcbe0aedd8..16e3d779b940 100644
+--- a/drivers/amlogic/drm/am_meson_gem.h
++++ b/drivers/amlogic/drm/am_meson_gem.h
+@@ -60,8 +60,16 @@ int am_meson_gem_dumb_map_offset(
+ 	uint64_t *offset);
+ 
+ /* GEM OBJECT OPERATIONS */
++struct am_meson_gem_object *am_meson_gem_object_create(
++		struct drm_device *dev, unsigned int flags,
++		unsigned long size, struct ion_client *client);
++
+ void am_meson_gem_object_free(struct drm_gem_object *gem_obj);
+ 
++int am_meson_gem_object_mmap(
++	struct am_meson_gem_object *obj,
++	struct vm_area_struct *vma);
++
+ int am_meson_gem_object_get_phyaddr(
+ 	struct meson_drm *drm,
+ 	struct am_meson_gem_object *meson_gem);
+diff --git a/drivers/amlogic/drm/am_meson_plane.c b/drivers/amlogic/drm/am_meson_plane.c
+index 4996d6b7597b..c95761369198 100644
+--- a/drivers/amlogic/drm/am_meson_plane.c
++++ b/drivers/amlogic/drm/am_meson_plane.c
+@@ -86,7 +86,7 @@ void am_osd_do_display(
+ 	dma_addr_t phyaddr;
+ 	unsigned long flags;
+ 
+-	//DRM_INFO("am_osd_do_display osd %d.\n", osd_plane->osd_idx);
++	//DRM_INFO("%s osd %d.\n", __func__, osd_plane->osd_idx);
+ 
+ 	switch (fb->pixel_format) {
+ 	case DRM_FORMAT_XRGB8888:
+@@ -174,7 +174,7 @@ int am_osd_check(struct drm_plane *plane, struct drm_plane_state *state)
+ {
+ 	struct am_osd_plane *osd_plane = to_am_osd_plane(plane);
+ 
+-	DRM_DEBUG("am_osd_check osd %d.\n", osd_plane->osd_idx);
++	DRM_DEBUG("%s osd %d.\n", __func__, osd_plane->osd_idx);
+ 	return 0;
+ }
+ 
+@@ -182,7 +182,7 @@ void am_osd_blank(struct drm_plane *plane, struct drm_plane_state *old_state)
+ {
+ 	struct am_osd_plane *osd_plane = to_am_osd_plane(plane);
+ 
+-	DRM_DEBUG("am_osd_blank osd %d.\n", osd_plane->osd_idx);
++	DRM_DEBUG("%s osd %d.\n", __func__, osd_plane->osd_idx);
+ }
+ 
+ static const struct drm_plane_helper_funcs am_osd_helper_funcs = {
+@@ -238,7 +238,7 @@ int meson_plane_create(struct meson_drm *priv)
+ {
+ 	struct am_osd_plane *plane;
+ 
+-	DRM_DEBUG("amlogic meson_plane_create. enter\n");
++	DRM_DEBUG("%s. enter\n", __func__);
+ 	/*crate primary plane*/
+ 	plane = am_osd_plane_create(priv, DRM_PLANE_TYPE_PRIMARY);
+ 	if (plane == NULL)
+diff --git a/drivers/amlogic/drm/meson_drv.c b/drivers/amlogic/drm/meson_drv.c
+index dde7ac8acc3d..4e1f737e83ef 100644
+--- a/drivers/amlogic/drm/meson_drv.c
++++ b/drivers/amlogic/drm/meson_drv.c
+@@ -55,6 +55,9 @@
+ #include "am_meson_gem.h"
+ #include "am_meson_fb.h"
+ #endif
++#ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
++#include "am_meson_fbdev.h"
++#endif
+ 
+ #define DRIVER_NAME "meson"
+ #define DRIVER_DESC "Amlogic Meson DRM driver"
+@@ -328,19 +331,13 @@ static int meson_drv_probe(struct platform_device *pdev)
+ 	drm->mode_config.max_width = 8192;
+ 	drm->mode_config.max_height = 8192;
+ 	drm->mode_config.funcs = &meson_mode_config_funcs;
+-
++	drm_kms_helper_poll_init(drm);
+ #ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
+-	priv->fbdev = drm_fbdev_cma_init(drm, 32,
+-					 drm->mode_config.num_crtc,
+-					 drm->mode_config.num_connector);
+-	if (IS_ERR(priv->fbdev)) {
+-		ret = PTR_ERR(priv->fbdev);
++	ret = meson_drm_fbdev_init(drm);
++	if (ret)
+ 		goto free_drm;
+-	}
++	drm->mode_config.allow_fb_modifiers = true;
+ #endif
+-
+-	drm_kms_helper_poll_init(drm);
+-
+ 	platform_set_drvdata(pdev, priv);
+ 
+ 	ret = drm_dev_register(drm, 0);
+@@ -369,10 +366,10 @@ static int meson_drv_remove(struct platform_device *pdev)
+ 	osd_drm_debugfs_exit();
+ #endif
+ 	drm_dev_unregister(drm);
+-	drm_kms_helper_poll_fini(drm);
+ #ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
+-	drm_fbdev_cma_fini(priv->fbdev);
++	meson_drm_fbdev_fini(drm);
+ #endif
++	drm_kms_helper_poll_fini(drm);
+ 	drm_mode_config_cleanup(drm);
+ 	drm_vblank_cleanup(drm);
+ #ifdef CONFIG_DRM_MESON_USE_ION
+diff --git a/drivers/amlogic/drm/meson_drv.h b/drivers/amlogic/drm/meson_drv.h
+index 61375f9c5014..7a46b521a794 100644
+--- a/drivers/amlogic/drm/meson_drv.h
++++ b/drivers/amlogic/drm/meson_drv.h
+@@ -41,6 +41,8 @@ struct meson_drm {
+ 	struct drm_device *drm;
+ 	struct drm_crtc *crtc;
+ 	struct drm_fbdev_cma *fbdev;
++	struct drm_fb_helper *fbdev_helper;
++	struct drm_gem_object *fbdev_bo;
+ 	struct drm_plane *primary_plane;
+ 	struct drm_plane *cursor_plane;
+ 
+-- 
+2.11.0
+

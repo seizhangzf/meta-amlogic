@@ -1,0 +1,40 @@
+From 3535561d00140dcaf74b50775a66aedeac6ebeb5 Mon Sep 17 00:00:00 2001
+From: Pengcheng Chen <pengcheng.chen@amlogic.com>
+Date: Wed, 13 Sep 2017 12:34:47 +0800
+Subject: [PATCH 06/16] osd: clean up deadcode
+
+PD#150472: driver defect clean up:
+#118
+#147
+
+Change-Id: I5eb405b884e05d42f238db43c9d3a16255f06d84
+Signed-off-by: Pengcheng Chen <pengcheng.chen@amlogic.com>
+---
+ drivers/amlogic/media/osd/osd_hw.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/media/osd/osd_hw.c b/drivers/amlogic/media/osd/osd_hw.c
+index fee822cdff8a..15972da92d3c 100644
+--- a/drivers/amlogic/media/osd/osd_hw.c
++++ b/drivers/amlogic/media/osd/osd_hw.c
+@@ -2574,7 +2574,7 @@ static void osd1_update_disp_freescale_enable(void)
+ 	hsc_ini_rcv_num = hf_bank_len;
+ 	vsc_ini_rcv_num = vf_bank_len;
+ 	hsc_ini_rpt_p0_num =
+-		(hf_bank_len / 2 - 1) > 0 ? (hf_bank_len / 2 - 1) : 0;
++		hf_bank_len / 2 - 1;
+ 	vsc_ini_rpt_p0_num =
+ 		(vf_bank_len / 2 - 1) > 0 ? (vf_bank_len / 2 - 1) : 0;
+ 
+@@ -2727,7 +2727,7 @@ static void osd2_update_disp_freescale_enable(void)
+ 	hsc_ini_rcv_num = hf_bank_len;
+ 	vsc_ini_rcv_num = vf_bank_len;
+ 	hsc_ini_rpt_p0_num =
+-		(hf_bank_len / 2 - 1) > 0 ? (hf_bank_len / 2 - 1) : 0;
++		hf_bank_len / 2 - 1;
+ 	vsc_ini_rpt_p0_num =
+ 		(vf_bank_len / 2 - 1) > 0 ? (vf_bank_len / 2 - 1) : 0;
+ 
+-- 
+2.11.0
+

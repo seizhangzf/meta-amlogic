@@ -1,0 +1,176 @@
+From 64fb25d6ce999bbbb4d4936afd5f3b8ad2fb7966 Mon Sep 17 00:00:00 2001
+From: Jiyu Yang <Jiyu.Yang@amlogic.com>
+Date: Fri, 1 Sep 2017 20:45:37 +0800
+Subject: [PATCH] sync: new fence api [2/7]
+
+PD#149525: sync: new fence api
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ MAINTAINERS                          |  4 ++
+ arch/arm64/configs/meson64_defconfig |  5 +--
+ drivers/dma-buf/sw_sync.c            | 79 ++++++++++++++++++++++++++++++++++++
+ include/linux/amlogic/aml_sync_api.h | 26 ++++++++++++
+ 4 files changed, 111 insertions(+), 3 deletions(-)
+ create mode 100644 include/linux/amlogic/aml_sync_api.h
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index aa55383f7ee7..cfe7fe6a4901 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -13564,6 +13564,10 @@ F:	drivers/amlogic/media/common/frame_sync/*
+ F:	drivers/amlogic/media/common/ge2d/*
+ F:	drivers/amlogic/media/common/vpu/*
+ 
++AMLOGIC sync
++M:  Sky Zhou <sky.zhou@amlogic.com>
++F: include/linux/amlogic/aml_sync_api.h
++
+ AMLOGIC VPU driver support
+ M: Evoke Zhang <evoke.zhang@amlogic.com>
+ F: drivers/amlogic/vpu/*
+diff --git a/arch/arm64/configs/meson64_defconfig b/arch/arm64/configs/meson64_defconfig
+index 6123b248426b..5185ac82bfa1 100644
+--- a/arch/arm64/configs/meson64_defconfig
++++ b/arch/arm64/configs/meson64_defconfig
+@@ -415,6 +415,8 @@ CONFIG_LEDS_TRIGGER_TIMER=y
+ CONFIG_LEDS_TRIGGER_ONESHOT=y
+ CONFIG_LEDS_TRIGGER_HEARTBEAT=y
+ CONFIG_LEDS_TRIGGER_BACKLIGHT=y
++CONFIG_SYNC_FILE=y
++CONFIG_SW_SYNC=y
+ CONFIG_UIO=y
+ CONFIG_UIO_PDRV_GENIRQ=y
+ CONFIG_VIRTIO_MMIO=y
+@@ -422,9 +424,6 @@ CONFIG_STAGING=y
+ CONFIG_ASHMEM=y
+ CONFIG_ANDROID_LOGGER=y
+ CONFIG_ANDROID_LOW_MEMORY_KILLER=y
+-CONFIG_SYNC=y
+-CONFIG_SW_SYNC=y
+-CONFIG_SW_SYNC_USER=y
+ CONFIG_PM_DEVFREQ=y
+ CONFIG_DEVFREQ_GOV_SIMPLE_ONDEMAND=y
+ CONFIG_DEVFREQ_GOV_PERFORMANCE=y
+diff --git a/drivers/dma-buf/sw_sync.c b/drivers/dma-buf/sw_sync.c
+index 0cb8d9d8784a..ab217e4ec559 100644
+--- a/drivers/dma-buf/sw_sync.c
++++ b/drivers/dma-buf/sw_sync.c
+@@ -381,3 +381,82 @@ const struct file_operations sw_sync_debugfs_fops = {
+ 	.unlocked_ioctl = sw_sync_ioctl,
+ 	.compat_ioctl	= sw_sync_ioctl,
+ };
++
++
++/*api for amlogic use.*/
++void *aml_sync_create_timeline(const char *tname)
++{
++	struct sync_timeline *timeline;
++
++	timeline = sync_timeline_create(tname);
++	return (void *)timeline;
++}
++EXPORT_SYMBOL(aml_sync_create_timeline);
++
++int aml_sync_create_fence(void *timeline, unsigned int value)
++{
++	struct sync_timeline *tl = (struct sync_timeline *)timeline;
++	int fd;
++	int err;
++	struct sync_pt *pt;
++	struct sync_file *sync_file;
++
++	if (tl == NULL)
++		return -EPERM;
++
++	fd =  get_unused_fd_flags(O_CLOEXEC);
++	if (fd < 0)
++		return -EBADF;
++
++	pt = sync_pt_create(tl, sizeof(*pt), value);
++	if (!pt) {
++		err = -ENOMEM;
++		goto err;
++	}
++
++	sync_file = sync_file_create(&pt->base);
++	fence_put(&pt->base);
++	if (!sync_file) {
++		err = -ENOMEM;
++		goto err;
++	}
++
++	fd_install(fd, sync_file->file);
++	return fd;
++
++err:
++	put_unused_fd(fd);
++	return err;
++}
++EXPORT_SYMBOL(aml_sync_create_fence);
++
++void aml_sync_inc_timeline(void *timeline, unsigned int value)
++{
++	struct sync_timeline *tl = (struct sync_timeline *)timeline;
++
++	if (tl == NULL)
++		return;
++	sync_timeline_signal(tl, value);
++}
++EXPORT_SYMBOL(aml_sync_inc_timeline);
++
++struct fence *aml_sync_get_fence(int syncfile_fd)
++{
++	return sync_file_get_fence(syncfile_fd);
++}
++EXPORT_SYMBOL(aml_sync_get_fence);
++
++int aml_sync_wait_fence(struct fence *fence, long timeout)
++{
++	long ret;
++
++	ret = fence_wait_timeout(fence, false, timeout);
++	return ret;
++}
++EXPORT_SYMBOL(aml_sync_wait_fence);
++
++void aml_sync_put_fence(struct fence *fence)
++{
++	fence_put(fence);
++}
++EXPORT_SYMBOL(aml_sync_put_fence);
+diff --git a/include/linux/amlogic/aml_sync_api.h b/include/linux/amlogic/aml_sync_api.h
+new file mode 100644
+index 000000000000..8c67e58f4a00
+--- /dev/null
++++ b/include/linux/amlogic/aml_sync_api.h
+@@ -0,0 +1,26 @@
++/*
++ * include/linux/amlogic/aml_sync_api.h
++ *
++ * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ */
++
++struct fence;
++
++void *aml_sync_create_timeline(const char *tname);
++int aml_sync_create_fence(void *timeline, unsigned int value);
++int aml_sync_inc_timeline(void *timeline, unsigned int value);
++
++struct fence *aml_sync_get_fence(int syncfile_fd);
++int aml_sync_wait_fence(struct fence *syncfile, long timeout);
++void aml_sync_put_fence(struct fence *syncfile);
+-- 
+2.11.0
+

@@ -1,0 +1,29 @@
+From 731c31983433b1f3f74850f5c570ccba3f7894e2 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Fri, 3 Nov 2017 15:12:55 +0800
+Subject: [PATCH] for wpe video playing
+
+this is temp fix. Wait for real fix
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ drivers/amlogic/drm/am_meson_plane.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/drm/am_meson_plane.c b/drivers/amlogic/drm/am_meson_plane.c
+index c95761369198..5ed042996aa0 100644
+--- a/drivers/amlogic/drm/am_meson_plane.c
++++ b/drivers/amlogic/drm/am_meson_plane.c
+@@ -90,7 +90,8 @@ void am_osd_do_display(
+ 
+ 	switch (fb->pixel_format) {
+ 	case DRM_FORMAT_XRGB8888:
+-		format = COLOR_INDEX_32_XRGB;
++		//format = COLOR_INDEX_32_XRGB;
++		format = COLOR_INDEX_32_ARGB;
+ 		break;
+ 	case DRM_FORMAT_XBGR8888:
+ 		format = COLOR_INDEX_32_XBGR;
+-- 
+2.11.0
+

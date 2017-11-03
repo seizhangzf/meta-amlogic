@@ -1,0 +1,36 @@
+From 93f5c54df69f634ae07d83cce5638e6698e8afde Mon Sep 17 00:00:00 2001
+From: Jiyu Yang <Jiyu.Yang@amlogic.com>
+Date: Mon, 11 Sep 2017 19:18:26 +0800
+Subject: [PATCH 05/16] osd: use the old fence close way [3/3]
+
+PD#149525: osd use the old fence close way
+
+Change-Id: I9473e4820d2cbf42c623ee6c563163b654c7fe85
+Signed-off-by: Jiyu Yang <Jiyu.Yang@amlogic.com>
+---
+ drivers/amlogic/media/osd/osd_hw.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/amlogic/media/osd/osd_hw.c b/drivers/amlogic/media/osd/osd_hw.c
+index 7daa60df1036..fee822cdff8a 100644
+--- a/drivers/amlogic/media/osd/osd_hw.c
++++ b/drivers/amlogic/media/osd/osd_hw.c
+@@ -428,6 +428,7 @@ int osd_sync_request(u32 index, u32 yres, u32 xoffset, u32 yoffset,
+ 	list_add_tail(&fence_map->list, &post_fence_list);
+ 	mutex_unlock(&post_fence_list_lock);
+ 	kthread_queue_work(&buffer_toggle_worker, &buffer_toggle_work);
++	__close_fd(current->files, in_fence_fd);
+ 	return  out_fence_fd;
+ }
+ 
+@@ -481,6 +482,7 @@ int osd_sync_request_render(u32 index, u32 yres,
+ 	mutex_unlock(&post_fence_list_lock);
+ 	kthread_queue_work(&buffer_toggle_worker, &buffer_toggle_work);
+ 	request->out_fen_fd = out_fence_fd;
++	__close_fd(current->files, in_fence_fd);
+ 	return  out_fence_fd;
+ }
+ 
+-- 
+2.11.0
+
