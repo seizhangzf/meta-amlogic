@@ -15,7 +15,7 @@ RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "eb5e0f9d406bf7196af290884e23a04319139b61"
+SRCREV = "5d40aacd791dd786af185f02ec15f09cb4366f5c"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;nobranch=1"
 VERSION = "r7p0"
 
@@ -35,6 +35,8 @@ do_install() {
     install -m 0755 ${S}/include/KHR/*.h ${D}${includedir}/KHR/
     # wayland headers
     install -m 0755 ${S}/include/EGL_platform/platform_wayland/*.h ${D}${includedir}/EGL
+    # gbm headers
+    install -m 0755 ${S}/include/EGL_platform/platform_wayland/gbm/gbm.h ${D}${includedir}
 
     # Copy the .pc files
     install -d -m 0755 ${D}${libdir}/pkgconfig
@@ -43,6 +45,8 @@ do_install() {
     install -m 0644 ${S}/pkgconfig/eglfs.pc ${D}${libdir}/pkgconfig/
     # wayland .pc
     install -m 0644 ${S}/pkgconfig/wayland-egl.pc ${D}${libdir}/pkgconfig/
+    # gbm.pc
+    install -m 0644 ${S}/pkgconfig/gbm/gbm.pc ${D}${libdir}/pkgconfig/
 
     install -d ${D}${libdir}
     install -d ${D}${includedir}
