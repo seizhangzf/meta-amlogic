@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LOCAL_DIR=$(pwd)
-BUILD_DIR="build"
+BUILD_DIR?="build"
 
 DEFCONFIG_ARRAY=("mesongxl_p230"
 				 "mesongxl_p230_32b"
