@@ -1,7 +1,9 @@
 #!/bin/sh
 
 LOCAL_DIR=$(pwd)
-BUILD_DIR?="build"
+if [ -z $BUILD_DIR ]; then
+	BUILD_DIR="build"
+fi
 
 DEFCONFIG_ARRAY=("mesongxl_p230"
 				 "mesongxl_p230_32b"
@@ -111,7 +113,7 @@ function lunch()
 		echo "==========================================="
 		echo  
 		echo "MACHINE=${TARGET_MACHINE}"
-		echo "OUTPUT_DIR=$LOCAL_DIR/${BUILD_DIR}"
+		echo "OUTPUT_DIR=${BUILD_DIR}"
 		echo
 		echo "==========================================="
 	fi
