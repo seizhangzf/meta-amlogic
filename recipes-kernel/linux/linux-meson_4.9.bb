@@ -40,10 +40,10 @@ DRM_SRC = "file://0012-Revert-android-port-fence-driver-from-kernel-4.4-1-7.patc
            file://0030-drm-add-fbdev-emulate-implement.patch \
            file://0031-drm-prune-drm-implement-if-using-osd.patch \
            file://0032-for-wpe-video-playing.patch \
-           file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch \
            "
 
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
+SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
 
 MIRRORS_prepend += "git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh git://git.myamlogic.com/kernel/common.git; \n"
 
