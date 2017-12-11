@@ -1,7 +1,7 @@
 From 2b0cf59211639185aee49a3aa8a7f5bfd877caee Mon Sep 17 00:00:00 2001
 From: Mingyen Hung <mingyen.hung@amlogic.com>
 Date: Thu, 2 Nov 2017 18:39:36 +0800
-Subject: [PATCH] Modify gxl_p230_2g.dts for DRM backend
+Subject: [PATCH] Modify gxl_p230_2g.dts and gxl_p212_2g.dts for DRM backend
 
 Make most part of dts the same as that of p212
 
@@ -70,3 +70,16 @@ index 5e8558f95878..131bae4c7c24 100644
 -- 
 2.11.0
 
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+index d032e619dc09..41430f320203 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+@@ -694,7 +694,7 @@
+ 	meson-fb {
+ 		compatible = "amlogic, meson-fb";
+ 		dev_name = "meson-fb";
+-		status = "okay";
++		status = "disable";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";

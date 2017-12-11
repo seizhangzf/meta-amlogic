@@ -35,7 +35,7 @@ DRM_SRC = "file://0012-Revert-android-port-fence-driver-from-kernel-4.4-1-7.patc
            file://0025-Partial-merge-of-afcba67e2683cff16cfb45a87f66dc4ef0f.patch \
            file://0026-Merge-PATCH-drm-add-amlogic-KMS-implement.patch \
            file://0027-Merge-64fb25d6ce999bbbb4d4936afd5f3b8ad2fb7966.patch \
-           file://0028-Modify-gxl_p230_2g.dts-for-DRM-backend.patch \
+           file://0028-Modify-gxl_p230_2g.dts-and-gxl_p212_2g.dts-for-DRM-backend.patch \
            file://0029-osd_drm-fix-osd-drm-blank-function-not-work.patch \
            file://0030-drm-add-fbdev-emulate-implement.patch \
            file://0031-drm-prune-drm-implement-if-using-osd.patch \
