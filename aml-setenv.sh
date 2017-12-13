@@ -14,7 +14,18 @@ DEFCONFIG_ARRAY=("mesongxl_p230"
 				 "mesongxl_p230_wayland_drm"
 				 "mesongxl_p230_wayland_drm_32b"
 				 "mesongxl_p230_wayland_drm_playready"
-				 "mesongxl_p230_wayland_drm_playready_32b")
+				 "mesongxl_p230_wayland_drm_playready_32b"
+				 "mesongxl_p212"
+				 "mesongxl_p212_32b"
+				 "mesongxl_p212_wayland_fbdev"
+				 "mesongxl_p212_wayland_fbdev_32b"
+				 "mesongxl_p212_wayland_fbdev_playready"
+				 "mesongxl_p212_wayland_fbdev_playready_32b"
+				 "mesongxl_p212_wayland_drm"
+				 "mesongxl_p212_wayland_drm_32b"
+				 "mesongxl_p212_wayland_drm_playready"
+				 "mesongxl_p212_wayland_drm_playready_32b"
+				 )
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
 
