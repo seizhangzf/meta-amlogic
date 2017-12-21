@@ -7,6 +7,7 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;nobranch=1"
 SRC_URI += "file://COPYING.GPL"
 SRC_URI += "file://0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch"
+SRC_URI += "file://0002-parser-for-tvp.patch"
 
 SRCREV = "8cbee189679f5c755e1e8a1fabd24cd2159cc7ae"
 
@@ -19,6 +20,7 @@ MEDIA_MODULES_UCODE_BIN = "${S}/firmware/video_ucode.bin"
 do_patch() {
     cd ${S}
     git apply -p1 < ../0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch
+    git apply -p1 < ../0002-parser-for-tvp.patch
 }
 
 do_install() {
