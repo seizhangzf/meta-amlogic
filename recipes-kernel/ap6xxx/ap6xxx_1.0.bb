@@ -3,9 +3,9 @@ inherit module
 SUMMARY = "Broadcom AP6xxx driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;branch=m-amlogic-openlinux-20160907;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;nobranch=1"
 
-SRCREV = "e410b9e03bb55733f5cf202db08a78e32afbb48b"
+SRCREV = "a6bb23fd533f71ed2360fc1e38d5a20f172c2b38"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=ssh; \n"
 
@@ -18,11 +18,11 @@ do_install() {
     WIFIDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/broadcom/wifi
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${WIFIDIR}
-    install -m 0666 ${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn/dhd.ko ${WIFIDIR}
+    install -m 0666 ${S}/bcmdhd.1.363.59.144.x.cn/dhd.ko ${WIFIDIR}
 }
 
 do_compile_append() {
-    oe_runmake -C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules
+    oe_runmake -C ${STAGING_KERNEL_DIR} M="${S}/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules
 }
 
 FILES_${PN} = "dhd.ko"
@@ -31,4 +31,4 @@ DEPENDS += ""
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules'
+EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/bcmdhd.1.363.59.144.x.cn" ${AP6XXX_KCONFIGS} modules'

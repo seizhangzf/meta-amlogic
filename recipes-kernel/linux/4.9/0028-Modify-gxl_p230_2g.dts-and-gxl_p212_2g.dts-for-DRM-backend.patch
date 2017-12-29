@@ -1,85 +1,49 @@
-From 2b0cf59211639185aee49a3aa8a7f5bfd877caee Mon Sep 17 00:00:00 2001
-From: Mingyen Hung <mingyen.hung@amlogic.com>
-Date: Thu, 2 Nov 2017 18:39:36 +0800
+From 4f52d718ba1631389c90f7900603d7465148f47b Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 28 Dec 2017 17:39:33 +0800
 Subject: [PATCH] Modify gxl_p230_2g.dts and gxl_p212_2g.dts for DRM backend
 
 Make most part of dts the same as that of p212
-
-Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
 ---
- arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 20 ++++++--------------
- 1 file changed, 6 insertions(+), 14 deletions(-)
+ arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts | 2 +-
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-index 5e8558f95878..131bae4c7c24 100644
---- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-+++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-@@ -64,14 +64,13 @@
- 			reg = <0x0 0x05300000 0x0 0x2000000>;
- 			no-map;
- 		};
--		logo_reserved:linux,meson-fb {
-+		ion_reserved:linux,ion-dev {
- 			compatible = "shared-dma-pool";
- 			reusable;
--			size = <0x0 0x800000>;
-+			size = <0x0 0x8000000>;
- 			alignment = <0x0 0x400000>;
--			alloc-ranges = <0x0 0x7f800000 0x0 0x800000>;
- 		};
--		//don't put other dts in front of logo_reserved
-+		//don't put other dts in front of fb_reserved
-  
- 		//di_reserved:linux,di {
- 		//	compatible = "amlogic, di-mem";
-@@ -86,13 +85,6 @@
- 			size = <0x0 0x2000000>;
- 			alignment = <0x0 0x400000>;
- 		};
--		ion_reserved:linux,ion-dev {
--			compatible = "shared-dma-pool";
--			reusable;
--			size = <0x0 0x2000000>;
--			alignment = <0x0 0x400000>;
--		};
--
- 		/*  vdin0 CMA pool */
- 		//vdin0_cma_reserved:linux,vdin0_cma {
- 		//	compatible = "shared-dma-pool";
-@@ -119,7 +111,8 @@
- 		codec_mm_cma:linux,codec_mm_cma {
- 			compatible = "shared-dma-pool";
- 			reusable;
--			size = <0x0 0x10400000>;
-+			/* ion_codec_mm max can alloc size 80M*/
-+			size = <0x0 0x13400000>;
- 			alignment = <0x0 0x400000>;
- 			linux,contiguous-region;
- 		};
-@@ -684,9 +677,8 @@
- 
- 	meson-fb {
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+index 13da1eed2580..afccc3ee51f8 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+@@ -727,7 +727,7 @@
  		compatible = "amlogic, meson-fb";
--		memory-region = <&logo_reserved>;
+ 		memory-region = <&logo_reserved>;
  		dev_name = "meson-fb";
 -		status = "okay";
-+		status = "disable";
++		status = "disabled";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+index 33321aaac223..8e325b0a6935 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+@@ -89,7 +89,7 @@
+ 		ion_reserved:linux,ion-dev {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x0 0x5C00000>;
++			size = <0x0 0x8000000>;
+ 			alignment = <0x0 0x400000>;
+ 		};
+ 
+@@ -702,7 +702,7 @@
+ 		compatible = "amlogic, meson-fb";
+ 		memory-region = <&logo_reserved>;
+ 		dev_name = "meson-fb";
+-		status = "okay";
++		status = "disabled";
  		interrupts = <0 3 1
  			0 89 1>;
  		interrupt-names = "viu-vsync", "rdma";
 -- 
 2.11.0
 
-diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-index d032e619dc09..41430f320203 100644
---- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-+++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-@@ -694,7 +694,7 @@
- 	meson-fb {
- 		compatible = "amlogic, meson-fb";
- 		dev_name = "meson-fb";
--		status = "okay";
-+		status = "disable";
- 		interrupts = <0 3 1
- 			0 89 1>;
- 		interrupt-names = "viu-vsync", "rdma";

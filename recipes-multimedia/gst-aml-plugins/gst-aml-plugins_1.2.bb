@@ -9,10 +9,9 @@ SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstre
 
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e431e272f5b8a6a4f948a910812f235e"
-SRCREV="408efb9f18ef6de911994c515e255ae5f3b31cfb"
-TARGET_CFLAGS += "-DSUPPORT_YOCTO"
+SRCREV="a57f2302ac76c0cdecd8922d8b0b0696f985fd14"
 
-S = "${WORKDIR}/git/gst-aml-plugins-1.0"
+S = "${WORKDIR}/git/gst-aml-plugins-1.2"
 
 EXTRA_OEMAKE = "CROSS=${TARGET_PREFIX} TARGET_DIR=${STAGING_DIR_TARGET} STAGING_DIR=${D} DESTDIR=${D}"
 inherit autotools pkgconfig distro_features_check

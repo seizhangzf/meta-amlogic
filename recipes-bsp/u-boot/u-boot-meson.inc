@@ -43,6 +43,7 @@ do_compile () {
 		echo ${UBOOT_LOCALVERSION} > ${S}/.scmversion
 	fi
 
+	cd ${S}
 	oe_runmake distclean
 	oe_runmake ${UBOOT_MACHINE}
 	oe_runmake

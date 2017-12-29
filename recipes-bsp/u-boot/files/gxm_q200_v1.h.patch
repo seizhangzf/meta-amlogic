@@ -1,8 +1,8 @@
-Index: git/board/amlogic/configs/gxm_q200_v1.h
+Index: uboot/board/amlogic/configs/gxm_q200_v1.h
 ===================================================================
---- git.orig/board/amlogic/configs/gxm_q200_v1.h	2017-09-13 15:41:43.197409402 +0800
-+++ git/board/amlogic/configs/gxm_q200_v1.h	2017-09-13 15:42:02.397409762 +0800
-@@ -82,7 +82,7 @@
+--- uboot.orig/board/amlogic/configs/gxm_q200_v1.h	2017-12-29 13:48:49.558720515 +0800
++++ uboot/board/amlogic/configs/gxm_q200_v1.h	2017-12-29 13:49:14.334720980 +0800
+@@ -86,7 +86,7 @@
  #define CONFIG_SYS_MAXARGS  64
  #define CONFIG_EXTRA_ENV_SETTINGS \
          "firstboot=0\0"\
@@ -11,7 +11,7 @@ Index: git/board/amlogic/configs/gxm_q200_v1.h
          "jtag=apao\0"\
          "loadaddr=1080000\0"\
          "outputmode=1080p60hz\0" \
-@@ -113,7 +113,7 @@
+@@ -117,7 +117,7 @@
          "active_slot=_a\0"\
          "boot_part=boot\0"\
          "initargs="\
@@ -20,29 +20,28 @@ Index: git/board/amlogic/configs/gxm_q200_v1.h
              "\0"\
          "upgrade_check="\
              "echo upgrade_step=${upgrade_step}; "\
-@@ -121,11 +121,17 @@
-                 "run init_display; run storeargs; run update;"\
+@@ -126,11 +126,19 @@
              "else fi;"\
              "\0"\
--    "storeargs="\
+     "storeargs="\
 -            "setenv bootargs ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${cecconfig} cvbsdrv=${cvbs_drv}  pq=${pq} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
--	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
-+        "storeargs="\
-+            "setenv bootargs root=/dev/system rootfstype=ext4 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${cecconfig} cvbsdrv=${cvbs_drv}  pq=${pq} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
++            "setenv bootargs root=/dev/system rootfstype=ext4 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv}  pq=${pq} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
 +			"setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+ 	"setenv bootargs ${bootargs} androidboot.hardware=amlogic;"\
              "run cmdline_keys;"\
--            "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
-+            "\0"\
+             "setenv bootargs ${bootargs} androidboot.veritymode=enforcing androidboot.slot_suffix=${active_slot};"\
+             "\0"\
 +        "sdcardargs="\
-+            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=ext2 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
++            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=ext2 ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv}  pq=${pq} androidboot.firstboot=${firstboot} jtag=${jtag}; "\
 +            "run cmdline_keys;"\
 +            "\0"\
 +        "bootupdateargs="\
-+            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=vfat ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv} androidboot.firstboot=${firstboot} jtag=${jtag} firmware=rootfs.tar.gz;"\
-             "\0"\
++            "setenv bootargs root=/dev/mmcblk1p1 rootfstype=vfat ${initargs} androidboot.selinux=${EnableSelinux} logo=${display_layer},loaded,${fb_addr},${outputmode} maxcpus=${maxcpus} vout=${outputmode},enable hdmimode=${hdmimode} cvbsmode=${cvbsmode} hdmitx=${hdmimode} cvbsdrv=${cvbs_drv}  pq=${pq} androidboot.firstboot=${firstboot} jtag=${jtag} firmware=rootfs.tar.gz;"\
++            "\0"\
          "switch_bootmode="\
              "get_rebootmode;"\
-@@ -139,6 +145,12 @@
+             "if test ${reboot_mode} = factory_reset; then "\
+@@ -143,6 +151,12 @@
                  "fastboot;"\
              "fi;fi;fi;fi;"\
              "\0" \
@@ -55,7 +54,7 @@ Index: git/board/amlogic/configs/gxm_q200_v1.h
          "storeboot="\
              "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
              "run update;"\
-@@ -451,6 +463,8 @@
+@@ -458,6 +472,8 @@
  #define CONFIG_FS_FAT 1
  #define CONFIG_FS_EXT4 1
  #define CONFIG_LZO 1
