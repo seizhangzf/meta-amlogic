@@ -1,0 +1,55 @@
+From ff6d4269ddc531d880283b2757fb2927949fdead Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Mon, 13 Nov 2017 17:46:48 +0800
+Subject: [PATCH] PD138385, fix yocto alsa hw set issue
+
+Author: Yvonne Chen <yvonne.chen@amlogic.com>
+Date:   Tue Jan 17 13:51:26 2017 +0800
+---
+ amadec/audio_out/alsa-out.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/amadec/audio_out/alsa-out.c b/amadec/audio_out/alsa-out.c
+index 564ef0b..6a5fee8 100644
+--- a/amadec/audio_out/alsa-out.c
++++ b/amadec/audio_out/alsa-out.c
+@@ -168,6 +168,12 @@ static int set_params(alsa_param_t *alsa_params)
+     snd_pcm_uframes_t start_threshold, stop_threshold;
+     snd_pcm_hw_params_alloca(&hwparams);
+     snd_pcm_sw_params_alloca(&swparams);
++    snd_pcm_info_t *info;
++    static snd_output_t *log;
++
++    snd_pcm_info_alloca(&info);
++    err = snd_output_stdio_attach(&log, stderr, 0);
++
+ 
+     err = snd_pcm_hw_params_any(alsa_params->handle, hwparams);
+     if (err < 0) {
+@@ -201,7 +207,7 @@ static int set_params(alsa_param_t *alsa_params)
+     }
+ 
+     rate = alsa_params->rate;
+-    err = snd_pcm_hw_params_set_rate_near(alsa_params->handle, hwparams, &alsa_params->rate, 0);
++    err = snd_pcm_hw_params_set_rate(alsa_params->handle, hwparams, alsa_params->rate, 0);
+     assert(err >= 0);
+ #if 0
+     err = snd_pcm_hw_params_get_buffer_time_max(hwparams,  &buffer_time, 0);
+@@ -231,12 +237,12 @@ static int set_params(alsa_param_t *alsa_params)
+         set_sysfs_type("/sys/class/amhdmitx/amhdmitx0/aud_output_chs", "2:1");
+     }
+ 
+-    err = snd_pcm_hw_params_set_buffer_size_near(alsa_params->handle, hwparams, &bufsize);
++    err = snd_pcm_hw_params_set_buffer_size(alsa_params->handle, hwparams,bufsize);
+     if (err < 0) {
+         adec_print("Unable to set	buffer	size \n");
+         return err;
+     }
+-    err = snd_pcm_hw_params_set_period_size_near(alsa_params->handle, hwparams, &chunk_size, NULL);
++    err = snd_pcm_hw_params_set_period_size(alsa_params->handle, hwparams, chunk_size, NULL);
+     if (err < 0) {
+         adec_print("Unable to set period size \n");
+         return err;
+-- 
+2.11.0
+

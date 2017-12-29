@@ -1,0 +1,573 @@
+From 75a2129287bb51b65df9888968a9bf10876366b4 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Tue, 14 Nov 2017 15:20:42 +0800
+Subject: [PATCH] fix libplayer compilation on yocto
+
+---
+ .gitignore                                     |  4 ++++
+ amadec/Makefile                                |  2 +-
+ amavutils/Makefile                             |  2 +-
+ amcodec/Makefile                               | 22 +++++++++++-----------
+ amcodec/rules.mk                               |  2 +-
+ amffmpeg/libavutil/arm/timer.h                 |  2 +-
+ amplayer/Makefile.mk                           | 26 +++++++++++++-------------
+ amplayer/rules.mk                              |  4 ++--
+ audio_codec/libamffmpegdec/Makefile            | 15 +++++++++------
+ audio_codec/libamr/Makefile                    | 11 +++++++----
+ audio_codec/libape/Makefile                    | 11 +++++++----
+ audio_codec/libcook/Makefile                   | 11 +++++++----
+ audio_codec/libfaad/Makefile                   | 11 +++++++----
+ audio_codec/libflac/Makefile                   | 11 +++++++----
+ audio_codec/liblpcm/Makefile                   | 11 +++++++----
+ audio_codec/libmad/Makefile                    | 13 ++++++++-----
+ audio_codec/libpcm/Makefile                    | 13 ++++++++-----
+ audio_codec/libraac/Makefile                   | 12 ++++++++----
+ bootplayer/Makefile                            |  4 ++--
+ bootplayer/bootplayer.c                        |  1 +
+ examples/Makefile                              |  2 +-
+ third_parts/libcurl-ffmpeg/curl_base/Makefile  |  2 +-
+ third_parts/libcurl-ffmpeg/curl_binds/Makefile |  2 +-
+ third_parts/libdash/ffmpeg_binds/Makefile      |  4 ++--
+ third_parts/libdash/libdash/source/Makefile    |  2 +-
+ 25 files changed, 118 insertions(+), 82 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index b816fe9..5518579 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,3 +1,7 @@
+ amadec/firmware/*.checksum
+ amadec/firmware-m6/*.checksum
+ amadec/firmware-m8/*.checksum
++*.d
++*.o
++*.so*
++*.a
+diff --git a/amadec/Makefile b/amadec/Makefile
+index cf71587..66079f5 100644
+--- a/amadec/Makefile
++++ b/amadec/Makefile
+@@ -10,7 +10,7 @@ TARGET=libamadec.so
+ 
+ INSTALL_DIR=$(LIB_DIR)
+ 
+-LDFLAGS += -shared -lpthread -lm -lasound -lrt
++CFLAGS += -shared -lpthread -lm -lasound -lrt
+ 
+ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+diff --git a/amavutils/Makefile b/amavutils/Makefile
+index 8870b65..521d907 100755
+--- a/amavutils/Makefile
++++ b/amavutils/Makefile
+@@ -8,7 +8,7 @@ TARGET=libamavutils.so
+ 
+ INSTALL_DIR=${LIB_DIR}
+ 
+-LDFLAGS += -shared -lpthread -lm -lrt
++CFLAGS += -shared -lpthread -lm -lrt
+ 
+ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+diff --git a/amcodec/Makefile b/amcodec/Makefile
+index 3540a86..744e974 100755
+--- a/amcodec/Makefile
++++ b/amcodec/Makefile
+@@ -2,19 +2,19 @@ PREFIX=$(LIBPLAYER_STAGING_DIR)/usr
+ 
+ LIB_DIR?=$(PREFIX)/lib
+ HEADERS_DIR?=$(PREFIX)/include
+-CROSS=$(CC:%gcc=%)
++#CROSS=$(CC:%gcc=%)
+ QUITE_CMD=1
+ 
+ INSTALL_FLAGS=-m 755
+ 
+-CPP=$(CROSS)g++
+-AS=$(CROSS)as
+-AR=$(CROSS)ar
+-LD=$(CROSS)ld
+-NM=$(CROSS)nm
+-STRIP=$(CROSS)strip
+-OBJCOPY=$(CROSS)objcopy
+-export CC CPP AS AR LD NM STRIP OBJCOPY
++#CPP=$(CROSS)g++
++#AS=$(CROSS)as
++#AR=$(CROSS)ar
++#LD=$(CROSS)ld
++#NM=$(CROSS)nm
++#STRIP=$(CROSS)strip
++#OBJCOPY=$(CROSS)objcopy
++#export CC CPP AS AR LD NM STRIP OBJCOPY
+ 
+ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+@@ -27,12 +27,12 @@ TARGET?=libamcodec.so
+ 
+ DIRS=audio_ctl/  codec/
+ 
+-LDFLAGS=  -O2  -L$(LIB_DIR)  -lm -lc  -shared -Wl,--shared -Wl,-soname,$(TARGET)$(LIB_VERSION)
++CFLAGS+=  -O2  -L$(LIB_DIR)  -lm -lc  -shared -Wl,--shared -Wl,-soname,$(TARGET)$(LIB_VERSION)
+ 
+ #INCLUDE=$(DIRS:%/=-I$(SRC)/%/include)
+ INCLUDE=${SRCTREE}/include/
+ #CFLAGS=-O0  -gdwarf-2  -g
+-CFLAGS=-O2 -g  -I$(SRC)/include  -I${SRCTREE}/audio_ctl -I${SRCTREE}/amsub_ctl -I${SRCTREE}/codec -I${SRCTREE}/../amadec/include -I${SRCTREE}/codec/yuvplayer -fPIC
++CFLAGS+=-O2 -g  -I$(SRC)/include  -I${SRCTREE}/audio_ctl -I${SRCTREE}/amsub_ctl -I${SRCTREE}/codec -I${SRCTREE}/../amadec/include -L${SRCTREE}/../amadec -lamadec -I${SRCTREE}/codec/yuvplayer -fPIC -I${SRCTREE}/../amavutils/include \
+ 
+ 
+ 
+diff --git a/amcodec/rules.mk b/amcodec/rules.mk
+index d54d451..2fe250a 100755
+--- a/amcodec/rules.mk
++++ b/amcodec/rules.mk
+@@ -18,7 +18,7 @@ ar_mk=$(Q)echo "LD $(1)";\
+ 
+ 
+ ld_mk=$(Q)echo "LD $(1) $(2)  $(3)";\
+-		$(CC) $(LDFLAGS)  \
++		$(CC) $(CFLAGS)  \
+ 		$(2:%-dir=%/build-in.o) \
+ 		$(3:%-dir=%/build-in.o) \
+ 		-o $(1) 	
+diff --git a/amffmpeg/libavutil/arm/timer.h b/amffmpeg/libavutil/arm/timer.h
+index 5e8bc8e..21a489a 100644
+--- a/amffmpeg/libavutil/arm/timer.h
++++ b/amffmpeg/libavutil/arm/timer.h
+@@ -24,7 +24,7 @@
+ #include <stdint.h>
+ #include "config.h"
+ 
+-#if HAVE_INLINE_ASM && defined(__ARM_ARCH_7A__)
++#if HAVE_INLINE_ASM && (defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_8A__))
+ 
+ #define AV_READ_TIME read_time
+ 
+diff --git a/amplayer/Makefile.mk b/amplayer/Makefile.mk
+index 2328203..6624a66 100755
+--- a/amplayer/Makefile.mk
++++ b/amplayer/Makefile.mk
+@@ -1,20 +1,20 @@
+ PREFIX=$(LIBPLAYER_STAGING_DIR)/usr
+ ROOTFS?=$(PREFIX)
+ 
+-CROSS=$(CC:%gcc=%)
++#CROSS=$(CC:%gcc=%)
+ 
+ QUITE_CMD?=no
+ 
+ INSTALL_FLAGS=-m 755
+ 
+-CPP=$(CROSS)g++
+-AS=$(CROSS)as
+-AR=$(CROSS)ar
+-LD=$(CROSS)ld
+-NM=$(CROSS)nm
+-STRIP=$(CROSS)strip
+-OBJCOPY=$(CROSS)objcopy
+-export CC CPP AS AR LD NM STRIP OBJCOPY
++#CPP=$(CROSS)g++
++#AS=$(CROSS)as
++#AR=$(CROSS)ar
++#LD=$(CROSS)ld
++#NM=$(CROSS)nm
++#STRIP=$(CROSS)strip
++#OBJCOPY=$(CROSS)objcopy
++#export CC CPP AS AR LD NM STRIP OBJCOPY
+ 
+ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+@@ -30,11 +30,11 @@ TARGET?=libamplayer.so
+ 
+ TARGET_IS_LIB=$(TARGET:%so=yes)
+ 
+-LDFLAGS+= -L$(INSTALL_DIR) -lavutil -lavformat -lavcodec -lm  -lpthread -L$(STAGING_DIR)/usr/lib/libplayer -lamavutils
++CFLAGS+= -L$(INSTALL_DIR) -L$(PREFIX)/lib -lavutil -lavformat -lavcodec -lm  -lpthread -L$(STAGING_DIR)/usr/lib/libplayer -lamavutils
+ 
+ INSTALL_DIR?=$(PREFIX)/lib/libplayer
+-LDFLAGS+=-shared 
+-CFLAGS=$(DIRS:%/=-I$(SRC)/%/include) 
++CFLAGS+=-shared 
++CFLAGS+=$(DIRS:%/=-I$(SRC)/%/include) 
+ 
+ ifeq ($(TARGET),libamplayer.so)
+     DIRS=player/
+@@ -44,7 +44,7 @@ else
+ endif
+ 
+ 
+-CFLAGS+= -I${SRCTREE}/../amffmpeg -I${SRCTREE}/../amcodec/include -I${SRCTREE}/../amadec/include -I${SRCTREE}/player/system
++CFLAGS+= -I${SRCTREE}/../amffmpeg -I${SRCTREE}/../amcodec/include -I${SRCTREE}/../amadec/include -I${SRCTREE}/player/system -I${SRCTREE}/../amavutils/include
+ CFLAGS+= -fPIC -g
+ target_all=  $(TARGET)
+ 
+diff --git a/amplayer/rules.mk b/amplayer/rules.mk
+index d80fb49..1e30f0b 100755
+--- a/amplayer/rules.mk
++++ b/amplayer/rules.mk
+@@ -17,8 +17,8 @@ ar_mk=$(Q)echo "LD $(1)";\
+ 		$(LD) -r -o build-in.o $(2:%-dir=%/build-in.o)
+ 
+ 
+-ld_mk=$(Q)echo "LD $(1) $(2)  $(3)";\
+-		$(CC)   	$(LDFLAGS)\
++ld_mk=$(Q)echo "CCLD $(1) $(2)  $(3)";\
++		$(CC)   	$(CFLAGS)\
+ 		$(2:%-dir=%/build-in.o) \
+ 		$(3:%-dir=%/build-in.o) \
+ 		-o $(1) 	
+diff --git a/audio_codec/libamffmpegdec/Makefile b/audio_codec/libamffmpegdec/Makefile
+index 7a27d30..ed88630 100755
+--- a/audio_codec/libamffmpegdec/Makefile
++++ b/audio_codec/libamffmpegdec/Makefile
+@@ -4,19 +4,22 @@ LIB_DIR?=$(M_PREFIX)/lib
+ INSTALL_DIR	= $(LIB_DIR)/libplayer
+ SRC_PATH		= ./
+ SRC_FILES		=  $(wildcard $(SRC_PATH)*.c)
+-EXPORT_INCLUDE_FILES	= $(wildcard $(SRC_PATH)*.h)  $(SRC_PATH)/../../amadec/include $(SRC_PATH)/../../amadec/
++EXPORT_INCLUDE_FILES	= $(wildcard $(SRC_PATH)*.h)  $(SRC_PATH)/../../amadec/include $(SRC_PATH)/../../amadec/ 
+  
+ USING_LIBS		= 
+-USING_INCLUDES_PATH	= 
++USING_INCLUDES_PATH	= -I../../amadec/include -I../../amadec/ -I../../amffmpeg/
+ 
+ USING_LIBS_PATH		= 
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libamr/Makefile b/audio_codec/libamr/Makefile
+index e29e19f..f422f6a 100755
+--- a/audio_codec/libamr/Makefile
++++ b/audio_codec/libamr/Makefile
+@@ -13,10 +13,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libape/Makefile b/audio_codec/libape/Makefile
+index 3c4eef0..6fbc0ea 100755
+--- a/audio_codec/libape/Makefile
++++ b/audio_codec/libape/Makefile
+@@ -13,10 +13,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libcook/Makefile b/audio_codec/libcook/Makefile
+index c427f52..7748bc3 100755
+--- a/audio_codec/libcook/Makefile
++++ b/audio_codec/libcook/Makefile
+@@ -13,10 +13,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libfaad/Makefile b/audio_codec/libfaad/Makefile
+index e049c29..12ec434 100755
+--- a/audio_codec/libfaad/Makefile
++++ b/audio_codec/libfaad/Makefile
+@@ -16,10 +16,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libflac/Makefile b/audio_codec/libflac/Makefile
+index 5c31834..945a0b0 100755
+--- a/audio_codec/libflac/Makefile
++++ b/audio_codec/libflac/Makefile
+@@ -13,10 +13,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/liblpcm/Makefile b/audio_codec/liblpcm/Makefile
+index 6420bca..58088cb 100755
+--- a/audio_codec/liblpcm/Makefile
++++ b/audio_codec/liblpcm/Makefile
+@@ -13,10 +13,13 @@ USING_LIBS_PATH		=
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libmad/Makefile b/audio_codec/libmad/Makefile
+index 7ab2bae..680b5fa 100755
+--- a/audio_codec/libmad/Makefile
++++ b/audio_codec/libmad/Makefile
+@@ -7,16 +7,19 @@ SRC_FILES		=  $(wildcard $(SRC_PATH)*.c)
+ EXPORT_INCLUDE_FILES	= $(wildcard $(SRC_PATH)*.h) 
+  
+ USING_LIBS		= 
+-USING_INCLUDES_PATH	= 
++USING_INCLUDES_PATH	= -I../../amadec/include -I../../amadec
+ 
+ USING_LIBS_PATH		= 
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libpcm/Makefile b/audio_codec/libpcm/Makefile
+index 607552c..6ecccc7 100755
+--- a/audio_codec/libpcm/Makefile
++++ b/audio_codec/libpcm/Makefile
+@@ -7,16 +7,19 @@ SRC_FILES		=  $(wildcard $(SRC_PATH)*.c)
+ EXPORT_INCLUDE_FILES	= $(wildcard $(SRC_PATH)*.h)  $(SRC_PATH)/../../amadec/include $(SRC_PATH)/../../amadec/
+  
+ USING_LIBS		= 
+-USING_INCLUDES_PATH	= 
++USING_INCLUDES_PATH	+= -I../../amadec/include -I../../amadec
+ 
+ USING_LIBS_PATH		= 
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/audio_codec/libraac/Makefile b/audio_codec/libraac/Makefile
+index e3bd228..bf7eeac 100755
+--- a/audio_codec/libraac/Makefile
++++ b/audio_codec/libraac/Makefile
+@@ -8,15 +8,19 @@ EXPORT_INCLUDE_FILES	= $(wildcard $(SRC_PATH)*.h)
+  
+ USING_LIBS		= 
+ USING_INCLUDES_PATH	= -I$(SRC_PATH)/include
++USING_INCLUDES_PATH	+= -I../../amadec/include -I../../amadec
+ 
+ USING_LIBS_PATH		= 
+ DEBUG  		= YES
+ DEFINES		= 
+ 
+-CROSS=$(CC:%gcc=%)
+-G++		= $(CROSS)g++
+-GCC		= $(CROSS)gcc
+-LD 		= $(CROSS)ld
++#CROSS=$(CC:%gcc=%)
++#G++		= $(CROSS)g++
++#GCC		= $(CROSS)gcc
++#LD 		= $(CROSS)ld
++G++		= $(CXX)
++GCC		= $(CC)
++LD      = $(CC)
+ 
+ DEBUG_CFLAGS     := -c -Wall -shared -fPIC -Wno-format -g -DDEBUG -fexceptions -fnon-call-exceptions
+ RELEASE_CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+diff --git a/bootplayer/Makefile b/bootplayer/Makefile
+index 15cfb46..fa65981 100644
+--- a/bootplayer/Makefile
++++ b/bootplayer/Makefile
+@@ -12,7 +12,7 @@ INSTALL_FLAGS=-m 755
+ 
+ TARGET=bootplayer
+ 
+-LDFLAGS= -L$(PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
++LDFLAGS= -L$(PREFIX)/lib -L$(PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
+ CFLAGS+= -I${BUILD_DIR}/../amffmpeg -I${BUILD_DIR}/../amcodec/include -I${BUILD_DIR}/../amadec/include
+ CFLAGS+= -I${BUILD_DIR}/../amplayer/player/include -I${BUILD_DIR}/../amplayer/player -I${BUILD_DIR}/../streamsource
+ CFLAGS+= -I$(INC_DIR)
+@@ -33,7 +33,7 @@ all: ${TARGET}
+ 	mkdir -p $(TARGET_DIR)/../lib/firmware
+ install:all
+ 	install $(INSTALL_FLAGS) $(TARGET) $(TARGET_DIR)/bin
+-	cp -rf $(LIB_DIR)/*.so* $(TARGET_DIR)/lib
++#	cp -rf $(LIB_DIR)/*.so* $(TARGET_DIR)/lib
+ 
+ distclean:clean
+ 
+diff --git a/bootplayer/bootplayer.c b/bootplayer/bootplayer.c
+index 4ef1e56..31d8118 100644
+--- a/bootplayer/bootplayer.c
++++ b/bootplayer/bootplayer.c
+@@ -42,6 +42,7 @@
+ #define ALOGI printf
+ #endif
+ 
++int property_set(const char *key, const char *value);
+ typedef enum {
+     //EMU_STEP_NONE = 0,
+     EMU_STEP_PAUSE = 2,
+diff --git a/examples/Makefile b/examples/Makefile
+index a4dc8ca..ca44bde 100755
+--- a/examples/Makefile
++++ b/examples/Makefile
+@@ -12,7 +12,7 @@ INSTALL_FLAGS=-m 755
+ 
+ TARGET=kplayer
+ 
+-LDFLAGS= -L$(PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
++LDFLAGS= -L$(PREFIX)/lib -L$(PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
+ CFLAGS+= -I${BUILD_DIR}/../amffmpeg -I${BUILD_DIR}/../amcodec/include -I${BUILD_DIR}/../amadec/include 
+ CFLAGS+= -I${BUILD_DIR}/../amplayer/player/include -I${BUILD_DIR}/../amplayer/player -I${BUILD_DIR}/../streamsource
+ CFLAGS+= -I$(INC_DIR)
+diff --git a/third_parts/libcurl-ffmpeg/curl_base/Makefile b/third_parts/libcurl-ffmpeg/curl_base/Makefile
+index d624b0f..e8261bd 100755
+--- a/third_parts/libcurl-ffmpeg/curl_base/Makefile
++++ b/third_parts/libcurl-ffmpeg/curl_base/Makefile
+@@ -13,7 +13,7 @@ SRC?=$(TOPDIR)
+ 
+ CFLAGS+=-O2 -fPIC
+ CFLAGS+= -I$(SRC)/../include -I$(STAGING_DIR)/usr/include/curl
+-LDFLAGS+= -ldl -lstdc++ -lcurl
++CFLAGS+= -ldl -lstdc++ -lcurl
+ 
+ export CC CFLAGS
+ all: $(TARGET)
+diff --git a/third_parts/libcurl-ffmpeg/curl_binds/Makefile b/third_parts/libcurl-ffmpeg/curl_binds/Makefile
+index 1ad0aa8..44de34b 100755
+--- a/third_parts/libcurl-ffmpeg/curl_binds/Makefile
++++ b/third_parts/libcurl-ffmpeg/curl_binds/Makefile
+@@ -12,7 +12,7 @@ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+ CFLAGS+=-O2 -fPIC
+ CFLAGS+=-I$(STAGING_DIR)/usr/include/curl -I$(SRC)/../include -I$(SRC)/../../../amffmpeg/  -I$(SRC)/../../../amffmpeg/$(wildcard libavformat/*.h) -I$(SRC)/../../../amavutils/include
+-LDFLAGS +=-L$(M_PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++ -lcurl
++CFLAGS +=-L$(M_PREFIX)/lib -L$(M_PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++ -lcurl
+ 
+ export CC CFLAGS  LIBMOD_DIR
+ 
+diff --git a/third_parts/libdash/ffmpeg_binds/Makefile b/third_parts/libdash/ffmpeg_binds/Makefile
+index 6a6cad6..945f980 100644
+--- a/third_parts/libdash/ffmpeg_binds/Makefile
++++ b/third_parts/libdash/ffmpeg_binds/Makefile
+@@ -14,8 +14,8 @@ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+ 
+ CFLAGS+=-O2 -fPIC
+-CFLAGS+= -I$(SRC)/../common -I$(SRC)/../../../amffmpeg/ -I$(SRC)/../../../amffmpeg/libavutil/ -I$(STAGING_DIR)/usr/include/libxml2
+-LDFLAGS+= -L$(M_PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming -L$(STAGING_DIR)/usr/lib/aml_libs -lamavutils -lrt -lstdc++ -lcurl -lxml2
++CFLAGS+= -I$(SRC)/../common -I$(SRC)/../../../amffmpeg/ -I$(SRC)/../../../amffmpeg/libavutil/ -I$(STAGING_DIR)/usr/include/libxml2 -I$(SRC)/../../../amavutils/include
++CFLAGS+= -L$(M_PREFIX)/lib/ -L$(M_PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming -L$(STAGING_DIR)/usr/lib/aml_libs -lamavutils -lrt -lstdc++ -lcurl -lxml2
+ 
+ all: $(TARGET)
+ 	$(MAKE) install
+diff --git a/third_parts/libdash/libdash/source/Makefile b/third_parts/libdash/libdash/source/Makefile
+index 398cacb..fa151c4 100644
+--- a/third_parts/libdash/libdash/source/Makefile
++++ b/third_parts/libdash/libdash/source/Makefile
+@@ -14,7 +14,7 @@ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+ 
+ CFLAGS+=-O2 -fPIC
+-CFLAGS+= -I$(SRC)/../include -I$(SRC)/../../common -I$(STAGING_DIR)/usr/include/libxml2  -I$(SRC)/../../../libcurl-ffmpeg/include -I$(STAGING_DIR)/usr/include/curl
++CFLAGS+= -I$(SRC)/../include -I$(SRC)/../../common -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/libxml2  -I$(SRC)/../../../libcurl-ffmpeg/include -I$(PKG_CONFIG_SYSROOT_DIR)/usr/include/curl
+ LDFLAGS+=-lm -lz -lpthread -ldl -lrt -lstdc++ -lcurl  -lxml2
+ 
+ all: $(TARGET)
+-- 
+2.11.0
+

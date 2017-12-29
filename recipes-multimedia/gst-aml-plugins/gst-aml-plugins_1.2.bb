@@ -4,7 +4,7 @@ DEPENDS = " libplayer libffi gstreamer1.0 gstreamer1.0-plugins-base libpcre  gli
 
 #SRC_URI = "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.git;protocol=git;nobranch=1"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstreamer_plugin.git;protocol=ssh;nobranch=1"
-SRC_URI += "file://fix-CodecID-redefinition.patch"
+#SRC_URI += "file://fix-CodecID-redefinition.patch"
 
 #MIRRORS_prepend += "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstreamer_plugin.git;protocol=ssh; \n"
 

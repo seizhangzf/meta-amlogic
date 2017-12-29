@@ -1,24 +1,23 @@
 SUMMARY = "aml libplayer code"
 LICENSE = "LGPL-2.0+"
-DEPENDS = "curl bzip2 alsa-lib virtual/gettext"
+DEPENDS = "curl bzip2 alsa-lib virtual/gettext libxml2"
 SRC_URI = "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git;protocol=git;nobranch=1"
 MIRRORS_prepend += "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/LibPlayer.git;protocol=ssh; \n"
 
+SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
+            file://0002-PD138385-fix-yocto-alsa-hw-set-issue.patch"
+PROVIDES += "libamcodec.so"
 DEFAULT_PREFERENCE = "-1"
-LIC_FILES_CHKSUM = "file://Makefile;md5=2e513777cb96aec3d7397dc4fac9b2ad"
-PLBANCH = "yocto-libplayer"
-SRCREV="28bb064d8cf43556c1dada977ca55d00dbe45605"
-S = "${WORKDIR}/git"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
+SRCREV="a634d302a82584610ba710d0ac4497aff1ba0530"
 
 SRC_URI += "\
-           file://audio_codec_Makfile_changes.patch \
            file://0001-PD-151901-set-drmmode-flag-before-codec_init-for-MUL.patch \
            "
 
-CC_remove += "-fno-omit-frame-pointer"
 EXTRA_OECONF_remove += "-fno-omit-frame-pointer"
 
-EXTRA_OEMAKE = "LIBPLAYER_STAGING_DIR=${D} CROSS=${TARGET_PREFIX} TARGET_DIR=${D} STAGING_DIR=${D} DESTDIR=${D}"
+EXTRA_OEMAKE = "LIBPLAYER_STAGING_DIR=${D} CROSS=${TARGET_PREFIX} TARGET_DIR=${D} STAGING_DIR=${D} DESTDIR=${D} INSTALL_DIR=${D}/usr/lib"
 EXTRA_OECONF = " \
     --disable-stripping \
     --enable-shared \
@@ -51,7 +50,6 @@ EXTRA_OECONF = " \
 do_configure(){
        cd ${S}/amffmpeg
        ./configure ${EXTRA_OECONF}
-       cd ${S}
 }
 
 do_compile () {
@@ -60,36 +58,54 @@ do_compile () {
 	install -m 0755 -d ${D}/usr/bin
 	install -m 0755 -d ${D}/usr/include
 	install -m 0755 -d ${D}/usr/include/sys
-	oe_runmake ${EXTRA_OEMAKE} all
+	cd ${S}
+	oe_runmake -j1 ${EXTRA_OEMAKE} all
 	install ${S}/examples/kplayer ${D}/usr/bin
         install ${S}/amffmpeg/ffprobe ${D}/usr/bin
 }
 
-pkg_postinst_${PN} () {
-    ln -s libadpcm.so.1 $D/usr/lib/libadpcm.so
-    ln -s libamadec.so.1 $D/usr/lib/libamadec.so
-    ln -s libamavutils.so.1 $D/usr/lib/libamavutils.so
-    ln -s libamcodec.so.1 $D/usr/lib/libamcodec.so
-    ln -s libamffmpegdec.so.1 $D/usr/lib/libamffmpegdec.so
-    ln -s libamplayer.so.1 $D/usr/lib/libamplayer.so
-    ln -s libamr.so.1 $D/usr/lib/libamr.so
-    ln -s libamstreaming.so.1 $D/usr/lib/libamstreaming.so
-    ln -s libape.so.1 $D/usr/lib/libape.so
-    ln -s libcook.so.1 $D/usr/lib/libcook.so
-    ln -s libfaad.so.1 $D/usr/lib/libfaad.so
-    ln -s libflac.so.1 $D/usr/lib/libflac.so
-    ln -s libmad.so.1 $D/usr/lib/libmad.so
-    ln -s libpcm.so.1 $D/usr/lib/libpcm.so
-    ln -s libpcm_wfd.so.1 $D/usr/lib/libpcm_wfd.so
-    ln -s libraac.so.1 $D/usr/lib/libraac.so
+do_compile_append() {
+    rm ${D}/usr/lib/libdtscore.so
+    rm ${D}/usr/lib/libdcv.so
 }
-inherit  pkgconfig distro_features_check
 
+inherit  pkgconfig distro_features_check
 do_install[noexec] = "1"
 
-#INHIBIT_PACKAGE_STRIP = "1"
-#INHIBIT_SYSROOT_STRIP = "1"
-#INHIBIT_PACKAGE_DEBUG_SPLIT = "1" 
-
 FILES_${PN} += "/usr/share/lib* /usr/lib/amplayer/*.so /bin/ /usr/bin/"
+FILES_${PN} += "/usr/lib/libadpcm.so \
+                /usr/lib/libamadec.so \
+                /usr/lib/libamavutils.so \
+                /usr/lib/libamcodec.so \
+                /usr/lib/libamffmpegdec.so \
+                /usr/lib/libammad.so \
+                /usr/lib/libamplayer.so \
+                /usr/lib/libamr.so \
+                /usr/lib/libamstreaming.so \
+                /usr/lib/libape.so \
+                /usr/lib/libcook.so \
+                /usr/lib/libfaad.so \
+                /usr/lib/libflac.so \
+                /usr/lib/liblibpcm_wfd.so \
+                /usr/lib/libpcm.so \
+                /usr/lib/libraac.so \
+                /usr/lib/libdash_mod.so \
+                /usr/lib/libcurl_mod.so \
+                /usr/lib/libavcodec.so \
+                /usr/lib/libavutil.so \
+                /usr/lib/libswscale.so \
+                /usr/lib/libavfilter.so \
+                /usr/lib/libavdevice.so \
+                /usr/lib/libavformat.so \
+                "
+
+FILES_${PN}-dev = "/usr/include/* \
+        /usr/lib/pkgconfig/* \
+        "
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1" 
+S = "${WORKDIR}/git"
+
+
 INSANE_SKIP_${PN} = "ldflags dev-so"

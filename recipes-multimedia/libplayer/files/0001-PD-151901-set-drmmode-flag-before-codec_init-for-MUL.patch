@@ -1,8 +1,7 @@
-From f337f89bd8cf29da81e00c873ac9826d173cb931 Mon Sep 17 00:00:00 2001
+From 4f5c6bb716739793d3d51b2d0b5d4b9629cc440b Mon Sep 17 00:00:00 2001
 From: Matthew Shyu <matthew.shyu@amlogic.com>
-Date: Sat, 7 Oct 2017 21:53:29 +0800
-Subject: [PATCH] PD#151901: set drmmode flag before codec_init for MULTI merge
- from
+Date: Thu, 28 Dec 2017 19:04:55 +0800
+Subject: [PATCH] set drmmode flag before codec_init for MULTI
 
 ---
  amcodec/codec/codec_ctrl.c   | 7 +++++++
@@ -10,10 +9,10 @@ Subject: [PATCH] PD#151901: set drmmode flag before codec_init for MULTI merge
  2 files changed, 8 insertions(+)
 
 diff --git a/amcodec/codec/codec_ctrl.c b/amcodec/codec/codec_ctrl.c
-index 4eb1d4f8647..323aff18f04 100644
+index 7e91fda..e78e9ac 100644
 --- a/amcodec/codec/codec_ctrl.c
 +++ b/amcodec/codec/codec_ctrl.c
-@@ -336,6 +336,13 @@ static inline int codec_video_es_init(codec_para_t *pcodec)
+@@ -349,6 +349,13 @@ static inline int codec_video_es_init(codec_para_t *pcodec)
          print_error_msg(codec_r, errno, __FUNCTION__, __LINE__);
          return codec_r;
      }
@@ -28,13 +27,13 @@ index 4eb1d4f8647..323aff18f04 100644
  }
  
 diff --git a/amcodec/include/codec_type.h b/amcodec/include/codec_type.h
-index b0c5515b831..4afa53f51ab 100644
+index e960316..b68a29a 100644
 --- a/amcodec/include/codec_type.h
 +++ b/amcodec/include/codec_type.h
-@@ -106,6 +106,7 @@ unsigned int noblock:
-     struct avpkt_node_list *avpkt_node_list;
-     int status;
-     struct amvideo_dev *amvideo_dev;
+@@ -119,6 +119,7 @@ unsigned int noblock:
+     char *sub_filename;
+     int associate_dec_supported;//support associate or not
+     int mixing_level;
 +    unsigned int drmmode;
  } codec_para_t;
  
