@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;nobranch=1"
 SRC_URI += "file://COPYING.GPL"
 
-SRCREV = "5f2400c0392a0b8f958e4ee9750999279c1af09b"
+SRCREV = "e0614bf740eef90386cce89723447233f7b7d3a5"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 
