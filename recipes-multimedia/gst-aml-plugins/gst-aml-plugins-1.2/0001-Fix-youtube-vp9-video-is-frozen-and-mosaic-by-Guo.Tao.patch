@@ -1,0 +1,287 @@
+From 8b40b1179a50d8a7d2e95b5d9f171ea201d05d50 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Tue, 9 Jan 2018 11:26:42 +0800
+Subject: [PATCH] Fix youtube vp9 video is frozen and mosaic by Guo.Tao
+
+Note: Modify original pathch by disabling tvp and datadump
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+
+Index: gst-aml-plugins-1.2/audio/amladec/amlaudioinfo.c
+===================================================================
+--- gst-aml-plugins-1.2/audio/amladec/amlaudioinfo.c	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/audio/amladec/amlaudioinfo.c	2018-01-09 12:00:39.704428856 +0800
+@@ -234,10 +234,11 @@
+     return 0;
+ }
+
+-gint adts_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buffer, void *opaque)
++gint adts_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuffer, void *opaque)
+ {
+     gint8 *buf ;
+     int i;
++    GstBuffer *buffer = *pbuffer;
+     int size = ADTS_HEADER_SIZE + gst_buffer_get_size(buffer);   // 13bit valid
+     size &= 0x1fff;
+     guint8 *adts_header=NULL;
+@@ -457,11 +458,11 @@
+     return info;
+ }
+
+-gint vorbis_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buffer, void *opaque)
++gint vorbis_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuffer, void *opaque)
+ {
+     gint32 buf_size;
+     char head[] = "HEAD";
+-
++    GstBuffer *buffer = *pbuffer;
+     info->write_codec(pcodec, head, 4, opaque);
+     buf_size = gst_buffer_get_size(buffer);
+     info->write_codec(pcodec, &buf_size, 4, opaque);
+@@ -482,7 +483,7 @@
+     AmlStreamInfo *info = createAudioInfo(sizeof(AmlAinfoVorbis));
+     info->init = amlInitVorbis;
+     info->writeheader = audio_writeheader;
+-    info->add_startcode = vorbis_startcode;
++    info->add_startcode = vorbis_add_startcode;
+     return info;
+ }
+
+Index: gst-aml-plugins-1.2/audio/amladec/gstamladec.c
+===================================================================
+--- gst-aml-plugins-1.2/audio/amladec/gstamladec.c	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/audio/amladec/gstamladec.c	2018-01-09 12:00:39.704428856 +0800
+@@ -775,7 +775,7 @@
+         } else {
+             if (amladec->info->add_startcode) {
+                 amladec->info->add_startcode(amladec->info, amladec->pcodec,
+-                        buf, (void *)amladec);
++                        &buf, (void *)amladec);
+             }
+
+             gst_buffer_map(buf, &map, GST_MAP_READ);
+Index: gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.c
+===================================================================
+--- gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.c	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.c	2018-01-09 12:00:39.704428856 +0800
+@@ -71,6 +71,17 @@
+     while (size > 0 && retry < 10) {
+         written = codec_write(pcodec, data, size);
+         if (written >= 0) {
++#if 0 //DUMP
++            if (pcodec->has_video) {
++                FILE *fp2 = fopen("/mnt/codec.data", "a+");
++                if (fp2) {
++                    int flen = fwrite(data, 1, written, fp2);
++                    fclose(fp2);
++                } else {
++                    GST_ERROR("could not open file:codec.data");
++                }
++            }
++#endif
+             size -= written;
+             data += written;
+             total += written;
+Index: gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.h
+===================================================================
+--- gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.h	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/common/amstreaminfo/amlstreaminfo.h	2018-01-09 12:00:39.704428856 +0800
+@@ -14,7 +14,7 @@
+     gchar *format;
+     gint (*init)(AmlStreamInfo* info, codec_para_t *pcodec, GstStructure  *structure); //pure virtual function
+     gint (*writeheader)(AmlStreamInfo* info, codec_para_t *pcodec, void *opaque);
+-    gint (*add_startcode)(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf, void *opaque); //pure virtual function
++    gint (*add_startcode)(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **buf, void *opaque); //pure virtual function
+     gint (*write_codec)(AmlStreamInfo* info, void *data, int size, void *opaque);
+     void (*finalize)(AmlStreamInfo* info);
+ //protected:
+Index: gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c	2018-01-09 12:00:39.704428856 +0800
+@@ -337,7 +337,7 @@
+     return 0;
+ }
+
+-static gint h264_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf)
++static gint h264_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuf, void *opaque)
+ {
+     gint ret = 0;
+     GstMapInfo map, hdrmap;
+@@ -345,6 +345,7 @@
+     unsigned char *data;
+     unsigned char *p;
+     GstBuffer *hdrBuf;
++    GstBuffer *buf = *pbuf;
+     gst_buffer_map(buf, &map, GST_MAP_READ | GST_MAP_WRITE);
+     size = map.size;
+     data = map.data;
+@@ -470,7 +471,7 @@
+     return 0;
+ }
+
+-static gint vp9_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buffer, void *opaque)
++static gint vp9_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuffer, void *opaque)
+ {
+     int dsize;
+     unsigned char *buf;
+@@ -482,6 +483,7 @@
+     unsigned char *old_header = NULL;
+     int total_datasize = 0;
+     GstMapInfo map;
++    GstBuffer *buffer = *pbuffer;
+
+     gst_buffer_map(buffer, &map, GST_MAP_READ);
+     dsize = map.size;
+@@ -558,7 +560,6 @@
+             framesize -= 4;
+             info->write_codec(pcodec, old_framedata, framesize, opaque);
+         }
+-        gst_buffer_resize(buffer, 0, 0);
+         gst_buffer_unmap(buffer, &map);
+     }
+ #else
+@@ -609,6 +610,7 @@
+     }
+     gst_buffer_unmap(buffer, &map);
+ #endif
++    *pbuffer = NULL; //IMPORTANT
+     return 0;
+ }
+ void amlVP9Finalize(AmlStreamInfo *info)
+@@ -682,11 +684,12 @@
+     return info;
+ }
+
+-static gint h263_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf)
++static gint h263_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuf, void *opaque)
+ {
+     GstMapInfo map_in, map_out;
+     GstBuffer *vld_buf;
+     int size;
++    GstBuffer *buf = *pbuf;
+
+     vld_buf = gst_buffer_new_and_alloc(
+             pcodec->am_sysinfo.height * pcodec->am_sysinfo.width * 2);
+@@ -733,11 +736,12 @@
+ }
+
+
+-static gint flvh263_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf)
++static gint flvh263_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuf, void *opaque)
+ {
+     GstMapInfo map_in, map_out;
+     GstBuffer *vld_buf;
+     int size;
++    GstBuffer *buf = pbuf;
+
+     vld_buf = gst_buffer_new_and_alloc(
+             pcodec->am_sysinfo.height * pcodec->am_sysinfo.width * 2);
+@@ -840,12 +844,14 @@
+     return info;
+ }
+
+-static int wmv3_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf, void *opaque)
++static int wmv3_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuf, void *opaque)
+ {
+     unsigned i, check_sum = 0;
+     char bufout[26];
+     int data_size;
+     GstMapInfo map;
++    GstBuffer *buf = *pbuf;
++
+     if (NULL == info->configdata) {
+         GST_WARNING("no codec data");
+         return 0;
+@@ -1040,12 +1046,14 @@
+     return 0;
+ }
+
+-static gint divx3_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer *buf, void *opaque)
++static gint divx3_add_startcode(AmlStreamInfo* info, codec_para_t *pcodec, GstBuffer **pbuf, void *opaque)
+ {
+ #define DIVX311_CHUNK_HEAD_SIZE 13
+     gint data_size;
+     guint8 prefix[DIVX311_CHUNK_HEAD_SIZE + 4] = { 0x00, 0x00, 0x00, 0x01, 0xb6,
+             'D', 'I', 'V', 'X', '3', '.', '1', '1', };
++    GstBuffer *buf = *pbuf;
++
+     data_size = gst_buffer_get_size(buf);
+     prefix[DIVX311_CHUNK_HEAD_SIZE + 0] = (data_size >> 24) & 0xff;
+     prefix[DIVX311_CHUNK_HEAD_SIZE + 1] = (data_size >> 16) & 0xff;
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-01-09 12:00:14.632428385 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-01-09 12:00:39.704428856 +0800
+@@ -272,7 +272,7 @@
+     amlvdec->decodetype = FALSE; //for test
+     amlvdec->datadump = FALSE;
+     amlvdec->segment.rate = 1.0;
+-    amlvdec->tvp = TRUE;
++    amlvdec->tvp = FALSE;
+
+     return TRUE;
+ }
+@@ -723,7 +723,7 @@
+         if (!amlvdec->codec_init_ok) {
+             //amlvdec->pcodec->vbuf_size = 0xf20000;
+             if (amlvdec->tvp) {
+-                amlvdec->pcodec->drmmode = 1;
++                //amlvdec->pcodec->drmmode = 1;
+                 amlvdec->info->write_codec = gst_aml_vdec_tvp_write_clear;
+             }
+             ret = codec_init(amlvdec->pcodec);
+@@ -787,8 +787,24 @@
+             }
+             amlvdec->is_headerfeed = TRUE;
+         }
++        if (amlvdec->datadump) {
++            FILE *fp2 = fopen("/mnt/codec.data2", "a+");
++            if (fp2) {
++                gst_buffer_map(buf, &map, GST_MAP_READ);
++                int flen = fwrite(map.data, 1, map.size, fp2);
++                fclose(fp2);
++                gst_buffer_unmap(buf, &map);
++            } else {
++                GST_ERROR_OBJECT(amlvdec, "could not open file:codec.data");
++            }
++        }
++
+         if (amlvdec->info->add_startcode) {
+-            amlvdec->info->add_startcode(amlvdec->info, amlvdec->pcodec, buf, (void*)amlvdec);
++            amlvdec->info->add_startcode(amlvdec->info, amlvdec->pcodec, &buf, (void*)amlvdec);
++        }
++        if (!buf) {
++            ret = GST_FLOW_OK;
++            goto error;
+         }
+         tvp_meta = gst_buffer_get_aml_tvp_meta(buf);
+         gst_buffer_map(buf, &map, GST_MAP_READ);
+@@ -825,18 +841,18 @@
+                 gst_aml_vdec_tvp_write_clear(NULL, data, size, (void*)amlvdec);
+             }
+         } else {
+-            if (amlvdec->datadump) {
+-                FILE *fp2 = fopen("/mnt/codec.data", "a+");
+-                if (fp2) {
+-                    int flen = fwrite(data, 1, size, fp2);
+-                    fclose(fp2);
+-                } else {
+-                    GST_ERROR_OBJECT(amlvdec, "could not open file:codec.data");
+-                }
+-            }
+             while (size > 0) {
+                 written = codec_write(amlvdec->pcodec, data, size);
+                 if (written >= 0) {
++                    if (amlvdec->datadump) {
++                        FILE *fp2 = fopen("/mnt/codec.data", "a+");
++                        if (fp2) {
++                            int flen = fwrite(data, 1, written, fp2);
++                            fclose(fp2);
++                        } else {
++                            GST_ERROR_OBJECT(amlvdec, "could not open file:codec.data");
++                        }
++                    }
+                     size -= written;
+                     data += written;
+                 } else if (errno == EAGAIN || errno == EINTR) {

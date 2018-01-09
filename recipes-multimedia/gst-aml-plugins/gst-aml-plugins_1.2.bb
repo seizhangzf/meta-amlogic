@@ -4,13 +4,15 @@ DEPENDS = " libplayer libffi gstreamer1.0 gstreamer1.0-plugins-base libpcre  gli
 
 #SRC_URI = "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.git;protocol=git;nobranch=1"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstreamer_plugin.git;protocol=ssh;nobranch=1"
+SRC_URI += "file://0001-Fix-youtube-vp9-video-is-frozen-and-mosaic-by-Guo.Tao.patch"
+
 #SRC_URI += "file://fix-CodecID-redefinition.patch"
 
 #MIRRORS_prepend += "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstreamer_plugin.git;protocol=ssh; \n"
 
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e431e272f5b8a6a4f948a910812f235e"
-SRCREV="a57f2302ac76c0cdecd8922d8b0b0696f985fd14"
+SRCREV="6c2fbebd31204a466244ca4fda676739abf15cd4"
 
 S = "${WORKDIR}/git/gst-aml-plugins-1.2"
 
