@@ -1,0 +1,127 @@
+Index: gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c
+===================================================================
+--- gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-01-16 11:46:02.991758832 +0800
++++ gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-01-16 11:47:18.663760252 +0800
+@@ -119,12 +119,13 @@
+ static void
+ gst_aml_asink_init (GstAmlAsink * amlasink)
+ {
++    GST_DEBUG_OBJECT(amlasink, "%s", __func__);
+     GstBaseSink *bsink = GST_BASE_SINK(amlasink);
+     GST_OBJECT_FLAG_SET (amlasink, GST_ELEMENT_FLAG_PROVIDE_CLOCK);
+ //    gst_base_sink_set_sync(bsink, FALSE);
+ //    gst_base_sink_set_async_enabled(bsink, FALSE);
+     amlasink->segment.rate = 1.0;
+-    amlasink->clock = NULL;
++    amlasink->clock = gst_aml_clock_new("GstAmlAudioSinkClock", GST_AML_CLOCK_AUDIO);
+ }
+ 
+ static void
+@@ -168,8 +169,27 @@
+ gst_amlasink_provide_clock(GstElement *element)
+ {
+     GstAmlAsink *amlasink = GST_AMLASINK(element);
+-    amlasink->clock = gst_aml_clock_new("GstAmlAudioSinkClock", GST_AML_CLOCK_AUDIO);
+-    return gst_object_ref(amlasink->clock);
++    GstClock *clock = NULL;
++
++    GST_DEBUG_OBJECT(amlasink, "%s", __func__);
++
++    GST_OBJECT_LOCK(amlasink);
++    if (GST_OBJECT_FLAG_IS_SET(amlasink, GST_ELEMENT_FLAG_PROVIDE_CLOCK)) {
++        if (!amlasink->clock) {
++            // If clock is null, create one. Clock should be created in gst_aml_asink_init()
++            // If this occurs, it is likely wrong. Please check
++            GST_DEBUG_OBJECT(amlasink, "Original clock is null, it is likely wrong");
++            amlasink->clock = gst_aml_clock_new("GstAmlAudioSinkClock", GST_AML_CLOCK_AUDIO);
++        }
++        // increase ref count
++        clock = gst_object_ref(amlasink->clock);
++    }
++    else {
++        GST_DEBUG_OBJECT(amlasink, "GST_ELEMENT_FLAG_PROVIDE_CLOCK is not set\n");
++    }
++    GST_OBJECT_UNLOCK(amlasink);
++
++    return clock;
+ }
+ 
+ 
+@@ -307,6 +327,7 @@
+         ret = GST_BASE_SINK_CLASS(parent_class)->event(asink, event);
+         break;
+     case GST_EVENT_FLUSH_STOP:
++        GST_DEBUG_OBJECT(amlasink, "GST_EVENT_FLUSH_STOP\n");
+         gst_aml_clock_reset(amlasink->clock);
+         ret = GST_BASE_SINK_CLASS(parent_class)->event(asink, event);
+         break;
+Index: gst-aml-plugins-1.2/clock/gstamlclock.c
+===================================================================
+--- gst-aml-plugins-1.2/clock/gstamlclock.c	2018-01-16 11:46:09.407758952 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.c	2018-01-16 11:47:23.571760344 +0800
+@@ -281,7 +281,12 @@
+ void
+ gst_aml_clock_reset(GstClock *clock)
+ {
+-    GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
++    GST_ERROR("%s", __func__);
+     set_sysfs_int("/sys/class/tsync/pts_pcrscr", 1);
+-    aclock->last_pts = 0;
++    if (clock) {
++        GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
++        aclock->last_pts = 0;
++    } else {
++        GST_ERROR("clock is null. It's likely wrong!\n");
++    }
+ }
+Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-01-16 11:46:14.743759052 +0800
++++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-01-16 11:47:32.107760504 +0800
+@@ -108,7 +108,7 @@
+     amlvsink->coordinate[2] = DEFAULT_WINDOW_WIDTH;
+     amlvsink->coordinate[3] = DEFAULT_WINDOW_HEIGHT;
+     set_video_axis(amlvsink->coordinate);
+-    amlvsink->clock = NULL;
++    amlvsink->clock = gst_aml_clock_new("GstAmlVideoSinkClock", GST_AML_CLOCK_VIDEO);
+ #if DEBUG_DUMP
+     amlvsink->dump_fd = open("/tmp/gst_aml_vsink.dump", O_CREAT | O_TRUNC | O_WRONLY, 0777);
+ #endif
+@@ -184,8 +184,27 @@
+ gst_amlvsink_provide_clock(GstElement *element)
+ {
+     GstAmlVsink *amlvsink = GST_AMLVSINK(element);
+-    amlvsink->clock = gst_aml_clock_new("GstAmlVideoSinkClock", GST_AML_CLOCK_VIDEO);
+-    return gst_object_ref(amlvsink->clock);
++    GstClock *clock = NULL;
++
++    GST_DEBUG_OBJECT(amlvsink, "%s", __func__);
++
++    GST_OBJECT_LOCK(amlvsink);
++    if (GST_OBJECT_FLAG_IS_SET(amlvsink, GST_ELEMENT_FLAG_PROVIDE_CLOCK)) {
++        if (!amlvsink->clock) {
++            // If clock is null, create one. Clock should be created in gst_aml_vsink_init()
++            // If this occurs, it is likely wrong. Please check
++            GST_DEBUG_OBJECT(amlvsink, "Original clock is null, it is likely wrong");
++            amlvsink->clock = gst_aml_clock_new("GstAmlVideoSinkClock", GST_AML_CLOCK_VIDEO);
++        }
++        // Increase ref count
++        clock = gst_object_ref(amlvsink->clock);
++    }
++    else {
++        GST_DEBUG_OBJECT(amlvsink, "GST_ELEMENT_FLAG_PROVIDE_CLOCK is not set\n");
++    }
++    GST_OBJECT_UNLOCK(amlvsink);
++
++    return clock;
+ }
+ 
+ static GstStateChangeReturn
+@@ -288,6 +307,7 @@
+         ret = GST_BASE_SINK_CLASS(parent_class)->event(bsink, event);
+         break;
+     case GST_EVENT_FLUSH_STOP:
++        GST_DEBUG_OBJECT(amlvsink, "GST_EVENT_FLUSH_STOP\n");
+         gst_aml_clock_reset(amlvsink->clock);
+         ret = GST_BASE_SINK_CLASS(parent_class)->event(bsink, event);
+         break;
