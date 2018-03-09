@@ -1,0 +1,38 @@
+Index: gst-aml-plugins-1.2/clock/gstamlclock.c
+===================================================================
+--- gst-aml-plugins-1.2/clock/gstamlclock.c	2018-01-26 17:04:27.216326416 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.c	2018-01-30 14:51:00.874659882 +0800
+@@ -214,7 +214,7 @@
+ {
+     gboolean ret = FALSE;
+     char buf[4096] = { 0 };
+-    char *str1 = NULL, *str2 = NULL, *str3 = NULL;
++    char *str1 = NULL, *str2 = NULL, *str3 = NULL, *str4 = NULL;
+     unsigned int rp;
+ 
+     get_sysfs_str("/sys/class/amstream/bufs", buf, sizeof(buf));
+@@ -230,6 +230,7 @@
+         if (str1) {
+             str2 = strstr(str1, "Audio buffer:");
+         }
++        str4 = strstr(buf, "HEVC buffer:");
+         break;
+     default:
+         break;
+@@ -238,9 +239,13 @@
+         goto exit;
+ 
+     *str2 = 0;
+-    str3 = strstr(str1, "buf no used.");
+-    if (str3)
+-        goto exit;
++    if (str4 && !strstr(str4, "buf no used.")) {
++        str1 = str4;
++    } else {
++        if (strstr(str1, "buf no used.")) {
++            goto exit;
++        }
++    }
+ 
+     str3 = strstr(str1, "buf read pointer:");
+     if (!str3)
