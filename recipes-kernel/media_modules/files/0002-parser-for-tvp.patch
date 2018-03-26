@@ -1,0 +1,36 @@
+From faf67ed56abd8eb5522ab9de8a5e0d9cb7bcbbbd Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 21 Dec 2017 18:01:55 +0800
+Subject: [PATCH] parser for tvp
+
+---
+ drivers/stream_input/parser/esparser.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/stream_input/parser/esparser.c b/drivers/stream_input/parser/esparser.c
+index 1dee180..82a0109 100644
+--- a/drivers/stream_input/parser/esparser.c
++++ b/drivers/stream_input/parser/esparser.c
+@@ -738,10 +738,15 @@ ssize_t drm_write(struct file *file, struct stream_buf_s *stbuf,
+ 		if (r < 0)
+ 			pr_info("Warning. drm flush threadrw failed[%d]\n", r);
+ 	}
+-	res = copy_from_user(drm, buf, sizeof(struct drm_info));
+-	if (res) {
+-		pr_info("drm kmalloc failed res[%d]\n", res);
+-		return -EFAULT;
++	if (count >= sizeof(struct drm_info)) {
++		res = copy_from_user(drm, buf, sizeof(struct drm_info));
++		if (res) {
++			pr_info("drm kmalloc failed res[%d]\n", res);
++			return -EFAULT;
++		}
++	} else {
++		drm->drm_flag = 0;
++		drm->drm_hasesdata = 0;
+ 	}
+ 
+ 	if ((drm->drm_flag & TYPE_DRMINFO) && (drm->drm_hasesdata == 0)) {
+-- 
+2.11.0
+
