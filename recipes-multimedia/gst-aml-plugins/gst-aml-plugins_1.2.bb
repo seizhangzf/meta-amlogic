@@ -8,6 +8,7 @@ SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstre
 SRC_URI += "file://0001-Fix-youtube-vp9-video-is-frozen-and-mosaic-by-Guo.Tao.patch"
 SRC_URI += "file://0002-gst-12-null-clock-excpetion.patch"
 SRC_URI += "file://0003-correct-query-video-position-for-vp9.patch"
+SRC_URI += "file://0004-gst-aml-plugins1-add-TVP-support-1-1.patch"
 
 #SRC_URI += "file://fix-CodecID-redefinition.patch"
 
