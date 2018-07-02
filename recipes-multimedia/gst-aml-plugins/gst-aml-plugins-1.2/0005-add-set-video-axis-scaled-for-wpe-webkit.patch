@@ -1,0 +1,83 @@
+Index: gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/common/amlsysctl/gstamlsysctl.c	2018-06-30 17:10:31.437910759 +0800
++++ gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c	2018-07-02 10:39:48.404712788 +0800
+@@ -160,6 +160,64 @@
+     return count;
+ }
+ 
++int set_video_axis_scaled(int* coordinate)
++{
++    const char* free_scale_axis_path = "/sys/class/graphics/fb0/free_scale_axis";
++    const char* window_axis_path = "/sys/class/graphics/fb0/window_axis";
++    char str[64];
++    int free_scale_axis[4], window_axis[4];
++    int count, ret = 0;
++    float x_scale, y_scale;
++
++    if (!coordinate) {
++        fprintf(stderr, "Invalid input\n");
++        ret = -1;
++        goto out;
++    }
++    if (freescale_is_enable()) {
++        // Get and parse free_scale_axis
++        ret = get_sysfs_str(free_scale_axis_path, str, sizeof(str));
++        if (ret < 0) {
++            fprintf(stderr,"Error reading %s.(%d)\n", free_scale_axis_path, ret);
++            goto out;
++        }
++        count = parse_para(str, 4, free_scale_axis);
++        if (count != 4) {
++            ret = -1;
++            fprintf(stderr,"Error parsing %s.(count = %d)\n", free_scale_axis_path, count);
++            goto out;
++        }
++        // Get and parse window_axis
++        ret = get_sysfs_str(window_axis_path, str, sizeof(str));
++        if (ret < 0) {
++            fprintf(stderr,"Error reading %s.(%d)\n", window_axis_path, ret);
++            goto out;
++        }
++        count = parse_para(str, 4, window_axis);
++        if (count != 4) {
++            ret = -1;
++            fprintf(stderr,"Error parsing %s.(count = %d)\n", window_axis_path, count);
++            goto out;
++        }
++        // calculate scaling factor
++        x_scale = (window_axis[2] + 1 - window_axis[0]) /
++                    (free_scale_axis[2] + 1 - free_scale_axis[0]);
++        y_scale = (window_axis[3] + 1 - window_axis[1]) /
++                    (free_scale_axis[3] + 1 - free_scale_axis[1]);
++        fprintf(stderr, "scaling factor(%.2f, %.2f)\n", x_scale, y_scale);
++        // apply to original coordinate
++        coordinate[0] *= x_scale;
++        coordinate[2] *= x_scale;
++        coordinate[1] *= y_scale;
++        coordinate[3] *= y_scale;
++    }
++out:
++    if (ret < 0)
++        return ret;
++    else
++        return set_video_axis(coordinate);
++}
++
+ int set_display_axis(int recovery)
+ {
+     int fd;
+Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvsink/gstamlvsink.c	2018-06-30 17:10:32.453910778 +0800
++++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-06-30 17:10:32.573910780 +0800
+@@ -135,7 +135,8 @@
+             amlvsink->coordinate[1] = atoi(parts[1]);
+             amlvsink->coordinate[2] = amlvsink->coordinate[0] + atoi(parts[2]);
+             amlvsink->coordinate[3] = amlvsink->coordinate[1] + atoi(parts[3]);
+-            set_video_axis(amlvsink->coordinate);
++            //set_video_axis(amlvsink->coordinate);
++            set_video_axis_scaled(amlvsink->coordinate);
+             GST_DEBUG_OBJECT(amlvsink, " set window rect (%d %d %d %d)\n",
+                     amlvsink->coordinate[0], amlvsink->coordinate[1],
+                     amlvsink->coordinate[2], amlvsink->coordinate[3]);
