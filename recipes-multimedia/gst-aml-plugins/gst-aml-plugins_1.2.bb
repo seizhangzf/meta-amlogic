@@ -10,6 +10,7 @@ SRC_URI += "file://0002-gst-12-null-clock-excpetion.patch"
 SRC_URI += "file://0003-correct-query-video-position-for-vp9.patch"
 SRC_URI += "file://0004-gst-aml-plugins1-add-TVP-support-1-1.patch"
 SRC_URI += "file://0005-add-set-video-axis-scaled-for-wpe-webkit.patch"
+SRC_URI += "file://0006-For-2019-MSE-conformance-test-HE-AAC-ExplicitSBR.patch"
 
 #SRC_URI += "file://fix-CodecID-redefinition.patch"
 
