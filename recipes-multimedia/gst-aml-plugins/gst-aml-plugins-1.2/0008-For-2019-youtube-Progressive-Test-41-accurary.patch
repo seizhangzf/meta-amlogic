@@ -1,0 +1,80 @@
+Index: gst-aml-plugins-1.2/clock/gstamlclock.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/clock/gstamlclock.c	2018-10-11 16:21:24.375337495 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.c	2018-10-11 17:22:34.247406344 +0800
+@@ -274,10 +274,24 @@
+ gst_aml_clock_get_pts(GstClock *clock)
+ {
+     GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
+-    gboolean running, last_time_valid;
+-    unsigned long pcrscr, pts;
++    gboolean running = FALSE;
++    gboolean last_time_valid = FALSE;
++    gboolean temp = FALSE;
++    unsigned long pcrscr, pts = 0;
+     GstClockTime pcrscr_gst_clk;
+ 
++    int slowsync_enable = get_sysfs_int("/sys/class/tsync/slowsync_enable");
++    unsigned long tsync_video_started = 0;
++    // If slowsync_enable is 1, we have to wait until video is started;
++    // otherwise, we might get unstable pts.
++    if (slowsync_enable) {
++        tsync_video_started = get_sysfs_int("/sys/class/tsync/tsync_video_started");
++        if (!tsync_video_started) {
++            GST_DEBUG_OBJECT(aclock, "slowsync_enable is 1 but tsync_video_started is 0, pcrscr is not stable");
++            goto exit;
++        }
++    }
++
+     pts = aclock->last_pts;
+     pcrscr = get_sysfs_int("/sys/class/tsync/pts_pcrscr");
+ 
+@@ -294,7 +308,7 @@
+             aclock->last_pts = pcrscr;
+         }
+     }
+-
++exit:
+     GST_DEBUG_OBJECT(aclock, "return pts = %d, pcrscr = %d, running = %d", pts,
+             pcrscr, running);
+     return (GstClockTime) pts;
+Index: gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/audio/amlasink/gstamlasink.c	2018-10-11 16:21:24.375337495 +0800
++++ gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-10-11 16:21:24.603337499 +0800
+@@ -296,10 +296,10 @@
+             res = TRUE;
+         } else {
+ #if 1
+-//            cur = GST_CLOCK_TIME_NONE;
+-//            gst_query_set_position(query, format, cur);
+-//            res = TRUE;
+-            res = FALSE;
++            cur = GST_CLOCK_TIME_NONE;
++            gst_query_set_position(query, format, cur);
++            res = TRUE;
++//          res = FALSE;
+ #else
+             res = GST_ELEMENT_CLASS(parent_class)->query(element, query);
+ #endif
+Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvsink/gstamlvsink.c	2018-10-11 16:21:24.263337493 +0800
++++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-10-11 16:21:24.603337499 +0800
+@@ -270,11 +270,11 @@
+             gst_query_set_position(query, format, cur);
+             res = TRUE;
+         } else {
+-#if 0
+-//            cur = GST_CLOCK_TIME_NONE;
+-//            gst_query_set_position(query, format, cur);
+-//            res = TRUE;
+-            res = FALSE;
++#if 1
++            cur = GST_CLOCK_TIME_NONE;
++            gst_query_set_position(query, format, cur);
++            res = TRUE;
++    //      res = FALSE;
+ #else
+             res = GST_ELEMENT_CLASS(parent_class)->query(element, query);
+ #endif

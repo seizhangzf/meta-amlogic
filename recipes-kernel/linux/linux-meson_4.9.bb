@@ -23,6 +23,7 @@ DRM_SRC = "file://0028-Modify-gxl_p230_2g.dts-and-gxl_p212_2g.dts-for-DRM-backen
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
 SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
 SRC_URI += "file://0034-Porting-to-gxl_p212_1g_buildroot.dts.patch"
+SRC_URI += "file://0035-tsync-expose-tsync_video_started-to-user-space.patch"
 
 MIRRORS_prepend += "git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh git://git.myamlogic.com/kernel/common.git; \n"
 

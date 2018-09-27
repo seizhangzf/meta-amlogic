@@ -1,0 +1,54 @@
+From b49e4e2e958511dba40386a94a7974497d6bcbec Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Mon, 1 Oct 2018 14:25:26 +0800
+Subject: [PATCH] tsync: expose tsync_video_started to user space
+
+When slowsync_enable is 1, pcrscr will be reset
+due to VIDEO_START event. This make pcrscr unstable.
+
+Expose this value will make apps in userspace know
+when pcrscr is stable to fetch.
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ drivers/amlogic/media/frame_sync/tsync.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/frame_sync/tsync.c b/drivers/amlogic/media/frame_sync/tsync.c
+index 4f424633f5ef..c8db3945be92 100644
+--- a/drivers/amlogic/media/frame_sync/tsync.c
++++ b/drivers/amlogic/media/frame_sync/tsync.c
+@@ -1776,6 +1776,12 @@ static ssize_t show_firstvpts(struct class *class,
+ 	return sprintf(buf, "0x%x\n", timestamp_firstvpts_get());
+ }
+ 
++static ssize_t show_tsync_video_started(struct class *class,
++		struct class_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%x\n", tsync_video_started);
++}
++
+ static ssize_t show_firstapts(struct class *class,
+ 		struct class_attribute *attr, char *buf)
+ {
+@@ -1831,7 +1837,7 @@ static ssize_t store_vpause_flag(struct class *class,
+ static ssize_t show_slowsync_enable(struct class *class,
+ 		struct class_attribute *attr, char *buf)
+ {
+-	return sprintf(buf, "slowsync enable:0x%x\n",
++	return sprintf(buf, "0x%x\n",
+ 				   tsync_get_slowsync_enable());
+ }
+ 
+@@ -1913,6 +1919,8 @@ static struct class_attribute tsync_class_attrs[] = {
+ 	store_firstapts),
+ 	__ATTR(checkin_firstvpts, 0644, show_checkin_firstvpts,
+ 	NULL),
++	__ATTR(tsync_video_started, 0444, show_tsync_video_started,
++	NULL),
+ 	__ATTR_NULL
+ };
+ 
+-- 
+2.11.0
+
