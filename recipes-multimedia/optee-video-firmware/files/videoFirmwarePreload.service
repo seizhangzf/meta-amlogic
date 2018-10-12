@@ -1,0 +1,12 @@
+[Unit]
+Description=Amlogic OPTEE Video Firmware Preload Service
+After=tee-supplicant.service
+Requires=tee-supplicant.service 
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/tee_preload_fw /lib/firmware/video/video_ucode.bin
+
+[Install]
+WantedBy=multi-user.target

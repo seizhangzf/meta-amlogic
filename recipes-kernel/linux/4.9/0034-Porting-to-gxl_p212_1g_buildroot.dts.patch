@@ -1,20 +1,18 @@
-From 344f0bebeb6be4c35a805c36b38890997dcf1bd4 Mon Sep 17 00:00:00 2001
+From 59f5e405b3505da3c095836e0e8be5851283d272 Mon Sep 17 00:00:00 2001
 From: Mingyen Hung <mingyen.hung@amlogic.com>
-Date: Mon, 29 Jan 2018 19:15:00 +0800
+Date: Thu, 4 Oct 2018 18:39:25 +0800
 Subject: [PATCH] Porting to gxl_p212_1g_buildroot.dts
-
-Most compoents are from gxl_p212_2g_buildroot.dts
 
 Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
 ---
- arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
+ arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts
-index f4ac749e9982..f7d75f454b6a 100644
+index 13fb0af0c2a7..4a763f3e3519 100644
 --- a/arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts
 +++ b/arch/arm64/boot/dts/amlogic/gxl_p212_1g_buildroot.dts
-@@ -36,6 +36,7 @@
+@@ -37,6 +37,7 @@
  	};
  	ion_dev {
  		compatible = "amlogic, ion_dev";
@@ -22,7 +20,7 @@ index f4ac749e9982..f7d75f454b6a 100644
  	};
  	memory@00000000 {
  		device_type = "memory";
-@@ -60,12 +61,11 @@
+@@ -61,12 +62,11 @@
  			reg = <0x0 0x05300000 0x0 0x2000000>;
  			no-map;
  		};
@@ -37,35 +35,25 @@ index f4ac749e9982..f7d75f454b6a 100644
  		};
  		//don't put other dts in front of fb_reserved
  
-@@ -544,9 +544,9 @@
+@@ -542,8 +542,8 @@
  			&clkc CLKID_USB1_TO_DDR
  			&clkc CLKID_USB1>;
  		clock-names = "usb_general",
 -						"usb1",
 -						"usb1_to_ddr";
--	};
 +			"usb1",
 +			"usb1_to_ddr";
-+		};
+ 	};
  
  	meson-amvideom {
- 		compatible = "amlogic, amvideom";
-@@ -690,7 +690,6 @@
+@@ -718,7 +718,6 @@
  
  	meson-fb {
- 		compatible = "amlogic, meson-fb";
+ 		compatible = "amlogic, meson-gxl";
 -		memory-region = <&fb_reserved>;
  		dev_name = "meson-fb";
  		status = "okay";
  		interrupts = <0 3 1
-@@ -1200,7 +1199,6 @@
- 			key-permit = "read","write","del";
- 		};
- 	};//End unifykey
--
- };
- &efuse {
- 	status = "ok";
 -- 
 2.11.0
 

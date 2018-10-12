@@ -4,7 +4,7 @@ SUMMARY = "Optee tdk kernel driver"
 LICENSE = "CLOSED"
 
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=tdk-v2.4"
-SRCREV = "8fe3d0ce9a57dcd35b6feb35d4df79a4ab425d0c"
+SRCREV = "bca0ab730d6e9701730fdc1f3015ccb0abfe60b9"
 
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"

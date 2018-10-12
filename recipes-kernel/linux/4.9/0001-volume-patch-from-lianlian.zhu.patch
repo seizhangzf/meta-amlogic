@@ -1,18 +1,18 @@
-From 2802030220516c00374fe44bb9d048f71f3a47bc Mon Sep 17 00:00:00 2001
-From: Matthew Shyu <matthew.shyu@amlogic.com>
-Date: Mon, 3 Jul 2017 16:22:54 +0800
+From 60e64abba38e74c60154ed7141d8ab20f045a550 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Fri, 5 Oct 2018 10:53:38 +0800
 Subject: [PATCH] volume-patch-from-lianlian.zhu
 
 ---
- sound/soc/amlogic/meson/i2s.c | 168 ++++++++++++++++++++++++++++++++++--------
+ sound/soc/amlogic/meson/i2s.c | 173 +++++++++++++++++++++++++++++++++---------
  sound/soc/amlogic/meson/i2s.h |   9 +++
- 2 files changed, 145 insertions(+), 32 deletions(-)
+ 2 files changed, 147 insertions(+), 35 deletions(-)
 
 diff --git a/sound/soc/amlogic/meson/i2s.c b/sound/soc/amlogic/meson/i2s.c
-index a4f8e56a2803..e8f1068001ce 100644
+index af1dcbddfd19..73a2b787e172 100644
 --- a/sound/soc/amlogic/meson/i2s.c
 +++ b/sound/soc/amlogic/meson/i2s.c
-@@ -57,6 +57,9 @@
+@@ -60,6 +60,9 @@
  #define XRUN_NUM 10 /*10ms*10=100ms timeout*/
  #endif
  
@@ -22,10 +22,10 @@ index a4f8e56a2803..e8f1068001ce 100644
  unsigned long aml_i2s_playback_start_addr;
  EXPORT_SYMBOL(aml_i2s_playback_start_addr);
  
-@@ -72,6 +75,21 @@ EXPORT_SYMBOL(aml_i2s_playback_channel);
- unsigned int aml_i2s_playback_format = 16;
- EXPORT_SYMBOL(aml_i2s_playback_format);
+@@ -77,6 +80,21 @@ EXPORT_SYMBOL(aml_i2s_playback_format);
  
+ unsigned int aml_i2s_playback_running_flag;
+ EXPORT_SYMBOL(aml_i2s_playback_running_flag);
 +static struct audio_mixer_control audio_mixer_ctl;
 +int get_mixer_output_volume(void)
 +{
@@ -41,38 +41,42 @@ index a4f8e56a2803..e8f1068001ce 100644
 +	return 0;
 +}
 +
+ 
  static int trigger_underrun;
  void aml_audio_hw_trigger(void)
- {
-@@ -703,6 +721,8 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
- 	void *ubuf = tmp_buf->buffer_start;
+@@ -757,6 +775,8 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+ 	struct aml_audio_buffer *tmp_buf = buffer->private_data;
  	struct audio_stream *s = &prtd->s;
  	struct device *dev = substream->pcm->card->dev;
 +	register unsigned int vol =
 +		(audio_mixer_ctl.output_volume*(1<<VOLUME_SHIFT))/VOLUME_SCALE;
  #ifndef CONFIG_AMLOGIC_SND_SPLIT_MODE
+ 	void *ubuf = tmp_buf->buffer_start;
  	int i = 0, j = 0;
- 	int align = runtime->channels * 32;
-@@ -761,7 +781,17 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -824,9 +844,19 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  
  	if (access_ok(VERIFY_READ, buf, frames_to_bytes(runtime, count))) {
  #ifdef CONFIG_AMLOGIC_SND_SPLIT_MODE
--		memcpy(hwbuf, ubuf, n);
+-		res = copy_from_user(hwbuf, buf, n);
+-		if (res)
+-			return -EFAULT;
 +		if (runtime->format == SNDRV_PCM_FORMAT_S16_LE) {
 +			int16_t *tfrom, *to;
 +			int i = 0;
 +
-+			tfrom = (int16_t *) ubuf;
++			tfrom = (int16_t *) buf;
 +			to = (int16_t *) hwbuf;
 +			for (i = 0; i < n/2; i++)
 +				*to++ = (int16_t)(VOL_CTL(*tfrom++));
 +		} else {
-+			memcpy(hwbuf, ubuf, n);
++			res = copy_from_user(hwbuf, buf, n);
++			if (res)
++				return -EFAULT;
 +		}
  #else
  		if (runtime->format == SNDRV_PCM_FORMAT_S16_LE) {
  			int16_t *tfrom, *to;
-@@ -783,14 +813,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -848,14 +878,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  				sbr = to + 16 * 7;
  				for (j = 0; j < n; j += 256) {
  					for (i = 0; i < 16; i++) {
@@ -103,7 +107,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					lf += 7 * 16;
  					cf += 7 * 16;
-@@ -809,8 +847,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -874,8 +912,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  
  				for (j = 0; j < n; j += 64) {
  					for (i = 0; i < 16; i++) {
@@ -116,7 +120,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					left += 16;
  					right += 16;
-@@ -837,14 +877,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -902,14 +942,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  				sbr = to + 8 * 7;
  				for (j = 0; j < n; j += 256) {
  					for (i = 0; i < 8; i++) {
@@ -147,7 +151,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					lf += 7 * 8;
  					cf += 7 * 8;
-@@ -863,8 +911,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -928,8 +976,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  
  				for (j = 0; j < n; j += 64) {
  					for (i = 0; i < 8; i++) {
@@ -160,7 +164,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					left += 8;
  					right += 8;
-@@ -891,14 +941,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -956,14 +1006,22 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  				sbr = to + 8 * 7;
  				for (j = 0; j < n; j += 256) {
  					for (i = 0; i < 8; i++) {
@@ -191,7 +195,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					lf += 7 * 8;
  					cf += 7 * 8;
-@@ -917,8 +975,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
+@@ -982,8 +1040,10 @@ static int aml_i2s_copy_playback(struct snd_pcm_runtime *runtime, int channel,
  
  				for (j = 0; j < n; j += 64) {
  					for (i = 0; i < 8; i++) {
@@ -204,7 +208,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  					}
  					left += 8;
  					right += 8;
-@@ -1218,6 +1278,35 @@ static int aml_i2s_probe(struct snd_soc_platform *platform)
+@@ -1352,6 +1412,35 @@ static int aml_i2s_probe(struct snd_soc_platform *platform)
  			aml_i2s_controls, ARRAY_SIZE(aml_i2s_controls));
  }
  
@@ -240,7 +244,7 @@ index a4f8e56a2803..e8f1068001ce 100644
  struct snd_soc_platform_driver aml_soc_platform = {
  	.probe = aml_i2s_probe,
  	.ops = &aml_i2s_ops,
-@@ -1227,12 +1316,27 @@ struct snd_soc_platform_driver aml_soc_platform = {
+@@ -1361,13 +1450,27 @@ struct snd_soc_platform_driver aml_soc_platform = {
  
  static int aml_soc_platform_probe(struct platform_device *pdev)
  {
@@ -265,16 +269,17 @@ index a4f8e56a2803..e8f1068001ce 100644
  static int aml_soc_platform_remove(struct platform_device *pdev)
  {
  	snd_soc_unregister_platform(&pdev->dev);
+-
 +	class_unregister(&audio_mixer_ctl.aml_i2s_class);
  	return 0;
  }
  
 diff --git a/sound/soc/amlogic/meson/i2s.h b/sound/soc/amlogic/meson/i2s.h
-index b032cb3d6b9b..96339547eb8b 100644
+index ac8e725155bd..5ed94fb1be0a 100644
 --- a/sound/soc/amlogic/meson/i2s.h
 +++ b/sound/soc/amlogic/meson/i2s.h
-@@ -54,6 +54,15 @@ struct aml_audio_buffer {
- 	int cached_len;
+@@ -59,6 +59,15 @@ struct aml_audio_buffer {
+ 	int cached_sample;
  };
  
 +struct audio_mixer_control {

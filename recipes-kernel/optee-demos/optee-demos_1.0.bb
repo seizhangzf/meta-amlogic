@@ -3,7 +3,7 @@ LICENSE = "Closed"
 
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=tdk-v2.4"
 SRC_URI += "file://0001-For-compilation-with-arm-rdk-linux-gnueabi-gcc.patch"
-SRCREV = "8fe3d0ce9a57dcd35b6feb35d4df79a4ab425d0c"
+SRCREV = "bca0ab730d6e9701730fdc1f3015ccb0abfe60b9"
 do_configure[noexec] = "1"
 #do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
