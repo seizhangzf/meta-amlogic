@@ -4,7 +4,7 @@ DEPENDS = "optee-tee-supplicant libplayer bzip2 libxml2"
 RDEPENDS_${PN} = "libbz2"
 
 BRANCH = "tdk-v2.4-video-firmware"
-SRC_URI = "git:///mnt/fileroot2/mingyen.hung/morty-check/build-p230-fbdev-TVP/optee-demos/1.0-r0/git;protocol=file;branch=${BRANCH}"
+SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=${BRANCH}"
 SRC_URI += "file://videoFirmwarePreload.service"
 SRCREV="${AUTOREV}"
 
