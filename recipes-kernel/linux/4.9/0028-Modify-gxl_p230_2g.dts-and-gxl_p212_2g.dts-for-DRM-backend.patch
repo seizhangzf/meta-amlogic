@@ -9,34 +9,21 @@ Make most part of dts the same as that of p212
  arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 4 ++--
  2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-index 13da1eed2580..afccc3ee51f8 100644
---- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-+++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
-@@ -727,7 +727,7 @@
- 		compatible = "amlogic, meson-fb";
- 		memory-region = <&logo_reserved>;
- 		dev_name = "meson-fb";
--		status = "okay";
-+		status = "disabled";
- 		interrupts = <0 3 1
- 			0 89 1>;
- 		interrupt-names = "viu-vsync", "rdma";
-diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-index 33321aaac223..8e325b0a6935 100644
---- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-+++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
-@@ -89,7 +89,7 @@
+Index: common/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+===================================================================
+--- common.orig/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts	2019-02-14 18:42:00.110175128 +0800
++++ common/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts	2019-02-14 18:43:54.034177265 +0800
+@@ -98,7 +98,7 @@
  		ion_reserved:linux,ion-dev {
  			compatible = "shared-dma-pool";
  			reusable;
--			size = <0x0 0x5C00000>;
-+			size = <0x0 0x8000000>;
+-			size = <0x0 0x7C00000>;
+++			size = <0x0 0x8000000>;
  			alignment = <0x0 0x400000>;
  		};
  
-@@ -702,7 +702,7 @@
- 		compatible = "amlogic, meson-fb";
+@@ -756,7 +756,7 @@
+ 		compatible = "amlogic, meson-gxl";
  		memory-region = <&logo_reserved>;
  		dev_name = "meson-fb";
 -		status = "okay";
@@ -44,6 +31,25 @@ index 33321aaac223..8e325b0a6935 100644
  		interrupts = <0 3 1
  			0 89 1>;
  		interrupt-names = "viu-vsync", "rdma";
--- 
-2.11.0
-
+Index: common/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+===================================================================
+--- common.orig/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts	2019-02-14 18:42:00.110175128 +0800
++++ common/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts	2019-02-14 18:43:36.782176942 +0800
+@@ -97,7 +97,7 @@
+ 		ion_reserved:linux,ion-dev {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x0 0x7C00000>;
+++			size = <0x0 0x8000000>;
+ 			alignment = <0x0 0x400000>;
+ 		};
+ 
+@@ -745,7 +745,7 @@
+ 		compatible = "amlogic, meson-gxl";
+ 		memory-region = <&logo_reserved>;
+ 		dev_name = "meson-fb";
+-		status = "okay";
++		status = "disabled";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";

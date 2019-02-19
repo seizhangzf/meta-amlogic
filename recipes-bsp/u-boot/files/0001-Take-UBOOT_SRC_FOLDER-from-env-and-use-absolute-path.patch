@@ -1,0 +1,386 @@
+From e46d1675427dc5aa72a8dc969d424033931e94ab Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Mon, 18 Feb 2019 15:06:08 +0800
+Subject: [PATCH] Take UBOOT_SRC_FOLDER from env and use absolute path in
+ scripts
+
+Change-Id: I64d374e80b14fd7893c099bbe55002993a06581a
+---
+ axg/build.sh    |  6 +++---
+ g12a/build.sh   | 14 +++++++-------
+ g12b/build.sh   | 14 +++++++-------
+ gxb/build.sh    |  6 +++---
+ gxl/build.sh    |  6 +++---
+ gxtvbb/build.sh |  6 +++---
+ mk              |  3 ++-
+ mk_script.sh    | 19 ++++++++++---------
+ tl1/build.sh    | 14 +++++++-------
+ txhd/build.sh   |  6 +++---
+ txl/build.sh    |  6 +++---
+ txlx/build.sh   |  6 +++---
+ variables.sh    | 13 ++++++-------
+ 13 files changed, 60 insertions(+), 59 deletions(-)
+
+diff --git a/axg/build.sh b/axg/build.sh
+index 1c03dbd..9826f8c 100755
+--- a/axg/build.sh
++++ b/axg/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -171,8 +171,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/g12a/build.sh b/g12a/build.sh
+index 0b69cb7..0617dec 100755
+--- a/g12a/build.sh
++++ b/g12a/build.sh
+@@ -86,7 +86,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -111,10 +111,10 @@ function encrypt() {
+ 	encrypt_step --bootmk  --output ${BUILD_PATH}/u-boot.bin \
+ 		--bl2   ${BUILD_PATH}/bl2.n.bin.sig  --bl30  ${BUILD_PATH}/bl30_new.bin.enc  \
+ 		--bl31  ${BUILD_PATH}/bl31.${BL3X_SUFFIX}.enc ${FIP_BL32_PROCESS} --bl33  ${BUILD_PATH}/bl33.bin.enc ${V3_PROCESS_FLAG} \
+-		--ddrfw1  ./${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ./${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
+-		--ddrfw3  ./${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ./${FIP_FOLDER}${CUR_SOC}/piei.fw \
+-		--ddrfw5  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
+-		--ddrfw7  ./${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ./${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
++		--ddrfw1  ${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
++		--ddrfw3  ${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ${FIP_FOLDER}${CUR_SOC}/piei.fw \
++		--ddrfw5  ${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
++		--ddrfw7  ${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
+ 
+ 	if [ "y" == "${CONFIG_AML_CRYPTO_UBOOT}" ]; then
+ 		encrypt_step --efsgen --amluserkey ${UBOOT_SRC_FOLDER}/${BOARD_DIR}/${AML_KEY_BLOB_NANE} \
+@@ -166,8 +166,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/g12b/build.sh b/g12b/build.sh
+index 6f5c564..094b455 100755
+--- a/g12b/build.sh
++++ b/g12b/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -106,10 +106,10 @@ function encrypt() {
+ 	encrypt_step --bootmk  --output ${BUILD_PATH}/u-boot.bin \
+ 		--bl2   ${BUILD_PATH}/bl2.n.bin.sig  --bl30  ${BUILD_PATH}/bl30_new.bin.enc  \
+ 		--bl31  ${BUILD_PATH}/bl31.${BL3X_SUFFIX}.enc ${FIP_BL32_PROCESS} --bl33  ${BUILD_PATH}/bl33.bin.enc ${V3_PROCESS_FLAG} \
+-		--ddrfw1  ./${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ./${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
+-		--ddrfw3  ./${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ./${FIP_FOLDER}${CUR_SOC}/piei.fw \
+-		--ddrfw5  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
+-		--ddrfw7  ./${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ./${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
++		--ddrfw1  ${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
++		--ddrfw3  ${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ${FIP_FOLDER}${CUR_SOC}/piei.fw \
++		--ddrfw5  ${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
++		--ddrfw7  ${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
+ 
+ 	if [ "y" == "${CONFIG_AML_CRYPTO_UBOOT}" ]; then
+ 		encrypt_step --efsgen --amluserkey ${UBOOT_SRC_FOLDER}/${BOARD_DIR}/${AML_KEY_BLOB_NANE} \
+@@ -161,8 +161,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/gxb/build.sh b/gxb/build.sh
+index b6f7407..6e1248f 100755
+--- a/gxb/build.sh
++++ b/gxb/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -146,8 +146,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/gxl/build.sh b/gxl/build.sh
+index c80feb4..befb994 100755
+--- a/gxl/build.sh
++++ b/gxl/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -171,8 +171,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/gxtvbb/build.sh b/gxtvbb/build.sh
+index b6f7407..6e1248f 100755
+--- a/gxtvbb/build.sh
++++ b/gxtvbb/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -146,8 +146,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/mk b/mk
+index 9b77926..eda5169 100755
+--- a/mk
++++ b/mk
+@@ -1,4 +1,5 @@
+ #!/bin/bash
+ ### DO NOT EDIT THIS FILE ###
+-source fip/mk_script.sh
++DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
++source $DIR/fip/mk_script.sh
+ ### DO NOT EDIT THIS FILE ###
+diff --git a/mk_script.sh b/mk_script.sh
+index fe01d2f..d509f5e 100755
+--- a/mk_script.sh
++++ b/mk_script.sh
+@@ -6,15 +6,16 @@
+ #  2017.05.20-2017.05.26 Update for txlx and ATF1.3
+ 
+ # include compile check script
+-source fip/check_compile.sh
+-source fip/variables.sh
+-source fip/lib.sh
+-source fip/build_bl2.sh
+-source fip/build_bl30.sh
+-source fip/build_bl31.sh
+-source fip/build_bl32.sh
+-source fip/build_bl33.sh
+-source fip/build_bl40.sh
++DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
++source $DIR/check_compile.sh
++source $DIR/variables.sh
++source $DIR/lib.sh
++source $DIR/build_bl2.sh
++source $DIR/build_bl30.sh
++source $DIR/build_bl31.sh
++source $DIR/build_bl32.sh
++source $DIR/build_bl33.sh
++source $DIR/build_bl40.sh
+ 
+ 
+ function init_variable_early() {
+diff --git a/tl1/build.sh b/tl1/build.sh
+index ba2b3a4..7995c62 100755
+--- a/tl1/build.sh
++++ b/tl1/build.sh
+@@ -86,7 +86,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -111,10 +111,10 @@ function encrypt() {
+ 	encrypt_step --bootmk  --output ${BUILD_PATH}/u-boot.bin \
+ 		--bl2   ${BUILD_PATH}/bl2.n.bin.sig  --bl30  ${BUILD_PATH}/bl30_new.bin.enc  \
+ 		--bl31  ${BUILD_PATH}/bl31.${BL3X_SUFFIX}.enc ${FIP_BL32_PROCESS} --bl33  ${BUILD_PATH}/bl33.bin.enc ${V3_PROCESS_FLAG} \
+-		--ddrfw1  ./${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ./${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
+-		--ddrfw3  ./${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ./${FIP_FOLDER}${CUR_SOC}/piei.fw \
+-		--ddrfw5  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ./${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
+-		--ddrfw7  ./${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ./${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
++		--ddrfw1  ${FIP_FOLDER}${CUR_SOC}/ddr4_1d.fw --ddrfw2  ${FIP_FOLDER}${CUR_SOC}/ddr4_2d.fw \
++		--ddrfw3  ${FIP_FOLDER}${CUR_SOC}/ddr3_1d.fw --ddrfw4  ${FIP_FOLDER}${CUR_SOC}/piei.fw \
++		--ddrfw5  ${FIP_FOLDER}${CUR_SOC}/lpddr4_1d.fw --ddrfw6  ${FIP_FOLDER}${CUR_SOC}/lpddr4_2d.fw \
++		--ddrfw7  ${FIP_FOLDER}${CUR_SOC}/diag_lpddr4.fw --ddrfw8 ${FIP_FOLDER}${CUR_SOC}/${DDR_FW_NAME}
+ 
+ 	if [ "y" == "${CONFIG_AML_CRYPTO_UBOOT}" ]; then
+ 		encrypt_step --efsgen --amluserkey ${UBOOT_SRC_FOLDER}/${BOARD_DIR}/${AML_KEY_BLOB_NANE} \
+@@ -166,8 +166,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/txhd/build.sh b/txhd/build.sh
+index 1c03dbd..9826f8c 100755
+--- a/txhd/build.sh
++++ b/txhd/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -171,8 +171,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/txl/build.sh b/txl/build.sh
+index 1c03dbd..9826f8c 100755
+--- a/txl/build.sh
++++ b/txl/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -171,8 +171,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/txlx/build.sh b/txlx/build.sh
+index 7c47563..ea7961f 100755
+--- a/txlx/build.sh
++++ b/txlx/build.sh
+@@ -81,7 +81,7 @@ function cleanup() {
+ function encrypt_step() {
+ 	dbg "encrypt: $@"
+ 	local ret=0
+-	./${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
++	${FIP_FOLDER}${CUR_SOC}/aml_encrypt_${CUR_SOC} $@
+ 	ret=$?
+ 	if [ 0 != $ret ]; then
+ 		echo "Err! aml_encrypt_${CUR_SOC} return $ret"
+@@ -171,8 +171,8 @@ function build_fip() {
+ 	FIP_ARGS="${FIP_ARGS}"" --bl33 ${BUILD_PATH}/bl33.bin"
+ 
+ 	# create fip.bin
+-	./${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
+-	./${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create ${FIP_ARGS} ${BUILD_PATH}/fip.bin
++	${FIP_FOLDER}/fip_create --dump ${BUILD_PATH}/fip.bin
+ 
+ 	# build final bootloader
+ 	cat ${BUILD_PATH}/bl2_new.bin ${BUILD_PATH}/fip.bin > ${BUILD_PATH}/boot_new.bin
+diff --git a/variables.sh b/variables.sh
+index a0a41d2..6dfc904 100755
+--- a/variables.sh
++++ b/variables.sh
+@@ -1,17 +1,16 @@
+ 
+-declare UBOOT_SRC_FOLDER="bl33"
+ declare MAIN_FOLDER=""
+ export UBOOT_SRC_FOLDER MAIN_FOLDER
++DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ 
+ # build environment
+-BUILD_FOLDER="build/"
+-FIP_FOLDER="fip/"
++FIP_FOLDER="$DIR/"
+ MANIFEST=".repo/manifest.xml"
+-FIP_BUILD_FOLDER="fip/_tmp/"
++FIP_BUILD_FOLDER="$DIR/_tmp/"
+ 
+ # include uboot pre-build defines
+-SOURCE_FILE=("bl33/build/.config")
+-CONFIG_FILE=("bl33/build/include/autoconf.mk")
++SOURCE_FILE=("${UBOOT_SRC_FOLDER}/build/.config")
++CONFIG_FILE=("${UBOOT_SRC_FOLDER}/build/include/autoconf.mk")
+ 
+ # variables
+ declare BOARD_DIR=""
+@@ -26,4 +25,4 @@ function export_variables() {
+ 	export MANIFEST
+ 	export CUR_SOC
+ 	export BOARD_DIR
+-}
+\ No newline at end of file
++}
+-- 
+2.11.0
+
