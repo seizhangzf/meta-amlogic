@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1707d6db1d42237583f50183a5651ecb"
 
 EXTRA_OEMAKE = ''
 
-DEPENDS = "bl2 bl30 bl31 bl31-1.3 fip-native"
+DEPENDS = "bl2 bl30 bl31 bl31-1.3 bl32 fip-native"
 #SRC_URI = "git://git.myamlogic.com/uboot.git;nobranch=1"
 SRC_URI = "git:///home/matthew.shyu/workspace2/rdkv-morty/amlogic/uboot/.git/;protocol=file;nobranch=1"
 
@@ -46,11 +46,21 @@ BL31_tl1 = "bl31_1.3"
 BL31_txhd = "bl31_1.3"
 BL31_txlx = "bl31_1.3"
 
+BL32_SOC_FAMILY = "gx"
+BL32_SOC_FAMILY_axg = "axg"
+BL32_SOC_FAMILY_g12a = "g12a"
+BL32_SOC_FAMILY_g12b = "g12a"
+BL32_SOC_FAMILY_gxl = "gx"
+BL32_SOC_FAMILY_gxtvbb = "gx"
+BL32_SOC_FAMILY_tl1 = "tl1"
+BL32_SOC_FAMILY_tlhd = "gx"
+BL32_SOC_FAMILY_txl = "gx"
+BL32_SOC_FAMILY_txlx = "txlx"
+
 do_compile () {
     export UBOOT_SRC_FOLDER=${S}
     mkdir -p BUILD_FOLDER=${S}/fip/
     export BUILD_FOLDER=${S}/fip/
-    mk ${UBOOT_TYPE} --bl2 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl2/bin/${SOC_FAMILY}/bl2.bin  --bl30 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl30/bin/${SOC_FAMILY}/bl30.bin --bl31 ${STAGING_DIR_TARGET}${datadir}/bootloader/${BL31}/bin/${SOC_FAMILY}/bl31.img
-#--bl32 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl32/${SOC_FAMILY}/bl32.bin
+    mk ${UBOOT_TYPE} --bl2 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl2/bin/${SOC_FAMILY}/bl2.bin  --bl30 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl30/bin/${SOC_FAMILY}/bl30.bin --bl31 ${STAGING_DIR_TARGET}${datadir}/bootloader/${BL31}/bin/${SOC_FAMILY}/bl31.img --bl32 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 }
 
