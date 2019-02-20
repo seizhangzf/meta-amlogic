@@ -15,13 +15,13 @@ Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
  1 file changed, 8 insertions(+)
 
 diff --git a/drivers/amlogic/media/frame_sync/tsync.c b/drivers/amlogic/media/frame_sync/tsync.c
-index cb2fc32d7cf0..bfa6cae13308 100644
+index df091fe..c4c7537 100644
 --- a/drivers/amlogic/media/frame_sync/tsync.c
 +++ b/drivers/amlogic/media/frame_sync/tsync.c
-@@ -1838,6 +1838,12 @@ static ssize_t show_firstvpts(struct class *class,
+@@ -1844,6 +1844,12 @@ static ssize_t show_firstvpts(struct class *class,
  	return sprintf(buf, "0x%x\n", timestamp_firstvpts_get());
  }
- 
+
 +static ssize_t show_tsync_video_started(struct class *class,
 +		struct class_attribute *attr, char *buf)
 +{
@@ -31,15 +31,12 @@ index cb2fc32d7cf0..bfa6cae13308 100644
  static ssize_t show_firstapts(struct class *class,
  		struct class_attribute *attr, char *buf)
  {
-@@ -2003,6 +2009,8 @@ static struct class_attribute tsync_class_attrs[] = {
+@@ -2019,6 +2025,8 @@ static struct class_attribute tsync_class_attrs[] = {
  	NULL),
- 	__ATTR(apts_lookup, 0644, show_apts_lookup,
- 		store_apts_lookup),
+ 	__ATTR(checkin_firstapts, 0644, show_checkin_firstapts,
+ 	NULL),
 +	__ATTR(tsync_video_started, 0444, show_tsync_video_started,
 +	NULL),
  	__ATTR_NULL
  };
- 
--- 
-2.11.0
 

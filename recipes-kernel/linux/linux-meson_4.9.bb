@@ -15,7 +15,7 @@ SRC_URI += "file://meson.scc \
 
 SRC_URI += "file://0001-volume-patch-from-lianlian.zhu.patch"
 #SRC_URI += "file://0002-Fix-dump_backtrace-caused-by-__might_sleep.patch"
-SRC_URI += "file://0003-Fix-amlvideo2-crash.patch"
+#SRC_URI += "file://0003-Fix-amlvideo2-crash.patch"
 SRC_URI += "file://0004-dts-enable-meson-drm.patch"
 SRC_URI += "file://0005-use-old-partition-on-p230.patch"
 
@@ -30,7 +30,7 @@ MIRRORS_prepend += "git://git@openlinux.amlogic.com/yocto/kernel/common.git;prot
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
 
-SRCREV="17a672d3e8ee5d034a14231e09ab9b6925356c83"
+SRCREV="4e27896d9c550738640fcace31130d58eb97b9a3"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
