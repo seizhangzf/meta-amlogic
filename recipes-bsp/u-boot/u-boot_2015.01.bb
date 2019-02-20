@@ -1,5 +1,5 @@
 require u-boot-meson.inc
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015:"
 
 LICENSE = "GPLv2+"
 
@@ -8,12 +8,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1707d6db1d42237583f50183a5651ecb"
 EXTRA_OEMAKE = ''
 
 DEPENDS = "bl2 bl30 bl31 bl31-1.3 bl32 fip-native"
-#SRC_URI = "git://git.myamlogic.com/uboot.git;nobranch=1"
-SRC_URI = "git:///home/matthew.shyu/workspace2/rdkv-morty/amlogic/uboot/.git/;protocol=file;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/uboot.git;nobranch=1"
+SRC_URI += "file://0001-disable-dtbo-in-Linux.patch"
 
 do_configure[noexec] = "1"
 
-#MIRRORS_prepend += "git://git.myamlogic.com/uboot.git git://git@openlinux.amlogic.com/yocto/uboot.git;protocol=ssh; \n"
+MIRRORS_prepend += "git://git.myamlogic.com/uboot.git git://git@openlinux.amlogic.com/yocto/uboot.git;protocol=ssh; \n"
 SRCREV="d8c242475d617be3cfeeda3452c4d2ec5ca6dae2"
 
 S = "${WORKDIR}/git"

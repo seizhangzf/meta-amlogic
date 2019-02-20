@@ -4,7 +4,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 ROOT_MOUNT="/rootfs"
 INIT="/sbin/init"
-ROOT_DEVICE=""
+ROOT_DEVICE="/dev/system"
 MOUNT="/bin/mount"
 UMOUNT="/bin/umount"
 FIRMWARE=""

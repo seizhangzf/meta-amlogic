@@ -1,12 +1,11 @@
 inherit image
-#inherit more-image
-#inherit more-new
 SDKEXTCLASS ?= "${@['populate_sdk', 'populate_sdk_ext']['linux' in d.getVar("SDK_OS", True)]}"
 inherit ${SDKEXTCLASS}
 
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-PACKAGE_INSTALL += "\
+IMAGE_INSTALL = "udev busybox ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL} ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS}"
+IMAGE_INSTALL += "\
                    initramfs-meson-boot \
                    e2fsprogs \
                    kernel-modules \
@@ -49,8 +48,14 @@ python do_install_mkbootimg() {
 do_install_mkbootimg[nostamp] = "1"
 addtask install_mkbootimg before do_bundle_initramfs_dtb
 
+KERNEL_BOOTARGS = "root=/dev/system rootfstype=ext4"
+KERNEL_BOOTARGS_p212 = "root=/dev/system rootfstype=ext4"
+KERNEL_BOOTARGS_p230 = "root=/dev/system rootfstype=ext4"
+KERNEL_BOOTARGS_u200 = "root=/dev/system rootfstype=ext4"
+KERNEL_BOOTARGS_u212 = "root=/dev/system rootfstype=ext4"
+
 do_bundle_initramfs_dtb() {
-	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
+	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --cmdline ${KERNEL_BOOTARGS} --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 addtask bundle_initramfs_dtb before do_image_complete after do_image_cpio
