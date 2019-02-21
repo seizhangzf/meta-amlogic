@@ -19,7 +19,7 @@ SRC_URI += "file://0001-volume-patch-from-lianlian.zhu.patch"
 SRC_URI += "file://0004-dts-enable-meson-drm.patch"
 SRC_URI += "file://0005-use-old-partition-on-p230.patch"
 
-DRM_SRC = "file://0028-Modify-gxl_p230_2g.dts-and-gxl_p212_2g.dts-for-DRM-backend.patch"
+DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch"
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
 #SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
 SRC_URI += "file://0034-Porting-to-gxl_p212_1g_buildroot.dts.patch"
