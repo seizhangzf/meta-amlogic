@@ -61,10 +61,10 @@ read_args() {
                 else
                     console_params="$console_params $arg"
                 fi ;;
-			firmware=*)
-				FIRMWARE=$optarg ;;
-			init=*)
-				init=$optarg ;;
+            firmware=*)
+                FIRMWARE=$optarg ;;
+            init=*)
+                init=$optarg ;;
             debugshell*)
                 if [ -z "$optarg" ]; then
                         shelltimeout=30
@@ -113,17 +113,20 @@ early_setup
 read_args
 
 #Waiting for device to become ready
-i=1
-while [ "$i" -le 30 ]
-do
-    if [ -b "${ROOT_DEVICE}" ]; then
-        echo "${ROOT_DEVICE} is ready now."
-        break
-    fi
-    echo "${ROOT_DEVICE} is not ready.  Waited for ${i} second"
-    sleep 1
-    i=$((i+1))
-done
+
+wait_for_device () {
+    i=1
+    while [ "$i" -le 30 ]
+    do
+        if [ -b "${ROOT_DEVICE}" ]; then
+            echo "${ROOT_DEVICE} is ready now."
+            break
+        fi
+        echo "${ROOT_DEVICE} is not ready.  Waited for ${i} second"
+        sleep 1
+        i=$((i+1))
+    done
+}
 
 format_and_install() {
     if [ -f "/${ROOT_MOUNT}/${FIRMWARE}" ] ; then
@@ -173,6 +176,11 @@ mount_and_boot() {
     mkdir $ROOT_MOUNT
     mknod /dev/loop0 b 7 0 2>/dev/null
 
+    if [ "${FIRMWARE}" != "" ];
+    then
+        ROOT_DEVICE="/dev/mmcblk1p1"
+        wait_for_device
+    fi
 	if [ "$ROOT_DEVICE" != "" ];
 	then
     	if ! mount -o rw,noatime,nodiratime $ROOT_DEVICE $ROOT_MOUNT ; then
@@ -237,4 +245,5 @@ mount_and_boot() {
     boot_root
 }
 
+wait_for_device
 mount_and_boot

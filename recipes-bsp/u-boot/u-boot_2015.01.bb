@@ -32,12 +32,6 @@ SOC_FAMILY_tlhd = "tlhd"
 SOC_FAMILY_txl = "txl"
 SOC_FAMILY_txlx = "txlx"
 
-UBOOT_TYPE = "gxl_p212_v1"
-UBOOT_TYPE_p212 = "gxl_p212_v1"
-UBOOT_TYPE_p230 = "gxl_p230_v1"
-UBOOT_TYPE_u200 = "g12a_u200_v1"
-UBOOT_TYPE_u212 = "g12a_u200_v1"
-
 BL31 = "bl31"
 BL31_axg = "bl31_1.3"
 BL31_g12a = "bl31_1.3"
@@ -61,6 +55,7 @@ do_compile () {
     export UBOOT_SRC_FOLDER=${S}
     mkdir -p BUILD_FOLDER=${S}/fip/
     export BUILD_FOLDER=${S}/fip/
-    mk ${UBOOT_TYPE} --bl2 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl2/bin/${SOC_FAMILY}/bl2.bin  --bl30 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl30/bin/${SOC_FAMILY}/bl30.bin --bl31 ${STAGING_DIR_TARGET}${datadir}/bootloader/${BL31}/bin/${SOC_FAMILY}/bl31.img --bl32 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+    UBOOT_TYPE="${UBOOT_MACHINE}"
+    mk ${UBOOT_TYPE%_config} --bl2 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl2/bin/${SOC_FAMILY}/bl2.bin  --bl30 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl30/bin/${SOC_FAMILY}/bl30.bin --bl31 ${STAGING_DIR_TARGET}${datadir}/bootloader/${BL31}/bin/${SOC_FAMILY}/bl31.img --bl32 ${STAGING_DIR_TARGET}${datadir}/bootloader/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 }
 

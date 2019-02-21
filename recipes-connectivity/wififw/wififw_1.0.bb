@@ -43,12 +43,12 @@ do_install() {
 	mkdir -p ${D}${sysconfdir}/wifi/6210/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6210/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6210/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6210/Wi-Fi/nvram_ap6210.txt ${D}${sysconfdir}/wifi/6210/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6210/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6210/BT/bcm20710a1.hcd ${D}${sysconfdir}/bluetooth/
 #ap6476
 	mkdir -p ${D}${sysconfdir}/wifi/6476/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6476/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6476/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6476/Wi-Fi/nvram_ap6476.txt ${D}${sysconfdir}/wifi/6476/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6476/GPS/*.hcd ${D}${sysconfdir}/wifi/6476/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6476/GPS/bcm2076b1.hcd ${D}${sysconfdir}/bluetooth/
 #ap6493
 	mkdir -p ${D}${sysconfdir}/wifi/6493/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6493/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6493/
@@ -62,7 +62,7 @@ do_install() {
 	mkdir -p ${D}${sysconfdir}/wifi/6330/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6330/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6330/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6330/Wi-Fi/nvram_ap6330.txt ${D}${sysconfdir}/wifi/6330/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6330/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/AP6330/BT/bcm40183b2.hcd ${D}${sysconfdir}/bluetooth/
 #ath10k
 	mkdir -p ${D}/lib/firmware/ath10k/QCA6174/hw3.0/
 	mkdir -p ${D}/lib/firmware/ath10k/QCA9888/hw2.0/
@@ -80,162 +80,107 @@ do_install() {
 	mkdir -p ${D}${sysconfdir}/wifi/62x2/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/62x2/*.bin ${D}${sysconfdir}/wifi/62x2/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/62x2/nvram.txt ${D}${sysconfdir}/wifi/62x2/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/62x2/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/62x2/BT/bcm43241b4.hcd ${D}${sysconfdir}/bluetooth/
 #ap6335
 	mkdir -p ${D}${sysconfdir}/wifi/6335/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6335/*.bin ${D}${sysconfdir}/wifi/6335/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6335/nvram.txt ${D}${sysconfdir}/wifi/6335/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6335/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6335/BT/bcm4335c0.hcd ${D}${sysconfdir}/bluetooth/
 #ap6234
 	mkdir -p ${D}${sysconfdir}/wifi/6234/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6234/*.bin ${D}${sysconfdir}/wifi/6234/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6234/nvram.txt ${D}${sysconfdir}/wifi/6234/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6234/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6234/BT/bcm43341b0.hcd ${D}${sysconfdir}/bluetooth/
 #ap6441
 	mkdir -p ${D}${sysconfdir}/wifi/6441/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6441/*.bin ${D}${sysconfdir}/wifi/6441/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6441/nvram.txt ${D}${sysconfdir}/wifi/6441/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6441/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6441/BT/bcm43341b0.hcd ${D}${sysconfdir}/bluetooth/
 #ap6212
 	mkdir -p ${D}${sysconfdir}/wifi/6212/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6212/*.bin ${D}${sysconfdir}/wifi/6212/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6212/nvram.txt ${D}${sysconfdir}/wifi/6212/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6212/BT/*.hcd ${D}${sysconfdir}/bluetooth/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/6212/BT/bcm43438a0.hcd ${D}${sysconfdir}/bluetooth/
 #bcm4354
 	mkdir -p ${D}${sysconfdir}/wifi/4354/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4354/*.bin ${D}${sysconfdir}/wifi/4354/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4354/nvram*.txt ${D}${sysconfdir}/wifi/4354/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4354/*.hcd ${D}${sysconfdir}/wifi/4354/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4354/bcm4354a1.hcd ${D}${sysconfdir}/bluetooth/
 #bcm4356
 	mkdir -p ${D}${sysconfdir}/wifi/4356/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4356/*.bin ${D}${sysconfdir}/wifi/4356/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4356/nvram*.txt ${D}${sysconfdir}/wifi/4356/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4356/*.hcd ${D}${sysconfdir}/wifi/4356/
-#bcm4358 
-	mkdir -p ${D}${sysconfdir}/wifi/4358/
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/*.bin ${D}${sysconfdir}/wifi/4358/
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/nvram*.txt ${D}${sysconfdir}/wifi/4358/nvram.txt
-	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/*.hcd ${D}${sysconfdir}/wifi/4358/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/4356/bcm4356a2.hcd ${D}${sysconfdir}/bluetooth/
+#bcm43458 
+	mkdir -p ${D}${sysconfdir}/wifi/43458/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/*.bin ${D}${sysconfdir}/wifi/43458/
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/nvram*.txt ${D}${sysconfdir}/wifi/43458/nvram.txt
+	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/BCM4345C0.hcd ${D}${sysconfdir}/bluetooth/
 }
 
 FILES_${PN}-ap6181 = "\
-                ${sysconfdir}/6181/fw_bcm40181a2_apsta.bin \
-                ${sysconfdir}/6181/fw_bcm40181a2.bin \
-                ${sysconfdir}/6181/fw_bcm40181a2_p2p.bin \
-                ${sysconfdir}/6181/nvram_ap6181.txt"
+                ${sysconfdir}/wifi/6181/*"\
 
 FILES_${PN}-ap6210 = "\
-                ${sysconfdir}/6210/fw_bcm40181a2_apsta.bin \
-                ${sysconfdir}/6210/fw_bcm40181a2.bin \
-                ${sysconfdir}/6210/fw_bcm40181a2_p2p.bin \
-                ${sysconfdir}/6210/nvram.txt \
-                ${sysconfdir}/6210/bcm20710a1.hcd"
+                ${sysconfdir}/wifi/6210/* \
+                ${sysconfdir}/bluetooth/bcm20710a1.hcd"
 
 FILES_${PN}-ap6476 = "\
-                ${sysconfdir}/6476/fw_bcm40181a2_apsta.bin \
-                ${sysconfdir}/6476/fw_bcm40181a2.bin \
-                ${sysconfdir}/6476/fw_bcm40181a2_p2p.bin \
-                ${sysconfdir}/6476/nvram.txt \
-                ${sysconfdir}/6476/bcm2076b1.hcd"
+                ${sysconfdir}/wifi/6476/* \
+                ${sysconfdir}/bluetooth/bcm2076b1.hcd"
 
 FILES_${PN}-ap6493 = "\
-                ${sysconfdir}/6493/fw_bcm40183b2_apsta.bin \
-                ${sysconfdir}/6493/fw_bcm40183b2.bin \
-                ${sysconfdir}/6493/fw_bcm40183b2_p2p.bin \
-                ${sysconfdir}/6493/nvram.txt \
-                ${sysconfdir}/6493/bcm40183b2.hcd"
+                ${sysconfdir}/wifi/6493/*"
 
 FILES_${PN}-ap6398 = "\
-                ${sysconfdir}/6398/fw_bcm40183b2_apsta.bin \
-                ${sysconfdir}/6398/fw_bcm40183b2.bin \
-                ${sysconfdir}/6398/fw_bcm40183b2_p2p.bin \
-                ${sysconfdir}/6398/nvram.txt \
-                ${sysconfdir}/6398/bcm40183b2.hcd"
+                ${sysconfdir}/wifi/6398/* \
+                ${sysconfdir}/bluetooth/BCM4359C0SR2.hcd"
 
 FILES_${PN}-ap6330 = "\
-                ${sysconfdir}/6330/fw_bcm40183b2_apsta.bin \
-                ${sysconfdir}/6330/fw_bcm40183b2.bin \
-                ${sysconfdir}/6330/fw_bcm40183b2_p2p.bin \
-                ${sysconfdir}/6330/nvram.txt \
-                ${sysconfdir}/6330/bcm40183b2.hcd"
+                ${sysconfdir}/wifi/6330/* \
+                ${sysconfdir}/bluetooth/bcm40183b2.hcd"
 
 FILES_${PN}-ath10k = "\
                 lib/firmware/ath10k/QCA6174/hw3.0/*.bin \
                 lib/firmware/ath10k/QCA9888/hw2.0/*.bin"
 
 FILES_${PN}-bcm40181 = "\
-                ${sysconfdir}/40181/fw_bcm40181a0_apsta.bin \
-                ${sysconfdir}/40181/fw_bcm40181a2_apsta.bin \
-                ${sysconfdir}/40181/fw_bcm40181a2_p2p.bin \
-                ${sysconfdir}/40181/fw_bcm40181a0.bin \
-                ${sysconfdir}/40181/fw_bcm40181a2.bin \
-                ${sysconfdir}/40181/nvram.txt"
+                ${sysconfdir}/wifi/40181/*"
 
 FILES_${PN}-bcm40183 = "\
-                ${sysconfdir}/40183/fw_bcm40183b2_apsta.bin \
-                ${sysconfdir}/40183/fw_bcm40183b2.bin \
-                ${sysconfdir}/40183/fw_bcm40183b2_p2p.bin \
-                ${sysconfdir}/40183/nvram.txt"
+                ${sysconfdir}/wifi/40183/*"
 
 FILES_${PN}-ap62x2 = "\
-                ${sysconfdir}/wifi/62x2/fw_bcm43241b4_ag_apsta.bin \
-                ${sysconfdir}/wifi/62x2/fw_bcm43241b4_ag.bin \
-                ${sysconfdir}/wifi/62x2/fw_bcm43241b4_ag_p2p.bin \
-                ${sysconfdir}/wifi/62x2/nvram.txt \
-                ${sysconfdir}/wifi/62x2/bcm43241b4.hcd"
+                ${sysconfdir}/wifi/62x2/* \
+                ${sysconfdir}/bluetooth/bcm43241b4.hcd"
 
 FILES_${PN}-ap6335 = "\
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0_ag.bin \
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0e_ag_apsta.bin  \
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0e_ag_p2p.bin \
-                ${sysconfdir}/wifi/6335/nvram.txt \
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0_ag_apsta.bin \
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0_ag_p2p.bin \
-                ${sysconfdir}/wifi/6335/fw_bcm4339a0e_ag.bin \
-                ${sysconfdir}/wifi/6335/nvram_ap6335e.txt \
-                ${sysconfdir}/wifi/6335/bcm4335c0.hcd"
+                ${sysconfdir}/wifi/6335/* \
+                ${sysconfdir}/bluetooth/bcm4335c0.hcd"
 
 FILES_${PN}-ap6234 = "\
-                ${sysconfdir}/wifi/6234/fw_bcm43341b0_ag_apsta.bin \
-                ${sysconfdir}/wifi/6234/fw_bcm43341b0_ag.bin \
-                ${sysconfdir}/wifi/6234/fw_bcm43341b0_ag_p2p.bin \
-                ${sysconfdir}/wifi/6234/nvram.txt \
-                ${sysconfdir}/wifi/6234/bcm43341b0.hcd"
+                ${sysconfdir}/wifi/6234/* \
+                ${sysconfdir}/bluetooth/bcm43341b0.hcd"
 
 FILES_${PN}-ap6441 = "\
-                ${sysconfdir}/wifi/6441/fw_bcm43341b0_ag_apsta.bin \
-                ${sysconfdir}/wifi/6441/fw_bcm43341b0_ag.bin \
-                ${sysconfdir}/wifi/6441/fw_bcm43341b0_ag_p2p.bin \
-                ${sysconfdir}/wifi/6441/nvram.txt \
-                ${sysconfdir}/wifi/6441/bcm43341b0.hcd"
+                ${sysconfdir}/wifi/6441/* \
+                ${sysconfdir}/bluetooth/bcm43341b0.hcd"
 
 FILES_${PN}-ap6212 = "\
-                ${sysconfdir}/wifi/6212/fw_bcm43438a0_apsta.bin \
-                ${sysconfdir}/wifi/6212/fw_bcm43438a0.bin \
-                ${sysconfdir}/wifi/6212/fw_bcm43438a0_p2p.bin \
-                ${sysconfdir}/wifi/6212/nvram.txt \
-                ${sysconfdir}/wifi/6212/bcm43438a0.hcd"
+                ${sysconfdir}/wifi/6212/*\
+                ${sysconfdir}/bluetooth/bcm43438a0.hcd"
 
 FILES_${PN}-bcm4354 = "\
-               ${sysconfdir}/wifi/4354/bcm4354a1.hcd \
-               ${sysconfdir}/wifi/4354/fw_bcm4354a1_ag_apsta.bin \
-               ${sysconfdir}/wifi/4354/fw_bcm4354a1_ag.bin \
-               ${sysconfdir}/wifi/4354/fw_bcm4354a1_ag_p2p.bin \
-               ${sysconfdir}/wifi/4354/nvram.txt"
+               ${sysconfdir}/wifi/4354/* \
+               ${sysconfdir}/bluetooth/bcm4354a1.hcd"
 
 FILES_${PN}-bcm4356 = " \
-                ${sysconfdir}/wifi/4356/bcm4356a2.hcd \
-                ${sysconfdir}/wifi/4356/fw_bcm4356a2_ag_apsta.bin \
-                ${sysconfdir}/wifi/4356/fw_bcm4356a2_ag.bin \
-                ${sysconfdir}/wifi/4356/fw_bcm4356a2_ag_p2p.bin \
-                ${sysconfdir}/wifi/4356/nvram.txt"
+                ${sysconfdir}/wifi/4356/* \
+                ${sysconfdir}/bluetooth/bcm4356a2.hcd"
 
 FILES_${PN}-bcm43458 = " \
-                ${sysconfdir}/wifi/43458/BCM4345C0.hcd \
-                ${sysconfdir}/wifi/43458/fw_bcm43455c0_ag_apsta.bin \
-                ${sysconfdir}/wifi/43458/fw_bcm43455c0_ag.bin \
-                ${sysconfdir}/wifi/43458/fw_bcm43455c0_ag_p2p.bin \
-                ${sysconfdir}/wifi/43458/nvram.txt"
+                ${sysconfdir}/bluetooth/BCM4345C0.hcd \
+                ${sysconfdir}/wifi/43458/*"
 
 # Header file provided by a separate package
 DEPENDS += ""
