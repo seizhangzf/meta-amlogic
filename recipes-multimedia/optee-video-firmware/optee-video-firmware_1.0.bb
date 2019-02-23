@@ -1,7 +1,7 @@
 SUMMARY = "amlogic optee video firmware"
 LICENSE = "CLOSED"
-DEPENDS = "optee-tee-supplicant libplayer bzip2 libxml2"
-RDEPENDS_${PN} = "libbz2"
+DEPENDS = "libplayer bzip2 libxml2"
+RDEPENDS_${PN} = "libbz2 optee-userspace"
 
 BRANCH = "tdk-v2.4-video-firmware"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=${BRANCH}"

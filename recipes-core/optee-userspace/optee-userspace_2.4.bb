@@ -1,18 +1,26 @@
-DESCRIPTION = "optee tee-supplicant"
+DESCRIPTION = "optee and tee-supplicant"
 LICENSE = "Closed"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRCREV = "de7d380fa527e929df31f75ffffa656673031403"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=tdk-v2.4"
 SRC_URI += "file://tee-supplicant.service"
+SRC_URI += "file://0001-For-compilation-with-arm-rdk-linux-gnueabi-gcc.patch"
 
 do_configure[noexec] = "1"
-do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
 
-PROVIDES_${PN} += "tee-supplicant"
+PROVIDES = "optee-userspace-demos"
+
+PACKAGES =+ "\
+    ${PN}-demos \
+"
 
 S = "${WORKDIR}/git"
+
+do_compile_prepend() {
+   unset LDFLAGS
+}
 
 do_install() {
     mkdir -p ${D}${bindir}
@@ -27,12 +35,29 @@ do_install() {
     # systemd service file
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/tee-supplicant.service ${D}${systemd_unitdir}/system/
+
+    # optee-demos
+    install -m 0755 ${S}/demos/hello_world/out/ca/tee_helloworld ${D}${bindir}
+    mkdir -p ${D}/lib/teetz/
+    install -m 0755 ${S}/demos/hello_world/out/ta/8aaaf200-2450-11e4-abe2-0002a5d5c51b.ta ${D}/lib/teetz/
+
 }
 
-FILES_${PN} += "${bindir}/* ${libdir}/libteec.so.1.0 ${libdir}/libteec.so.1"
+FILES_${PN} += " ${libdir}/libteec.so.1.0 \
+                ${libdir}/libteec.so.1"
+
+FILES_${PN} += "${bindir}/tee-supplicant"
+
 FILES_${PN}-dev += "${libdir}/libteec.so"
+
 INSANE_SKIP_${PN} = "ldflags dev-so"
 
 FILES_${PN} += "${systemd_unitdir}/system/tee-supplicant.service"
 SYSTEMD_SERVICE_${PN} = "tee-supplicant.service"
 inherit systemd
+
+# optee-demos
+EXTRA_OEMAKE='-C ${S}/demos/hello_world TA_CROSS_COMPILE=${TARGET_PREFIX} CROSS_COMPILE=${TARGET_PREFIX}'
+FILES_${PN}-demos += "${bindir}/tee_helloworld \
+                      /lib/teetz/8aaaf200-2450-11e4-abe2-0002a5d5c51b.ta"
+RDEPENDS_${PN}-demos += "${PN}"

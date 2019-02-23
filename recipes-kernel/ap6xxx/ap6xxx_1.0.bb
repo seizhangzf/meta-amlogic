@@ -5,7 +5,7 @@ LICENSE = "GPLv2"
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;nobranch=1"
 
-SRCREV = "a6bb23fd533f71ed2360fc1e38d5a20f172c2b38"
+SRCREV = "e0599cf99ebac232e73d4c76aa7022f0db21921e"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=ssh; \n"
 
