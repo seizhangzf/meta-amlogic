@@ -85,6 +85,9 @@ do_deploy () {
         ln -sf ${SPL_IMAGE} ${DEPLOYDIR}/${SPL_BINARY}
         ln -sf ${SPL_IMAGE} ${DEPLOYDIR}/${SPL_SYMLINK}
     fi
+    install ${S}/fip/u-boot.bin.usb.bl2 ${DEPLOYDIR}/
+    install ${S}/fip/u-boot.bin.usb.tpl ${DEPLOYDIR}/
+    install ${S}/fip/u-boot.bin.sd.bin ${DEPLOYDIR}/
 }
 
 addtask deploy before do_build after do_compile

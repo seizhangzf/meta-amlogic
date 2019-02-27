@@ -7,3 +7,8 @@ do_copy_dtb() {
 }
 
 addtask copy_dtb before do_install after do_compile
+
+do_deploy_append () {
+    DTB_PATH=`get_real_dtb_path_in_kernel ${KERNEL_DEVICETREE}`
+    install -m 0644 ${DTB_PATH} ${DEPLOY_DIR_IMAGE}/dtb.img
+}
