@@ -3,7 +3,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SUMMARY = "Optee binary"
 LICENSE = "CLOSED"
 
-SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=tdk-v2.4"
+SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tdk.git;nobranch=1"
+MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh; \n"
 SRCREV = "de7d380fa527e929df31f75ffffa656673031403"
 
 do_populate_lic[noexec] = "1"
