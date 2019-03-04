@@ -20,8 +20,11 @@ SRC_URI += "file://0004-dts-enable-meson-drm.patch"
 SRC_URI += "file://0005-use-old-partition-on-p230.patch"
 SRC_URI += "file://0006-dts-include-meson_drm.dtsi-in-962e-r321-dts.patch"
 
-DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch"
-DRM_SRC += "file://0029-dts-Add-drm-backend-for-txlx-t962e-r321.patch"
+DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch \
+           file://0029-dts-Add-drm-backend-for-txlx-t962e-r321.patch \
+           file://0036-dts-add-u212-w400-wayland-drm-dts.-1-3.patch \
+           file://0037-osd-update-osd_count-according-to-the-chip-2-4.patch \
+           "
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
 #SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
 SRC_URI += "file://0034-Porting-to-gxl_p212_1g_buildroot.dts.patch"
