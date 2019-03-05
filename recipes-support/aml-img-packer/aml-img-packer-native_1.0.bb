@@ -9,3 +9,12 @@ SRC_URI += " \
             "
 LICENSE = "Closed"
 do_populate_lic[noexec] = "1"
+
+do_install () {
+    mkdir -p ${D}${bindir}/aml-img-packer/
+    install -m 0755 ${S}/../aml_image_v2_packer_new ${D}${bindir}/aml-img-packer/
+    install -m 0644 ${S}/../aml_sdc_burn.ini ${D}${bindir}/aml-img-packer/
+    install -m 0755 ${S}/../img2simg ${D}${bindir}/aml-img-packer/
+    cp -rf ${S}/../ubi ${D}${bindir}/aml-img-packer/
+    cp -rf ${S}/../ext4 ${D}${bindir}/aml-img-packer/
+}
