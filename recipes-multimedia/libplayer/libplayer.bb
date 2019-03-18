@@ -5,7 +5,9 @@ SRC_URI = "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git;proto
 MIRRORS_prepend += "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/LibPlayer.git;protocol=ssh; \n"
 
 SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
-            file://0002-PD138385-fix-yocto-alsa-hw-set-issue.patch"
+            file://0002-PD138385-fix-yocto-alsa-hw-set-issue.patch\
+            file://0003-fix-compilation-on-audioplayer.patch\
+            "
 PROVIDES += "libamcodec.so"
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
