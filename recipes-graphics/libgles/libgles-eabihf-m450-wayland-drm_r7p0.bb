@@ -15,9 +15,8 @@ RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "5d40aacd791dd786af185f02ec15f09cb4366f5c"
-SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;nobranch=1"
-VERSION = "r7p0"
+SRCREV = "4ee50d25ba1dfc340f23e312fb07f42f64eb05e3"
+SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r6p1-RDK"
 
 S = "${WORKDIR}/git"
 
@@ -40,19 +39,15 @@ do_install() {
 
     # Copy the .pc files
     install -d -m 0755 ${D}${libdir}/pkgconfig
-    install -m 0644 ${S}/pkgconfig/egl.pc ${D}${libdir}/pkgconfig/
-    install -m 0644 ${S}/pkgconfig/gles2.pc ${D}${libdir}/pkgconfig/glesv2.pc
-    install -m 0644 ${S}/pkgconfig/eglfs.pc ${D}${libdir}/pkgconfig/
-    # wayland .pc
-    install -m 0644 ${S}/pkgconfig/wayland-egl.pc ${D}${libdir}/pkgconfig/
+    install -m 0644 ${S}/lib/pkgconfig/common/*.pc ${D}${libdir}/pkgconfig/
     # gbm.pc
-    install -m 0644 ${S}/pkgconfig/gbm/gbm.pc ${D}${libdir}/pkgconfig/
+    install -m 0644 ${S}/lib/pkgconfig/common/gbm/*.pc ${D}${libdir}/pkgconfig/
 
     install -d ${D}${libdir}
     install -d ${D}${includedir}
 
     # waylnad lib
-    install -m 0755 ${S}/arm32/${VERSION}/wayland-drm/libMali.so ${D}${libdir}/libMali.so
+    install -m 0755 ${S}/lib/eabihf/m450/${PV}/wayland/drm/libMali.so ${D}${libdir}/
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4
     ln -s libEGL.so.1.4 ${D}${libdir}/libEGL.so.1
