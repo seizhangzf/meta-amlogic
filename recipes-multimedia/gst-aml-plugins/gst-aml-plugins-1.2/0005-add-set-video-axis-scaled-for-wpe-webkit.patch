@@ -1,12 +1,20 @@
-Index: gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c
+Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
 ===================================================================
---- gst-aml-plugins-1.2.orig/common/amlsysctl/gstamlsysctl.c	2018-06-30 17:10:31.437910759 +0800
-+++ gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c	2018-07-02 10:39:48.404712788 +0800
-@@ -160,6 +160,64 @@
-     return count;
+--- gst-aml-plugins-1.2.orig/video/amlvsink/gstamlvsink.c	2019-03-19 19:24:45.757394588 +0800
++++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2019-03-20 19:33:52.427025762 +0800
+@@ -7,6 +7,7 @@
+ #include <unistd.h>
+ #include "gstamlvsink.h"
+ #include "gstamlclock.h"
++#include <stdio.h>
+ 
+ GST_DEBUG_CATEGORY_STATIC (gst_aml_vsink_debug);
+ #define GST_CAT_DEFAULT gst_aml_vsink_debug
+@@ -114,6 +115,115 @@
+ #endif
  }
  
-+int set_video_axis_scaled(int* coordinate)
++static int set_video_axis_scaled(GObject * object, int* coordinate)
 +{
 +    const char* free_scale_axis_path = "/sys/class/graphics/fb0/free_scale_axis";
 +    const char* window_axis_path = "/sys/class/graphics/fb0/window_axis";
@@ -14,9 +22,22 @@ Index: gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c
 +    int free_scale_axis[4], window_axis[4];
 +    int count, ret = 0;
 +    float x_scale, y_scale;
++    FILE *fp = NULL;
++    char *line = NULL;
++    size_t len = 0;
++    ssize_t read;
++    int width = 0;
++    int height = 0;
++    int real_width = 0;
++    int real_height = 0;
++    int i = 0;
++    const char* vinfo = "/sys/class/display/vinfo";
++    GstAmlVsink *amlvsink;
++
++    amlvsink = GST_AMLVSINK(object);
 +
 +    if (!coordinate) {
-+        fprintf(stderr, "Invalid input\n");
++        GST_DEBUG_OBJECT(amlvsink, "Invalid input\n");
 +        ret = -1;
 +        goto out;
 +    }
@@ -24,60 +45,94 @@ Index: gst-aml-plugins-1.2/common/amlsysctl/gstamlsysctl.c
 +        // Get and parse free_scale_axis
 +        ret = get_sysfs_str(free_scale_axis_path, str, sizeof(str));
 +        if (ret < 0) {
-+            fprintf(stderr,"Error reading %s.(%d)\n", free_scale_axis_path, ret);
-+            goto out;
++            GST_DEBUG_OBJECT(amlvsink, "Error reading %s.(%d)\n", free_scale_axis_path, ret);
++            goto drm;
 +        }
 +        count = parse_para(str, 4, free_scale_axis);
 +        if (count != 4) {
 +            ret = -1;
-+            fprintf(stderr,"Error parsing %s.(count = %d)\n", free_scale_axis_path, count);
-+            goto out;
++            GST_DEBUG_OBJECT(amlvsink, "Error parsing %s.(count = %d)\n", free_scale_axis_path, count);
++            goto drm;
 +        }
 +        // Get and parse window_axis
 +        ret = get_sysfs_str(window_axis_path, str, sizeof(str));
 +        if (ret < 0) {
-+            fprintf(stderr,"Error reading %s.(%d)\n", window_axis_path, ret);
-+            goto out;
++            GST_DEBUG_OBJECT(amlvsink, "Error reading %s.(%d)\n", window_axis_path, ret);
++            goto drm;
 +        }
 +        count = parse_para(str, 4, window_axis);
 +        if (count != 4) {
 +            ret = -1;
-+            fprintf(stderr,"Error parsing %s.(count = %d)\n", window_axis_path, count);
-+            goto out;
++            GST_DEBUG_OBJECT(amlvsink, "Error parsing %s.(count = %d)\n", window_axis_path, count);
++            goto drm;
 +        }
 +        // calculate scaling factor
 +        x_scale = (window_axis[2] + 1 - window_axis[0]) /
 +                    (free_scale_axis[2] + 1 - free_scale_axis[0]);
 +        y_scale = (window_axis[3] + 1 - window_axis[1]) /
 +                    (free_scale_axis[3] + 1 - free_scale_axis[1]);
-+        fprintf(stderr, "scaling factor(%.2f, %.2f)\n", x_scale, y_scale);
++        GST_DEBUG_OBJECT(amlvsink, "scaling factor(%.2f, %.2f)\n", x_scale, y_scale);
 +        // apply to original coordinate
 +        coordinate[0] *= x_scale;
 +        coordinate[2] *= x_scale;
 +        coordinate[1] *= y_scale;
 +        coordinate[3] *= y_scale;
++
++        goto out;
 +    }
++
++drm:
++    fp = fopen("/opt/persistent/drm_mode", "r");
++    if (fp) {
++        if ((read = getline(&line, &len, fp)) != -1) {
++            width = atoi(line);
++        }
++        if ((read = getline(&line, &len, fp)) != -1) {
++            height = atoi(line);
++        }
++        GST_DEBUG_OBJECT(amlvsink, "format: %dx%d\n", width, height);
++        fclose(fp);
++    }
++    fp = fopen(vinfo, "r");
++    if (fp) {
++        for (i = 0; i < 5; i++) {
++            if ((read = getline(&line, &len, fp)) == -1) {
++                break;
++            } else {
++                if (i == 3) {
++                    sscanf(line, " width: %d", &real_width);
++                }
++                if (i == 4) {
++                    sscanf(line, " height: %d", &real_height);
++                }
++            }
++        }
++        GST_DEBUG_OBJECT(amlvsink, "real format: %dx%d\n", real_width, real_height);
++        fclose(fp);
++    }
++    if (real_width != 0 && real_height != 0 && width != 0 && height != 0) {
++        coordinate[0] *= (real_width / width);
++        coordinate[2] *= (real_width / width);
++        coordinate[1] *= (real_height / height);
++        coordinate[3] *= (real_height / height);
++    }
++
 +out:
 +    if (ret < 0)
 +        return ret;
 +    else
 +        return set_video_axis(coordinate);
 +}
-+
- int set_display_axis(int recovery)
- {
-     int fd;
-Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
-===================================================================
---- gst-aml-plugins-1.2.orig/video/amlvsink/gstamlvsink.c	2018-06-30 17:10:32.453910778 +0800
-+++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-06-30 17:10:32.573910780 +0800
-@@ -135,7 +135,8 @@
+ 
+ static void
+ gst_aml_vsink_set_property (GObject * object, guint prop_id,
+@@ -135,7 +245,8 @@
              amlvsink->coordinate[1] = atoi(parts[1]);
              amlvsink->coordinate[2] = amlvsink->coordinate[0] + atoi(parts[2]);
              amlvsink->coordinate[3] = amlvsink->coordinate[1] + atoi(parts[3]);
 -            set_video_axis(amlvsink->coordinate);
 +            //set_video_axis(amlvsink->coordinate);
-+            set_video_axis_scaled(amlvsink->coordinate);
++            set_video_axis_scaled(object, amlvsink->coordinate);
              GST_DEBUG_OBJECT(amlvsink, " set window rect (%d %d %d %d)\n",
                      amlvsink->coordinate[0], amlvsink->coordinate[1],
                      amlvsink->coordinate[2], amlvsink->coordinate[3]);
