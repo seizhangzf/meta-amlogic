@@ -1,27 +1,56 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-. meta-cmf/setup-environment $1
+unset _RDK_FLAVOR
+export RDK_BSP_LAYER=meta-rdk-bsp-amlogic
+TOP_DIR=$(pwd)
 
-# Add meta-linaro-gcc only if not already present.
-#if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-linaro-gcc[^-]') -eq 0 ]; then
-#    cat >> conf/bblayers.conf <<EOF
-#BBLAYERS =+ "\${RDKROOT}/meta-linaro-gcc"
-#EOF
-#fi
-
-# Add meta-rdk-video only if not already present.
-if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-rdk-video[^-]') -eq 0 ]; then
-    cat >> conf/bblayers.conf <<EOF
-BBLAYERS =+ "\${RDKROOT}/meta-rdk-video"
-EOF
+if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" ]; then
+    # add RDK WPE targets to conf file
+    # this step has to be added before calling meta-cmf/setup-environment
+    # so that the target is displayed to the user
+    if [ $(grep -c 'rdk-generic-mediaclient-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-mediaclient-image/a \ \ \ \ rdk-generic-mediaclient-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
+    if [ $(grep -c 'rdk-generic-mediaclient-westeros-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-mediaclient-wpe-image/a \ \ \ \ rdk-generic-mediaclient-westeros-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
+    if [ $(grep -c 'rdk-generic-hybrid-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-image/a \ \ \ \ rdk-generic-hybrid-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
+    if [ $(grep -c 'rdk-generic-hybrid-wpe-lxc-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-wpe-lxc-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
+    if [ $(grep -c 'rdk-generic-hybrid-westeros-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-westeros-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
 fi
 
-## Add meta-aarch64 only if not already present.
-#if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-linaro/meta-aarch64[^-]') -eq 0 ]; then
-#    cat >> conf/bblayers.conf <<EOF
-#BBLAYERS =+ "\${RDKROOT}/meta-linaro/meta-aarch64"
-#EOF
-#fi
+source meta-cmf/setup-environment $1
+if [ $? -ne 0 ]; then
+    return 1
+fi
+
+#BUILD_DIR=$(pwd)
+
+if [ -z "$_RDK_FLAVOR" ]; then
+    if [[ -z $(grep 'rdkv' conf/local.conf) ]]
+    then
+        _RDK_FLAVOR="rdkb"
+    else
+        _RDK_FLAVOR="rdkv"
+    fi
+fi
+
+if [ "${_RDK_FLAVOR}" = "rdkv" ]
+then
+    if [[ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-wpe') -eq 0 ]] && [[ -d  ../meta-wpe ]]
+    then
+        cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-wpe"
+EOF
+    fi
+fi
+
 
 # Add meta-rdk-bsp-amlogic only if not already present.
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-rdk-bsp-amlogic[^-]') -eq 0 ]; then

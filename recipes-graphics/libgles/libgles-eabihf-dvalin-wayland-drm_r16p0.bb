@@ -11,6 +11,7 @@ do_populate_lic[noexec] = "1"
 EXCLUDE_FROM_WORLD = "1"
 PROVIDES = "virtual/libgles1 virtual/libgles2 virtual/egl"
 RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
+DEPENDS += "patchelf-native"
 
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
@@ -48,6 +49,7 @@ do_install() {
     install -d ${D}${libdir}
     install -d ${D}${includedir}
 
+    patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
     # waylnad lib
     install -m 0755 ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so ${D}${libdir}/
 
