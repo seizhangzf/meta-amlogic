@@ -72,5 +72,8 @@ if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-ini
 BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-initramfs"
 EOF
 fi
+cat >> conf/local.conf <<EOF
+LICENSE_FLAGS_WHITELIST="commercial"
+EOF
 
 . $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
