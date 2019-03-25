@@ -14,6 +14,7 @@ SRC_URI += "file://0006-For-2019-MSE-conformance-test-HE-AAC-ExplicitSBR.patch"
 #SRC_URI += "file://0007-Fix-Youtube-stuck-after-seek-remove-while-loop.patch"
 SRC_URI += "file://0007-Fix-Youtube-stuck-after-seek.patch"
 SRC_URI += "file://0008-For-2019-youtube-Progressive-Test-41-accurary.patch"
+SRC_URI += "file://0009-fix-pcrscr-overflowing-and-refind-get-sysfs-apis.patch"
 
 #SRC_URI += "file://fix-CodecID-redefinition.patch"
 
