@@ -8,7 +8,7 @@ EXTRA_OEMAKE = ''
 
 SRC_URI = "git://git.myamlogic.com/firmware/bin/bl31.git;nobranch=1"
 
-MIRRORS_prepend += "git://git.myamlogic.com/firmware/bin/bl31.git git://git@openlinux.amlogic.com/firmware/bin/bl31.git;protocol=ssh; \n"
+MIRRORS_prepend += "git://git.myamlogic.com/firmware/bin/bl31.git git://git@openlinux.amlogic.com/yocto/firmware/bin/bl31.git;protocol=ssh; \n"
 SRCREV="192987dfaddc779724b3cd40515c29eeb393a81d"
 
 S = "${WORKDIR}/git"
