@@ -11,6 +11,7 @@ do_populate_lic[noexec] = "1"
 EXCLUDE_FROM_WORLD = "1"
 PROVIDES = "virtual/libgles1 virtual/libgles2 virtual/egl"
 RPROVIDES_${PN} += "libGLESv2.so()(64bit) libEGL.so()(64bit) libGLESv1_CM.so()(64bit) libMali.so"
+DEPENDS += "patchelf-native"
 
 SRCREV = "ff2ef217a995bba2fd9b4337f38bb0dfcf3f3ccc"
 VERSION = "r7p0"
@@ -42,6 +43,7 @@ do_install() {
     install -d ${D}${includedir}
 
 
+    patchelf --set-soname libMali.so ${S}/arm64/${VERSION}/libMali.so ${D}${libdir}/libMali.so
     install -m 0755 ${S}/arm64/${VERSION}/libMali.so ${D}${libdir}/libMali.so
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4

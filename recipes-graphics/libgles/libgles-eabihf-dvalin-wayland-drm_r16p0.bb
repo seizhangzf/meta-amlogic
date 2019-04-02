@@ -50,7 +50,7 @@ do_install() {
     install -d ${D}${includedir}
 
     patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
-    # waylnad lib
+    # wayland lib
     install -m 0755 ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so ${D}${libdir}/
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4.0
