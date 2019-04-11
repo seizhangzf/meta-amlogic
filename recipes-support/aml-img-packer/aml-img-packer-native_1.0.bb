@@ -9,6 +9,7 @@ SRC_URI += " \
             file://gxl/* \
             file://g12a/* \
             file://txlx/* \
+            file://g12b/* \
             "
 LICENSE = "Closed"
 do_populate_lic[noexec] = "1"
@@ -23,4 +24,5 @@ do_install () {
     cp -rf ${S}/../gxl ${D}${bindir}/aml-img-packer/
     cp -rf ${S}/../g12a ${D}${bindir}/aml-img-packer/
     cp -rf ${S}/../txlx ${D}${bindir}/aml-img-packer/
+    cp -rf ${S}/../g12b ${D}${bindir}/aml-img-packer/
 }
