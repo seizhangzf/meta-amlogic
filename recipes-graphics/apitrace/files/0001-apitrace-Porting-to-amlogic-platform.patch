@@ -1,0 +1,221 @@
+From d3b585c0627555388b49767b2cbbf406bc79ec93 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Fri, 12 Apr 2019 02:34:30 -0700
+Subject: [PATCH] [apitrace] Porting to amlogic platform
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ thirdparty/khronos/EGL/eglext.h      |  24 ++++++
+ thirdparty/khronos/EGL/eglplatform.h | 148 +++++++++--------------------------
+ 2 files changed, 60 insertions(+), 112 deletions(-)
+
+diff --git a/thirdparty/khronos/EGL/eglext.h b/thirdparty/khronos/EGL/eglext.h
+index b897d4a..fc75fc2 100644
+--- a/thirdparty/khronos/EGL/eglext.h
++++ b/thirdparty/khronos/EGL/eglext.h
+@@ -633,6 +633,30 @@ EGLAPI const char *EGLAPIENTRY eglQueryOutputPortStringEXT (EGLDisplay dpy, EGLO
+ #endif
+ #endif /* EGL_EXT_output_base */
+ 
++#ifndef EGL_WL_bind_wayland_display
++#define EGL_WL_bind_wayland_display 1
++
++#define EGL_WAYLAND_BUFFER_WL           0x31D5 /* eglCreateImageKHR target */
++#define EGL_WAYLAND_PLANE_WL            0x31D6 /* eglCreateImageKHR target */
++
++#define EGL_TEXTURE_Y_U_V_WL            0x31D7
++#define EGL_TEXTURE_Y_UV_WL             0x31D8
++#define EGL_TEXTURE_Y_XUXV_WL           0x31D9
++#define EGL_TEXTURE_EXTERNAL_WL         0x31DA
++
++struct wl_display;
++struct wl_resource;
++#ifdef EGL_EGLEXT_PROTOTYPES
++EGLAPI EGLBoolean EGLAPIENTRY eglBindWaylandDisplayWL(EGLDisplay dpy, struct wl_display *display);
++EGLAPI EGLBoolean EGLAPIENTRY eglUnbindWaylandDisplayWL(EGLDisplay dpy, struct wl_display *display);
++EGLAPI EGLBoolean EGLAPIENTRY eglQueryWaylandBufferWL(EGLDisplay dpy, struct wl_resource *buffer, EGLint attribute, EGLint *value);
++#endif
++typedef EGLBoolean (EGLAPIENTRYP PFNEGLBINDWAYLANDDISPLAYWL) (EGLDisplay dpy, struct wl_display *display);
++typedef EGLBoolean (EGLAPIENTRYP PFNEGLUNBINDWAYLANDDISPLAYWL) (EGLDisplay dpy, struct wl_display *display);
++typedef EGLBoolean (EGLAPIENTRYP PFNEGLQUERYWAYLANDBUFFERWL) (EGLDisplay dpy, struct wl_resource *buffer, EGLint attribute, EGLint *value);
++
++#endif /* EGL_WL_bind_wayland_display */
++
+ #ifndef EGL_EXT_output_drm
+ #define EGL_EXT_output_drm 1
+ #define EGL_DRM_CRTC_EXT                  0x3234
+diff --git a/thirdparty/khronos/EGL/eglplatform.h b/thirdparty/khronos/EGL/eglplatform.h
+index 35364ce..957edff 100644
+--- a/thirdparty/khronos/EGL/eglplatform.h
++++ b/thirdparty/khronos/EGL/eglplatform.h
+@@ -1,131 +1,55 @@
+-#ifndef __eglplatform_h_
+-#define __eglplatform_h_
+-
+ /*
+-** Copyright (c) 2007-2013 The Khronos Group Inc.
+-**
+-** Permission is hereby granted, free of charge, to any person obtaining a
+-** copy of this software and/or associated documentation files (the
+-** "Materials"), to deal in the Materials without restriction, including
+-** without limitation the rights to use, copy, modify, merge, publish,
+-** distribute, sublicense, and/or sell copies of the Materials, and to
+-** permit persons to whom the Materials are furnished to do so, subject to
+-** the following conditions:
+-**
+-** The above copyright notice and this permission notice shall be included
+-** in all copies or substantial portions of the Materials.
+-**
+-** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+-** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+-** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+-** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+-** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+-** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+-** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+-*/
+-
+-/* Platform-specific types and definitions for egl.h
+- * $Revision: 30994 $ on $Date: 2015-04-30 13:36:48 -0700 (Thu, 30 Apr 2015) $
+- *
+- * Adopters may modify khrplatform.h and this file to suit their platform.
+- * You are encouraged to submit all modifications to the Khronos group so that
+- * they can be included in future versions of this file.  Please submit changes
+- * by sending them to the public Khronos Bugzilla (http://khronos.org/bugzilla)
+- * by filing a bug against product "EGL" component "Registry".
++ * This confidential and proprietary software may be used only as
++ * authorised by a licensing agreement from ARM Limited
++ * (C) COPYRIGHT 2014-2016 ARM Limited
++ * ALL RIGHTS RESERVED
++ * The entire notice above must be reproduced on all authorised
++ * copies and copies may only be made to the extent permitted
++ * by a licensing agreement from ARM Limited.
+  */
+ 
+-#include <KHR/khrplatform.h>
++#ifndef __EGLPLATFORM_H__
++#define __EGLPLATFORM_H__
+ 
+-/* Macros used in EGL function prototype declarations.
+- *
+- * EGL functions should be prototyped as:
+- *
+- * EGLAPI return-type EGLAPIENTRY eglFunction(arguments);
+- * typedef return-type (EXPAPIENTRYP PFNEGLFUNCTIONPROC) (arguments);
+- *
+- * KHRONOS_APICALL and KHRONOS_APIENTRY are defined in KHR/khrplatform.h
+- */
+-
+-#ifndef EGLAPI
+-#define EGLAPI KHRONOS_APICALL
++#ifdef __cplusplus
++extern "C" {
+ #endif
+ 
+ #ifndef EGLAPIENTRY
+-#define EGLAPIENTRY  KHRONOS_APIENTRY
++#define EGLAPIENTRY
+ #endif
++#ifndef EGLAPIENTRYP
+ #define EGLAPIENTRYP EGLAPIENTRY*
+-
+-/* The types NativeDisplayType, NativeWindowType, and NativePixmapType
+- * are aliases of window-system-dependent types, such as X Display * or
+- * Windows Device Context. They must be defined in platform-specific
+- * code below. The EGL-prefixed versions of Native*Type are the same
+- * types, renamed in EGL 1.3 so all types in the API start with "EGL".
+- *
+- * Khronos STRONGLY RECOMMENDS that you use the default definitions
+- * provided below, since these changes affect both binary and source
+- * portability of applications using EGL running on different EGL
+- * implementations.
+- */
+-
+-#if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__) /* Win32 and WinCE */
+-#ifndef WIN32_LEAN_AND_MEAN
+-#define WIN32_LEAN_AND_MEAN 1
+ #endif
+-#include <windows.h>
+-
+-typedef HDC     EGLNativeDisplayType;
+-typedef HBITMAP EGLNativePixmapType;
+-typedef HWND    EGLNativeWindowType;
+-
+-#elif defined(__APPLE__) || defined(__WINSCW__) || defined(__SYMBIAN32__)  /* Symbian */
+-
+-typedef int   EGLNativeDisplayType;
+-typedef void *EGLNativeWindowType;
+-typedef void *EGLNativePixmapType;
+-
+-#elif defined(__ANDROID__) || defined(ANDROID)
+-
+-#include <android/native_window.h>
+-
+-struct egl_native_pixmap_t;
+-
+-typedef struct ANativeWindow*           EGLNativeWindowType;
+-typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
+-typedef void*                           EGLNativeDisplayType;
+-
+-#elif defined(__APPLE__) || defined(__QNXNTO__)
+-
+-typedef void *EGLNativeDisplayType;
+-typedef void *EGLNativePixmapType;
+-typedef void *EGLNativeWindowType;
+-
+-#elif defined(__unix__)
++#ifndef EGLAPI
++#define EGLAPI extern
++#endif
+ 
+-/* X11 (tentative)  */
+-#include <X11/Xlib.h>
+-#include <X11/Xutil.h>
++#include <KHR/khrplatform.h>
+ 
+-typedef Display *EGLNativeDisplayType;
+-typedef Pixmap   EGLNativePixmapType;
+-typedef Window   EGLNativeWindowType;
++typedef struct wl_egl_window *NativeWindowType;
++typedef void *NativePixmapType;
++typedef void *NativeDisplayType;
+ 
+-#else
+-#error "Platform not recognized"
++#ifdef __cplusplus
++}
+ #endif
+ 
+ /* EGL 1.2 types, renamed for consistency in EGL 1.3 */
+-typedef EGLNativeDisplayType NativeDisplayType;
+-typedef EGLNativePixmapType  NativePixmapType;
+-typedef EGLNativeWindowType  NativeWindowType;
+-
+-
+-/* Define EGLint. This must be a signed integral type large enough to contain
+- * all legal attribute names and values passed into and out of EGL, whether
+- * their type is boolean, bitmask, enumerant (symbolic constant), integer,
+- * handle, or other.  While in general a 32-bit integer will suffice, if
+- * handles are 64 bit types, then EGLint should be defined as a signed 64-bit
++typedef NativeDisplayType EGLNativeDisplayType;
++typedef NativePixmapType EGLNativePixmapType;
++typedef NativeWindowType EGLNativeWindowType;
++
++/* Define EGLint. This must be an integral type large enough to contain
++ * all legal attribute names and values passed into and out of EGL,
++ * whether their type is boolean, bitmask, enumerant (symbolic
++ * constant), integer, handle, or other.
++ * While in general a 32-bit integer will suffice, if handles are
++ * represented as pointers, then EGLint should be defined as a 64-bit
+  * integer type.
+  */
+-typedef khronos_int32_t EGLint;
++typedef int EGLint;
++typedef intptr_t EGLAttrib;
++
++#endif /* __EGLPLATFORM_H__ */
+ 
+-#endif /* __eglplatform_h */
+-- 
+2.7.4
+
