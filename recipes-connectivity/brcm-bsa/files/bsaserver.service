@@ -1,0 +1,14 @@
+[Unit]
+Description=bsaserver
+Wants=multi-user.target
+After=multi-user.target
+
+[Service]
+PIDFile=/var/run/bsa.pid
+ExecStartPre=/bin/bash -c "echo 0 > /sys/class/rfkill/rfkill0/state;sleep 1;echo 1 > /sys/class/rfkill/rfkill0/state;sleep 1"
+ExecStart=-/usr/bin/bsa_server -r 13 -lpm -all=0 -pp /etc/bluetooth -d /dev/ttyS1
+ExecStop=/bin/kill $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+
