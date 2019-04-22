@@ -1,4 +1,4 @@
-DESCRIPTION = "libGLES with wayland for 32bit Mali dvalin (Drm)"
+DESCRIPTION = "libGLES with wayland for 32bit Mali gondul (Drm)"
 
 LICENSE = "Proprietary"
 
@@ -12,14 +12,16 @@ EXCLUDE_FROM_WORLD = "1"
 PROVIDES = "virtual/libgles1 virtual/libgles2 virtual/egl"
 RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
 DEPENDS += "patchelf-native"
+DEPENDS += "wayland libdrm"
 
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "4ee50d25ba1dfc340f23e312fb07f42f64eb05e3"
+SRCREV = "46031102294f71ab96f08c43ced3843496b21db1"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r6p1-RDK"
 
 S = "${WORKDIR}/git"
+GPU_MODEL = "gondul"
 
 inherit autotools pkgconfig
 
@@ -49,9 +51,9 @@ do_install() {
     install -d ${D}${libdir}
     install -d ${D}${includedir}
 
-    patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
+    patchelf --set-soname libMali.so ${S}/lib/eabihf/${GPU_MODEL}/${PV}/wayland/drm/libMali.so 
     # wayland lib
-    install -m 0755 ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so ${D}${libdir}/
+    install -m 0755 ${S}/lib/eabihf/${GPU_MODEL}/${PV}/wayland/drm/libMali.so ${D}${libdir}/
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4.0
     ln -s libEGL.so.1.4.0 ${D}${libdir}/libEGL.so.1
