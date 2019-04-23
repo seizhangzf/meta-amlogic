@@ -9,7 +9,7 @@ SRC_URI += "file://COPYING.GPL"
 #SRC_URI += "file://0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch"
 SRC_URI += "file://0002-parser-for-tvp.patch"
 
-SRCREV = "daa682836fdcdeaebdd3783eae69cdb6dcf68afe"
+SRCREV = "630e09ed6e40221dce5eff6eeb7b9eb30146ecc3"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 
@@ -40,31 +40,32 @@ FILES_${PN} = " \
 DEPENDS += ""
 
 MEDIA_CONFIGS = " \
-           CONFIG_AMLOGIC_MEDIA_VDEC_MPEG12=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_MPEG4=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_MPEG4_MULTI=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_VC1=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H264=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H264_MULTI=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H264_MVC=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H264_4K2K=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H264_MVC=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_H265=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_VP9=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_MJPEG=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_MJPEG_MULTI=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_REAL=m \
-           CONFIG_AMLOGIC_MEDIA_VDEC_AVS=m \
-           CONFIG_AMLOGIC_MEDIA_VENC_H264=m \
-           CONFIG_AMLOGIC_MEDIA_VECN_H265=m \
-           "
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MPEG12=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MPEG2_MULTI=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MPEG4=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MPEG4_MULTI=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_VC1=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_H264=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_H264_MULTI=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_H264_MVC=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_H265=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_VP9=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MJPEG=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_MJPEG_MULTI=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_REAL=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AVS=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AVS2=m \
+                 CONFIG_AMLOGIC_MEDIA_VENC_H264=m \
+                 CONFIG_AMLOGIC_MEDIA_VENC_H265=m \
+                 CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION=y \
+                 CONFIG_AMLOGIC_MEDIA_GE2D=y \
+                 "
 
 S = "${WORKDIR}/git"
 EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/drivers" ${MEDIA_CONFIGS} modules'
 
 KERNEL_MODULE_AUTOLOAD += "amvdec_avs"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h264"
-KERNEL_MODULE_AUTOLOAD += "amvdec_h264_4k2k"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h264mvc"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h265"
 KERNEL_MODULE_AUTOLOAD += "amvdec_mh264"
@@ -80,3 +81,7 @@ KERNEL_MODULE_AUTOLOAD += "decoder_common"
 KERNEL_MODULE_AUTOLOAD += "firmware"
 KERNEL_MODULE_AUTOLOAD += "media_clock"
 KERNEL_MODULE_AUTOLOAD += "stream_input"
+KERNEL_MODULE_AUTOLOAD += "amvdec_ports"
+KERNEL_MODULE_AUTOLOAD += "aml_hardware_dmx"
+KERNEL_MODULE_AUTOLOAD += "vpu"
+KERNEL_MODULE_AUTOLOAD += "encoder"

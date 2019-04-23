@@ -11,7 +11,7 @@ SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
 PROVIDES += "libamcodec.so"
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
-SRCREV="121aee239e68116ad48fa09c92dfbc0be2875c98"
+SRCREV="ab9e480f9cb17b0b1164de6e82da781bdbe0beb9"
 
 #SRC_URI += "\
 #           file://0001-PD-151901-set-drmmode-flag-before-codec_init-for-MUL.patch \
@@ -64,11 +64,6 @@ do_compile () {
 	oe_runmake -j1 ${EXTRA_OEMAKE} all
 	install ${S}/examples/kplayer ${D}/usr/bin
         install ${S}/amffmpeg/ffprobe ${D}/usr/bin
-}
-
-do_compile_append() {
-    rm ${D}/usr/lib/libdtscore.so
-    rm ${D}/usr/lib/libdcv.so
 }
 
 inherit  pkgconfig distro_features_check

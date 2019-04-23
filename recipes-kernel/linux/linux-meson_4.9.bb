@@ -6,6 +6,7 @@ KBRANCH = ""
 SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};nobranch=1"
 
 SRC_URI += "file://defconfig"
+SRC_URI += "file://tm2_t962e2_ab311_drm.dts"
 
 SRC_URI += "file://meson.scc \
             file://meson.cfg \
@@ -22,10 +23,9 @@ SRC_URI += "file://0006-dts-include-meson_drm.dtsi-in-962e-r321-dts.patch"
 
 DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch \
            file://0029-dts-Add-drm-backend-for-txlx-t962e-r321.patch \
-           file://0036-dts-add-u212-w400-wayland-drm-dts.-1-3.patch \
-           file://0037-osd-update-osd_count-according-to-the-chip-2-4.patch \
            file://0038-linux-meson-Enable-drm-backend-for-gxl_p212_1g_build.patch \
            file://0039-drm-workaround-for-1080p-scale-to-4k-1-1.patch \
+           file://0040-dts-tdmb-add-samesource_srcpll-to-dts-1-1.patch \
            "
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
 #SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
@@ -37,10 +37,14 @@ MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinu
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
 
-SRCREV="4e27896d9c550738640fcace31130d58eb97b9a3"
+SRCREV="a3b88dbcca356c71c1d6c25a7962db3a995b1fec"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
-COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*)"
+COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*)"
+
+do_compile_prepend() {
+    cp ${WORKDIR}/tm2_t962e2_ab311_drm.dts ${S}/arch/arm64/boot/dts/amlogic
+}
 
 S = "${WORKDIR}/git"

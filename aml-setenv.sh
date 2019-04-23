@@ -39,6 +39,8 @@ DEFCONFIG_ARRAY=("mesongxl_p230"
 				 "mesong12b_w400_wayland_drm_32b"
 				 "mesong12b_w400_wayland_drm_playready"
 				 "mesong12b_w400_wayland_drm_playready_32b"
+				 "mesontm2_ab311_wayland_drm_playready"
+				 "mesontm2_ab311_wayland_drm_playready_32b"
 				 )
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
