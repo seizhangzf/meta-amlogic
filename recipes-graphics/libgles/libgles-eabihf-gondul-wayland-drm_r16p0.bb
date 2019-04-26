@@ -17,7 +17,7 @@ DEPENDS += "wayland libdrm"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "46031102294f71ab96f08c43ced3843496b21db1"
+SRCREV = "bb5085a5c51dad022f4301267c79ae48ab1ddcb1"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r6p1-RDK"
 
 S = "${WORKDIR}/git"

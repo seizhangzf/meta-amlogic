@@ -9,10 +9,14 @@ SRC_URI = "git://github.com/apitrace/apitrace.git;protocol=git;branch=master"
 SRCREV = "26966134f15d28f6b4a9a0a560017b3ba36d60bf"
 
 SRC_URI += "file://0001-apitrace-Porting-to-amlogic-platform.patch"
+SRC_URI += "file://0002-fix-waffle-is-not-included-and-linked-error.patch"
 
 S = "${WORKDIR}/git"
 
 inherit cmake pythonnative
+
+PACKAGECONFIG += "waffle"
+PACKAGECONFIG[waffle] = "-DENABLE_WAFFLE=ON,-DENABLE_WAFFLE=OFF,waffle"
 
 EXTRA_OECMAKE += "-DENABLE_X11=OFF \
                   -DCMAKE_SYSROOT=${STAGING_DIR_TARGET} \
