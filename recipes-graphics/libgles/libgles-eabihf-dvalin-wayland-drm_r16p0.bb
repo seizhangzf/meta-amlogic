@@ -16,8 +16,8 @@ DEPENDS += "patchelf-native"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV = "bb5085a5c51dad022f4301267c79ae48ab1ddcb1"
-SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r6p1-RDK"
+SRCREV = "1ef49d2b0b3b011ca6897f4422b9835dafd719d5"
+SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r16p0-RDK"
 
 S = "${WORKDIR}/git"
 
