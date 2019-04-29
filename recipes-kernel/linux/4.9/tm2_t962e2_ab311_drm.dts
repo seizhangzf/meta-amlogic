@@ -103,7 +103,7 @@
 		ion_cma_reserved:linux,ion-dev {
 			compatible = "shared-dma-pool";
 			reusable;
-			size = <0x0 0x2000000>;
+			size = <0x0 0x8000000>;
 			alignment = <0x0 0x400000>;
 		};
 
@@ -663,21 +663,24 @@
 };
 
 	partitions: partitions{
-		parts = <14>;
+		parts = <17>;
 		part-0 = <&logo>;
 		part-1 = <&recovery>;
 		part-2 = <&misc>;
-		part-3 = <&dto>;
+		part-3 = <&dtbo>;
 		part-4 = <&cri_data>;
 		part-5 = <&param>;
 		part-6 = <&boot>;
 		part-7 = <&rsv>;
-		part-8 = <&tee>;
-		part-9 = <&vendor>;
-		part-10 = <&odm>;
-		part-11 = <&system>;
-		part-12 = <&cache>;
-		part-13 = <&data>;
+		part-8 = <&metadata>;
+		part-9 = <&vbmeta>;
+		part-10 = <&tee>;
+		part-11 = <&vendor>;
+		part-12 = <&odm>;
+		part-13 = <&system>;
+		part-14 = <&product>;
+		part-15 = <&cache>;
+		part-16 = <&data>;
 
 		logo:logo{
 			pname = "logo";
@@ -694,12 +697,13 @@
 			size = <0x0 0x800000>;
 			mask = <1>;
 		};
-		dto:dto{
-			pname = "dto";
+		dtbo:dtbo{
+			pname = "dtbo";
 			size = <0x0 0x800000>;
 			mask = <1>;
 		};
-		cri_data:cri_data{
+		cri_data:cri_data
+		{
 			pname = "cri_data";
 			size = <0x0 0x800000>;
 			mask = <2>;
@@ -709,12 +713,23 @@
 			size = <0x0 0x1000000>;
 			mask = <1>;
 		};
+		metadata:metadata{
+			pname = "metadata";
+			size = <0x0 0x1000000>;
+			mask = <1>;
+		};
+		vbmeta:vbmeta{
+			pname = "vbmeta";
+			size = <0x0 0x200000>;
+			mask = <1>;
+		};
 		param:param{
 			pname = "param";
 			size = <0x0 0x1000000>;
 			mask = <2>;
 		};
-		boot:boot{
+		boot:boot
+		{
 			pname = "boot";
 			size = <0x0 0x1000000>;
 			mask = <1>;
@@ -724,27 +739,37 @@
 			size = <0x0 0x2000000>;
 			mask = <1>;
 		};
-		vendor:vendor{
+		vendor:vendor
+		{
 			pname = "vendor";
-			size = <0x0 0x10000000>;
+			size = <0x0 0x14000000>;
 			mask = <1>;
 		};
-		odm:odm{
+		odm:odm
+		{
 			pname = "odm";
-			size = <0x0 0x10000000>;
+			size = <0x0 0x8000000>;
 			mask = <1>;
 		};
-		system:system{
+		system:system
+		{
 			pname = "system";
-			size = <0x0 0x80000000>;
+			size = <0x0 0x50000000>;
 			mask = <1>;
 		};
-		cache:cache{
+		product:product{
+			pname = "product";
+			size = <0x0 0x8000000>;
+			mask = <1>;
+		};
+		cache:cache
+		{
 			pname = "cache";
 			size = <0x0 0x46000000>;
 			mask = <2>;
 		};
-		data:data{
+		data:data
+		{
 			pname = "data";
 			size = <0xffffffff 0xffffffff>;
 			mask = <4>;
@@ -2017,7 +2042,7 @@
 };
 
 &meson_fb {
-	status = "okay";
+	status = "disabled";
 	display_size_default = <1920 1080 1920 2160 32>;
 	mem_size = <0x00800000 0x1980000 0x100000 0x100000 0x800000>;
 	logo_addr = "0x7f800000";
