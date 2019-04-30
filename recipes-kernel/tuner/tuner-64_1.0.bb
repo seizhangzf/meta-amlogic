@@ -12,7 +12,6 @@ SRC_URI = " \
            file://si2168_fe_64.ko \
            "
 
-
 do_configure[noexec] = "1"
 
 do_compile() {
@@ -27,13 +26,4 @@ do_install() {
 }
 
 S = "${WORKDIR}/modules"
-
-KERNEL_MODULE_AUTOLOAD += "atbm8881_fe_64"
-KERNEL_MODULE_AUTOLOAD += "avl6762_fe_64"
-KERNEL_MODULE_AUTOLOAD += "mxl661_fe_64"
-KERNEL_MODULE_AUTOLOAD += "r840_fe_64"
-KERNEL_MODULE_AUTOLOAD += "r842_fe_64"
-KERNEL_MODULE_AUTOLOAD += "si2151_fe_64"
-KERNEL_MODULE_AUTOLOAD += "si2159_fe_64"
-KERNEL_MODULE_AUTOLOAD += "si2168_fe_64"
 
