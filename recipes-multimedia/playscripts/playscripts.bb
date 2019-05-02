@@ -23,6 +23,6 @@ do_install() {
     install -d ${D}${sysconfdir}
     install -d ${D}${sysconfdir}/profile.d
     install -m 0755 ${WORKDIR}/alsactl.conf ${D}${sysconfdir}/
-    install -m 0755 ${WORKDIR}/${ASOUND_CONF} ${D}${sysconfdir}/
+    install -m 0755 ${WORKDIR}/${ASOUND_CONF} ${D}${sysconfdir}/asound.conf
     install -m 0755 ${WORKDIR}/property_set.sh ${D}${sysconfdir}/profile.d/
 }
