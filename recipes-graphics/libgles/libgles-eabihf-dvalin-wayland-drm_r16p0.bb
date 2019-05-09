@@ -1,6 +1,7 @@
 DESCRIPTION = "libGLES with wayland for 32bit Mali dvalin (Drm)"
 
 LICENSE = "Proprietary"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
@@ -18,6 +19,8 @@ RPROVIDES_${PN} += "libwayland-egl.so"
 
 SRCREV = "1ef49d2b0b3b011ca6897f4422b9835dafd719d5"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r16p0-RDK"
+#SRC_URI += "file://libMali.so"
+SRC_URI += "file://gl3ext.h"
 
 S = "${WORKDIR}/git"
 
@@ -33,6 +36,7 @@ do_install() {
     install -m 0755 ${S}/include/GLES2/*.h ${D}${includedir}/GLES2/
     install -d -m 0755 ${D}${includedir}/GLES3
     install -m 0755 ${S}/include/GLES3/*.h ${D}${includedir}/GLES3/
+    install -m 0755 ${WORKDIR}/gl3ext.h ${D}${includedir}/GLES3/
     install -d -m 0755 ${D}${includedir}/KHR
     install -m 0755 ${S}/include/KHR/*.h ${D}${includedir}/KHR/
     # wayland headers
@@ -48,6 +52,7 @@ do_install() {
 
     install -d ${D}${libdir}
     install -d ${D}${includedir}
+    #install -m 0644 ${WORKDIR}/libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
 
     patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
     # wayland lib
