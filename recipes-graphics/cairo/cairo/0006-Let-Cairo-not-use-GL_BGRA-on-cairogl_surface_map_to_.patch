@@ -1,0 +1,31 @@
+From 9ba148df62d2056625d4b6e77701c4f805ae78e9 Mon Sep 17 00:00:00 2001
+From: lingjie li <lingjie.li@amlogic.com>
+Date: Thu, 9 May 2019 14:59:45 +0800
+Subject: [PATCH] Let Cairo not use GL_BGRA on cairogl_surface_map_to_image on
+ G52 Mali.
+
+Comment:
+G52 Mali glTexSubImage2D not accept GL_BGRA,despite it support below extension:
+GL_EXT_texture_format_BGRA8888
+GL_EXT_read_format_bgra
+Let Cairo not use GL_BGRA on cairogl_surface_map_to_image avoid glTexSubImage2D not accept GL_BGRA issue.
+---
+ src/cairo-gl-surface.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cairo-gl-surface.c b/src/cairo-gl-surface.c
+index 12ea3dd..89169f0 100644
+--- a/src/cairo-gl-surface.c
++++ b/src/cairo-gl-surface.c
+@@ -1166,7 +1166,7 @@ _cairo_gl_surface_map_to_image (void      *abstract_surface,
+ 	 * interacting with other image surfaces. For ALPHA, GLES2 does not
+ 	 * support GL_PACK_ROW_LENGTH anyway, and this makes sure that the
+ 	 * pixman image that is created has row_stride = row_width * bpp. */
+-	if (surface->base.content == CAIRO_CONTENT_ALPHA || !ctx->can_read_bgra) {
++	if (surface->base.content == CAIRO_CONTENT_ALPHA || TRUE /*!ctx->can_read_bgra*/) {
+ 	    cairo_bool_t little_endian = _cairo_is_little_endian ();
+ 	    format = GL_RGBA;
+ 
+-- 
+2.7.4
+
