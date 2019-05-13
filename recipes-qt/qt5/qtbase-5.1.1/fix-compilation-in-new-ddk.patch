@@ -1,0 +1,13 @@
+Index: qtbase-opensource-src-5.1.1/src/plugins/platforms/kms/qkmsdevice.cpp
+===================================================================
+--- qtbase-opensource-src-5.1.1.orig/src/plugins/platforms/kms/qkmsdevice.cpp
++++ qtbase-opensource-src-5.1.1/src/plugins/platforms/kms/qkmsdevice.cpp
+@@ -59,7 +59,7 @@ QKmsDevice::QKmsDevice(const QString &pa
+     }
+ 
+     m_graphicsBufferManager = gbm_create_device(m_fd);
+-    m_eglDisplay = eglGetDisplay(m_graphicsBufferManager);
++    m_eglDisplay = eglGetDisplay(reinterpret_cast<EGLNativeDisplayType>(m_graphicsBufferManager));
+ 
+     if (m_eglDisplay == EGL_NO_DISPLAY) {
+         qWarning("Could not open EGL display");

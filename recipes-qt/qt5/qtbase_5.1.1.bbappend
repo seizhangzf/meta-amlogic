@@ -1,8 +1,9 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
 SRC_URI += " \
-	    file://Resolve_Compilation_error.patch \
-	   "
+        file://Resolve_Compilation_error.patch \
+        file://fix-compilation-in-new-ddk.patch \
+        "
 
 DEPENDS += "virtual/libgles1 virtual/libgles2 virtual/egl"
 
