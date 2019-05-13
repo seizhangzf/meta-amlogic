@@ -24,13 +24,13 @@ MIRRORS_prepend += "git://git.myamlogic.com/firmware/bin/bl31.git git://git@open
 MIRRORS_prepend += "git://git.myamlogic.com/uboot.git git://git@openlinux.amlogic.com/yocto/uboot.git;protocol=ssh; \n"
 MIRRORS_prepend += "git://git.myamlogic.com/amlogic/tools/fip.git git://git@openlinux.amlogic.com/yocto/amlogic/tools/fip.git;protocol=ssh; \n"
 
-SRCREV_bl2="11a14e0870c0800d7fa1e3af4f5a64214482708d"
-SRCREV_bl30="637ff11f916216ece0c9f0264db6cf4599cea41b"
-SRCREV_bl31="2160d7d872c9f3a4fea99260fb43bb2fd5b56581"
-SRCREV_bl31-1.3="14e3e1dc56713b37b1d08503d83e47afec156007"
+SRCREV_bl2="9a082fa86ae3c3c13a6dc07e027868caafc3e34a"
+SRCREV_bl30="b8055d4fdb9f1b7de872c311564ce48df5468fd7"
+SRCREV_bl31="9801bc28415100223fb280469674adc02fe733d5"
+SRCREV_bl31-1.3="f60682a0748ae3a05adeec54527f48d2cd499396"
 SRCREV_tdk = "f08d734bb2c56c4b8cc00edfb4d6e66fc9efd1fa"
-SRCREV_bl33="fd437675f1badaec2688651644bbdca5e8b9266a"
-SRCREV_fip="ba7d2d547cd16d20b7d5c3b31899170164fe6850"
+SRCREV_bl33="2fc7a22b503d57f1b347876b8851d26fbbfdd097"
+SRCREV_fip="675f6a8a96621d4d4f4ef5193972f3eae6124bfb"
 
 S = "${WORKDIR}/uboot-repo"
 
