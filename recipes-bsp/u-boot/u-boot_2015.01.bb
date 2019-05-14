@@ -15,6 +15,7 @@ SRC_URI += "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=
 SRC_URI += "git://git.myamlogic.com/uboot.git;nobranch=1;destsuffix=uboot-repo/bl33;name=bl33"
 SRC_URI += "git://git.myamlogic.com/amlogic/tools/fip.git;nobranch=1;destsuffix=uboot-repo/fip;name=fip"
 SRC_URI += "file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33"
+SRC_URI += "file://0002-lpddr4-timing.patch;patchdir=bl33"
 
 do_configure[noexec] = "1"
 
