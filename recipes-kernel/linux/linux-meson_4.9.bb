@@ -7,6 +7,7 @@ SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};nobranch=
 
 SRC_URI += "file://defconfig"
 SRC_URI += "file://tm2_t962e2_ab311_drm.dts"
+SRC_URI += "file://tm2_t962e2_sky_drm.dts"
 
 SRC_URI += "file://meson.scc \
             file://meson.cfg \
@@ -44,6 +45,7 @@ COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*
 
 do_compile_prepend() {
     cp ${WORKDIR}/tm2_t962e2_ab311_drm.dts ${S}/arch/arm64/boot/dts/amlogic
+    cp ${WORKDIR}/tm2_t962e2_sky_drm.dts ${S}/arch/arm64/boot/dts/amlogic
 }
 
 S = "${WORKDIR}/git"

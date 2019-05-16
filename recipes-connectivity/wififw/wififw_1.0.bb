@@ -4,7 +4,7 @@ LICENSE = "GPLv2"
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/wifi.git;protocol=git;nobranch=1"
 
-SRCREV = "7f9d4f7a8fa7c73bc099e8430770f529c381b6fa"
+SRCREV = "68e9fc0882d2491b6943af90b7c50a44bfa96c34"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/wifi.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/wifi.git;protocol=ssh; \n"
 
@@ -31,6 +31,7 @@ PACKAGES =+ "${PN}-ap6181 \
              ${PN}-bcm4354 \
              ${PN}-bcm4356 \
              ${PN}-bcm43458 \
+             ${PN}-qca6174\
             "
 
 do_install() {
@@ -116,6 +117,13 @@ do_install() {
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/*.bin ${D}${sysconfdir}/wifi/43458/
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/nvram*.txt ${D}${sysconfdir}/wifi/43458/nvram.txt
 	install -D -m 0644 ${WORKDIR}/git/bcm_ampak/config/43458/BCM4345C0.hcd ${D}${sysconfdir}/bluetooth/
+
+#qca6174
+	mkdir -p ${D}${sysconfdir}/wifi/qca6174/wlan/
+	mkdir -p ${D}${sysconfdir}/bluetooth/qca6174/
+	install -D -m 0644 ${WORKDIR}/git/qcom/config/qca6174/wifi/*.bin ${D}${sysconfdir}/wifi/qca6174/
+	install -D -m 0644 ${WORKDIR}/git/qcom/config/qca6174/wifi/wlan/* ${D}${sysconfdir}/wifi/qca6174/wlan/
+	install -D -m 0644 ${WORKDIR}/git/qcom/config/qca6174/bt/* ${D}${sysconfdir}/bluetooth/qca6174/
 }
 
 FILES_${PN}-ap6181 = "\
@@ -182,6 +190,9 @@ FILES_${PN}-bcm43458 = " \
                 ${sysconfdir}/bluetooth/BCM4345C0.hcd \
                 ${sysconfdir}/wifi/43458/*"
 
+FILES_${PN}-qca6174= " \
+                ${sysconfdir}/bluetooth/qca6174/* \
+                ${sysconfdir}/wifi/qca6174/*"
 # Header file provided by a separate package
 DEPENDS += ""
 
