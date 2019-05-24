@@ -16,6 +16,8 @@ SRC_URI += "file://0007-Fix-Youtube-stuck-after-seek.patch"
 SRC_URI += "file://0008-For-2019-youtube-Progressive-Test-41-accurary.patch"
 SRC_URI += "file://0009-fix-pcrscr-overflowing-and-refind-get-sysfs-apis.patch"
 
+SRC_URI_append += "${@bb.utils.contains('DISTRO_FEATURES', 'playready', '', 'file://0010-disable-tvp.patch', d)}"
+
 #SRC_URI += "file://fix-CodecID-redefinition.patch"
 
 #MIRRORS_prepend += "git://git.myamlogic.com/linux/multimedia/gstreamer_plugin.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/gstreamer_plugin.git;protocol=ssh; \n"
