@@ -6,10 +6,9 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;nobranch=1"
 SRC_URI += "file://COPYING.GPL"
-#SRC_URI += "file://0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch"
 SRC_URI += "file://0002-parser-for-tvp.patch"
 
-SRCREV = "c4265acedff9f9ad083f9548a3852f31223eca43"
+SRCREV = "e3612ddb229f330d34c050a5c23ff9201126dcbc"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 
@@ -19,7 +18,6 @@ MEDIA_MODULES_UCODE_BIN = "${S}/firmware/video_ucode.bin"
 
 do_patch() {
     cd ${S}
-#    git apply -p1 < ../0001-PD-146152-media_modules-merged-code-from-43177e6a-on.patch
     git apply -p1 < ../0002-parser-for-tvp.patch
 }
 

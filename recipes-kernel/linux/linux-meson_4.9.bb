@@ -37,7 +37,7 @@ MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinu
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
 
-SRCREV="dd40cac611121797ca8d8f40ac47dd370b5d0d67"
+SRCREV="2d4cc31d6f8e8923d9f9a0997dc0260927bdb503"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
