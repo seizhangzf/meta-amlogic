@@ -26,6 +26,7 @@ DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch \
            file://0029-dts-Add-drm-backend-for-txlx-t962e-r321.patch \
            file://0038-linux-meson-Enable-drm-backend-for-gxl_p212_1g_build.patch \
            file://0039-drm-workaround-for-1080p-scale-to-4k-1-1.patch \
+           file://0041-workaround-for-emmc-eyetest-fail.patch \
            "
 SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d)}"
 #SRC_URI += "file://0033-For-abnormal-video-as-playing-4k-video-on-youtube-pc.patch"
