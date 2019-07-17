@@ -33,6 +33,10 @@ SRC_URI += " ${@bb.utils.contains("DISTRO_FEATURES", "drm", "${DRM_SRC}", " ", d
 SRC_URI += "file://0034-Porting-to-gxl_p212_1g_buildroot.dts.patch"
 SRC_URI += "file://0035-tsync-expose-tsync_video_started-to-user-space.patch"
 
+#v4l patches
+
+SRC_URI += "file://0001-increase-v4l-memory.patch"
+
 MIRRORS_prepend += "git://git.myamlogic.com/kernel/common.git git://git@openlinux.amlogic.com/yocto/kernel/common.git;protocol=ssh; \n"
 
 LINUX_VERSION ?= "4.9.113"
