@@ -16,6 +16,7 @@ SRC_URI += "git://git.myamlogic.com/uboot.git;nobranch=1;destsuffix=uboot-repo/b
 SRC_URI += "git://git.myamlogic.com/amlogic/tools/fip.git;nobranch=1;destsuffix=uboot-repo/fip;name=fip"
 SRC_URI += "file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33"
 SRC_URI += "file://0002-lpddr4-timing.patch;patchdir=bl33"
+SRC_URI += "file://0001-remove-hardcode-path.patch;patchdir=bl33"
 
 do_configure[noexec] = "1"
 
@@ -50,6 +51,13 @@ BL32_SOC_FAMILY_txl = "gx"
 BL32_SOC_FAMILY_txlx = "txlx"
 BL32_SOC_FAMILY_sm2 = "g12a"
 BL32_SOC_FAMILY_tm2 = "tl1"
+
+PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-none-elf/bin"
+PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-eabi/bin"
+DEPENDS += "gcc-linaro-aarch64-none-elf-native "
+DEPENDS_tm2 += " riscv-none-gcc-native "
+DEPENDS_g12a += " gcc-arm-none-eabi-native"
 
 do_compile () {
     cp fip/mk .

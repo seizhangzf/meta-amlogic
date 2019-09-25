@@ -45,6 +45,8 @@ DEFCONFIG_ARRAY=("mesongxl_p230"
 				 "mesontm2_ab311_wayland_drm_playready_32b"
 				 "mesontm2_sky_wayland_drm_playready"
 				 "mesontm2_sky_wayland_drm_playready_32b"
+				 "mesontm2_sky_wayland_drm"
+				 "mesontm2_sky_wayland_drm_32b"
 				 )
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
@@ -57,7 +59,7 @@ done
 
 function choose_info()
 {
-	echo 
+	echo
 	echo "You're building on Linux"
 	echo "Lunch menu...pick a combo:"
 	i=0
@@ -92,7 +94,7 @@ function choose_type()
 	local DEFAULT_NUM DEFAULT_VALUE
 	DEFAULT_NUM=2
 	DEFAULT_VALUE="mesongxl_p230_32b"
-	
+
 	export TARGET_MACHINE=
 	local ANSWER
 	while [ -z $TARGET_MACHINE ]
@@ -109,7 +111,7 @@ function choose_type()
 			ANSWER="$DEFAULT_NUM"
 		fi
 
-		if [ -n "`echo $ANSWER | sed -n '/^[0-9][0-9]*$/p'`" ]; then	
+		if [ -n "`echo $ANSWER | sed -n '/^[0-9][0-9]*$/p'`" ]; then
 			if [ $ANSWER -le $DEFCONFIG_ARRAY_LEN ] && [ $ANSWER -gt 0 ]; then
 				index=$((${ANSWER}-1))
 				TARGET_MACHINE=${DEFCONFIG_ARRAY[$index]}
@@ -142,7 +144,7 @@ function lunch()
 		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
 		export MACHINE=$TARGET_MACHINE
 		echo "==========================================="
-		echo  
+		echo
 		echo "MACHINE=${TARGET_MACHINE}"
 		echo "OUTPUT_DIR=${BUILD_DIR}"
 		echo

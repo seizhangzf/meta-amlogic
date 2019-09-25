@@ -12,8 +12,9 @@ MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@ope
 do_configure[noexec] = "1"
 do_populate_lic[noexec] = "1"
 
+DEPENDS += " coreutils-native python-native python-pycrypto-native"
 PROVIDES = "optee-userspace-demos"
-
+export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
 PACKAGES =+ "\
     ${PN}-demos \
 "
