@@ -54,10 +54,10 @@ BL32_SOC_FAMILY_tm2 = "tl1"
 
 PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-none-elf/bin"
 PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
-PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-eabi/bin"
-DEPENDS += "gcc-linaro-aarch64-none-elf-native "
-DEPENDS_tm2 += " riscv-none-gcc-native "
-DEPENDS_g12a += " gcc-arm-none-eabi-native"
+PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-elf/bin"
+DEPENDS_append = "gcc-linaro-aarch64-none-elf-native "
+DEPENDS_append_tm2 = " riscv-none-gcc-native "
+DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 
 do_compile () {
     cp fip/mk .

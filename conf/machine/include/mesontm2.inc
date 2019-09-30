@@ -1,4 +1,4 @@
 # common configuration
-
-MACHINEOVERRIDES .= ":client"
-BBMASK .= "|.*recipes-rdkb"
+require conf/machine/include/amlogic_common.inc
+PREFERRED_PROVIDER_virtual/gpu ?= "dvalin"
+OVERRIDES .= ":tm2"

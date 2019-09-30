@@ -1,6 +1,8 @@
 inherit kernel
 require linux-meson.inc
 FILESEXTRAPATHS_prepend := "${THISDIR}/4.9:"
+FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/aarch64:"
+FILESEXTRAPATHS_prepend_armv7a := "${THISDIR}/armv7a:"
 
 KBRANCH = ""
 SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};nobranch=1"
@@ -21,6 +23,7 @@ SRC_URI += "file://0001-volume-patch-from-lianlian.zhu.patch"
 SRC_URI += "file://0004-dts-enable-meson-drm.patch"
 SRC_URI += "file://0005-use-old-partition-on-p230.patch"
 SRC_URI += "file://0006-dts-include-meson_drm.dtsi-in-962e-r321-dts.patch"
+SRC_URI += "file://0001-fix-kernel-warning.patch"
 
 DRM_SRC = "file://0028-linux-meson-Modification-for-DRM-backend.patch \
            file://0029-dts-Add-drm-backend-for-txlx-t962e-r321.patch \
@@ -48,8 +51,8 @@ PV = "${LINUX_VERSION}+git${SRCPV}"
 COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*)"
 
 do_compile_prepend() {
-    cp ${WORKDIR}/tm2_t962e2_ab311_drm.dts ${S}/arch/arm64/boot/dts/amlogic
-    cp ${WORKDIR}/tm2_t962e2_sky_drm.dts ${S}/arch/arm64/boot/dts/amlogic
+    cp ${WORKDIR}/tm2_t962e2_ab311_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
+    cp ${WORKDIR}/tm2_t962e2_sky_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
 }
 
 S = "${WORKDIR}/git"

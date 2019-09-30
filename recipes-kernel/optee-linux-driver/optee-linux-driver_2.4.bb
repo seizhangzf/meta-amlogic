@@ -23,8 +23,11 @@ FILES_${PN} = "optee_armtz.ko optee.ko"
 DEPENDS += ""
 
 S = "${WORKDIR}/git"
-
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/linuxdriver" modules'
-
+TARGET_ARGS_armv7a=" KERNEL_A32_SUPPORT=true"
+do_compile() {
+    unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+    export ${TARGET_ARGS}
+    oe_runmake  -C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/linuxdriver" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
+}
 KERNEL_MODULE_AUTOLOAD += "optee_armtz"
 KERNEL_MODULE_AUTOLOAD += "optee"
