@@ -1,0 +1,57 @@
+From e66cb6221d9fe21563e80249195fa25a6e946f55 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 18 Oct 2019 16:45:56 -0700
+Subject: [PATCH] fix linux-dvb adapter name
+
+---
+ am_adp/am_dmx/linux_dvb/linux_dvb.c  | 3 ++-
+ am_adp/am_dvr/linux_dvb/linux_dvb.c  | 4 +++-
+ am_adp/am_fend/linux_dvb/linux_dvb.c | 3 ++-
+ 3 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/am_adp/am_dmx/linux_dvb/linux_dvb.c b/am_adp/am_dmx/linux_dvb/linux_dvb.c
+index 5c29a3f..4a66fdc 100644
+--- a/am_adp/am_dmx/linux_dvb/linux_dvb.c
++++ b/am_adp/am_dmx/linux_dvb/linux_dvb.c
+@@ -107,7 +107,8 @@ static AM_ErrorCode_t dvb_open(AM_DMX_Device_t *dev, const AM_DMX_OpenPara_t *pa
+ 		return AM_DMX_ERR_NO_MEM;
+ 	}
+ 	
+-	snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb0.demux%d", dev->dev_no);
++	//snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb0.demux%d", dev->dev_no);
++	snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb/adapter0/demux%d", dev->dev_no);
+ 	
+ 	for(i=0; i<DMX_FILTER_COUNT; i++)
+ 		dmx->fd[i] = -1;
+diff --git a/am_adp/am_dvr/linux_dvb/linux_dvb.c b/am_adp/am_dvr/linux_dvb/linux_dvb.c
+index 468269c..c46d8a4 100644
+--- a/am_adp/am_dvr/linux_dvb/linux_dvb.c
++++ b/am_adp/am_dvr/linux_dvb/linux_dvb.c
+@@ -72,7 +72,9 @@ static AM_ErrorCode_t dvb_open(AM_DVR_Device_t *dev, const AM_DVR_OpenPara_t *pa
+ 	
+ 	UNUSED(para);
+ 
+-	snprintf(dev_name, sizeof(dev_name), "/dev/dvb0.dvr%d", dev->dev_no);
++	//snprintf(dev_name, sizeof(dev_name), "/dev/dvb0.dvr%d", dev->dev_no);
++	AM_DEBUG(1, "device no %d ", dev->dev_no);
++	snprintf(dev_name, sizeof(dev_name), "/dev/dvb/adapter0/dvr%d", dev->dev_no);
+ 	fd = open(dev_name, O_RDONLY);
+ 	if (fd == -1)
+ 	{
+diff --git a/am_adp/am_fend/linux_dvb/linux_dvb.c b/am_adp/am_fend/linux_dvb/linux_dvb.c
+index bc5f3ca..9377e1b 100644
+--- a/am_adp/am_fend/linux_dvb/linux_dvb.c
++++ b/am_adp/am_fend/linux_dvb/linux_dvb.c
+@@ -117,7 +117,8 @@ static AM_ErrorCode_t dvb_open (AM_FEND_Device_t *dev, const AM_FEND_OpenPara_t
+ 	char name[PATH_MAX];
+ 	int fd, ret;
+ 
+-	snprintf(name, sizeof(name), "/dev/dvb0.frontend%d", dev->dev_no);
++	//snprintf(name, sizeof(name), "/dev/dvb0.frontend%d", dev->dev_no);
++	snprintf(name, sizeof(name), "/dev/dvb/adapter0/frontend%d", dev->dev_no);
+ 
+ 	fd = open(name, O_RDWR);
+ 	if(fd==-1)
+-- 
+2.7.4
+

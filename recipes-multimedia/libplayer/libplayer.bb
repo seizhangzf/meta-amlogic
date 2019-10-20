@@ -11,7 +11,8 @@ SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
 PROVIDES += "libamcodec.so"
 DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
-SRCREV="ab9e480f9cb17b0b1164de6e82da781bdbe0beb9"
+#SRCREV="ab9e480f9cb17b0b1164de6e82da781bdbe0beb9"
+SRCREV="19ca046757f026bec28e35ee4b5041d59d669240"
 
 #SRC_URI += "\
 #           file://0001-PD-151901-set-drmmode-flag-before-codec_init-for-MUL.patch \
@@ -94,6 +95,7 @@ FILES_${PN} += "/usr/lib/libadpcm.so \
                 /usr/lib/libavfilter.so \
                 /usr/lib/libavdevice.so \
                 /usr/lib/libavformat.so \
+                /usr/lib/libamvdec.so \
                 "
 
 FILES_${PN}-dev = "/usr/include/* \
