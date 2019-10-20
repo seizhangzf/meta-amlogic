@@ -5,7 +5,7 @@ LICENSE = "CLOSED"
 
 SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tdk.git;nobranch=1"
 MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh; \n"
-SRCREV = "2b4fb5c1dcef812b296194d8362d6c891b05cb34"
+SRCREV = "9bbf7b7c550b9f3f625dd42a6c27f7a53185a368"
 
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"

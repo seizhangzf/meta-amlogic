@@ -5,14 +5,10 @@ if [ -z $BUILD_DIR ]; then
 	BUILD_DIR="build"
 fi
 
-DEFCONFIG_ARRAY=("mesong12a_u200_wayland_drm"
-				 "mesong12a_u200_wayland_drm_32b"
-				 "mesong12a_u212_wayland_drm"
-				 "mesong12a_u212_wayland_drm_32b"
-				 "mesontm2_ab311_wayland_drm"
-				 "mesontm2_ab311_wayland_drm_32b"
-				 "mesontm2_lama_wayland_drm"
-				 "mesontm2_lama_wayland_drm_32b"
+DEFCONFIG_ARRAY=("mesong12a_u212"
+				 "mesontm2_ab301"
+				 "mesontm2_t962e2_llama"
+				 "mesontm2_t962x3_llama"
 				 )
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
