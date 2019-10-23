@@ -9,7 +9,7 @@ SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};nobranch=
 
 SRC_URI_append = " file://defconfig"
 SRC_URI_append = " file://tm2_t962e2_ab311_drm.dts"
-SRC_URI_append = " file://tm2_t962e2_sky_drm.dts"
+SRC_URI_append = " file://tm2_t962e2_llama_drm.dts"
 
 SRC_URI_append = " file://meson.scc \
             file://meson.cfg \
@@ -25,6 +25,7 @@ SRC_URI_append = " file://tm2_t962x3_ab301_drm.dts"
 SRC_URI_append = " file://mesontm2_llama.dtsi"
 SRC_URI_append = " file://mesontm2_t962x3_llama-panel.dtsi"
 SRC_URI_append = " file://tm2_t962x3_llama_drm.dts"
+SRC_URI_append = " file://0001-workaround-tee-disable-microCode-loading-by-optee.patch"
 
 
 DRM_SRC = "file://0041-workaround-for-emmc-eyetest-fail.patch \
@@ -54,7 +55,7 @@ COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*
 
 do_compile_prepend() {
     cp ${WORKDIR}/tm2_t962e2_ab311_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
-    cp ${WORKDIR}/tm2_t962e2_sky_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
+    cp ${WORKDIR}/tm2_t962e2_llama_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
     cp ${WORKDIR}/tm2_t962x3_ab301_drm.dts ${S}/arch/${ARCH}/boot/dts/amlogic
 }
 

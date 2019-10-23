@@ -17,7 +17,8 @@
 
 /dts-v1/;
 
-#include "mesontm2.dtsi"
+#include "mesontm2_llama.dtsi"
+#include "partition_mbox_normal_P_32.dtsi"
 #include "mesong12a_drm.dtsi"
 
 / {
@@ -45,7 +46,7 @@
 
 	memory@00000000 {
 		device_type = "memory";
-		linux,usable-memory = <0x0 0xf5800000>;
+		linux,usable-memory = <0x0 0x80000000>;
 	};
 
 	reserved-memory {
@@ -89,9 +90,10 @@
 			compatible = "shared-dma-pool";
 			reusable;
 			/* ion_codec_mm max can alloc size 80M*/
-			size = <0x18400000>;
+			size = <0x13400000>;
 			alignment = <0x400000>;
 			linux,contiguous-region;
+			alloc-ranges = <0x30000000 0x50000000>;
 		};
 
 		/* codec shared reserved */
@@ -105,7 +107,7 @@
 		ion_cma_reserved:linux,ion-dev {
 			compatible = "shared-dma-pool";
 			reusable;
-			size = <0x8000000>;
+			size = <0x2000000>;
 			alignment = <0x400000>;
 		};
 
@@ -184,7 +186,6 @@
 			alignment = <0x0>;
 			linux,contiguous-region;
 		};
-
 		dsp_fw_reserved:linux,dsp_fw {
 			compatible = "shared-dma-pool";
 			reusable;
@@ -327,8 +328,10 @@
 			};
 			tdmacodec: codec {
 				//sound-dai = <&dummy_codec>;
-				prefix-names = "AMP", "AMP1";
-				sound-dai = <&ad82584f &ad82584f1 &tl1_codec>;
+				prefix-names = "AMP";
+				sound-dai = <&tas5805_4c
+							&tas5805_4d
+							&tas5805_4e>;
 			};
 		};
 
@@ -697,120 +700,6 @@
 		key_val = <0 143 266 389 512 143 266>; //val=voltage/1800mV*1023
 		key_tolerance = <40 40 40 40 40 40 40>;
 };
-
-	partitions: partitions{
-		parts = <17>;
-		part-0 = <&logo>;
-		part-1 = <&recovery>;
-		part-2 = <&misc>;
-		part-3 = <&dtbo>;
-		part-4 = <&cri_data>;
-		part-5 = <&param>;
-		part-6 = <&boot>;
-		part-7 = <&rsv>;
-		part-8 = <&metadata>;
-		part-9 = <&vbmeta>;
-		part-10 = <&tee>;
-		part-11 = <&vendor>;
-		part-12 = <&odm>;
-		part-13 = <&system>;
-		part-14 = <&product>;
-		part-15 = <&cache>;
-		part-16 = <&data>;
-
-		logo:logo{
-			pname = "logo";
-			size = <0x0 0x800000>;
-			mask = <1>;
-		};
-		recovery:recovery{
-			pname = "recovery";
-			size = <0x0 0x1800000>;
-			mask = <1>;
-		};
-		misc:misc{
-			pname = "misc";
-			size = <0x0 0x800000>;
-			mask = <1>;
-		};
-		dtbo:dtbo{
-			pname = "dtbo";
-			size = <0x0 0x800000>;
-			mask = <1>;
-		};
-		cri_data:cri_data
-		{
-			pname = "cri_data";
-			size = <0x0 0x800000>;
-			mask = <2>;
-		};
-		rsv:rsv{
-			pname = "rsv";
-			size = <0x0 0x1000000>;
-			mask = <1>;
-		};
-		metadata:metadata{
-			pname = "metadata";
-			size = <0x0 0x1000000>;
-			mask = <1>;
-		};
-		vbmeta:vbmeta{
-			pname = "vbmeta";
-			size = <0x0 0x200000>;
-			mask = <1>;
-		};
-		param:param{
-			pname = "param";
-			size = <0x0 0x1000000>;
-			mask = <2>;
-		};
-		boot:boot
-		{
-			pname = "boot";
-			size = <0x0 0x2000000>;
-			mask = <1>;
-		};
-		tee:tee{
-			pname = "tee";
-			size = <0x0 0x1000000>;
-			mask = <1>;
-		};
-		vendor:vendor
-		{
-			pname = "vendor";
-			size = <0x0 0x14000000>;
-			mask = <1>;
-		};
-		odm:odm
-		{
-			pname = "odm";
-			size = <0x0 0x8000000>;
-			mask = <1>;
-		};
-		system:system
-		{
-			pname = "system";
-			size = <0x0 0x50000000>;
-			mask = <1>;
-		};
-		product:product{
-			pname = "product";
-			size = <0x0 0x8000000>;
-			mask = <1>;
-		};
-		cache:cache
-		{
-			pname = "cache";
-			size = <0x0 0x46000000>;
-			mask = <2>;
-		};
-		data:data
-		{
-			pname = "data";
-			size = <0xffffffff 0xffffffff>;
-			mask = <4>;
-		};
-	};
 
 	unifykey {
 		compatible = "amlogic, unifykey";
@@ -1571,7 +1460,7 @@
 		clock-names = "mclk", "clk_srcpll";
 
 		pinctrl-names = "tdm_pins";
-		pinctrl-0 = <&tdmout_c &tdmin_c>;
+		pinctrl-0 = </*&tdmout_c &tdmin_c*/>;
 
 		status = "okay";
 	};
@@ -1737,7 +1626,7 @@
 		/* max 0xff, each bit for one channel */
 		channel_mask = <0xff>;
 
-		status = "disable";
+		status = "disabled";
 	};
 
 	asrca: resample@0 {
@@ -1932,8 +1821,9 @@
 }; /* end of audiobus */
 
 &earc {
-	status = "okay";
-};
+		status = "okay";
+	};
+
 
 &pinctrl_periphs {
 	/* audio pin mux */
@@ -1953,14 +1843,6 @@
 				"tdma_dout1_h";
 			function = "tdma_out";
 			bias-pull-down;
-		};
-	};
-
-	tdmin_a: tdmin_a {
-		mux { /* GPIOH_11, GPIOH_12 */
-			groups = "tdma_din0_h",
-			    "tdma_din1_h";
-			function = "tdma_in";
 		};
 	};
 
@@ -2005,7 +1887,7 @@
 		mux { /* GPIOZ_7, GPIOZ_8, pdm_din2_z4 */
 			groups = "pdm_dclk_z",
 				"pdm_din0_z",
-				"pdm_din2_z4";
+				"pdm_din1_z9";
 			function = "pdm";
 		};
 	};
@@ -2044,18 +1926,7 @@
 			output-low;
 		};
 	};
-    dvb_s_ts0_pins: dvb_s_ts0_pins {
-		mux {
-			groups = "tsin_a_din0",
-			"tsin_a_clk",
-			"tsin_a_sop",
-			"tsin_a_valid";
-			function = "tsin_a";
-		};
-
-    };
-
-}; /* end of pinctrl_periphs */
+ }; /* end of pinctrl_periphs */
 
 &audio_data{
 	status = "okay";
@@ -2072,7 +1943,7 @@
 		#sound-dai-cells = <0>;
 		codec_name = "tas5805";
 		reg = <0x2d>;
-		status = "disable";
+		status = "disabled";
 	};
 };
 
@@ -2086,7 +1957,7 @@
 		compatible = "ESMT, ad82584f";
 		#sound-dai-cells = <0>;
 		reg = <0x30>;
-		status = "okay";
+		status = "disabled";
 		reset_pin = <&gpio GPIOH_13 0>;
 		no_mclk;
 	};
@@ -2094,9 +1965,60 @@
 		compatible = "ESMT, ad82584f";
 		#sound-dai-cells = <0>;
 		reg = <0x31>;
-		status = "okay";
+		status = "disabled";
 		no_mclk;
 	};
+    tas5766_7c: tas5766@7c {
+		compatible = "ti,tas5766";
+		#sound-dai-cells = <0>;
+		reg = <0x2d>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_11 0>;
+		status = "disabled";
+	};
+    tas5766_7d: tas5766@7d {
+		compatible = "ti,tas5766";
+		#sound-dai-cells = <0>;
+		reg = <0x2e>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_12 0>;
+		status = "disabled";
+	};
+    tas5766_7e: tas5766@7e {
+		compatible = "ti,tas5766";
+		#sound-dai-cells = <0>;
+		reg = <0x2f>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_13 0>;
+		status = "disabled";
+	};
+tas5805_4c: tas5805@4c {
+		compatible = "ti,tas5805";
+		#sound-dai-cells = <0>;
+		reg = <0x4c>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_11 0>;
+		status = "okay";
+	};
+
+	tas5805_4d: tas5805@4d {
+		compatible = "ti,tas5805";
+		#sound-dai-cells = <0>;
+		reg = <0x4d>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_12 0>;
+		status = "okay";
+	};
+
+	tas5805_4e: tas5805@4e {
+		compatible = "ti,tas5805";
+		#sound-dai-cells = <0>;
+		reg = <0x4e>;
+		master_vol = /bits/ 8 <150>; /* 0 ~ 232 */
+		gpio-fb = <&gpio GPIOH_13 0>;
+		status = "okay";
+	};
+
 };
 
 &sd_emmc_c {
@@ -2194,8 +2116,6 @@
 
 &ethmac {
 	status = "okay";
-	//pinctrl-names = "internal_eth_pins";
-	//pinctrl-0 = <&internal_eth_pins>;
 	mc_val = <0x4be04>;
 
 	internal_phy=<1>;
@@ -2257,7 +2177,6 @@
 	mem_alloc = <0>;
 	pxp_mode = <0>; /** 0:normal mode 1:pxp mode */
 };
-
 &drm_vpu {
 	status = "okay";
 	logo_addr = "0x7f800000";
@@ -2269,9 +2188,8 @@
 };
 
 &drm_lcd {
-	status = "disable";
+	status = "disabled";
 };
-
 &pwm_AO_cd {
 	status = "okay";
 };
