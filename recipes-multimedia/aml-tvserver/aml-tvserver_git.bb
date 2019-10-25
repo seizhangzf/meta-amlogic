@@ -1,8 +1,10 @@
 SUMMARY = "aml tvserver"
 LICENSE = "CLOSED"
 SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tvserver.git;protocol=git;branch=pure-linux-amlogic"
+MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tvserver.git git://git@openlinux.amlogic.com/yocto/vendor/amlogic/tvserver.git;protocol=ssh; \n"
 
-SRCREV= "0ccc8639f85e3a33a8a5d851af9b0b94ddc26854"
+SRCREV ?= "${AUTOREV}"
+
 DEPENDS = " dbus sqlite3 "
 do_configure[noexec] = "1"
 inherit autotools pkgconfig

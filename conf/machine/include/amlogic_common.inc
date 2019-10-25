@@ -1,4 +1,5 @@
 require conf/machine/include/arm/arch-armv8.inc
+include conf/machine/include/amlogic_srcrev.inc
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
         media-modules \
         optee-linux-driver \

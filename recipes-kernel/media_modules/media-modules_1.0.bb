@@ -10,7 +10,7 @@ SRC_URI_append = " file://0002-parser-for-tvp.patch"
 SRC_URI_append = " file://0001-v4l2-fix-gstreamer-play-error-1-1.patch"
 SRC_URI_append_llama = " file://0001-Merge-patch-to-fix-TS1-TS2-TS3-serial-in-path.patch"
 #SRC_URI_append_llama = " file://0001-si2168-support.patch"
-SRCREV = "8773984960bbdc020f2a1c1047d5bf4e9b4bdbca"
+SRCREV ?= "${AUTOREV}"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 

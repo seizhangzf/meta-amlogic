@@ -6,7 +6,7 @@ LICENSE = "GPLv2"
 SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git;nobranch=1"
 SRC_URI += "file://0001-fix-firmware-path.patch"
 
-SRCREV = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
+SRCREV ?= "${AUTOREV}"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/qualcomm/drivers/qca6174.git;protocol=ssh; \n"
 

@@ -4,8 +4,7 @@ LICENSE = "GPLv2"
 
 SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/wifi.git;protocol=git;nobranch=1"
 
-SRCREV = "68e9fc0882d2491b6943af90b7c50a44bfa96c34"
-
+SRCREV ?= "${AUTOREV}"
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/wifi.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/wifi.git;protocol=ssh; \n"
 
 inherit pkgconfig

@@ -2,7 +2,8 @@ DESCRIPTION = "optee and tee-supplicant"
 LICENSE = "Closed"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-SRCREV = "2b4fb5c1dcef812b296194d8362d6c891b05cb34"
+
+SRCREV ?= "${AUTOREV} "
 SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tdk.git;nobranch=1"
 SRC_URI += "file://tee-supplicant.service"
 SRC_URI += "file://0001-For-compilation-with-arm-rdk-linux-gnueabi-gcc.patch"
