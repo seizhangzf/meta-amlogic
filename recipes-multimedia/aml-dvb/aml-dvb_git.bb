@@ -38,10 +38,6 @@ do_install() {
     install -m 0755 ${S}/usr/bin/* ${D}${bindir}
 }
 
-do_clean() {
-    cd ${S}
-    oe_runmake clean
-}
 FILES_${PN} = "${libdir}/* ${bindir}/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"

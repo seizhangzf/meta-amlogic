@@ -30,10 +30,6 @@ do_install() {
     install -m 0644 ${S}/src/dtvcc.h ${D}${includedir} 
 }
 
-do_clean() {
-    cd ${S}
-    oe_runmake clean
-}
 FILES_${PN} = "${libdir}/*"
 FILES_${PN}-dev = "${includedir}/*"
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"

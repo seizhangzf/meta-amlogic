@@ -27,10 +27,6 @@ do_install() {
     install -m 0644 ${S}/client/include/*.h ${D}${includedir}
 }
 
-do_clean() {
-    cd ${S}
-    oe_runmake clean
-}
 FILES_${PN} = "${libdir}/* ${bindir}/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"
