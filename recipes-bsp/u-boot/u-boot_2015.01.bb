@@ -20,8 +20,6 @@ SRC_URI_append = " git://git.myamlogic.com/amlogic/tools/fip.git;nobranch=1;dest
 SRC_URI_append = " file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33"
 SRC_URI_append = " file://0002-lpddr4-timing.patch;patchdir=bl33"
 SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33"
-SRC_URI_append_llama = " file://0001-Adjust-DDR-timing-for-LPDDR4.patch;patchdir=bl33"
-SRC_URI_append_llama = " file://0002-Pull-high-GPIOAO_6-to-power-up-AMP.patch;patchdir=bl33"
 
 do_configure[noexec] = "1"
 

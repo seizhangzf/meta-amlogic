@@ -55,7 +55,7 @@ function choose_type()
 	choose_info
 	local DEFAULT_NUM DEFAULT_VALUE
 	DEFAULT_NUM=2
-	DEFAULT_VALUE="mesongxl_p230_32b"
+	DEFAULT_VALUE="mesong12a_u212.conf"
 
 	export TARGET_MACHINE=
 	local ANSWER

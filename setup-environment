@@ -65,6 +65,13 @@ if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-meson[^-]') -eq 0 ]; 
 BBLAYERS =+ "\${RDKROOT}/meta-meson"
 EOF
 fi
+# Add meta-customer-* only if a machine configuration choosed from different layer
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-customer[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-customer-sky"
+EOF
+fi
+
 
 # Add meta-openembedded/meta-initramfs only if a machine configuration choosed from different layer
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-initramfs[^-]') -eq 0 ]; then
