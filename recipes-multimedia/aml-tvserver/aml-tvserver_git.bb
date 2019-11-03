@@ -4,10 +4,11 @@ SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tvserver.git;protocol=git;bran
 MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tvserver.git git://git@openlinux.amlogic.com/yocto/vendor/amlogic/tvserver.git;protocol=ssh; \n"
 
 SRCREV ?= "${AUTOREV}"
-
+SRC_URI +="file://tvserver.service"
+SRC_URI += "file://0001-fix-wrong-path.patch"
 DEPENDS = " dbus sqlite3 "
 do_configure[noexec] = "1"
-inherit autotools pkgconfig
+inherit autotools pkgconfig systemd
 S="${WORKDIR}/git"
 
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
@@ -25,7 +26,12 @@ do_install() {
     cd ${S}
     oe_runmake  install
     install -m 0644 ${S}/client/include/*.h ${D}${includedir}
+    if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then
+        install -D -m 0644 ${WORKDIR}/tvserver.service ${D}${systemd_unitdir}/system/tvserver.service
+    fi
+
 }
+SYSTEMD_SERVICE_${PN} = "tvserver.service"
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"
 FILES_${PN}-dev = "${includedir}/* "

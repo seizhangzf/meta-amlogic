@@ -1,4 +1,4 @@
-do_install_append_llama () {
+do_install_append_tm2 () {
 
 #         part-0 = <&logo>;
 #         part-1 = <&recovery>;
@@ -28,7 +28,6 @@ mkdir -p ${D}/data
 cat >> ${D}${sysconfdir}/fstab <<EOF
  /dev/vendor            /vendor                    auto       defaults              0  0
  /dev/odm            /odm                    auto       defaults              0  0
- /dev/product            /product                    auto       defaults              0  0
  /dev/cache            /cache                    auto       defaults              0  0
  /dev/data            /data                    auto       defaults              0  0
 
@@ -36,5 +35,5 @@ EOF
 
 }
 
-FILES_${PN}_append_llama = " /vendor /odm /product /cache /data"
-dirs755_append_llama = " /vendor /odm /product /cache /data"
+FILES_${PN}_append_tm2 = " /vendor /odm /product /cache /data"
+dirs755_append_tm2 = " /vendor /odm /product /cache /data"

@@ -1,0 +1,45 @@
+From 3cf03657895f12c15411a4d5cc29d5f4baea5fad Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Sat, 2 Nov 2019 21:34:52 -0700
+Subject: [PATCH] si2168 support
+
+---
+ drivers/stream_input/Makefile                       | 2 +-
+ drivers/stream_input/parser/hw_demux/aml_demod_gt.h | 5 +----
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+ mode change 100644 => 100755 drivers/stream_input/parser/hw_demux/aml_demod_gt.h
+
+diff --git a/drivers/stream_input/Makefile b/drivers/stream_input/Makefile
+index 6518166..7f17067 100644
+--- a/drivers/stream_input/Makefile
++++ b/drivers/stream_input/Makefile
+@@ -13,7 +13,7 @@ stream_input-objs	+=	subtitle/subtitle.o
+ obj-$(CONFIG_AMLOGIC_DVB)   += parser/hw_demux/
+ obj-$(CONFIG_AMLOGIC_DVB)   += parser/demux/
+ obj-$(CONFIG_AMLOGIC_DVB)   += parser/dvb_ci/
+-#obj-y 	+= 	tv_frontend/
++#obj-y 	+= 	tv_frontend/superset/
+ # obj-y	+=	box-frontend/avl6211/
+ # obj-y	+=	box-frontend/atbm8881/
+ # obj-y	+=	box-frontend/avl68xx/
+diff --git a/drivers/stream_input/parser/hw_demux/aml_demod_gt.h b/drivers/stream_input/parser/hw_demux/aml_demod_gt.h
+old mode 100644
+new mode 100755
+index 7d8ae11..ad2fa43
+--- a/drivers/stream_input/parser/hw_demux/aml_demod_gt.h
++++ b/drivers/stream_input/parser/hw_demux/aml_demod_gt.h
+@@ -91,10 +91,7 @@ static inline struct dvb_frontend* atbm8881_attach (const struct amlfe_demod_con
+ 	return NULL;
+ }
+ 
+-static inline struct dvb_frontend* si2168_attach (const struct amlfe_demod_config *config)
+-{
+-	return NULL;
+-}
++extern struct dvb_frontend* si2168_attach (const struct amlfe_demod_config *config);
+ 
+ static inline struct dvb_frontend* si2168_attach_1 (const struct amlfe_demod_config *config)
+ {
+-- 
+2.7.4
+

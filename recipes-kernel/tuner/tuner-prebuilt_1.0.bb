@@ -1,7 +1,10 @@
 inherit module
 SUMMARY = "Tuner prebuilt drivers"
 LICENSE = "CLOSED"
-SRC_URI = " \
+FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/tuner-64:"
+FILESEXTRAPATHS_prepend_armv7a := "${THISDIR}/tuner-32:"
+
+SRC_URI_aarch64 = " \
            file://atbm8881_fe_64.ko \
            file://avl6762_fe_64.ko \
            file://mxl661_fe_64.ko \
@@ -11,7 +14,7 @@ SRC_URI = " \
            file://si2159_fe_64.ko \
            file://si2168_fe_64.ko \
            "
-
+SRC_URI_armv7a = " file://si2168_fe.ko"
 do_configure[noexec] = "1"
 
 do_compile() {

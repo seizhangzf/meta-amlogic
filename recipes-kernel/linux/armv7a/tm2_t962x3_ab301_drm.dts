@@ -1,5 +1,5 @@
 /*
- * arch/arm/boot/dts/amlogic/tm2_t962x3_ab301.dts
+ * arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
  *
  * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
  *
@@ -271,6 +271,30 @@
 		dat1_ch_sel = <1>;
 	};
 
+	aml_dtv_demod {
+		compatible = "amlogic, ddemod-tm2";
+		dev_name = "aml_dtv_demod";
+		status = "okay";
+
+		//pinctrl-names="dtvdemod_agc";
+		//pinctrl-0=<&dtvdemod_agc>;
+
+		clocks = <&clkc CLKID_DAC_CLK>;
+		clock-names = "vdac_clk_gate";
+
+		reg = <0xff650000 0x4000	/*dtv demod base*/
+			   0xff63c000 0x2000	/*hiu reg base*/
+			   0xff800000 0x1000	/*io_aobus_base*/
+			   0xffd01000 0x1000	/*reset*/
+			>;
+
+		dtv_demod0_mem = <0>;	// need move to aml_dtv_demod ?
+		spectrum = <1>;
+		cma_flag = <1>;
+		cma_mem_size = <8>;
+		memory-region = <&demod_cma_reserved>;//<&demod_reserved>;
+	};
+
 	auge_sound {
 		compatible = "amlogic, tm2-sound-card";
 		aml-audio-card,name = "AML-AUGESOUND";
@@ -450,63 +474,32 @@
 
 	dvb {
 		compatible = "amlogic, dvb";
-		dev_name = "dvb";
 		status = "okay";
-		fe0_mode = "external";
-		fe0_demod = "Si2168";
-		fe0_i2c_adap_id = <&i2c1>;
-		fe0_demod_i2c_addr = <0x64>;
-		fe0_ts = <0>;
-		fe0_reset_value = <0>;
-		fe0_reset_gpio = <&gpio GPIODV_4 GPIO_ACTIVE_HIGH>;
+		fe0_mode = "internal";
+		fe0_tuner = <&tuner>;
 
 		/*"parallel","serial","disable"*/
-		ts0 = "serial";
-		ts0_control = <0x800>;
-		ts0_invert = <0>;
-		ts_out_invert = <1>;
-
+		ts2 = "parallel";
+		ts2_control = <0>;
+		ts2_invert = <0>;
 		interrupts = <0 23 1
-					0 5 1
-					0 53 1
-					0 19 1
-					0 25 1
-					0 18 1
-					0 24 1>;
+				0 5 1
+				0 53 1
+				0 19 1
+				0 25 1
+				0 17 1>;
 		interrupt-names = "demux0_irq",
-						"demux1_irq",
-						"demux2_irq",
-						"dvr0_irq",
-						"dvr1_irq",
-						"dvr2_irq",
-						"dvrfill0_fill",
-						"dvrfill1_flush";
-		pinctrl-names = "s_ts0";
-		pinctrl-0 = <&dvb_s_ts0_pins>;
+				"demux1_irq",
+				"demux2_irq",
+				"dvr0_irq",
+				"dvr1_irq",
+				"dvr2_irq";
 		clocks = <&clkc CLKID_DEMUX
 			&clkc CLKID_ASYNC_FIFO
 			&clkc CLKID_AHB_ARB0
 /*		&clkc CLKID_DOS_PARSER>;*/
 		&clkc CLKID_U_PARSER>;
 		clock-names = "demux", "asyncfifo", "ahbarb0", "uparsertop";
-	};
-
-	dvbci {
-		compatible = "amlogic, dvbci";
-		dev_name = "dvbci";
-		io_type = <3>; /* 0=iobus,1=spi,2=cimax,3=spi-t312*/
-		dvbci_io {
-			/*mcu irq pin*/
-			mcu_irq_pin = <&gpio GPIOH_9 GPIO_ACTIVE_HIGH>;
-			/*below is spi config*/
-		    /*if use iobus you need add iobus config below */
-			spi_bus_num = <1>;
-			spi_chip_select = <0>;
-			spi_max_frequency = <300000>; /* unit: hz */
-			spi_mode = <3>; /* mode: 0, 1, 2, 3 */
-			spi_cs_delay = <10 100>; /*h delay, cs delay(unit:us)*/
-			spi_write_check = <0>; /* 0=disable, 1=enable */
-		};
 	};
 
 	tvafe_avin_detect {
@@ -560,8 +553,9 @@
 		 *if support 4K2K-YUV422-10bit-wr:3840*2160*3*6 ~= 160M
 		 *if support 4K2K-YUV422-8BIT-WR:3840*2160*2*4 ~= 64M
 		 *if support 1080p-YUV422-8BIT-WR:1920*1080*2*4 ~= 16M
+		 *worst case:(4096*2160*4 + 2M(afbce issue)) *6buf = 214.5M
 		 */
-		cma_size = <200>;
+		cma_size = <215>;
 		interrupts = <0 83 1>;
 		rdma-irq = <2>;
 		clocks = <&clkc CLKID_FCLK_DIV5>,
@@ -586,7 +580,8 @@
 		 * bit6 -- afbce for 720p
 		 * bit7 -- afbce for smaller resolution
 		 */
-		afbce_bit_mode = <0x0>;
+		afbce_bit_mode = <0x31>;
+		/*urgent_en*/
 	};
 
 	vdin@1 {
@@ -610,6 +605,7 @@
 		 *bit3:support 12bit
 		 */
 		tv_bit_mode = <0x15>;
+		/*urgent_en*/
 	};
 
 	tvafe {
@@ -701,7 +697,7 @@
 		compatible = "amlogic, unifykey";
 		status = "okay";
 
-		unifykey-num = <24>;
+		unifykey-num = <21>;
 		unifykey-index-0 = <&keysn_0>;
 		unifykey-index-1 = <&keysn_1>;
 		unifykey-index-2 = <&keysn_2>;
@@ -723,9 +719,6 @@
 		unifykey-index-18 = <&keysn_18>;
 		unifykey-index-19 = <&keysn_19>;
 		unifykey-index-20 = <&keysn_20>;
-		unifykey-index-21 = <&keysn_21>;
-		unifykey-index-22 = <&keysn_22>;
-		unifykey-index-23 = <&keysn_23>;
 
 		keysn_0: key_0{
 			key-name = "usid";
@@ -837,21 +830,6 @@
 			key-device = "secure";
 			key-permit = "read","write","del";
 		};
-		keysn_21:key_21{
-			key-name = "hdcp22_rprx_fw";
-			key-device = "normal";
-			key-permit = "read","write","del";
-		};
-		keysn_22:key_22{
-			key-name = "hdcp22_rprp_fw";
-			key-device = "normal";
-			key-permit = "read","write","del";
-		};
-		keysn_23:key_23{
-			key-name = "hdcp22_rp_private";
-			key-device = "secure";
-			key-permit = "read","write","del";
-		};
 	}; /* End unifykey */
 
 	amlvideo2_0 {
@@ -876,7 +854,7 @@
 		#size-cells=<1>;
 		memory-region = <&hdmirx_emp_cma_reserved>;
 		status = "okay";
-		pinctrl-names = "default";
+		pinctrl-names = "hdmirx_pins";
 		pinctrl-0 = <&hdmirx_a_mux &hdmirx_b_mux
 			&hdmirx_c_mux>;
 		repeat = <0>;
@@ -926,13 +904,6 @@
 			0x0 0x0
 			0x0 0x0
 			0xff610000 0xa000>;
-	};
-
-	amhdmitx: amhdmitx {
-		compatible = "amlogic, amhdmitx";
-		dev_name = "amhdmitx";
-		status = "okay";
-		repeater_tx = <0x0>;
 	};
 
 	aocec: aocec {
@@ -1233,8 +1204,33 @@
 	tuner: tuner {
 		compatible = "amlogic, tuner";
 		status = "okay";
-		tuner0_i2c_addr = <0x61>;
-		tuner1_i2c_addr = <0x62>;
+		tuner_cur = <0>; /* default use tuner */
+		tuner_num = <1>; /* tuner number, multi tuner support */
+		tuner_name_0 = "mxl661_tuner";
+		tuner_i2c_adap_0 = <&i2c0>;
+		tuner_i2c_addr_0 = <0x60>;
+		tuner_xtal_0 = <1>; /* 0: 16MHz, 1: 24MHz */
+		tuner_xtal_mode_0 = <3>;
+					/* NO_SHARE_XTAL(0)
+					 * SLAVE_XTAL_SHARE(3)
+					 */
+		tuner_xtal_cap_0 = <25>; /* when tuner_xtal_mode = 3, set 25 */
+	};
+
+	atv-demod {
+		compatible = "amlogic, atv-demod";
+		status = "okay";
+		tuner = <&tuner>;
+		btsc_sap_mode = <1>;
+		interrupts = <0 236 1>;
+		/* pinctrl-names="atvdemod_agc_pins"; */
+		/* pinctrl-0=<&atvdemod_agc_pins>; */
+		reg = <0xff656000 0x2000 /* demod reg */
+				0xff63c000 0x2000 /* hiu reg */
+				0xff634000 0x2000 /* periphs reg */
+				0xff64a000 0x2000>; /* audio reg */
+		reg_23cf = <0x88188832>;
+		/*default:0x88188832;r840 on haier:0x48188832*/
 	};
 
 	bt-dev{
@@ -1533,13 +1529,13 @@
 		interrupts =
 				<GIC_SPI 151 IRQ_TYPE_EDGE_RISING>;
 		interrupt-names = "irq_spdifin";
-/*
+
 		pinctrl-names = "spdif_pins",
 				"spdif_pins_mute";
 
 		pinctrl-0 = <&spdifout_a>;
 		pinctrl-1 = <&spdifout_a_mute>;
-*/
+
 		/*
 		 * whether do asrc for pcm and resample a or b
 		 * if raw data, asrc is disabled automatically
@@ -1580,38 +1576,6 @@
 		interrupts =
 				<GIC_SPI 158 IRQ_TYPE_EDGE_RISING>;
 		interrupt-names = "irq_frhdmirx";
-
-		status = "okay";
-	};
-
-	earc:earc {
-		compatible = "amlogic, tm2-snd-earc";
-		#sound-dai-cells = <0>;
-
-		clocks = < &clkaudio CLKID_EARCRX_CMDC
-			&clkaudio CLKID_EARCRX_DMAC
-			&clkc CLKID_FCLK_DIV5
-			&clkc CLKID_FCLK_DIV3
-			&clkaudio CLKID_EARCTX_CMDC
-			&clkaudio CLKID_EARCTX_DMAC
-			&clkc CLKID_FCLK_DIV5
-			&clkc CLKID_FCLK_DIV3
-			>;
-		clock-names =
-			"rx_cmdc",
-			"rx_dmac",
-			"rx_cmdc_srcpll",
-			"rx_dmac_srcpll",
-			"tx_cmdc",
-			"tx_dmac",
-			"tx_cmdc_srcpll",
-			"tx_dmac_srcpll";
-
-		interrupts = <
-			GIC_SPI 88 IRQ_TYPE_EDGE_RISING
-			GIC_SPI 87 IRQ_TYPE_EDGE_RISING
-		>;
-		interrupt-names = "rx_cmdc", "rx_dmac";
 
 		status = "okay";
 	};
@@ -1718,7 +1682,7 @@
 		 */
 		level = <1>;
 
-		status = "disabled";
+		status = "okay";
 	};
 
 	loopbacka:loopback@0 {
@@ -1832,6 +1796,10 @@
 	};
 }; /* end of audiobus */
 
+&earc {
+	status = "okay";
+};
+
 &pinctrl_periphs {
 	/* audio pin mux */
 
@@ -1882,21 +1850,21 @@
 			function = "spdif_in";
 		};
 	};
-/*
+
 	spdifout_a: spdifout_a {
-		mux { 
+		mux { /* GPIODV_4 */
 			groups = "spdif_out_dv4";
 			function = "spdif_out";
 		};
 	};
 
 	spdifout_a_mute: spdifout_a_mute {
-		mux { 
+		mux { /* GPIODV_4 */
 			groups = "GPIODV_4";
 			function = "gpio_periphs";
 		};
 	};
-*/
+
 	pdmin: pdmin {
 		mux { /* GPIOZ_7, GPIOZ_8, pdm_din2_z4 */
 			groups = "pdm_dclk_z",
@@ -1940,15 +1908,7 @@
 			output-low;
 		};
 	};
-	dvb_s_ts0_pins: dvb_s_ts0_pins {
-		mux {
-			groups = "tsin_a_din0",
-			"tsin_a_clk",
-			"tsin_a_sop",
-			"tsin_a_valid";
-			function = "tsin_a";
-		};
-	};
+
 }; /* end of pinctrl_periphs */
 
 &pinctrl_aobus {
@@ -2148,7 +2108,7 @@
 };
 
 &meson_fb {
-	status = "disabled";
+	status = "okay";
 	display_size_default = <1920 1080 1920 2160 32>;
 	mem_size = <0x00800000 0x1980000 0x100000 0x100000 0x800000>;
 	logo_addr = "0x7f800000";
