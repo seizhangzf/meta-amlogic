@@ -1,7 +1,7 @@
 SUMMARY = "aml libplayer code"
 LICENSE = "LGPL-2.0+"
 DEPENDS = "curl bzip2 alsa-lib virtual/gettext libxml2"
-SRC_URI = "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git;protocol=git;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git;protocol=git;branch=buildroot-libplayer"
 MIRRORS_prepend += "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/LibPlayer.git;protocol=ssh; \n"
 
 SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
@@ -13,6 +13,7 @@ DEFAULT_PREFERENCE = "-1"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
 
 SRCREV ?="${AUTOREV}"
+PV = "git${SRCPV}"
 
 #SRC_URI += "\
 #           file://0001-PD-151901-set-drmmode-flag-before-codec_init-for-MUL.patch \

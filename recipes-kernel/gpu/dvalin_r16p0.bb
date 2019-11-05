@@ -4,16 +4,17 @@ SUMMARY = "Arm G31(dvalin) graphic driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a31bb510"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/arm/gpu.git;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/platform/hardware/arm/gpu.git;branch=mainline"
 
 SRCREV = "${AUTOREV}"
-
+PV = "git${SRCPV}"
+VER = "r16p0"
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/arm/gpu.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/gpu.git;protocol=ssh; \n"
 
 PROVIDES += "virtual/gpu"
 RPROVIDES_${PN} += "gpu"
 GPU_ARCH = "bifrost"
-GPU_DRV_SRC = "${S}/${GPU_ARCH}/${PV}/kernel/drivers/gpu/arm/midgard"
+GPU_DRV_SRC = "${S}/${GPU_ARCH}/${VER}/kernel/drivers/gpu/arm/midgard"
 
 do_configure[noexec] = "1"
 

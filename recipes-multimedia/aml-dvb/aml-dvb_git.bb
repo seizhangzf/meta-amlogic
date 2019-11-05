@@ -2,13 +2,14 @@ SUMMARY = "aml dvb samples"
 LICENSE = "LGPL-2.0+"
 LIC_FILES_CHKSUM = "file://Doxyfile;md5=c771730fa57fc498cd9dc7d74b84934d"
 
-SRC_URI = "git://git.myamlogic.com/dvb.git;protocol=git;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/dvb.git;protocol=git;branch=tv-kernel-4.9"
 MIRRORS_prepend += "git://git.myamlogic.com/dvb.git git://git@openlinux.amlogic.com/yocto/dvb.git;protocol=ssh; \n"
 
 SRC_URI_append = " file://0001-fix-yocto-build.patch"
 SRC_URI_append = " file://0001-fix-linux-dvb-adapter-name.patch"
 
 SRCREV ?= "${AUTOREV}"
+PV = "${SRCPV}"
 
 DEPENDS = " aml-zvbi libplayer sqlite"
 do_configure[noexec] = "1"

@@ -7,6 +7,7 @@ BRANCH = "tdk-v2.4-video-firmware"
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=${BRANCH}"
 SRC_URI += "file://videoFirmwarePreload.service"
 SRCREV ?= "${AUTOREV}"
+PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"
 

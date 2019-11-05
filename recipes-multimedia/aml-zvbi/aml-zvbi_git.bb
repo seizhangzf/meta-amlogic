@@ -11,6 +11,7 @@ SRC_URI = "git://git.myamlogic.com/platform/external/libzvbi.git;protocol=git;br
 MIRRORS_prepend += "git://git.myamlogic.com/external/libzvbi.git git://git@openlinux.amlogic.com/yocto/external/libzvbi.git;protocol=ssh; \n"
 
 SRCREV ?= "${AUTOREV}"
+PV = "${SRCPV}"
 
 S="${WORKDIR}/git"
 ARCH_IS_64_aarch64 = "y"

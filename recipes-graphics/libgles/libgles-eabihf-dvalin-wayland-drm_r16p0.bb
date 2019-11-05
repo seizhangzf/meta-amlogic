@@ -12,15 +12,19 @@ do_populate_lic[noexec] = "1"
 EXCLUDE_FROM_WORLD = "1"
 PROVIDES = "virtual/libgles1 virtual/libgles2 virtual/egl"
 RPROVIDES_${PN} += "libGLESv2.so libEGL.so libGLESv1_CM.so libMali.so"
-DEPENDS += "patchelf-native"
+DEPENDS += "patchelf-native libdrm wayland"
 
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
-SRCREV ?= "${AUTOREV}"
+
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r16p0-RDK"
 #SRC_URI += "file://libMali.so"
-SRC_URI += "file://gl3ext.h"
+#SRC_URI += "file://gl3ext.h"
+
+SRCREV ?= "${AUTOREV}"
+PV = "git${SRCPV}"
+VER = "r16p0"
 
 S = "${WORKDIR}/git"
 
@@ -36,7 +40,7 @@ do_install() {
     install -m 0755 ${S}/include/GLES2/*.h ${D}${includedir}/GLES2/
     install -d -m 0755 ${D}${includedir}/GLES3
     install -m 0755 ${S}/include/GLES3/*.h ${D}${includedir}/GLES3/
-    install -m 0755 ${WORKDIR}/gl3ext.h ${D}${includedir}/GLES3/
+    #install -m 0755 ${WORKDIR}/gl3ext.h ${D}${includedir}/GLES3/
     install -d -m 0755 ${D}${includedir}/KHR
     install -m 0755 ${S}/include/KHR/*.h ${D}${includedir}/KHR/
     # wayland headers
@@ -54,9 +58,9 @@ do_install() {
     install -d ${D}${includedir}
     #install -m 0644 ${WORKDIR}/libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
 
-    patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
+    patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so 
     # wayland lib
-    install -m 0755 ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so ${D}${libdir}/
+    install -m 0755 ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so ${D}${libdir}/
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4.0
     ln -s libEGL.so.1.4.0 ${D}${libdir}/libEGL.so.1

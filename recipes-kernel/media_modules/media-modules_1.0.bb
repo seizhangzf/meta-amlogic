@@ -4,9 +4,10 @@ SUMMARY = "Amlogic media driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa882bbe"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git;branch=amlogic-4.9-dev"
 SRC_URI_append = " file://COPYING.GPL"
 SRCREV ?= "${AUTOREV}"
+PV = "git${SRCPV}"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/amlogic/media_modules.git git://git@openlinux.amlogic.com/yocto/platform/hardware/amlogic/media_modules.git;protocol=ssh; \n"
 

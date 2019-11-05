@@ -18,7 +18,6 @@ SRC_URI_append = " git://git.myamlogic.com/amlogic/tools/fip.git;nobranch=1;dest
 
 #patches
 SRC_URI_append = " file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33"
-SRC_URI_append = " file://0002-lpddr4-timing.patch;patchdir=bl33"
 SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33"
 
 do_configure[noexec] = "1"
@@ -38,9 +37,9 @@ SRCREV_bl33 ?="${AUTOREV}"
 SRCREV_fip ?="${AUTOREV}"
 
 S = "${WORKDIR}/uboot-repo"
-
+SRCREV_FORMAT = "bl2_bl30_bl31_bl31-1.3_tdk_bl33_fip"
 PR = "r1"
-PV = "v2015.01+git${SRCREV_bl33}"
+PV = "v2015.01+git${SRCPV}"
 
 BL32_SOC_FAMILY = "gx"
 BL32_SOC_FAMILY_axg = "axg"

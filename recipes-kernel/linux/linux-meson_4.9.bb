@@ -4,8 +4,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/4.9:"
 FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/aarch64:"
 FILESEXTRAPATHS_prepend_armv7a := "${THISDIR}/armv7a:"
 
-KBRANCH = ""
-SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};nobranch=1"
+KBRANCH = "amlogic-4.9-dev"
+SRC_URI = "git://git.myamlogic.com/kernel/common.git;branch=${KBRANCH};"
 
 SRC_URI_append = " file://defconfig"
 SRC_URI_append = " file://tm2_t962e2_ab311_drm.dts"

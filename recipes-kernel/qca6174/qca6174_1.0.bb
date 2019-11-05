@@ -7,6 +7,7 @@ SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca61
 SRC_URI += "file://0001-fix-firmware-path.patch"
 
 SRCREV ?= "${AUTOREV}"
+PV = "git${SRCPV}"
 
 MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/qualcomm/drivers/qca6174.git;protocol=ssh; \n"
 
