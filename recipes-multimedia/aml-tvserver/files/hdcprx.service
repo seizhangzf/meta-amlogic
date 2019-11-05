@@ -1,0 +1,9 @@
+[Unit]
+Description=HDCP RX Service
+Before=tvserver.service
+
+[Service]
+ExecStart=/bin/sh -c '/usr/bin/hdcp_rx22  >& /var/log/hdcprx.log '
+
+[Install]
+WantedBy=multi-user.target
