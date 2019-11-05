@@ -1,0 +1,29 @@
+Index: git/config.tests/arch/arch.cpp
+===================================================================
+--- git.orig/config.tests/arch/arch.cpp	2017-01-12 17:47:19.537067064 +0800
++++ git/config.tests/arch/arch.cpp	2017-01-12 17:47:23.197067133 +0800
+@@ -250,7 +250,8 @@
+ " iwmmxt"
+ #endif
+ #ifdef __ARM_FEATURE_CRC32
+-" crc32"
++#undef __ARM_FEATURE_CRC32
++//" crc32"
+ #endif
+ 
+ // -- SPARC --
+Index: git/src/corelib/tools/qsimd_p.h
+===================================================================
+--- git.orig/src/corelib/tools/qsimd_p.h	2017-01-12 17:47:20.117067075 +0800
++++ git/src/corelib/tools/qsimd_p.h	2017-01-12 17:48:36.801068514 +0800
+@@ -266,7 +266,9 @@
+ #    include <x86intrin.h>
+ #  endif
+ #endif
+-
++#if defined(__ARM_FEATURE_CRC32)
++#undef __ARM_FEATURE_CRC32
++#endif
+ // Clang compiler fix, see http://lists.llvm.org/pipermail/cfe-commits/Week-of-Mon-20160222/151168.html
+ // This should be tweaked with an "upper version" of clang once we know which release fixes the
+ // issue. At that point we can rely on __ARM_FEATURE_CRC32 again.

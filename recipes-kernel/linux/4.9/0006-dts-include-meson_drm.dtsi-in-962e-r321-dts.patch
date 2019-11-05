@@ -1,0 +1,27 @@
+From 0eae97b043e1c89e4f8bb75bbd50ab36eae4f413 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Mon, 25 Feb 2019 18:05:36 +0800
+Subject: [PATCH] dts: include meson_drm.dtsi in 962e r321 dts
+
+To enable wayland, drm is required
+
+Signed-off-by: Matthew Shyu <matthew.shyu@amlogic.com>
+---
+ arch/arm64/boot/dts/amlogic/txlx_t962e_r321_buildroot.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/txlx_t962e_r321_buildroot.dts b/arch/arm64/boot/dts/amlogic/txlx_t962e_r321_buildroot.dts
+index f18c895dd43a..f09fdc695d5f 100644
+--- a/arch/arm64/boot/dts/amlogic/txlx_t962e_r321_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/txlx_t962e_r321_buildroot.dts
+@@ -20,6 +20,7 @@
+ #include <dt-bindings/gpio/gpio.h>
+ 
+ #include "mesontxlx.dtsi"
++#include "meson_drm.dtsi"
+ 
+ / {
+ 	model = "Amlogic";
+-- 
+2.11.0
+

@@ -1,0 +1,394 @@
+Index: gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c
+===================================================================
+--- gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-03-23 11:56:14.777534861 +0800
++++ gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-03-26 17:37:36.822781870 +0800
+@@ -119,7 +119,6 @@
+ static void
+ gst_aml_asink_init (GstAmlAsink * amlasink)
+ {
+-    GST_DEBUG_OBJECT(amlasink, "%s", __func__);
+     GstBaseSink *bsink = GST_BASE_SINK(amlasink);
+     GST_OBJECT_FLAG_SET (amlasink, GST_ELEMENT_FLAG_PROVIDE_CLOCK);
+ //    gst_base_sink_set_sync(bsink, FALSE);
+@@ -291,7 +290,6 @@
+             gst_query_set_position(query, format, cur);
+             res = TRUE;
+         } else {
+-            GST_ERROR("HERE2");
+ #if 1
+ //            cur = GST_CLOCK_TIME_NONE;
+ //            gst_query_set_position(query, format, cur);
+Index: gst-aml-plugins-1.2/clock/gstamlclock.c
+===================================================================
+--- gst-aml-plugins-1.2/clock/gstamlclock.c	2018-03-23 11:56:14.857534862 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.c	2018-03-26 17:36:22.134780468 +0800
+@@ -73,8 +73,7 @@
+ #define parent_class gst_aml_clock_parent_class
+ G_DEFINE_TYPE (GstAmlClock, gst_aml_clock, GST_TYPE_SYSTEM_CLOCK);
+ 
+-static int sync_mode = 0;
+-
++static int clock_inuse[GST_AML_CLOCK_MAX] = {0};
+ static void
+ gst_aml_clock_class_init (GstAmlClockClass * klass)
+ {
+@@ -106,7 +105,9 @@
+     GstAmlClock *aclock;
+ 
+     aclock = GST_AML_CLOCK(object);
+-    sync_mode &= ~(1 << aclock->source);
++    if (clock_inuse[aclock->source]) {
++        clock_inuse[aclock->source]--;
++    }
+     update_sync_mode(aclock);
+     G_OBJECT_CLASS(parent_class)->finalize(object);
+ }
+@@ -117,7 +118,7 @@
+     GstAmlClock *aclock = GST_AML_CLOCK( g_object_new (
+             GST_TYPE_AML_CLOCK, "name", name, "clock-type", GST_CLOCK_TYPE_OTHER, NULL));
+     aclock->source = source;
+-    sync_mode |= (1 << source);
++    clock_inuse[aclock->source]++;
+     update_sync_mode(aclock);
+     switch (source) {
+     case GST_AML_CLOCK_AUDIO:
+@@ -135,7 +136,14 @@
+ update_sync_mode(GstAmlClock * clock)
+ {
+     int enable = 0;
++    int sync_mode = 0;
+     int mode = TSYNC_MODE_VIDEO;
++    if (clock_inuse[GST_AML_CLOCK_AUDIO]) {
++        sync_mode |= 1 << GST_AML_CLOCK_AUDIO;
++    }
++    if (clock_inuse[GST_AML_CLOCK_VIDEO]) {
++        sync_mode |= 1 << GST_AML_CLOCK_VIDEO;
++    }
+     GST_DEBUG_OBJECT(clock, "a/v sync_mode = %d", sync_mode);
+     switch (sync_mode) {
+     case 3:
+Index: gst-aml-plugins-1.2/clock/gstamlclock.h
+===================================================================
+--- gst-aml-plugins-1.2/clock/gstamlclock.h	2018-03-23 11:56:13.909534844 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.h	2018-03-26 17:36:38.090780768 +0800
+@@ -48,7 +48,8 @@
+ typedef enum {
+     GST_AML_CLOCK_AUDIO,
+     GST_AML_CLOCK_VIDEO,
+-    GST_AML_CLOCK_PCRSCR
++    GST_AML_CLOCK_PCRSCR,
++    GST_AML_CLOCK_MAX
+ } GstAmlClockSource;
+ 
+ /**
+@@ -67,7 +68,6 @@
+   GstClockTimeDiff         time_offset;
+   unsigned long           last_pts;
+   unsigned int            last_rp;
+-
+   gpointer _gst_reserved[GST_PADDING];
+ };
+ 
+Index: gst-aml-plugins-1.2/tvp/gstamltvpmeta.c
+===================================================================
+--- gst-aml-plugins-1.2/tvp/gstamltvpmeta.c	2018-03-23 11:56:13.913534844 +0800
++++ gst-aml-plugins-1.2/tvp/gstamltvpmeta.c	2018-03-26 17:34:06.806777929 +0800
+@@ -26,7 +26,10 @@
+     }
+     aml_tvp_meta->count = 0;
+     aml_tvp_meta->phy_addr = 0;
+-    aml_tvp_meta->buffer = NULL;
++    if (aml_tvp_meta->buffer) {
++        gst_buffer_unref(aml_tvp_meta->buffer);
++        aml_tvp_meta->buffer = NULL;
++    }
+ }
+ 
+ static gboolean
+@@ -42,12 +45,13 @@
+ 
+         if (!copy->region) {
+             /* only copy if the complete data is copied as well */
+-            dmeta = gst_buffer_add_aml_tvp_meta(dest, smeta->chunks,
++            dmeta = gst_buffer_create_aml_tvp_meta(dest, smeta->chunks,
+                     smeta->count, smeta->phy_addr);
+ 
+             if (!dmeta)
+                 return FALSE;
+-            dmeta->buffer = smeta->buffer;
++            if (smeta->buffer)
++                dmeta->buffer = gst_buffer_ref(smeta->buffer);
+         }
+     } else {
+         /* return FALSE, if transform type is not supported */
+@@ -91,20 +95,43 @@
+ }
+ 
+ GstAMLTVPMeta *
+-gst_buffer_add_aml_tvp_meta(GstBuffer * buffer, tvp_chunk_info_t *chunks,
++gst_buffer_create_aml_tvp_meta(GstBuffer * buffer, tvp_chunk_info_t *chunks,
+         guint count, guint phy_addr)
+ {
+     GstAMLTVPMeta *aml_tvp_meta;
+     aml_tvp_meta = (GstAMLTVPMeta *) gst_buffer_add_meta(buffer,
+             GST_AML_TVP_META_INFO, NULL);
+     aml_tvp_meta->chunks = g_malloc(sizeof(tvp_chunk_info_t) * count);
++    g_return_val_if_fail(aml_tvp_meta->chunks != NULL, NULL);
+     if (aml_tvp_meta->chunks) {
+         memcpy(aml_tvp_meta->chunks, chunks, sizeof(tvp_chunk_info_t) * count);
+         aml_tvp_meta->count = count;
+         aml_tvp_meta->phy_addr = phy_addr;
+-        aml_tvp_meta->buffer = buffer;
++        aml_tvp_meta->buffer = NULL;
+     }
+ 
+     return aml_tvp_meta;
+ }
+ 
++GstAMLTVPMeta *
++gst_buffer_add_aml_tvp_meta(GstBuffer * buffer, tvp_chunk_info_t *chunks,
++        guint count, guint phy_addr)
++{
++    GstAMLTVPMeta *aml_tvp_meta;
++    int i, n;
++    aml_tvp_meta = gst_buffer_create_aml_tvp_meta(buffer, chunks, count,
++            phy_addr);
++    if (aml_tvp_meta && aml_tvp_meta->chunks) {
++        aml_tvp_meta->buffer = gst_buffer_new();
++        n = gst_buffer_n_memory(buffer);
++        for (i = 0; i < n; i++) {
++            GstMemory *mem;
++            mem = gst_buffer_get_memory(buffer, i);
++            gst_buffer_insert_memory(aml_tvp_meta->buffer, i, mem);
++        }
++    }
++    return aml_tvp_meta;
++}
++
++
++
+Index: gst-aml-plugins-1.2/tvp/gstamltvpmeta.h
+===================================================================
+--- gst-aml-plugins-1.2/tvp/gstamltvpmeta.h	2018-03-23 11:56:13.913534844 +0800
++++ gst-aml-plugins-1.2/tvp/gstamltvpmeta.h	2018-03-22 20:18:39.452479400 +0800
+@@ -26,6 +26,7 @@
+ #ifndef __GST_AMLTVPMETA_H_
+ #define __GST_AMLTVPMETA_H_
+ 
++#include <stdint.h>
+ #include <gst/gst.h>
+ 
+ 
+@@ -54,6 +55,8 @@
+ 
+ #define gst_buffer_get_aml_tvp_meta(b) ((GstAMLTVPMeta*)gst_buffer_get_meta((b),GST_AML_TVP_META_API_TYPE))
+ 
++GstAMLTVPMeta *gst_buffer_create_aml_tvp_meta(GstBuffer * buffer,
++        tvp_chunk_info_t *chunks, guint count, guint phy_addr);
+ GstAMLTVPMeta *gst_buffer_add_aml_tvp_meta(GstBuffer * buffer,
+         tvp_chunk_info_t *chunks, guint count, guint phy_addr);
+ 
+Index: gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c	2018-03-23 11:56:14.705534859 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/amlvideoinfo.c	2018-03-26 17:33:13.142776923 +0800
+@@ -271,7 +271,7 @@
+     GstMapInfo map;
+ 
+     if (NULL == info->configdata) {
+-        GST_WARNING("no codec data");
++        GST_ERROR("no codec data");
+         return 0;
+     }
+     gst_buffer_map(info->configdata, &map, GST_MAP_READ);
+@@ -279,31 +279,27 @@
+     config = map.data;
+     gst_buffer_unmap(info->configdata, &map);
+     p = config;
+-    GST_INFO("add 264 header in stream");
+     if (((p[0] == 0 && p[1] == 0 && p[2] == 0 && p[3] == 1)
+             || (p[0] == 0 && p[1] == 0 && p[2] == 1)) && config_size < 1024) {
+-        GST_INFO("add 264 header in stream before header len=%d", config_size);
++        GST_ERROR("add 264 header in stream before header len=%d", config_size);
+         info->write_codec(pcodec, config, config_size, opaque);
+         return 0;
+     }
+-    if (config_size < 4) {
+-        return -1;
+-    }
+ 
+     if (config_size < 10) {
+-        GST_WARNING("avcC too short");
++        GST_ERROR("avcC too short");
+         return -1;
+     }
+ 
+     if (*p != 1) {
+-        GST_WARNING(" Unkonwn avcC version %d", *p);
++        GST_ERROR(" Unkonwn avcC version %d", *p);
+         return -1;
+     }
+     spps = gst_buffer_new_and_alloc(config_size);
+     gst_buffer_map(spps, &map, GST_MAP_WRITE);
+     sppsData = map.data;
+     cnt = *(p + 5) & 0x1f; //number of sps
+-    GST_WARNING("number of sps :%d", cnt);
++    GST_DEBUG("number of sps :%d", cnt);
+     p += 6;
+     for (i = 0; i < cnt; i++) {
+         nalsize = (*p << 8) | (*(p + 1));
+@@ -315,7 +311,7 @@
+     }
+ 
+     cnt = *(p++); //Number of pps
+-    GST_WARNING("number of pps :%d", cnt);
++    GST_DEBUG("number of pps :%d", cnt);
+     for (i = 0; i < cnt; i++) {
+         nalsize = (*p << 8) | (*(p + 1));
+         memcpy(&(sppsData[sppsLen]), nal_start_code, sizeof(nal_start_code));
+@@ -346,7 +342,7 @@
+     unsigned char *p;
+     GstBuffer *hdrBuf;
+     GstBuffer *buf = *pbuf;
+-    gst_buffer_map(buf, &map, GST_MAP_READ | GST_MAP_WRITE);
++    gst_buffer_map(buf, &map, GST_MAP_READ);
+     size = map.size;
+     data = map.data;
+     p = data;
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-03-23 11:56:14.705534859 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-03-26 17:32:13.758775809 +0800
+@@ -87,7 +87,7 @@
+         "systemstream = (boolean) false, "
+         COMMON_VIDEO_CAPS "; "
+         "video/x-h264, "
+-        "stream-format={ byte-stream }, "
++        "stream-format={ avc }, "
+         "alignment={ au }, "
+         COMMON_VIDEO_CAPS "; "
+         "video/x-h265, "
+@@ -270,9 +270,9 @@
+     amlvdec->codec_init_ok = 0;
+     amlvdec->trickRate = 1.0;
+     amlvdec->decodetype = FALSE; //for test
+-    amlvdec->datadump = FALSE;
++    amlvdec->datadump = FALSE; //for debug
+     amlvdec->segment.rate = 1.0;
+-    amlvdec->tvp = FALSE;
++    amlvdec->tvp = TRUE;
+ 
+     return TRUE;
+ }
+@@ -484,7 +484,7 @@
+             gst_video_decoder_finish_frame(dec, p);
+             //}
+         } else {
+-            GST_ERROR("EEEEEEEEEEEEEEEEEEE");
++            GST_ERROR("decode error");
+         }
+         gst_video_codec_frame_unref(p);
+ 
+@@ -710,6 +710,7 @@
+     if (NULL == name) {
+         return FALSE;
+     }
++    GST_ERROR ("parsing caps: %" GST_PTR_FORMAT, caps);
+     amlvdec->info = videoinfo;
+     if (0 != videoinfo->init(videoinfo, amlvdec->pcodec, structure)) {
+         return FALSE;
+@@ -723,7 +724,7 @@
+         if (!amlvdec->codec_init_ok) {
+             //amlvdec->pcodec->vbuf_size = 0xf20000;
+             if (amlvdec->tvp) {
+-                //amlvdec->pcodec->drmmode = 1;
++                amlvdec->pcodec->drmmode = 1;
+                 amlvdec->info->write_codec = gst_aml_vdec_tvp_write_clear;
+             }
+             ret = codec_init(amlvdec->pcodec);
+@@ -739,6 +740,8 @@
+                 }
+             }
+             GST_DEBUG_OBJECT(amlvdec, "pcodec: video codec_init ok");
++        } else {
++            amlvdec->is_headerfeed =  FALSE;
+         }
+ 
+     }
+@@ -787,18 +790,6 @@
+             }
+             amlvdec->is_headerfeed = TRUE;
+         }
+-        if (amlvdec->datadump) {
+-            FILE *fp2 = fopen("/mnt/codec.data2", "a+");
+-            if (fp2) {
+-                gst_buffer_map(buf, &map, GST_MAP_READ);
+-                int flen = fwrite(map.data, 1, map.size, fp2);
+-                fclose(fp2);
+-                gst_buffer_unmap(buf, &map);
+-            } else {
+-                GST_ERROR_OBJECT(amlvdec, "could not open file:codec.data");
+-            }
+-        }
+-
+         if (amlvdec->info->add_startcode) {
+             amlvdec->info->add_startcode(amlvdec->info, amlvdec->pcodec, &buf, (void*)amlvdec);
+         }
+@@ -816,18 +807,16 @@
+                 tvp_chunk_info_t *chunk;
+                 if (GST_IS_BUFFER (tvp_meta->buffer)) {
+                     if (amlvdec->info->add_startcode) {
+-                        amlvdec->info->add_startcode(amlvdec->info, amlvdec->pcodec, tvp_meta->buffer, (void*)amlvdec);
++                        amlvdec->info->add_startcode(amlvdec->info, amlvdec->pcodec, &tvp_meta->buffer, (void*)amlvdec);
+                     }
+                     gst_buffer_map(tvp_meta->buffer, &map2, GST_MAP_READ);
+                     data = map2.data;
+                     size = map2.size;
+                     GST_DEBUG_OBJECT(amlvdec, "chunk phy = %x, size: %u, info:", tvp_meta->phy_addr, size);
+-                    //gst_util_dump_mem(data, size + 64);
+                     for (i = 0; i < tvp_meta->count; i++) {
+                         chunk = &tvp_meta->chunks[i];
+                         GST_DEBUG_OBJECT(amlvdec, "chunk: %d %d", chunk->clear_size, chunk->encrypted_size);
+                         gst_aml_vdec_tvp_write_clear(NULL, data + pos, chunk->clear_size, (void*)amlvdec);
+-    //                    gst_util_dump_mem(data + pos, chunk->clear_size);
+                         pos += chunk->clear_size;
+                         gst_aml_vdec_tvp_write(NULL, data + pos, chunk->encrypted_size, (void*)amlvdec, tvp_meta->phy_addr + enc);
+                         pos += chunk->encrypted_size;
+@@ -841,6 +830,15 @@
+                 gst_aml_vdec_tvp_write_clear(NULL, data, size, (void*)amlvdec);
+             }
+         } else {
++            if (amlvdec->datadump) {
++                FILE *fp2 = fopen("/mnt/codec.data2", "a+");
++                if (fp2) {
++                    int flen = fwrite(data, 1, size, fp2);
++                    fclose(fp2);
++                } else {
++                    GST_ERROR_OBJECT(amlvdec, "could not open file:codec.data");
++                }
++            }
+             while (size > 0) {
+                 written = codec_write(amlvdec->pcodec, data, size);
+                 if (written >= 0) {
+Index: gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c
+===================================================================
+--- gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-03-23 11:56:14.777534861 +0800
++++ gst-aml-plugins-1.2/video/amlvsink/gstamlvsink.c	2018-03-26 17:31:10.602774624 +0800
+@@ -269,7 +269,6 @@
+             gst_query_set_position(query, format, cur);
+             res = TRUE;
+         } else {
+-            GST_ERROR("HERE1");
+ #if 0
+ //            cur = GST_CLOCK_TIME_NONE;
+ //            gst_query_set_position(query, format, cur);
+@@ -390,7 +389,8 @@
+     return TRUE;
+ }
+ 
+-static void gst_aml_vsink_get_times(GstBaseSink *bsink, GstBuffer *buffer,
++static void
++gst_aml_vsink_get_times(GstBaseSink *bsink, GstBuffer *buffer,
+         GstClockTime *start, GstClockTime *end)
+ {
+     GstAmlVsink *amlvsink = GST_AMLVSINK(bsink);

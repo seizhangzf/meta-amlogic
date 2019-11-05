@@ -1,0 +1,25 @@
+From 8537a3b24ad6f91f36ec1d105a57e0194e276843 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 26 Sep 2019 15:00:31 -0700
+Subject: [PATCH] fix kernel warning
+
+---
+ drivers/amlogic/drm/am_meson_vpu.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/amlogic/drm/am_meson_vpu.c b/drivers/amlogic/drm/am_meson_vpu.c
+index 198d6b6..82b4d96 100644
+--- a/drivers/amlogic/drm/am_meson_vpu.c
++++ b/drivers/amlogic/drm/am_meson_vpu.c
+@@ -806,8 +806,6 @@ static int am_meson_vpu_bind(struct device *dev,
+ 		cma = dev_get_cma_area(&pdev->dev);
+ 		if (cma) {
+ 			logo_memsize = cma_get_size(cma);
+-			pr_info("reserved memory base:0x%llx, size:0x%x\n",
+-				cma_get_base(cma), logo_memsize);
+ 			if (logo_memsize > 0) {
+ 				logo_page = dma_alloc_from_contiguous(
+ 					&pdev->dev,
+-- 
+2.7.4
+

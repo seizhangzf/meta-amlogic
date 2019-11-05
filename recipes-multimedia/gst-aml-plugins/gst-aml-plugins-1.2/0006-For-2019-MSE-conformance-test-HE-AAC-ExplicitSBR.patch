@@ -1,0 +1,91 @@
+Index: gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/audio/amlasink/gstamlasink.c	2018-08-24 10:15:40.830594268 +0800
++++ gst-aml-plugins-1.2/audio/amlasink/gstamlasink.c	2018-08-24 10:15:41.074594272 +0800
+@@ -246,7 +246,12 @@
+ gst_aml_asink_render (GstBaseSink * asink, GstBuffer *buffer)
+ {
+     GstAmlAsink *amlasink = GST_AMLASINK(asink);
+-    GST_TRACE_OBJECT(amlasink, "%llu", GST_BUFFER_TIMESTAMP (buffer) );
++    GST_DEBUG_OBJECT(amlasink, "buffer end: %" GST_TIME_FORMAT,
++            GST_TIME_ARGS(GST_BUFFER_TIMESTAMP(buffer) + GST_BUFFER_DURATION(buffer)));
++    if (amlasink->clock) {
++        gst_aml_clock_update_last_time(amlasink->clock,
++                GST_BUFFER_TIMESTAMP(buffer) + GST_BUFFER_DURATION(buffer));
++    }
+     return GST_FLOW_OK;
+ }
+ 
+Index: gst-aml-plugins-1.2/clock/gstamlclock.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/clock/gstamlclock.c	2018-08-24 10:15:40.830594268 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.c	2018-08-24 10:25:23.278605195 +0800
+@@ -91,7 +91,7 @@
+ static void
+ gst_aml_clock_init(GstAmlClock * clock)
+ {
+-    clock->last_time = 0;
++    clock->last_time = GST_CLOCK_TIME_NONE;
+     clock->time_offset = 0;
+     clock->last_pts = 0;
+     clock->last_rp = 0;
+@@ -274,12 +274,21 @@
+ gst_aml_clock_get_pts(GstClock *clock)
+ {
+     GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
+-    gboolean running;
++    gboolean running, last_time_valid;
+     unsigned long pcrscr, pts;
++    GstClockTime pcrscr_gst_clk;
+ 
+     pts = aclock->last_pts;
+     pcrscr = get_sysfs_int("/sys/class/tsync/pts_pcrscr");
+-    if ( (running = gst_aml_clock_check_running(aclock))) {
++
++    pcrscr_gst_clk = (GstClockTime)pcrscr * 100000LL / 9LL;
++    GST_OBJECT_LOCK(aclock);
++    last_time_valid = GST_CLOCK_TIME_IS_VALID(aclock->last_time) &&
++        (llabs(pcrscr_gst_clk - aclock->last_time) < 150 * GST_MSECOND);
++    GST_OBJECT_UNLOCK(aclock);
++
++    running = gst_aml_clock_check_running(aclock) || last_time_valid;
++    if (running) {
+         if (pcrscr != aclock->last_pts && pcrscr != 1) {
+             pts = pcrscr;
+             aclock->last_pts = pcrscr;
+@@ -299,7 +308,23 @@
+     if (clock) {
+         GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
+         aclock->last_pts = 0;
++
++        GST_OBJECT_LOCK(aclock);
++        aclock->last_time = GST_CLOCK_TIME_NONE;
++        GST_OBJECT_UNLOCK(aclock);
+     } else {
+         GST_ERROR("clock is null. It's likely wrong!\n");
+     }
+ }
++
++void gst_aml_clock_update_last_time(GstClock *clock, const GstClockTime time)
++{
++    GstAmlClock *aclock = GST_AML_CLOCK_CAST(clock);
++    if (!GST_CLOCK_TIME_IS_VALID(time)) {
++        GST_ERROR("%s:%d: unable to set to invalid time\n", __func__, __LINE__);
++        return;
++    }
++    GST_OBJECT_LOCK(aclock);
++    aclock->last_time = time;
++    GST_OBJECT_UNLOCK(aclock);
++}
+Index: gst-aml-plugins-1.2/clock/gstamlclock.h
+===================================================================
+--- gst-aml-plugins-1.2.orig/clock/gstamlclock.h	2018-08-24 10:15:40.830594268 +0800
++++ gst-aml-plugins-1.2/clock/gstamlclock.h	2018-08-24 10:22:50.702602332 +0800
+@@ -82,6 +82,7 @@
+ GstClock*       gst_aml_clock_new             (const gchar *name, GstAmlClockSource source);
+ GstClockTime    gst_aml_clock_get_pts         (GstClock *clock);
+ void            gst_aml_clock_reset           (GstClock *clock);
++void            gst_aml_clock_update_last_time(GstClock *clock, const GstClockTime time);
+ #ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstAmlClock, gst_object_unref)
+ #endif

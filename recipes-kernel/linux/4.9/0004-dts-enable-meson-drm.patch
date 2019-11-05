@@ -1,0 +1,37 @@
+From 19f25cbd7536910da85dcc93e2dcd0db61be261c Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 28 Dec 2017 17:11:01 +0800
+Subject: [PATCH] dts: enable meson drm
+
+---
+ arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts | 1 +
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+index 190940729e9f..13da1eed2580 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+@@ -19,6 +19,7 @@
+ 
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include "mesongxl.dtsi"
++#include "meson_drm.dtsi"
+ #include "partition_mbox_normal.dtsi"
+ / {
+ 	model = "Amlogic";
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+index 5771fd07796e..bab029746c96 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+@@ -19,6 +19,7 @@
+ 
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include "mesongxl.dtsi"
++#include "meson_drm.dtsi"
+ #include "partition_mbox_ab.dtsi"
+ / {
+ 	model = "Amlogic";
+-- 
+2.11.0
+

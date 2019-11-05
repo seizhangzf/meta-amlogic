@@ -1,0 +1,75 @@
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvdec/gstamlvdec.c	2018-08-30 18:49:55.841193465 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-08-30 19:07:52.969213673 +0800
+@@ -273,6 +273,7 @@
+     amlvdec->datadump = FALSE; //for debug
+     amlvdec->segment.rate = 1.0;
+     amlvdec->tvp = TRUE;
++    amlvdec->flushing = FALSE;
+
+     return TRUE;
+ }
+@@ -465,7 +466,7 @@
+         return GST_FLOW_OK;
+     }
+
+-    while (!amlvdec->is_paused) {
++    while (!amlvdec->is_paused && !amlvdec->flushing) {
+         p = gst_video_decoder_get_oldest_frame(dec);
+         if (!p) {
+             break;
+@@ -502,7 +503,11 @@
+     GST_DEBUG_OBJECT(amlvdec, "Got %s event on sink pad",
+             GST_EVENT_TYPE_NAME(event));
+     switch (GST_EVENT_TYPE(event) ) {
+-
++    case GST_EVENT_FLUSH_START:
++        amlvdec->flushing = TRUE;
++        ret = GST_VIDEO_DECODER_CLASS (parent_class)->sink_event(amlvdec,
++                event);
++        break;
+     case GST_EVENT_SEGMENT: {
+         gst_event_copy_segment(event, &amlvdec->segment);
+         GST_INFO_OBJECT(amlvdec, "rate = %f", amlvdec->segment.rate);
+@@ -656,6 +661,7 @@
+     if (get_black_policy() != 1) {
+         set_black_policy(1);
+     }
++    amlvdec->flushing = FALSE;
+ }
+
+ static int gst_aml_vdec_tvp_write(AmlStreamInfo* info, void *data, int size,
+@@ -763,12 +769,18 @@
+
+     if (amlvdec->pcodec && amlvdec->codec_init_ok) {
+         while (codec_get_vbuf_state(amlvdec->pcodec, &vbuf) == 0) {
+-            if (vbuf.data_len * 10 < vbuf.size * 7) {
++            if (G_LIKELY(vbuf.data_len * 10 < vbuf.size * 7)) {
+                 break;
+             }
+-            if (amlvdec->is_paused) {
++            if (G_UNLIKELY(amlvdec->is_paused)) {
+                 goto error;
+             }
++
++            if (G_UNLIKELY(amlvdec->flushing)) {
++                GST_ERROR_OBJECT(amlvdec, "amlvdec is flushing");
++                goto error;
++            }
++
+             usleep(20000);
+         }
+         timestamp = frame->pts;
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.h
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvdec/gstamlvdec.h	2018-08-30 18:49:54.669193443 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.h	2018-08-30 18:49:56.193193472 +0800
+@@ -97,6 +97,7 @@
+     gboolean decodetype;
+     gboolean datadump;
+     gboolean tvp;
++    gboolean flushing;
+ };
+
+ struct _GstAmlVdecClass

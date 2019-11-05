@@ -1,0 +1,35 @@
+From 565484640b8f76d884a0706dd23707de0c6c5dca Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Wed, 6 Dec 2017 15:54:13 +0800
+Subject: [PATCH] For abnormal video as playing 4k video on youtube(pc)
+
+Keep min_ratio_1000 as MIN_RATIO_1000(1250)
+---
+ drivers/amlogic/media/video_sink/vpp.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/amlogic/media/video_sink/vpp.c b/drivers/amlogic/media/video_sink/vpp.c
+index 0cf1dc383773..468c9586bc6d 100644
+--- a/drivers/amlogic/media/video_sink/vpp.c
++++ b/drivers/amlogic/media/video_sink/vpp.c
+@@ -635,6 +635,7 @@ vpp_process_speed_check(s32 width_in,
+ 	} else {
+ 		clk_in_pps = get_vpu_clk();
+ 	}
++#if 0
+ 	if (vf->type & VIDTYPE_COMPRESS) {
+ 		if (vf->width > 720)
+ 			min_ratio_1000 = (MIN_RATIO_1000 * 1400)/1000;
+@@ -646,6 +647,9 @@ vpp_process_speed_check(s32 width_in,
+ 		else
+ 			min_ratio_1000 = 1750;
+ 	}
++#else
++	min_ratio_1000 = MIN_RATIO_1000;
++#endif
+ 	if (vinfo->field_height < vinfo->height)
+ 		vtotal = 525 / 2;//vinfo->vtotal/2;
+ 	else
+-- 
+2.11.0
+

@@ -1,0 +1,86 @@
+#!/bin/bash
+# -*- mode: shell-script-mode; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+#
+# Copyright (C) 2012-13 O.S. Systems Software LTDA.
+# Authored-by:  Otavio Salvador <otavio@ossystems.com.br>
+# Adopted to Angstrom:  Khem Raj <raj.khem@gmail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+
+# Helper command for building images for mixed 32bit/64bit
+# ARM builds. The command allow to specify a secondary MACHINE
+# and image that will be built next to the primary target.
+# If no secondary image is specified the core-image-minimal image
+# will be built.
+
+bitbake_secondary_image () {
+    BITBAKE_OPTIONS=""
+    unset ROOTFS_MACHINE
+    unset KERNEL_IMAGE
+
+    if [ -z $MACHINE ]
+    then
+        echo "Error: you have to export MACHINE first"
+        return
+    fi
+    ROOTFS_MACHINE="$MACHINE"_32b
+    KERNEL_IMAGE='core-image-minimal'
+    while [[ $# -gt 1 ]]
+    do
+        key="$1"
+        case $key in
+            --rootfs-machine)
+            ROOTFS_MACHINE="$2"
+            shift
+            ;;
+            --kernel-image)
+            KERNEL_IMAGE="$2"
+            shift
+            ;;
+        *)
+            BITBAKE_OPTIONS=$BITBAKE_OPTIONS" "$1
+        ;;
+    esac
+    shift
+    done
+    BITBAKE_OPTIONS=$BITBAKE_OPTIONS" "$1
+    if [ -z "$ROOTFS_MACHINE" ]
+    then
+        echo "   Error: you need to run $FUNCNAME with --rootfs-machine agument"
+        echo
+        echo "   Example:"
+        echo "     $ $FUNCNAME --rootfs-machine hikey rpb-weston-image"
+        return
+    fi
+
+    if [ "$ROOTFS_MACHINE" == "$MACHINE" ]
+    then
+        echo "Error: the rootfs machine must be different from the machine you already set using setup-environment: "$MACHINE
+        return
+    fi
+
+	echo "Building first image (kernel). MACHINE:" $MACHINE " DISTRO:" $DISTRO " IMAGE:" $KERNEL_IMAGE
+
+    MACHINE=$MACHINE bitbake $KERNEL_IMAGE
+
+    if [ $? != 0 ]; then
+        printf "Error building image"
+        return
+    fi
+	echo "Building second image (rootfs). MACHINE:" $ROOTFS_MACHINE " DISTRO:" $DISTRO
+
+    MACHINE=$ROOTFS_MACHINE bitbake $BITBAKE_OPTIONS
+}
+

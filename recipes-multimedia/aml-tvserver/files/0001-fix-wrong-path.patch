@@ -1,0 +1,51 @@
+From bbc25f72ce70778cf15fe283e44b8fd067e9ae2f Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 1 Nov 2019 23:36:30 -0700
+Subject: [PATCH] fix wrong path
+
+---
+ libtv/CTv.h           | 2 +-
+ service/TvService.cpp | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/libtv/CTv.h b/libtv/CTv.h
+index 0a46185..65b9dbf 100644
+--- a/libtv/CTv.h
++++ b/libtv/CTv.h
+@@ -5,7 +5,7 @@
+ #include "CHDMIRxManager.h"
+ 
+ 
+-#define CONFIG_FILE_PATH_DEF     "/ventor/etc/tvconfig/tvconfig.conf"
++#define CONFIG_FILE_PATH_DEF     "/vendor/etc/tvconfig/tvconfig.conf"
+ 
+ #define HDMI_EDID14_FILE_PATH    "/vendor/etc/tvconfig/hdmi/port_14.bin"
+ #define HDMI_EDID20_FILE_PATH    "/vendor/etc/tvconfig/hdmi/port_20.bin"
+diff --git a/service/TvService.cpp b/service/TvService.cpp
+index c7b315d..900ed8b 100644
+--- a/service/TvService.cpp
++++ b/service/TvService.cpp
+@@ -90,7 +90,7 @@ int TvService::TvServiceHandleMessage()
+             continue;
+         }
+ 
+-        LOGD("%s: path: %s\n", __FUNCTION__, dbus_message_get_path (msg));
++        //LOGD("%s: path: %s\n", __FUNCTION__, dbus_message_get_path (msg));
+         if (dbus_message_is_method_call(msg, "aml.tv", "cmd")) {
+             DBusMessage *rp;
+             DBusMessageIter r_arg;
+@@ -119,9 +119,9 @@ int TvService::TvServiceHandleMessage()
+             }
+             dbus_connection_flush(mpTvServiceConnection);
+             dbus_message_unref(rp);
+-        } else {
++        } /*else {
+             LOGE("%s: Not TV client method call!\n", __FUNCTION__);
+-        }
++        }*/
+         dbus_message_unref(msg);
+     }
+     //dbus_bus_remove_match();
+-- 
+2.7.4
+

@@ -1,0 +1,32 @@
+From a1ea6908e12daead72b1634c042488acc90dccaf Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Mon, 18 Mar 2019 16:23:23 +0800
+Subject: [PATCH] fix compilation on audioplayer
+
+---
+ audioplayer/Makefile    |   2 +-
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ create mode 100755 audioplayer/audioplayer
+
+Index: git/audioplayer/Makefile
+===================================================================
+--- git.orig/audioplayer/Makefile	2019-04-23 15:31:45.509864429 +0800
++++ git/audioplayer/Makefile	2019-04-23 15:40:49.993874644 +0800
+@@ -12,7 +12,7 @@
+ 
+ TARGET=audioplayer
+ 
+-LDFLAGS= -L$(PREFIX)/lib/libplayer -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
++CFLAGS+= -L$(PREFIX)/lib/libplayer -L$(STAGING_DIR)/usr/lib -lavutil -lavformat -lavcodec -lm -lz -lpthread -lamcodec -ldl -lamplayer -lamadec -lasound -lamstreaming  -lamavutils -lrt -lstdc++
+ CFLAGS+= -I${BUILD_DIR}/../amffmpeg -I${BUILD_DIR}/../amcodec/include -I${BUILD_DIR}/../amadec/include
+ CFLAGS+= -I${BUILD_DIR}/../amplayer/player/include -I${BUILD_DIR}/../amplayer/player -I${BUILD_DIR}/../streamsource
+ CFLAGS+= -I$(INC_DIR)
+@@ -33,7 +33,7 @@
+ 	mkdir -p $(TARGET_DIR)/../lib/firmware
+ install:all
+ 	install $(INSTALL_FLAGS) $(TARGET) $(TARGET_DIR)/bin
+-	cp -rf $(LIB_DIR)/*.so* $(TARGET_DIR)/lib
++#	cp -rf $(LIB_DIR)/*.so* $(TARGET_DIR)/lib
+ 
+ distclean:clean
+ 

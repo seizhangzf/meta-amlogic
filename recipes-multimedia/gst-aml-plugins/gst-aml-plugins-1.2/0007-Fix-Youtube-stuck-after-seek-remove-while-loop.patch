@@ -1,0 +1,132 @@
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvdec/gstamlvdec.c	2018-08-29 19:01:11.519585223 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.c	2018-08-30 15:39:06.772978673 +0800
+@@ -273,6 +273,7 @@
+     amlvdec->datadump = FALSE; //for debug
+     amlvdec->segment.rate = 1.0;
+     amlvdec->tvp = TRUE;
++    amlvdec->flushing = FALSE;
+
+     return TRUE;
+ }
+@@ -447,11 +448,7 @@
+ gst_aml_vdec_handle_frame(GstVideoDecoder *dec, GstVideoCodecFrame *frame)
+ {
+     GstAmlVdec *amlvdec = GST_AMLVDEC(dec);
+-    GstBuffer *outbuffer;
+-    GstFlowReturn ret;
+-    GSList *l;
+-    GstVideoCodecFrame *p = frame;
+-    GstVideoFrame video_frame;
++    GstFlowReturn ret =  GST_FLOW_ERROR;
+
+     if (G_UNLIKELY(!frame)) {
+         return GST_FLOW_OK;
+@@ -462,33 +459,29 @@
+
+     if (!amlvdec->codec_init_ok) {
+         GST_INFO_OBJECT(amlvdec, "decode frame later");
+-        return GST_FLOW_OK;
++        goto done;
+     }
+
+-    while (!amlvdec->is_paused) {
+-        p = gst_video_decoder_get_oldest_frame(dec);
+-        if (!p) {
+-            break;
+-        }
+-        if (!p->output_buffer) {
+-            ret = gst_video_decoder_allocate_output_frame(dec, p);
+-            if (G_UNLIKELY(ret != GST_FLOW_OK)) {
+-                GST_ERROR_OBJECT(amlvdec, "failed to allocate output frame");
+-                gst_video_codec_frame_unref(p);
+-                break;
+-            }
++    if (!frame->output_buffer) {
++        ret = gst_video_decoder_allocate_output_frame(dec, frame);
++        if (G_UNLIKELY(ret != GST_FLOW_OK)) {
++            GST_ERROR_OBJECT(amlvdec, "failed to allocate output frame");
++            goto done;
+         }
++    }
+
+-        if (GST_FLOW_OK == gst_aml_vdec_decode(amlvdec, p->input_buffer, p)) {
+-            //if (GST_CLOCK_TIME_IS_VALID(p->pts)) {
+-            gst_video_decoder_finish_frame(dec, p);
+-            //}
+-        } else {
+-            GST_ERROR("decode error");
+-        }
+-        gst_video_codec_frame_unref(p);
++    ret = gst_aml_vdec_decode(amlvdec, frame->input_buffer, frame);
+
++done:
++    if (ret == GST_FLOW_OK) {
++        gst_video_decoder_finish_frame(dec, frame);
++    }
++    else {
++        GST_ERROR_OBJECT(amlvdec, "decode error");
++        //gst_video_decoder_release_frame(dec, frame);
+     }
++    gst_video_codec_frame_unref(frame);
++
+     GST_TRACE_OBJECT(amlvdec, "finish");
+
+     return GST_FLOW_OK;
+@@ -502,7 +495,11 @@
+     GST_DEBUG_OBJECT(amlvdec, "Got %s event on sink pad",
+             GST_EVENT_TYPE_NAME(event));
+     switch (GST_EVENT_TYPE(event) ) {
+-
++    case GST_EVENT_FLUSH_START:
++        amlvdec->flushing = TRUE;
++        ret = GST_VIDEO_DECODER_CLASS (parent_class)->sink_event(amlvdec,
++                event);
++        break;
+     case GST_EVENT_SEGMENT: {
+         gst_event_copy_segment(event, &amlvdec->segment);
+         GST_INFO_OBJECT(amlvdec, "rate = %f", amlvdec->segment.rate);
+@@ -656,6 +653,7 @@
+     if (get_black_policy() != 1) {
+         set_black_policy(1);
+     }
++    amlvdec->flushing = FALSE;
+ }
+
+ static int gst_aml_vdec_tvp_write(AmlStreamInfo* info, void *data, int size,
+@@ -763,12 +761,20 @@
+
+     if (amlvdec->pcodec && amlvdec->codec_init_ok) {
+         while (codec_get_vbuf_state(amlvdec->pcodec, &vbuf) == 0) {
+-            if (vbuf.data_len * 10 < vbuf.size * 7) {
++            if (G_LIKELY(vbuf.data_len * 10 < vbuf.size * 7)) {
+                 break;
+             }
+-            if (amlvdec->is_paused) {
++
++            if (G_UNLIKELY(amlvdec->is_paused)) {
+                 goto error;
+             }
++
++            if (G_UNLIKELY(amlvdec->flushing)) {
++                GST_ERROR_OBJECT(amlvdec, "amlvdec is flushing");
++                //ret = GST_FLOW_FLUSHING;
++                goto error;
++            }
++
+             usleep(20000);
+         }
+         timestamp = frame->pts;
+Index: gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.h
+===================================================================
+--- gst-aml-plugins-1.2.orig/video/amlvdec/gstamlvdec.h	2018-08-29 19:01:10.087585197 +0800
++++ gst-aml-plugins-1.2/video/amlvdec/gstamlvdec.h	2018-08-29 19:01:11.879585230 +0800
+@@ -97,6 +97,7 @@
+     gboolean decodetype;
+     gboolean datadump;
+     gboolean tvp;
++    gboolean flushing;
+ };
+
+ struct _GstAmlVdecClass

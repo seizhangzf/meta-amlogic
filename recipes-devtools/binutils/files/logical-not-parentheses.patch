@@ -1,0 +1,11 @@
+--- binutils-2.24/gas/config/tc-i386.orig	2017-07-06 19:37:38.462247574 -0700
++++ binutils-2.24/gas/config/tc-i386.c	2017-07-06 19:38:25.571360855 -0700
+@@ -6140,7 +6140,7 @@
+ 	      op.bitfield.regmem = 0;
+ 	      if ((dest + 1) >= i.operands
+ 		  || (op.bitfield.reg32 != 1
+-		      && !op.bitfield.reg64 != 1
++		      && !(op.bitfield.reg64 != 1)
+ 		      && !operand_type_equal (&op, &regxmm)
+ 		      && !operand_type_equal (&op, &regymm)
+ 		      && !operand_type_equal (&op, &regzmm)

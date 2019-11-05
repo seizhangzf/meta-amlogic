@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Source function library.
+. /etc/init.d/functions
+
+do_start() {
+	/usr/bin/remotecfg /etc/remote.conf
+}
+
+do_stop() {
+	echo "stop remotecfg here"
+}
+
+case "$1" in
+  start)
+	echo "Setting up remote controller"
+	do_start
+	;;
+  stop)
+	do_stop
+	;;
+  restart|force-reload)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

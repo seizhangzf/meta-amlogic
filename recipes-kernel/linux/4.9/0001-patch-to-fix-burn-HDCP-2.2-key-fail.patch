@@ -1,0 +1,43 @@
+From b1bb4261a1198c3a48e26635f62db26c026fccc0 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Mon, 14 Oct 2019 14:31:05 -0700
+Subject: [PATCH 1/2] patch to fix burn HDCP 2.2 key fail Patch is from
+ http://scgit.amlogic.com:8080/#/c/86761/
+
+ Change-Id: Iaf3264472bf782b32f36d03e9d850fab34221a54
+ Signed-off-by: Ufo Chang <ufo.chang@amlogic.com>
+---
+ drivers/amlogic/media/vin/tvin/hdmirx/hdcp_rx_main.c | 3 ++-
+ drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h  | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/media/vin/tvin/hdmirx/hdcp_rx_main.c b/drivers/amlogic/media/vin/tvin/hdmirx/hdcp_rx_main.c
+index 832a59e..1a0a3c4 100644
+--- a/drivers/amlogic/media/vin/tvin/hdmirx/hdcp_rx_main.c
++++ b/drivers/amlogic/media/vin/tvin/hdmirx/hdcp_rx_main.c
+@@ -325,7 +325,8 @@ static long init(struct file *f, void __user *arg)
+ 		rc = alloc_dma_areas(esm, &info);
+ 		if (rc < 0)
+ 			goto err_free;
+-
++		info.hpi_base =
++		reg_maps[MAP_ADDR_MODULE_HDMIRX_CAPB3].phy_addr;
+ 		hpi_mem = request_mem_region(info.hpi_base, 128, "esm-hpi");
+ 		if (!hpi_mem) {
+ 			rc = -EADDRNOTAVAIL;
+diff --git a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
+index acfe0c7..6b46639 100644
+--- a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
++++ b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
+@@ -47,7 +47,7 @@
+  *
+  *
+  */
+-#define RX_VER2 "ver.2019/09/11"
++#define RX_VER2 "ver.2019/09/25"
+ 
+ /*print type*/
+ #define	LOG_EN		0x01
+-- 
+2.7.4
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=TV Server Startup
+After=dbus.service
+
+[Service]
+User=root
+Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket"
+ExecStart=/usr/bin/tvservice
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+HPD_STATE=/sys/class/amhdmitx/amhdmitx0/hpd_state
+DISP_CAP=/sys/class/amhdmitx/amhdmitx0/disp_cap
+DISP_MODE=/sys/class/display/mode
+
+# Source function library.
+. /etc/init.d/functions
+
+do_start() {
+	hdmi=`cat $HPD_STATE`
+	if [ $hdmi -eq 1 ]; then
+		sh /etc/display/set_display_mode.sh
+	fi
+	echo 0 > /sys/class/graphics/fb0/blank
+}
+
+do_stop() {
+	echo 1 > /sys/class/graphics/fb0/blank
+}
+
+case "$1" in
+  start)
+	echo "Setting up graphic parameters"
+	do_start
+	;;
+  stop)
+	echo "Turn off graphic"
+	do_stop
+	;;
+  restart|force-reload)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

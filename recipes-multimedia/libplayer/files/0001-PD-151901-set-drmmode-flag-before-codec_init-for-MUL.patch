@@ -1,0 +1,43 @@
+From 4f5c6bb716739793d3d51b2d0b5d4b9629cc440b Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 28 Dec 2017 19:04:55 +0800
+Subject: [PATCH] set drmmode flag before codec_init for MULTI
+
+---
+ amcodec/codec/codec_ctrl.c   | 7 +++++++
+ amcodec/include/codec_type.h | 1 +
+ 2 files changed, 8 insertions(+)
+
+diff --git a/amcodec/codec/codec_ctrl.c b/amcodec/codec/codec_ctrl.c
+index 7e91fda..e78e9ac 100644
+--- a/amcodec/codec/codec_ctrl.c
++++ b/amcodec/codec/codec_ctrl.c
+@@ -349,6 +349,13 @@ static inline int codec_video_es_init(codec_para_t *pcodec)
+         print_error_msg(codec_r, errno, __FUNCTION__, __LINE__);
+         return codec_r;
+     }
++    r = codec_set_drmmode(pcodec, pcodec->drmmode);
++    if (r < 0) {
++        codec_h_close(handle);
++        codec_r = system_error_to_codec_error(r);
++        print_error_msg(codec_r, errno, __FUNCTION__, __LINE__);
++        return codec_r;
++    }
+     return CODEC_ERROR_NONE;
+ }
+ 
+diff --git a/amcodec/include/codec_type.h b/amcodec/include/codec_type.h
+index e960316..b68a29a 100644
+--- a/amcodec/include/codec_type.h
++++ b/amcodec/include/codec_type.h
+@@ -119,6 +119,7 @@ unsigned int noblock:
+     char *sub_filename;
+     int associate_dec_supported;//support associate or not
+     int mixing_level;
++    unsigned int drmmode;
+ } codec_para_t;
+ 
+ typedef struct {
+-- 
+2.11.0
+

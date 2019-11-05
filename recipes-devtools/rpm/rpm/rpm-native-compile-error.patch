@@ -1,0 +1,19 @@
+--- rpm-5.4.9/rpmdb/db3.c	2017-02-22 10:51:49.535926022 +0530
++++ rpm-5.4.9/rpmdb/db3.c	2017-02-22 11:00:04.443912471 +0530
+@@ -1541,6 +1541,7 @@
+ #endif
+     int rc = 0;
+ 
++    DB_TXN * _txn = NULL;
+     assert(db != NULL);
+ #if defined(DB_FAST_STAT)
+     if (flags)
+@@ -1553,7 +1554,7 @@
+ #if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3) || (DB_VERSION_MAJOR == 5)
+     rc = db->stat(db, _txnid, &dbi->dbi_stats, flags);
+ #else
+-    rc = db->stat(db, &dbi->dbi_stats, flags);
++    rc = db->stat(db, _txn, &dbi->dbi_stats, flags);
+ #endif
+     rc = cvtdberr(dbi, "db->stat", rc, _debug);
+ 

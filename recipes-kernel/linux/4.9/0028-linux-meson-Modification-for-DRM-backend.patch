@@ -1,0 +1,83 @@
+From dc1f032b7ee41e57669ee85a0c38e997eaef3e9c Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Thu, 28 Dec 2017 17:39:33 +0800
+Subject: [PATCH] [linux-meson] Modification for DRM backend
+
+1. Modify gxl_p230_2g.dts and gxl_p212_2g.dts for DRM backend
+2. Add workaround for OSD transparent
+
+Make most part of dts the same as that of p212
+---
+ arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts | 11 ++++++++++-
+ arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts | 11 ++++++++++-
+ drivers/amlogic/drm/am_meson_vpu.c          |  2 +-
+ 3 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+index 5ea678c2b59e..f04ac0d73f1c 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p212_2g.dts
+@@ -756,7 +756,7 @@
+ 		compatible = "amlogic, meson-gxl";
+ 		memory-region = <&logo_reserved>;
+ 		dev_name = "meson-fb";
+-		status = "okay";
++		status = "disabled";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";
+@@ -1222,3 +1222,12 @@
+ 	status = "okay";
+ };
+ 
++&drm_vpu {
++	status = "okay";
++	compatible = "amlogic,meson-gxl-vpu";
++};
++
++&drm_amhdmitx {
++	status = "okay";
++};
++
+diff --git a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+index eceb2b8154cc..9b87eb920a42 100644
+--- a/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
++++ b/arch/arm64/boot/dts/amlogic/gxl_p230_2g.dts
+@@ -745,7 +745,7 @@
+ 		compatible = "amlogic, meson-gxl";
+ 		memory-region = <&logo_reserved>;
+ 		dev_name = "meson-fb";
+-		status = "okay";
++		status = "disabled";
+ 		interrupts = <0 3 1
+ 			0 89 1>;
+ 		interrupt-names = "viu-vsync", "rdma";
+@@ -1429,3 +1429,12 @@
+ 	};
+ }; /* end of pinctrl_periphs */
+ 
++&drm_vpu {
++	status = "okay";
++	compatible = "amlogic,meson-gxl-vpu";
++};
++
++&drm_amhdmitx {
++	status = "okay";
++};
++
+diff --git a/drivers/amlogic/drm/am_meson_vpu.c b/drivers/amlogic/drm/am_meson_vpu.c
+index fccfdc20a88a..99b8260077db 100644
+--- a/drivers/amlogic/drm/am_meson_vpu.c
++++ b/drivers/amlogic/drm/am_meson_vpu.c
+@@ -311,7 +311,7 @@ void am_osd_do_display(
+ 		 *force convert to ARGB8888 format,
+ 		 *because overlay layer needs to display
+ 		 */
+-		format = COLOR_INDEX_32_XRGB;//COLOR_INDEX_32_ARGB;
++		format = COLOR_INDEX_32_ARGB;
+ 		break;
+ 	case DRM_FORMAT_XBGR8888:
+ 		format = COLOR_INDEX_32_XBGR;
+-- 
+2.11.0
+
