@@ -1,0 +1,78 @@
+From ce8d39c8b317c295e17d8b76f25871aebf8cc152 Mon Sep 17 00:00:00 2001
+From: "apollo.ling" <apollo.ling@amlogic.com>
+Date: Thu, 7 Nov 2019 13:30:21 +0800
+Subject: [PATCH] buildroot: westeros,h264 set dpb size to 15
+
+PD#SWPL-15844
+
+Problem:
+v4l2 broken
+
+Solution:
+set dpb size to 15
+
+Verify:
+u212
+
+Change-Id: Ie8e85e2c6bdfd2cbe0a7e9987bd38ac8b5a5dd18
+Signed-off-by: apollo.ling <apollo.ling@amlogic.com>
+---
+ drivers/amvdec_ports/aml_vcodec_dec.c       | 7 ++++---
+ drivers/amvdec_ports/decoder/vdec_h264_if.c | 2 +-
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 9c34b49..00d2b9b 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -464,6 +464,7 @@ void trans_vframe_to_user(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer *f
+ 	}
+ 
+ 	ctx->decoded_frame_cnt++;
++	aml_v4l2_debug(4, "%s decoded_frame_cnt=%d\n", __func__, ctx->decoded_frame_cnt);
+ }
+ 
+ static int get_display_buffer(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer **out)
+@@ -503,7 +504,7 @@ static int is_vdec_ready(struct aml_vcodec_ctx *ctx)
+ 		/* is there enough dst bufs for decoding? */
+ 		buf_ready_num = v4l2_m2m_num_dst_bufs_ready(ctx->m2m_ctx);
+ 		if ((buf_ready_num + ctx->buf_used_count) < ctx->dpb_size) {
+-			aml_v4l2_debug(4, "[%d] Not enough dst bufs, num: %d.",
++			aml_v4l2_debug(0, "[%d] Not enough dst bufs, num: %d.",
+ 				ctx->id, buf_ready_num);
+ 			v4l2_m2m_job_finish(dev->m2m_dev_dec, ctx->m2m_ctx);
+ 			v4l2_m2m_try_schedule(ctx->m2m_ctx);
+@@ -589,7 +590,7 @@ static void aml_vdec_worker(struct work_struct *work)
+ 
+ 	if (src_buf_info->lastframe) {
+ 		/*the empty data use to flushed the decoder.*/
+-		aml_v4l2_debug(3, "[%d] Got empty flush input buffer.", ctx->id);
++		aml_v4l2_debug(0, "[%d] Got empty flush input buffer.", ctx->id);
+ 
+ 		src_buf = v4l2_m2m_src_buf_remove(ctx->m2m_ctx);
+ 		v4l2_m2m_job_finish(dev->m2m_dev_dec, ctx->m2m_ctx);
+@@ -724,7 +725,7 @@ void try_to_capture(struct aml_vcodec_ctx *ctx)
+ 
+ 	ret = get_display_buffer(ctx, &fb);
+ 	if (ret) {
+-		aml_v4l2_debug(4, "[%d] %s() [%d], the que have no disp buf,ret: %d",
++		aml_v4l2_debug(0, "[%d] %s() [%d], the que have no disp buf,ret: %d",
+ 			ctx->id, __func__, __LINE__, ret);
+ 		return;
+ 	}
+diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+index 02848b8..56df33e 100644
+--- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+@@ -421,7 +421,7 @@ static void fill_vdec_params(struct vdec_h264_inst *inst, struct h264_SPS_t *sps
+ 	pic->c_len_sz		= pic->y_len_sz >> 1;
+ 
+ 	/* calc DPB size */
+-	dec->dpb_sz = sps->ref_frame_count;
++	dec->dpb_sz = 15;//sps->ref_frame_count;
+ 
+ 	aml_vcodec_debug(inst, "[%d] The stream infos, coded:(%d x %d), visible:(%d x %d), DPB: %d\n",
+ 		inst->ctx->id, pic->coded_width, pic->coded_height,
+-- 
+2.7.4
+
