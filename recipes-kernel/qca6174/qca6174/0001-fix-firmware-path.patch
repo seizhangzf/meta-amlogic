@@ -1,9 +1,8 @@
-From 2c2209a92eab9322beba15cdb2038f9ea19ab3d9 Mon Sep 17 00:00:00 2001
-From: Matthew Shyu <matthew.shyu@amlogic.com>
-Date: Wed, 15 May 2019 16:37:56 +0800
+From f91be3d15f1aa4de50a6431b3a3b59f8274a6b59 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Wed, 6 Nov 2019 02:10:22 -0800
 Subject: [PATCH] fix firmware path
 
-Change-Id: Ic8c0fd0e6b4d61a85a523b89344a58f0f9cdb3f4
 ---
  AIO/drivers/qcacld-new/CORE/HDD/src/wlan_hdd_main.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -22,5 +21,5 @@ index 9159738..d1bff5d 100644
  static int android_readwrite_file(const A_CHAR *filename, A_CHAR *rbuf, const A_CHAR *wbuf, size_t length)
  {
 -- 
-2.11.0
+2.7.4
 

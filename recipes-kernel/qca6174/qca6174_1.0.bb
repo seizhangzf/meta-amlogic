@@ -3,8 +3,10 @@ inherit module
 SUMMARY = "Qualcomm 6174 driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git;nobranch=1"
+SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git;branch=p-amlogic_9.2.1811_21"
 SRC_URI += "file://0001-fix-firmware-path.patch"
+SRC_URI += "file://nvm_tlv_3.2.bin"
+SRC_URI += "file://rampatch_tlv_3.2.tlv"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
@@ -19,10 +21,14 @@ do_install() {
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${WIFIDIR}
     install ${S}/AIO/rootfs-x86-android.build/lib/modules/wlan.ko ${WIFIDIR}
+    install -d ${D}/lib/firmware/
+    install -D -m 0644 ${WORKDIR}/nvm_tlv_3.2.bin ${D}/lib/firmware/
+    install -D -m 0644 ${WORKDIR}/rampatch_tlv_3.2.tlv ${D}/lib/firmware/
 }
 
 FILES_${PN} = "wlan.ko"
 DEPENDS += ""
+FILES_${PN} += "/lib/firmware"
 
 S = "${WORKDIR}/git"
 

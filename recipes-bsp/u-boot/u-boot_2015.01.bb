@@ -8,17 +8,17 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1707d6db1d42237583f50183a5651ecb"
 EXTRA_OEMAKE = ''
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-SRC_URI = "git://git.myamlogic.com/firmware/bin/bl2.git;nobranch=1;destsuffix=uboot-repo/bl2/bin;name=bl2"
-SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl30.git;nobranch=1;destsuffix=uboot-repo/bl30/bin;name=bl30"
-SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl31.git;nobranch=1;destsuffix=uboot-repo/bl31/bin;name=bl31"
-SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl31.git;nobranch=1;destsuffix=uboot-repo/bl31_1.3/bin;name=bl31-1.3"
-SRC_URI_append = " git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh;branch=tdk-v2.4-RDK-tvp-20190423;destsuffix=uboot-repo/tdk;name=tdk"
-SRC_URI_append = " git://git.myamlogic.com/uboot.git;nobranch=1;destsuffix=uboot-repo/bl33;name=bl33"
-SRC_URI_append = " git://git.myamlogic.com/amlogic/tools/fip.git;nobranch=1;destsuffix=uboot-repo/fip;name=fip"
+SRC_URI = "git://git.myamlogic.com/firmware/bin/bl2.git;branch=amlogic-dev;destsuffix=uboot-repo/bl2/bin;name=bl2"
+SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl30.git;branch=amlogic-dev;destsuffix=uboot-repo/bl30/bin;name=bl30"
+SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl31.git;branch=amlogic-dev;destsuffix=uboot-repo/bl31/bin;name=bl31"
+SRC_URI_append = " git://git.myamlogic.com/firmware/bin/bl31.git;branch=amlogic-dev-1.3;destsuffix=uboot-repo/bl31_1.3/bin;name=bl31-1.3"
+SRC_URI_append = " git://git.myamlogic.com/vendor/amlogic/tdk.git;branch=tdk-v2.4;destsuffix=uboot-repo/tdk;name=tdk"
+SRC_URI_append = " git://git.myamlogic.com/uboot.git;branch=amlogic-dev;destsuffix=uboot-repo/bl33/v2015;name=bl33"
+SRC_URI_append = " git://git.myamlogic.com/amlogic/tools/fip.git;branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 
 #patches
-SRC_URI_append = " file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33"
-SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33"
+#SRC_URI_append = " file://0001-disable-dtbo-in-Linux.patch;patchdir=bl33/v2015"
+SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33/v2015"
 
 do_configure[noexec] = "1"
 
@@ -27,6 +27,7 @@ MIRRORS_prepend += "git://git.myamlogic.com/firmware/bin/bl30.git git://git@open
 MIRRORS_prepend += "git://git.myamlogic.com/firmware/bin/bl31.git git://git@openlinux.amlogic.com/yocto/firmware/bin/bl31.git;protocol=ssh; \n"
 MIRRORS_prepend += "git://git.myamlogic.com/uboot.git git://git@openlinux.amlogic.com/yocto/uboot.git;protocol=ssh; \n"
 MIRRORS_prepend += "git://git.myamlogic.com/amlogic/tools/fip.git git://git@openlinux.amlogic.com/yocto/amlogic/tools/fip.git;protocol=ssh; \n"
+MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh; \n"
 
 SRCREV_bl2 ?="${AUTOREV}"
 SRCREV_bl30 ?="${AUTOREV}"
@@ -64,10 +65,14 @@ DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 do_compile () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
-    mkdir -p ${S}/bl32/bin/
-    cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
     UBOOT_TYPE="${UBOOT_MACHINE}"
-    ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+    if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
+        mkdir -p ${S}/bl32/bin/
+        cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
+        ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+    else
+        ./mk ${UBOOT_TYPE%_config}
+    fi
     cp -rf build/* fip/
 }
 
