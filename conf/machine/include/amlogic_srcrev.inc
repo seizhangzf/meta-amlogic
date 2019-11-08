@@ -3,7 +3,7 @@ SRCREV_pn-libplayer = "19ca046757f026bec28e35ee4b5041d59d669240"
 SRCREV_pn-aml-dvb = "f523225ce3492df540dcdebdde5dd9089794da7c"
 SRCREV_pn-optee-video-firmware = "90bce0e0f0102bdc58bc244d1e85c61395e50895"
 SRCREV_pn-aml-zvbi = "f06e974f1382046ede5de9e7890b5bbf51ee57dc"
-SRCREV_pn-libgles-eabihf-dvalin-wayland-drm = "faba60eec6d252f60b027c9c216d0bbb473b58a9"
+SRCREV_pn-libgles-eabihf-dvalin-wayland-drm = "f97ab8bf08e7c813793507b51fbe07e90d427392"
 SRCREV_pn-aml-tvserver = "97ab9f7992e90f3d93c844eec15c64e37a122127"
 SRCREV_pn-wififw = "68e9fc0882d2491b6943af90b7c50a44bfa96c34"
 # mesontm2_t962e2_llama-rdk-linux-gnueabi

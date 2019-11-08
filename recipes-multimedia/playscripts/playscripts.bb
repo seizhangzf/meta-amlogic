@@ -6,6 +6,7 @@ SRC_URI  = "\
   file://alsactl.conf \
   file://asound.conf \
   file://asound.dev0.conf \
+  file://asound_6ch.conf \
   file://property_set.sh \
   file://COPYING \
 "
@@ -18,7 +19,7 @@ ASOUND_CONF_u212 = "asound.conf"
 ASOUND_CONF_w400 = "asound.conf"
 ASOUND_CONF_r321 = "asound.conf"
 ASOUND_CONF_ab311 = "asound.dev0.conf"
-ASOUND_CONF_llama_t962x3 = "asound_6ch.conf"
+ASOUND_CONF_t962x3_llama = "asound_6ch.conf"
 
 do_install() {
     install -d ${D}${sysconfdir}
