@@ -3,7 +3,7 @@ inherit module
 SUMMARY = "Qualcomm 6174 driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git;branch=p-amlogic_9.2.1811_21"
+SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/qualcomm/drivers/qca6174.git;branch=o-amlogic"
 SRC_URI += "file://0001-fix-firmware-path.patch"
 SRC_URI += "file://nvm_tlv_3.2.bin"
 SRC_URI += "file://rampatch_tlv_3.2.tlv"

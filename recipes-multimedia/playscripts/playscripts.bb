@@ -19,7 +19,7 @@ ASOUND_CONF_u212 = "asound.conf"
 ASOUND_CONF_w400 = "asound.conf"
 ASOUND_CONF_r321 = "asound.conf"
 ASOUND_CONF_ab311 = "asound.dev0.conf"
-ASOUND_CONF_t962x3_llama = "asound_6ch.conf"
+ASOUND_CONF_t962x3_llama = "asound.dev0.conf"
 
 do_install() {
     install -d ${D}${sysconfdir}
