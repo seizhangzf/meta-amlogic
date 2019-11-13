@@ -3,8 +3,7 @@ inherit module
 SUMMARY = "Optee tdk kernel driver"
 LICENSE = "CLOSED"
 
-SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tdk.git;branch=tdk-v2.4"
-MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh; \n"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/tdk.git;protocol=${AML_GIT_PROTOCOL};branch=tdk-v2.4"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 

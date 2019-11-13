@@ -4,6 +4,11 @@ LOCAL_DIR=$(pwd)
 if [ -z $BUILD_DIR ]; then
 	BUILD_DIR="build"
 fi
+if [ -z $LOCAL_BUILD ]; then
+    LOCAL_BUILD=0
+else
+    LOCAL_BUILD=1
+fi
 
 DEFCONFIG_ARRAY=("mesong12a_u212"
 				 "mesontm2_ab301"
@@ -104,11 +109,19 @@ function lunch()
 {
 	if [ -n "$TARGET_MACHINE" ]; then
 		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
-		export MACHINE=$TARGET_MACHINE
+    if [ $LOCAL_BUILD == "1" ];then
+        cat >> $BUILD_DIR/conf/local.conf <<EOF
+
+AML_GIT_ROOT = "git.myamlogic.com"
+AML_GIT_PROTOCOL = "git"
+EOF
+    fi
+        export MACHINE=$TARGET_MACHINE
 		echo "==========================================="
 		echo
 		echo "MACHINE=${TARGET_MACHINE}"
 		echo "OUTPUT_DIR=${BUILD_DIR}"
+		echo "LOCAL_BUILD=${LOCAL_BUILD}"
 		echo
 		echo "==========================================="
 	fi

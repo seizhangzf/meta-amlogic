@@ -1,8 +1,7 @@
 SUMMARY = "aml libplayer code"
 LICENSE = "LGPL-2.0+"
 DEPENDS = "curl bzip2 alsa-lib virtual/gettext libxml2"
-SRC_URI = "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git;protocol=git;branch=buildroot-libplayer"
-MIRRORS_prepend += "git://git.myamlogic.com/platform/packages/amlogic/LibPlayer.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/LibPlayer.git;protocol=ssh; \n"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/packages/amlogic/LibPlayer.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-libplayer"
 
 SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
             file://0002-PD138385-fix-yocto-alsa-hw-set-issue.patch\

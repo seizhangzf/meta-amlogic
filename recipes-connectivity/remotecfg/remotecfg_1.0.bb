@@ -4,10 +4,8 @@ SECTION = "base"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=ac402fdf7a55a005619ca325e91db3ec"
 
-SRC_URI = "git://git.myamlogic.com/linux/amlogic/remotecfg.git;nobranch=1 \
+SRC_URI = "git://${AML_ROOT_GIT}/linux/amlogic/remotecfg.git;protocol=${AML_GIT_PROTOCOL};nobranch=1 \
            file://init"
-
-MIRRORS_prepend += "git://git.myamlogic.com/linux/amlogic/remotecfg.git git://git@openlinux.amlogic.com/yocto/platform/packages/amlogic/remotecfg.git;protocol=ssh; \n"
 
 SRCREV="a09a2c302e1c4bfce5f077f9de1f087874055f94"
 

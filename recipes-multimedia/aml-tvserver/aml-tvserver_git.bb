@@ -1,7 +1,6 @@
 SUMMARY = "aml tvserver"
 LICENSE = "CLOSED"
-SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tvserver.git;protocol=git;branch=pure-linux-amlogic"
-MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tvserver.git git://git@openlinux.amlogic.com/yocto/vendor/amlogic/tvserver.git;protocol=ssh; \n"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/tvserver.git;protocol=${AML_GIT_PROTOCOL};branch=pure-linux-amlogic"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"

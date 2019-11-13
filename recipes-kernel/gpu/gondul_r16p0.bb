@@ -4,11 +4,9 @@ SUMMARY = "Arm G53(gondul) graphic driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a31bb510"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/arm/gpu.git;nobranch=1"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/arm/gpu.git;protocol=${AML_GIT_PROTOCOL};nobranch=1"
 
 SRCREV = "4cf054626175aa511f9c765205f8b141ae169f70"
-
-MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/arm/gpu.git git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/gpu.git;protocol=ssh; \n"
 
 PROVIDES += "virtual/gpu"
 RPROVIDES_${PN} += "gpu"

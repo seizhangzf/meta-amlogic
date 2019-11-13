@@ -6,9 +6,7 @@ inherit autotools pkgconfig
 DEPENDS = "libpng"
 do_configure[noexec] = "1"
 
-SRC_URI = "git://git.myamlogic.com/platform/external/libzvbi.git;protocol=git;branch=ics-amlogic;name=libzvbi"
-
-MIRRORS_prepend += "git://git.myamlogic.com/external/libzvbi.git git://git@openlinux.amlogic.com/yocto/external/libzvbi.git;protocol=ssh; \n"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/external/libzvbi.git;protocol=${AML_GIT_PROTOCOL};branch=ics-amlogic;name=libzvbi"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"

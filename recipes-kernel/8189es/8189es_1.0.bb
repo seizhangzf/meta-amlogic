@@ -3,11 +3,9 @@ inherit module
 SUMMARY = "Realtek 8189es driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/realtek/drivers/8189es.git;nobranch=1"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/wifi/realtek/drivers/8189es.git;protocol=${AML_GIT_PROTOCOL};nobranch=1"
 
 SRCREV = "5a59235d2b69e774a58e0139dfd558170b866f9a"
-
-MIRRORS_prepend += "git://git.myamlogic.com/platform/hardware/wifi/realtek/drivers/8189es.git git://git@openlinux.amlogic.com/yocto/platform/hardware/wifi/realtek/drivers/8189es.git;protocol=ssh; \n"
 
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"

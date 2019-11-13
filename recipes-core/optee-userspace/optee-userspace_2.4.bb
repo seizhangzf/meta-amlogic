@@ -4,11 +4,9 @@ LICENSE = "Closed"
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 
-SRC_URI = "git://git.myamlogic.com/vendor/amlogic/tdk.git;branch=tdk-v2.4"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/tdk.git;protocol=${AML_GIT_PROTOCOL};branch=tdk-v2.4"
 SRC_URI += "file://tee-supplicant.service"
 SRC_URI += "file://0001-For-compilation-with-arm-rdk-linux-gnueabi-gcc.patch"
-
-MIRRORS_prepend += "git://git.myamlogic.com/vendor/amlogic/tdk.git git://git@openlinux.amlogic.com/yocto/optee-tdk;protocol=ssh; \n"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
