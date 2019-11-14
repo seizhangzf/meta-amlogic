@@ -9,6 +9,11 @@ LIC_FILES_CHKSUM = "file://NOTICE;md5=dbdefe400d894b510a9de14813181d0b"
 S = "${WORKDIR}/git"
 SRCREV = "df11091086b56e5fb71887f2fa320e1d2ffeff58"
 SRC_URI = "git://github.com/tinyalsa/tinyalsa.git;protocol=https;"
+SRC_URI += " \
+            file://0001-disable-doxygen-usage.patch \
+            file://0002-interval.h-add-missing-header.patch \
+            file://0003-add-pcm-ioctl.patch \
+            "
 
 do_configure() {
     :

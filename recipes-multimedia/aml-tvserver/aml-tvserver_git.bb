@@ -8,7 +8,11 @@ SRC_URI +="file://tvserver.service"
 SRC_URI += "file://0001-fix-wrong-path.patch"
 SRC_URI += "file://hdcp_rx22"
 SRC_URI += "file://hdcprx.service"
-DEPENDS = " dbus sqlite3 "
+SRC_URI += "file://0001-add-support-for-audio_client.patch"
+SRC_URI += "file://0001-fix-include-error.patch"
+SRC_URI += "file://0001-add-audio-hal-files.patch"
+
+DEPENDS = " dbus sqlite3 aml-audio-service "
 do_configure[noexec] = "1"
 inherit autotools pkgconfig systemd
 S="${WORKDIR}/git"

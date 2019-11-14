@@ -1,0 +1,59 @@
+From 585f69c602fc8dd002c85d657a6b982d13e10578 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Sat, 7 Dec 2019 12:04:54 -0800
+Subject: [PATCH] remove dtv
+
+---
+ CMakeLists.txt       | 2 --
+ audio_hal/audio_hw.c | 9 +++++----
+ 2 files changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6280c6c..0ad89db 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,10 +40,8 @@ add_library(audio_hal SHARED
+ 	audio_hal/aml_resample_wrap.cpp
+ 	audio_hal/audio_android_resample_api.c
+ 	audio_hal/audio_data_process.c
+-	audio_hal/audio_dtv_ad.c
+ 	audio_hal/audio_format_parse.c
+ 	audio_hal/audio_hw.c
+-	audio_hal/audio_hw_dtv.c
+ 	audio_hal/audio_hw_ms12.c
+ 	audio_hal/audio_hw_profile.c
+ 	audio_hal/audio_hwsync.c
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 3e01fcb..63e84bb 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -77,7 +77,6 @@
+ #include "aml_avsync_tuning.h"
+ #include "aml_ng.h"
+ #include "aml_audio_timer.h"
+-#include "audio_dtv_ad.h"
+ 
+ // for invoke bluetooth rc hal
+ //#include "audio_hal_thunks.h"
+@@ -92,13 +91,15 @@
+ #include "jb_nano.h"
+ #endif
+ 
++#ifdef ENABLE_DTV_PATCH
+ // for dtv playback
+ #include "audio_hw_dtv.h"
++#include "audio_dtv_ad.h"
+ //#include "../bt_voice/kehwin/audio_kw.h"
++#endif
+ 
+-
+-#define ENABLE_DTV_PATCH
+-#define ENABLE_TUNER_IN
++//#define ENABLE_DTV_PATCH
++//#define ENABLE_TUNER_IN
+ //#define ENABLE_NOISE_GATE
+ //#define ENABLE_DRC
+ //#define ENABLE_EQ
+-- 
+2.7.4
+

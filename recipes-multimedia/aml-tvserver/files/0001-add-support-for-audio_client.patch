@@ -1,0 +1,40 @@
+From 29cf899a43ba185d2136e6472d8e239af401b80b Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Tue, 10 Dec 2019 14:59:00 -0800
+Subject: [PATCH] add support for audio_client
+
+---
+ Makefile | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 876852e..cc919bc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,7 +8,7 @@ DBUS_HEADER_DIR = $(STAGING_DIR)/usr/include/dbus-1.0
+ LOCAL_PATH = $(shell pwd)
+ LDFLAGS += -lstdc++ -lpthread -lz -ldl -lrt -L$(DBUS_LIB_DIR) -ldbus-1
+ CFLAGS += -Wall -Wno-unknown-pragmas -Wno-format \
+-          -O3 -fexceptions -fnon-call-exceptions -D_GNU_SOURCE -I$(DBUS_HEADER_DIR) \
++          -O3 -fexceptions -fnon-call-exceptions -D_GNU_SOURCE -DHAVE_AUDIO -I$(DBUS_HEADER_DIR) \
+ 		  -I$(DBUS_LIB_DIR)/dbus-1.0/include
+ 
+ ################################################################################
+@@ -98,12 +98,12 @@ libpq.so: $(pq_SRCS)
+ 
+ libtv.so: $(tv_SRCS) libpq.so
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -fPIC -I$(tvclient_HEADERS) -I$(LOCAL_PATH)/libpq \
+-	-I$(LOCAL_PATH)/libtv/tvutils -L$(LOCAL_PATH) -lpq -o $@ $^ $(LDLIBS)
++	-I$(LOCAL_PATH)/libtv/tvutils -L$(LOCAL_PATH) -lpq -laudio_client -o $@ $^ $(LDLIBS)
+ 
+ tvservice: $(tvservice_SRCS) libtv.so libpq.so
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(tvclient_HEADERS) \
+ 	-I$(LOCAL_PATH)/libtv -I$(LOCAL_PATH)/libtv/tvutils -I$(LOCAL_PATH)/libpq \
+-	-L$(LOCAL_PATH) -ltv -L$(LOCAL_PATH) -lpq -o $@ $^ $(LDLIBS)
++	-L$(LOCAL_PATH) -ltv -L$(LOCAL_PATH) -lpq -laudio_client -o $@ $^ $(LDLIBS)
+ 
+ tvtest: $(tvtest_SRCS) libtvclient.so
+ 	$(CC) $(CFLAGS) -I$(tvclient_HEADERS) -L$(LOCAL_PATH) \
+-- 
+2.7.4
+

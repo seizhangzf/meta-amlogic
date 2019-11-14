@@ -1,0 +1,9 @@
+[Unit]
+Description=Audio Server Startup
+
+[Service]
+User=root
+ExecStart=/usr/bin/audio_server
+
+[Install]
+WantedBy=multi-user.target

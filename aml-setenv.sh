@@ -12,6 +12,7 @@ fi
 
 DEFCONFIG_ARRAY=("mesong12a_u212"
 				 "mesontm2_ab301"
+				 "mesontm2_ab311"
 				 "mesontm2_t962e2_llama"
 				 "mesontm2_t962x3_llama"
 				 )

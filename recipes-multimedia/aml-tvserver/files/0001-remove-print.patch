@@ -1,0 +1,28 @@
+From 67a39023a38c03b3a7ca8e02865c4bd941d4d49b Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Wed, 18 Dec 2019 17:07:32 -0800
+Subject: [PATCH] remove print
+
+---
+ client/TvClient.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/client/TvClient.cpp b/client/TvClient.cpp
+index b46f96c..b451892 100644
+--- a/client/TvClient.cpp
++++ b/client/TvClient.cpp
+@@ -239,9 +239,9 @@ void *TvClient::HandleTvServiceMessage(void *args)
+                     }
+                 }
+             }
+-        } else {
++        } /*else {
+             LOGD("TvClient: Not TV service signal call!\n");
+-        }
++        }*/
+         dbus_message_unref(msg);
+     }
+     //dbus_bus_remove_match();
+-- 
+2.7.4
+

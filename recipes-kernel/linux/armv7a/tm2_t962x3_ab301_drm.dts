@@ -1,5 +1,5 @@
 /*
- * arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
+ * arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
  *
  * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
  *
@@ -18,9 +18,9 @@
 /dts-v1/;
 
 #include "mesontm2.dtsi"
+#include "mesontm2_drm.dtsi"
 #include "partition_mbox_normal.dtsi"
 #include "mesontm2_t962x3_ab301-panel.dtsi"
-#include "mesontm2_drm.dtsi"
 
 / {
 	model = "Amlogic TM2 T962X3 AB301";
@@ -187,6 +187,7 @@
 			alignment = <0x0>;
 			linux,contiguous-region;
 		};
+
 		dsp_fw_reserved:linux,dsp_fw {
 			compatible = "shared-dma-pool";
 			reusable;
@@ -497,7 +498,7 @@
 		clocks = <&clkc CLKID_DEMUX
 			&clkc CLKID_ASYNC_FIFO
 			&clkc CLKID_AHB_ARB0
-/*		&clkc CLKID_DOS_PARSER>;*/
+		/*&clkc CLKID_DOS_PARSER>;*/
 		&clkc CLKID_U_PARSER>;
 		clock-names = "demux", "asyncfifo", "ahbarb0", "uparsertop";
 	};
@@ -678,7 +679,6 @@
 			0xffff  0x0>; /* ending flag */
 	};
 
-	/* for external keypad */
 	adc_keypad {
 		compatible = "amlogic, adc_keypad";
 		status = "okay";
@@ -922,6 +922,7 @@
 		/*cec_sel = <2>;*/
 		arc_port_mask = <0x2>;
 		output = <1>;	/*output port number*/
+		arc_port_mask = <0x2>;
 		interrupts = <0 203 1
 					0 199 1>;
 		interrupt-names = "hdmi_aocecb","hdmi_aocec";
@@ -1309,7 +1310,6 @@
 			 */
 		};
 	};
-
 /*	sd_emmc_b: sd@ffe05000 {
  *		status = "okay";
  *		compatible = "amlogic, meson-mmc-tm2";
@@ -1611,6 +1611,7 @@
 				&clkaudio CLKID_AUDIO_MCLK_A
 				&clkaudio CLKID_AUDIO_RESAMPLE_A>;
 		clock-names = "resample_pll", "resample_src", "resample_clk";
+
 		/*same with toddr_src
 		 *	TDMIN_A, 0
 		 *	TDMIN_B, 1
@@ -1908,7 +1909,6 @@
 			output-low;
 		};
 	};
-
 }; /* end of pinctrl_periphs */
 
 &pinctrl_aobus {
@@ -1956,7 +1956,6 @@
 	};
 };
 
-
 &sd_emmc_c {
 	status = "okay";
 	emmc {
@@ -1973,8 +1972,6 @@
 		f_max = <200000000>;
 	};
 };
-
-
 
 &spifc {
 	status = "disabled";
@@ -2054,6 +2051,7 @@
 	status = "okay";
 	pinctrl-names = "internal_eth_pins";
 	pinctrl-0 = <&internal_eth_pins>;
+	pinctrl-1 = <&internal_gpio_pins>;
 	mc_val = <0x4be04>;
 
 	internal_phy=<1>;
@@ -2108,16 +2106,18 @@
 };
 
 &meson_fb {
-	status = "okay";
+	status = "disabled";
 	display_size_default = <1920 1080 1920 2160 32>;
 	mem_size = <0x00800000 0x1980000 0x100000 0x100000 0x800000>;
 	logo_addr = "0x7f800000";
 	mem_alloc = <0>;
 	pxp_mode = <0>; /** 0:normal mode 1:pxp mode */
 };
+
 &drm_vpu {
 	status = "okay";
 	logo_addr = "0x7f800000";
+	osd_ver = /bits/ 8 <OSD_V6>;
 };
 
 &drm_amhdmitx {
@@ -2128,6 +2128,7 @@
 &drm_lcd {
 	status = "okay";
 };
+
 &pwm_AO_cd {
 	status = "okay";
 };
