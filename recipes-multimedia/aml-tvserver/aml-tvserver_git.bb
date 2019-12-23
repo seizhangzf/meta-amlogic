@@ -11,6 +11,8 @@ SRC_URI += "file://hdcprx.service"
 SRC_URI += "file://0001-add-support-for-audio_client.patch"
 SRC_URI += "file://0001-fix-include-error.patch"
 SRC_URI += "file://0001-add-audio-hal-files.patch"
+SRC_URI += "file://0001-remove-print.patch"
+SRC_URI += "file://0001-tvserver-video-don-t-display-corectly.-1-1.patch"
 
 DEPENDS = " dbus sqlite3 aml-audio-service "
 do_configure[noexec] = "1"

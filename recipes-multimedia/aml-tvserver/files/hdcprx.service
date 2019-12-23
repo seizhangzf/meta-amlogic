@@ -1,6 +1,7 @@
 [Unit]
 Description=HDCP RX Service
 Before=tvserver.service
+After=aml_hdcprx.service
 
 [Service]
 ExecStart=/bin/sh -c '/usr/bin/hdcp_rx22  >& /var/log/hdcprx.log '

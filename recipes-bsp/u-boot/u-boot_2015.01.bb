@@ -54,13 +54,21 @@ DEPENDS_append = "gcc-linaro-aarch64-none-elf-native "
 DEPENDS_append_tm2 = " riscv-none-gcc-native "
 DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 
+DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
+
 do_compile () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
-        mkdir -p ${S}/bl32/bin/
-        cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
+        mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
+        #cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
+        ${S}/tdk/ta_export/scripts/pack_kpub.py \
+            --rsk=${S}/tdk/ta_export/keys/root_rsa_pub_key.pem \
+            --rek=${S}/tdk/ta_export/keys/root_aes_key.bin \
+            --in=${S}/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
+            --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+
         ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img
     else
         ./mk ${UBOOT_TYPE%_config}

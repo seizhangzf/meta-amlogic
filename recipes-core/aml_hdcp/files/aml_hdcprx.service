@@ -1,0 +1,10 @@
+[Unit]
+Description=hdcprx Startup
+After=tee-supplicant.service
+
+[Service]
+User=root
+ExecStart=/usr/bin/tee_hdcp
+
+[Install]
+WantedBy=multi-user.target
