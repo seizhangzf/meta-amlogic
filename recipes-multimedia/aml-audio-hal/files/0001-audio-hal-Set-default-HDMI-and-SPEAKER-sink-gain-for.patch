@@ -1,0 +1,44 @@
+From b8565cd4f92b8724e38ea9d3b2b72d03a78d9076 Mon Sep 17 00:00:00 2001
+From: Tim Yao <tim.yao@amlogic.com>
+Date: Wed, 25 Dec 2019 06:46:45 -0800
+Subject: [PATCH] audio-hal: Set default HDMI and SPEAKER sink gain for TV
+ [1/1]
+
+PD#SWPL-17555
+
+Problem:
+For TV build, the gain for SPEAKER and HDMI output sink are
+0 by default. If there is no gain settings from application
+side then the output is muted.
+
+Solution:
+Make defaule gains 1.0.
+
+Verify:
+Local
+
+Change-Id: I3cbc09145dad03ca69cec2e2ba073bddc2e0eef4
+---
+ audio_hal/audio_hw.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 3e01fcb..1d762d7 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -10997,10 +10997,10 @@ static int adev_open(const hw_module_t* module, const char* name, hw_device_t**
+ #endif
+ #else
+     adev->is_STB = property_get_bool("ro.vendor.platform.is.stb", false);
+-    adev->sink_gain[OUTPORT_SPEAKER] = 1.0;
+-    adev->sink_gain[OUTPORT_HDMI] = 1.0;
+     ALOGI("%s(), OTT platform", __func__);
+ #endif
++    adev->sink_gain[OUTPORT_SPEAKER] = 1.0;
++    adev->sink_gain[OUTPORT_HDMI] = 1.0;
+ 
+     adev->useSubMix = false;
+ #ifdef SUBMIXER_V1_1
+-- 
+2.7.4
+
