@@ -6,7 +6,6 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-4.9-dev"
 SRC_URI_append = " file://COPYING.GPL"
-#SRC_URI_append = " file://0001-buildroot-westeros-h264-set-dpb-size-to-15.patch"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
