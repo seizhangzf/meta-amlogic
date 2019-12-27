@@ -16,6 +16,7 @@ SRC_URI_append = " file://meson.scc \
             file://meson-user-patches.scc "
 
 SRC_URI_append = " file://0001-drm-Buildroot-TM2-Suspend-WestonOS-can-t-work-after-.patch "
+SRC_URI_append = " file://0001-workaround-tee-disable-microCode-loading-by-optee.patch "
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
