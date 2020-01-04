@@ -1,0 +1,1014 @@
+From 25ccd30b8620ff3438e8c5b592c9960e21f9682d Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 3 Jan 2020 15:50:38 -0800
+Subject: [PATCH 1/3] Revert "drm: keep uboot logo if no new frame in [1/2]"
+
+This reverts commit 83573235161648f99077841c17253e56cb7c0e8f.
+
+Change-Id: I8575dc8a8345e90d106a65c6c6f8dc5b9363ae94
+---
+ .../g12a_s905x2_u212_drm_buildroot.dts        |   2 +-
+ .../sm1_s905d3_ac200_drm_buildroot.dts        |   2 +-
+ .../dts/amlogic/tl1_t962x2_x301_2g_drm.dts    |   2 +-
+ .../g12a_s905x2_u212_drm_buildroot.dts        |   2 +-
+ drivers/amlogic/drm/meson_drv.c               | 322 +-----------------
+ drivers/amlogic/drm/meson_drv.h               |   2 -
+ drivers/amlogic/drm/meson_fb.c                |  23 +-
+ drivers/amlogic/drm/meson_fb.h                |  38 +--
+ drivers/amlogic/drm/meson_gem.c               |   2 +-
+ drivers/amlogic/drm/meson_hdmi.c              |  23 +-
+ drivers/amlogic/drm/meson_plane.c             |  64 ++--
+ drivers/amlogic/drm/meson_vpu.c               | 109 ++----
+ drivers/amlogic/drm/meson_vpu.h               |   3 -
+ drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c |   3 +
+ .../amlogic/drm/vpu-hw/meson_vpu_osd_mif.c    |   1 +
+ 15 files changed, 118 insertions(+), 480 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+index fa5319876b81..f1fa032d1286 100644
+--- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+@@ -538,7 +538,7 @@
+ 		/*1920*1080*4*3 = 0x17BB000*/
+ 		pxp_mode = <0>; /** 0:normal mode 1:pxp mode */
+ 		mem_alloc = <1>;
+-		logo_addr = "0x7f800000";
++		logo_addr = "0x3f800000";
+ 		clocks = <&clkc CLKID_VPU_CLKC_MUX>;
+ 		clock-names = "vpu_clkc";
+ 	};
+diff --git a/arch/arm/boot/dts/amlogic/sm1_s905d3_ac200_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/sm1_s905d3_ac200_drm_buildroot.dts
+index 0211ea01f9a2..1160f12185eb 100644
+--- a/arch/arm/boot/dts/amlogic/sm1_s905d3_ac200_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/sm1_s905d3_ac200_drm_buildroot.dts
+@@ -72,7 +72,7 @@
+ 			reusable;
+ 			size = <0x800000>;
+ 			alignment = <0x400000>;
+-			alloc-ranges = <0x7f800000 0x800000>;
++			alloc-ranges = <0x30000000 0x50000000>;
+ 		};
+ 		ion_cma_reserved:linux,ion-dev {
+ 			compatible = "shared-dma-pool";
+diff --git a/arch/arm/boot/dts/amlogic/tl1_t962x2_x301_2g_drm.dts b/arch/arm/boot/dts/amlogic/tl1_t962x2_x301_2g_drm.dts
+index f18fc7b9a96b..5780a0f801ec 100644
+--- a/arch/arm/boot/dts/amlogic/tl1_t962x2_x301_2g_drm.dts
++++ b/arch/arm/boot/dts/amlogic/tl1_t962x2_x301_2g_drm.dts
+@@ -2110,7 +2110,7 @@
+ 
+ &drm_vpu {
+ 	status = "okay";
+-	logo_addr = "0x7f800000";
++	logo_addr = "0x3f800000";
+ 	osd_ver = /bits/ 8 <OSD_V4>;
+ };
+ 
+diff --git a/arch/arm64/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm64/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+index 8b2e20f59231..9ece53886b9d 100644
+--- a/arch/arm64/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+@@ -540,7 +540,7 @@
+ 		/*1920*1080*4*3 = 0x17BB000*/
+ 		pxp_mode = <0>; /** 0:normal mode 1:pxp mode */
+ 		mem_alloc = <1>;
+-		logo_addr = "0x7f800000";
++		logo_addr = "0x3f800000";
+ 		clocks = <&clkc CLKID_VPU_CLKC_MUX>;
+ 		clock-names = "vpu_clkc";
+ 	};
+diff --git a/drivers/amlogic/drm/meson_drv.c b/drivers/amlogic/drm/meson_drv.c
+index d74da5e62d2e..bfa68937374d 100644
+--- a/drivers/amlogic/drm/meson_drv.c
++++ b/drivers/amlogic/drm/meson_drv.c
+@@ -40,9 +40,9 @@
+ #include "meson_fb.h"
+ #endif
+ #include "meson_drv.h"
+-#include "meson_vpu.h"
+ #include "meson_vpu_pipeline.h"
+ 
++
+ #define DRIVER_NAME "meson"
+ #define DRIVER_DESC "Amlogic Meson DRM driver"
+ 
+@@ -114,313 +114,23 @@ static void am_meson_disable_vblank(struct drm_device *dev, unsigned int crtc)
+ 	priv->crtc_funcs[crtc]->disable_vblank(priv->crtc);
+ }
+ 
+-struct am_meson_logo logo;
+-core_param(fb_width, logo.width, uint, 0644);
+-core_param(fb_height, logo.height, uint, 0644);
+-core_param(display_bpp, logo.bpp, uint, 0644);
+-core_param(outputmode, logo.outputmode_t, charp, 0644);
+-
+-static struct drm_framebuffer *am_meson_logo_init_fb(struct drm_device *dev)
+-{
+-	struct drm_mode_fb_cmd2 mode_cmd;
+-	struct drm_framebuffer *fb;
+-	struct am_meson_fb *meson_fb;
+-
+-	DRM_INFO("width=%d,height=%d,start_addr=0x%pa,size=%d\n",
+-		 logo.width, logo.height, &logo.start, logo.size);
+-	DRM_INFO("bpp=%d,alloc_flag=%d\n", logo.bpp, logo.alloc_flag);
+-	DRM_INFO("outputmode=%s\n", logo.outputmode);
+-	if (logo.bpp == 16)
+-		mode_cmd.pixel_format = DRM_FORMAT_RGB565;
+-	else
+-		mode_cmd.pixel_format = DRM_FORMAT_XRGB8888;
+-	mode_cmd.offsets[0] = 0;
+-	mode_cmd.width = logo.width;
+-	mode_cmd.height = logo.height;
+-	mode_cmd.modifier[0] = DRM_FORMAT_MOD_LINEAR;
+-	/*ToDo*/
+-	mode_cmd.pitches[0] = ALIGN(mode_cmd.width * logo.bpp, 32) / 8;
+-	fb = am_meson_fb_alloc(dev, &mode_cmd, NULL);
+-	if (IS_ERR_OR_NULL(fb))
+-		return NULL;
+-	meson_fb = to_am_meson_fb(fb);
+-	meson_fb->logo = &logo;
+-
+-	return fb;
+-}
+-
+-#define FPS_DELTA_LIMIT 1
+-struct drm_display_mode *
+-am_meson_drm_display_mode_init(struct drm_connector *connector)
+-{
+-	struct drm_display_mode *mode;
+-	struct drm_device *dev;
+-	u32 found, num_modes;
+-
+-	if (!connector || !connector->dev)
+-		return NULL;
+-	dev = connector->dev;
+-	found = 0;
+-	drm_modeset_lock_all(dev);
+-	if (drm_modeset_is_locked(&dev->mode_config.connection_mutex))
+-		drm_modeset_unlock(&dev->mode_config.connection_mutex);
+-	num_modes = connector->funcs->fill_modes(connector,
+-						 dev->mode_config.max_width,
+-						 dev->mode_config.max_height);
+-	drm_modeset_unlock_all(dev);
+-	if (!num_modes) {
+-		DRM_INFO("%s:num_modes is zero\n", __func__);
+-		return NULL;
+-	}
+-	list_for_each_entry(mode, &connector->modes, head) {
+-		if (am_meson_crtc_check_mode(mode, logo.outputmode) == true) {
+-			found = 1;
+-			break;
+-		}
+-	}
+-	if (found)
+-		return mode;
+-	else
+-		return NULL;
+-}
+-
+-static int am_meson_update_output_state(struct drm_atomic_state *state,
+-					struct drm_mode_set *set)
+-{
+-	struct drm_device *dev = set->crtc->dev;
+-	struct drm_crtc *crtc;
+-	struct drm_crtc_state *crtc_state;
+-	struct drm_connector *connector;
+-	struct drm_connector_state *conn_state;
+-	int ret, i;
+-
+-	ret = drm_modeset_lock(&dev->mode_config.connection_mutex,
+-			       state->acquire_ctx);
+-	if (ret)
+-		return ret;
+-
+-	/* First disable all connectors on the target crtc. */
+-	ret = drm_atomic_add_affected_connectors(state, set->crtc);
+-	if (ret)
+-		return ret;
+-
+-	for_each_connector_in_state(state, connector, conn_state, i) {
+-		if (conn_state->crtc == set->crtc) {
+-			ret = drm_atomic_set_crtc_for_connector(conn_state,
+-								NULL);
+-			if (ret)
+-				return ret;
+-		}
+-	}
+-
+-	/* Then set all connectors from set->connectors on the target crtc */
+-	for (i = 0; i < set->num_connectors; i++) {
+-		conn_state = drm_atomic_get_connector_state(state,
+-							    set->connectors[i]);
+-		if (IS_ERR(conn_state))
+-			return PTR_ERR(conn_state);
+-
+-		ret = drm_atomic_set_crtc_for_connector(conn_state,
+-							set->crtc);
+-		if (ret)
+-			return ret;
+-	}
+-
+-	for_each_crtc_in_state(state, crtc, crtc_state, i) {
+-		/* Don't update ->enable for the CRTC in the set_config request,
+-		 * since a mismatch would indicate a bug in the upper layers.
+-		 * The actual modeset code later on will catch any
+-		 * inconsistencies here.
+-		 */
+-		if (crtc == set->crtc)
+-			continue;
+-
+-		if (!crtc_state->connector_mask) {
+-			ret = drm_atomic_set_mode_prop_for_crtc(crtc_state,
+-								NULL);
+-			if (ret < 0)
+-				return ret;
+-
+-			crtc_state->active = false;
+-		}
+-	}
+-
+-	return 0;
+-}
+-
+-static int __am_meson_drm_set_config(struct drm_mode_set *set,
+-				     struct drm_atomic_state *state)
++static void am_meson_load(struct drm_device *dev)
+ {
+-	struct drm_crtc_state *crtc_state;
+-	struct drm_plane_state *primary_state;
+-	struct drm_crtc *crtc = set->crtc;
+-	int hdisplay, vdisplay;
+-	int ret;
+-
+-	crtc_state = drm_atomic_get_crtc_state(state, crtc);
+-	if (IS_ERR(crtc_state))
+-		return PTR_ERR(crtc_state);
+-
+-	primary_state = drm_atomic_get_plane_state(state, crtc->primary);
+-	if (IS_ERR(primary_state))
+-		return PTR_ERR(primary_state);
+-
+-	if (!set->mode) {
+-		WARN_ON(set->fb);
+-		WARN_ON(set->num_connectors);
+-
+-		ret = drm_atomic_set_mode_for_crtc(crtc_state, NULL);
+-		if (ret != 0)
+-			return ret;
+-
+-		crtc_state->active = false;
+-
+-		ret = drm_atomic_set_crtc_for_plane(primary_state, NULL);
+-		if (ret != 0)
+-			return ret;
+-
+-		drm_atomic_set_fb_for_plane(primary_state, NULL);
+-
+-		goto commit;
+-	}
+-
+-	WARN_ON(!set->fb);
+-	WARN_ON(!set->num_connectors);
+-
+-	ret = drm_atomic_set_mode_for_crtc(crtc_state, set->mode);
+-	if (ret != 0)
+-		return ret;
+-
+-	crtc_state->active = true;
+-
+-	ret = drm_atomic_set_crtc_for_plane(primary_state, crtc);
+-	if (ret != 0)
+-		return ret;
+-
+-	drm_crtc_get_hv_timing(set->mode, &hdisplay, &vdisplay);
+-
+-	drm_atomic_set_fb_for_plane(primary_state, set->fb);
+-	primary_state->crtc_x = 0;
+-	primary_state->crtc_y = 0;
+-	primary_state->crtc_w = hdisplay;
+-	primary_state->crtc_h = vdisplay;
+-	primary_state->src_x = set->x << 16;
+-	primary_state->src_y = set->y << 16;
+-	if (drm_rotation_90_or_270(primary_state->rotation)) {
+-		primary_state->src_w = set->fb->height << 16;
+-		primary_state->src_h = set->fb->width << 16;
+-	} else {
+-		primary_state->src_w = set->fb->width << 16;
+-		primary_state->src_h = set->fb->height << 16;
+-	}
+-
+-commit:
+-	ret = am_meson_update_output_state(state, set);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
+-}
+-
+-static int am_meson_drm_set_config(struct drm_mode_set *set)
+-{
+-	struct drm_atomic_state *state;
+-	struct drm_crtc *crtc = set->crtc;
+-	int ret = 0;
+-
+-	state = drm_atomic_state_alloc(crtc->dev);
+-	if (!state)
+-		return -ENOMEM;
+-
+-	state->legacy_set_config = true;
+-	state->acquire_ctx = drm_modeset_legacy_acquire_ctx(crtc);
+-retry:
+-	ret = __am_meson_drm_set_config(set, state);
+-	if (ret != 0)
+-		goto fail;
+-
+-	ret = drm_atomic_commit(state);
+-	if (ret != 0)
+-		goto fail;
+-
+-	/* Driver takes ownership of state on successful commit. */
+-	return 0;
+-fail:
+-	if (ret == -EDEADLK)
+-		goto backoff;
+-
+-	drm_atomic_state_free(state);
+-
+-	return ret;
+-backoff:
+-	drm_atomic_state_clear(state);
+-	drm_atomic_legacy_backoff(state);
+-
+-	/*
+-	 * Someone might have exchanged the framebuffer while we dropped locks
+-	 * in the backoff code. We need to fix up the fb refcount tracking the
+-	 * core does for us.
+-	 */
+-	crtc->primary->old_fb = crtc->primary->fb;
+-
+-	goto retry;
+-}
++#if 0
++	struct meson_drm *priv = dev->dev_private;
++	struct drm_crtc *crtc = priv->crtc;
++	int pipe = drm_crtc_index(crtc);
+ 
+-static void am_meson_load_logo(struct drm_device *dev)
+-{
+-	struct drm_mode_set set;
+-	struct drm_framebuffer *fb;
+-	struct drm_display_mode *mode;
+-	struct drm_connector **connector_set;
+-	struct meson_drm *private = dev->dev_private;
+-
+-	if (!logo.alloc_flag) {
+-		DRM_INFO("%s: logo memory is not cma alloc\n", __func__);
+-		return;
+-	}
+-	fb = am_meson_logo_init_fb(dev);
+-	if (!fb) {
+-		DRM_INFO("%s:framebuffer is NULL!\n", __func__);
+-		return;
+-	}
+-	connector_set = kmalloc_array(1, sizeof(struct drm_connector *),
+-				      GFP_KERNEL);
+-	if (!connector_set)
+-		return;
+-	connector_set[0] = am_meson_hdmi_connector();
+-	if (!connector_set[0]) {
+-		DRM_INFO("%s:connector is NULL!\n", __func__);
+-		kfree(connector_set);
+-		return;
+-	}
+-	mode = am_meson_drm_display_mode_init(connector_set[0]);
+-	if (!mode) {
+-		DRM_INFO("%s:display mode is NULL!\n", __func__);
+-		kfree(connector_set);
+-		return;
+-	}
+-	DRM_INFO("find the match display mode:%s\n", mode->name);
+-	set.crtc = private->crtc;
+-	set.x = 0;
+-	set.y = 0;
+-	set.mode = mode;
+-	set.connectors = connector_set;
+-	set.num_connectors = 1;
+-	set.fb = fb;
+-	drm_modeset_lock_all(dev);
+-	if (am_meson_drm_set_config(&set))
+-		DRM_INFO("[%s]am_meson_drm_set_config fail\n", __func__);
+-	if (drm_framebuffer_read_refcount(fb) > 1)
+-		drm_framebuffer_unreference(fb);
+-	drm_modeset_unlock_all(dev);
+-
+-	kfree(connector_set);
++	if (priv->crtc_funcs[pipe] &&
++		priv->crtc_funcs[pipe]->loader_protect)
++		priv->crtc_funcs[pipe]->loader_protect(crtc, true);
++#endif
+ }
+ 
+ #ifdef CONFIG_DRM_MESON_USE_ION
+ static const struct drm_ioctl_desc meson_ioctls[] = {
+ 	DRM_IOCTL_DEF_DRV(MESON_GEM_CREATE, am_meson_gem_create_ioctl,
+-			  DRM_UNLOCKED | DRM_AUTH | DRM_RENDER_ALLOW),
++		DRM_UNLOCKED | DRM_AUTH | DRM_RENDER_ALLOW),
+ };
+ #endif
+ 
+@@ -567,7 +277,7 @@ static int am_meson_drm_bind(struct device *dev)
+ 
+ 	drm_kms_helper_poll_init(drm);
+ 
+-	am_meson_load_logo(drm);
++	am_meson_load(drm);
+ 
+ #ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
+ 	ret = am_meson_drm_fbdev_init(drm);
+@@ -580,6 +290,7 @@ static int am_meson_drm_bind(struct device *dev)
+ 
+ 	return 0;
+ 
++
+ err_fbdev_fini:
+ #ifdef CONFIG_DRM_MESON_EMULATE_FBDEV
+ 	am_meson_drm_fbdev_fini(drm);
+@@ -673,10 +384,10 @@ static bool am_meson_drv_use_osd(void)
+ 
+ 		if (strcmp(str, "okay") && strcmp(str, "ok")) {
+ 			DRM_INFO("device %s status is %s\n",
+-				 node->name, str);
++				node->name, str);
+ 		} else {
+ 			DRM_INFO("device %s status is %s\n",
+-				 node->name, str);
++				node->name, str);
+ 			return true;
+ 		}
+ 	}
+@@ -755,7 +466,6 @@ static int am_meson_drv_probe(struct platform_device *pdev)
+ 	struct component_match *match = NULL;
+ 	int i;
+ 
+-	pr_info("[%s] in\n", __func__);
+ 	if (am_meson_drv_use_osd())
+ 		return am_meson_drv_probe_prune(pdev);
+ 
+@@ -808,7 +518,7 @@ static int am_meson_drv_probe(struct platform_device *pdev)
+ 		am_meson_add_endpoints(dev, &match, port);
+ 		of_node_put(port);
+ 	}
+-	pr_info("[%s] out\n", __func__);
++
+ 	return component_master_add_with_match(dev, &am_meson_drm_ops, match);
+ }
+ 
+diff --git a/drivers/amlogic/drm/meson_drv.h b/drivers/amlogic/drm/meson_drv.h
+index 3e35f272e091..4260a3ca00fa 100644
+--- a/drivers/amlogic/drm/meson_drv.h
++++ b/drivers/amlogic/drm/meson_drv.h
+@@ -59,7 +59,6 @@ struct meson_drm {
+ 
+ 	struct meson_vpu_pipeline *pipeline;
+ 	struct meson_vpu_funcs *funcs;
+-	struct am_meson_logo *logo;
+ 
+ 	u32 num_crtcs;
+ 	struct am_meson_crtc *crtcs[MESON_MAX_CRTC];
+@@ -77,7 +76,6 @@ static inline int meson_vpu_is_compatible(struct meson_drm *priv,
+ extern int am_meson_register_crtc_funcs(struct drm_crtc *crtc,
+ 				 const struct meson_crtc_funcs *crtc_funcs);
+ extern void am_meson_unregister_crtc_funcs(struct drm_crtc *crtc);
+-struct drm_connector *am_meson_hdmi_connector(void);
+ 
+ #ifdef CONFIG_DEBUG_FS
+ int meson_debugfs_init(struct drm_minor *minor);
+diff --git a/drivers/amlogic/drm/meson_fb.c b/drivers/amlogic/drm/meson_fb.c
+index 81fc0981c595..1c364da4bf3e 100644
+--- a/drivers/amlogic/drm/meson_fb.c
++++ b/drivers/amlogic/drm/meson_fb.c
+@@ -18,7 +18,8 @@
+ #include <drm/drm_atomic_helper.h>
+ 
+ #include "meson_fb.h"
+-#include "meson_vpu.h"
++
++#define to_am_meson_fb(x) container_of(x, struct am_meson_fb, base)
+ 
+ void am_meson_fb_destroy(struct drm_framebuffer *fb)
+ {
+@@ -26,9 +27,6 @@ void am_meson_fb_destroy(struct drm_framebuffer *fb)
+ 
+ 	drm_gem_object_unreference_unlocked(&meson_fb->bufp->base);
+ 	drm_framebuffer_cleanup(fb);
+-	if (meson_fb->logo && meson_fb->logo->alloc_flag)
+-		am_meson_free_logo_memory();
+-	DRM_DEBUG("meson_fb=0x%p,\n", meson_fb);
+ 	kfree(meson_fb);
+ }
+ 
+@@ -60,12 +58,9 @@ am_meson_fb_alloc(struct drm_device *dev,
+ 	if (!meson_fb)
+ 		return ERR_PTR(-ENOMEM);
+ 
+-	if (obj) {
+-		meson_gem = container_of(obj, struct am_meson_gem_object, base);
+-		meson_fb->bufp = meson_gem;
+-	} else {
+-		meson_fb->bufp = NULL;
+-	}
++	meson_gem = container_of(obj, struct am_meson_gem_object, base);
++	meson_fb->bufp = meson_gem;
++
+ 	drm_helper_mode_fill_fb_struct(&meson_fb->base, mode_cmd);
+ 
+ 	ret = drm_framebuffer_init(dev, &meson_fb->base,
+@@ -75,10 +70,6 @@ am_meson_fb_alloc(struct drm_device *dev,
+ 			ret);
+ 		goto err_free_fb;
+ 	}
+-	DRM_INFO("meson_fb[id:%d,ref:%d]=0x%p,meson_fb->bufp=0x%p\n",
+-		 meson_fb->base.base.id,
+-		 atomic_read(&meson_fb->base.base.refcount.refcount),
+-		 meson_fb, meson_fb->bufp);
+ 
+ 	return &meson_fb->base;
+ 
+@@ -122,10 +113,6 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+ 		kfree(meson_fb);
+ 		return ERR_PTR(ret);
+ 	}
+-	DRM_DEBUG("meson_fb[in:%d,ref:%d]=0x%px,meson_fb->bufp=0x%p\n",
+-		  meson_fb->base.base.id,
+-		  atomic_read(&meson_fb->base.base.refcount.refcount),
+-		  meson_fb, meson_fb->bufp);
+ 
+ 	return &meson_fb->base;
+ }
+diff --git a/drivers/amlogic/drm/meson_fb.h b/drivers/amlogic/drm/meson_fb.h
+index 0226ee765899..9c76d2e71f26 100644
+--- a/drivers/amlogic/drm/meson_fb.h
++++ b/drivers/amlogic/drm/meson_fb.h
+@@ -24,40 +24,16 @@
+ 
+ #include "meson_gem.h"
+ 
+-#define to_am_meson_fb(x) container_of(x, struct am_meson_fb, base)
+-
+-#define VMODE_NAME_LEN_MAX    64
+-
+-struct am_meson_logo {
+-	struct page *logo_page;
+-	phys_addr_t start;
+-	u32 size;
+-	u32 width;
+-	u32 height;
+-	u32 bpp;
+-	u32 alloc_flag;
+-	u32 info_loaded_mask;
+-	char *outputmode_t;
+-	char outputmode[VMODE_NAME_LEN_MAX];
+-};
+-
+ struct am_meson_fb {
+ 	struct drm_framebuffer base;
+ 	struct am_meson_gem_object *bufp;
+-	struct am_meson_logo *logo;
+ };
+ 
+-struct drm_framebuffer *
+-am_meson_fb_create(struct drm_device *dev,
+-		   struct drm_file *file_priv,
+-		   const struct drm_mode_fb_cmd2 *mode_cmd);
+-struct drm_framebuffer *
+-am_meson_drm_framebuffer_init(struct drm_device *dev,
+-			      struct drm_mode_fb_cmd2 *mode_cmd,
+-			      struct drm_gem_object *obj);
+-struct drm_framebuffer *
+-am_meson_fb_alloc(struct drm_device *dev,
+-		  struct drm_mode_fb_cmd2 *mode_cmd,
+-		  struct drm_gem_object *obj);
+-
++struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
++				     struct drm_file *file_priv,
++				     const struct drm_mode_fb_cmd2 *mode_cmd);
++struct drm_framebuffer *am_meson_drm_framebuffer_init(
++				     struct drm_device *dev,
++				     struct drm_mode_fb_cmd2 *mode_cmd,
++				     struct drm_gem_object *obj);
+ #endif
+diff --git a/drivers/amlogic/drm/meson_gem.c b/drivers/amlogic/drm/meson_gem.c
+index b7dd7b27c492..4c6ef32a2098 100644
+--- a/drivers/amlogic/drm/meson_gem.c
++++ b/drivers/amlogic/drm/meson_gem.c
+@@ -55,7 +55,7 @@ static int am_meson_gem_alloc_ion_buff(
+ 		bscatter = true;
+ 	}
+ 
+-	if (IS_ERR_OR_NULL(handle)) {
++	if (IS_ERR(handle)) {
+ 		DRM_ERROR("%s: FAILED, flags:0x%x.\n",
+ 			__func__, flags);
+ 		return -ENOMEM;
+diff --git a/drivers/amlogic/drm/meson_hdmi.c b/drivers/amlogic/drm/meson_hdmi.c
+index 7cbe8c165c5d..e5f0ce60eae3 100644
+--- a/drivers/amlogic/drm/meson_hdmi.c
++++ b/drivers/amlogic/drm/meson_hdmi.c
+@@ -35,11 +35,17 @@
+ #include <linux/amlogic/media/vout/hdmi_tx/hdmi_tx_module.h>
+ #include "meson_hdmi.h"
+ #include "meson_hdcp.h"
+-#include "meson_vpu.h"
+ 
+ #define DEVICE_NAME "amhdmitx"
+ struct am_hdmi_tx am_hdmi_info;
+ 
++struct am_vout_mode {
++	char name[DRM_DISPLAY_MODE_LEN];
++	enum vmode_e mode;
++	int width, height, vrefresh;
++	unsigned int flags;
++};
++
+ static struct am_vout_mode am_vout_modes[] = {
+ 	{ "1080p60hz", VMODE_HDMI, 1920, 1080, 60, 0},
+ 	{ "1080p30hz", VMODE_HDMI, 1920, 1080, 30, 0},
+@@ -294,6 +300,7 @@ void am_hdmi_encoder_enable(struct drm_encoder *encoder)
+ 	vout_notifier_call_chain(VOUT_EVENT_MODE_CHANGE_PRE, &vmode);
+ 	set_vout_vmode(vmode);
+ 	vout_notifier_call_chain(VOUT_EVENT_MODE_CHANGE, &vmode);
++	am_hdmi->hdcp_work = NULL;
+ 	mdelay(1000);
+ 	am_hdmi_hdcp_work_state_change(am_hdmi, 0);
+ }
+@@ -577,11 +584,6 @@ static const struct of_device_id am_meson_hdmi_dt_ids[] = {
+ 
+ MODULE_DEVICE_TABLE(of, am_meson_hdmi_dt_ids);
+ 
+-struct drm_connector *am_meson_hdmi_connector(void)
+-{
+-	return &am_hdmi_info.connector;
+-}
+-
+ static int am_meson_hdmi_bind(struct device *dev,
+ 	struct device *master, void *data)
+ {
+@@ -594,9 +596,12 @@ static int am_meson_hdmi_bind(struct device *dev,
+ 	int ret;
+ 	int irq;
+ 
+-	DRM_INFO("[%s] in\n", __func__);
++	am_hdmi = devm_kzalloc(priv->dev, sizeof(*am_hdmi),
++				       GFP_KERNEL);
++	if (!am_hdmi)
++		return -ENOMEM;
++	memcpy(&am_hdmi_info, am_hdmi, sizeof(*am_hdmi));
+ 	am_hdmi = &am_hdmi_info;
+-	memset(am_hdmi, 0, sizeof(*am_hdmi));
+ 
+ 	DRM_INFO("drm hdmitx init and version:%s\n", DRM_HDMITX_VER);
+ 	am_hdmi->priv = priv;
+@@ -657,7 +662,6 @@ static int am_meson_hdmi_bind(struct device *dev,
+ 				DRM_DEBUG_KMS("HDCP init failed, skipping.\n");
+ 		}
+ 	}
+-	DRM_INFO("[%s] out\n", __func__);
+ 	return 0;
+ }
+ 
+@@ -675,7 +679,6 @@ static const struct component_ops am_meson_hdmi_ops = {
+ 
+ static int am_meson_hdmi_probe(struct platform_device *pdev)
+ {
+-	DRM_INFO("[%s] in\n", __func__);
+ 	return component_add(&pdev->dev, &am_meson_hdmi_ops);
+ }
+ 
+diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
+index 2c5820641ccb..87a4d31eb867 100644
+--- a/drivers/amlogic/drm/meson_plane.c
++++ b/drivers/amlogic/drm/meson_plane.c
+@@ -42,18 +42,12 @@ static u64 afbc_wb_modifier[] = {
+ 	DRM_FORMAT_MOD_INVALID
+ };
+ 
+-static void
+-meson_plane_position_calc(struct meson_vpu_osd_layer_info *plane_info,
+-			  struct drm_plane_state *state,
+-			  struct drm_display_mode *disp_mode)
++static void meson_plane_position_calc(
++	struct meson_vpu_osd_layer_info *plane_info,
++	struct drm_plane_state *state,
++	struct drm_display_mode *mode)
+ {
+ 	u32 dst_w, dst_h, src_w, src_h, scan_mode_out;
+-	struct drm_display_mode *mode;
+-
+-	if (IS_ERR_OR_NULL(state->crtc))
+-		mode = disp_mode;
+-	else
+-		mode = &state->crtc->mode;
+ 
+ 	scan_mode_out = mode->flags & DRM_MODE_FLAG_INTERLACE;
+ 	plane_info->src_x = state->src_x;
+@@ -153,7 +147,7 @@ static int meson_plane_fb_check(struct drm_plane *plane,
+ 	#else
+ 	struct drm_gem_cma_object *gem;
+ 	#endif
+-	phys_addr_t phyaddr;
++	dma_addr_t phyaddr;
+ 
+ 	#ifdef CONFIG_DRM_MESON_USE_ION
+ 	meson_fb = container_of(fb, struct am_meson_fb, base);
+@@ -161,21 +155,9 @@ static int meson_plane_fb_check(struct drm_plane *plane,
+ 		DRM_INFO("meson_fb is NULL!\n");
+ 		return -EINVAL;
+ 	}
+-	DRM_DEBUG("meson_fb[id:%d,ref:%d]=0x%p\n",
+-		  meson_fb->base.base.id,
+-		  atomic_read(&meson_fb->base.base.refcount.refcount),
+-		  meson_fb);
+-	if (meson_fb->logo && meson_fb->logo->alloc_flag &&
+-	    meson_fb->logo->start) {
+-		phyaddr = meson_fb->logo->start;
+-		DRM_DEBUG("logo->phyaddr=0x%pa\n", &phyaddr);
+-	} else  if (meson_fb->bufp) {
+-		phyaddr = am_meson_gem_object_get_phyaddr(drv, meson_fb->bufp);
+-	} else {
+-		phyaddr = 0;
+-		DRM_INFO("don't find phyaddr!\n");
+-		return -EINVAL;
+-	}
++	phyaddr = am_meson_gem_object_get_phyaddr(drv, meson_fb->bufp);
++	if (meson_fb->bufp->bscatter)
++		DRM_ERROR("am_meson_plane meet a scatter framebuffer.\n");
+ 	#else
+ 	if (!fb) {
+ 		DRM_INFO("fb is NULL!\n");
+@@ -200,6 +182,12 @@ static int meson_plane_get_fb_info(struct drm_plane *plane,
+ 	struct am_osd_plane *osd_plane = to_am_osd_plane(plane);
+ 	struct drm_framebuffer *fb = new_state->fb;
+ 	struct meson_drm *drv = osd_plane->drv;
++	#ifdef CONFIG_DRM_MESON_USE_ION
++	struct am_meson_fb *meson_fb;
++	#else
++	struct drm_gem_cma_object *gem;
++	#endif
++	dma_addr_t phyaddr;
+ 
+ 	if (!drv) {
+ 		DRM_INFO("%s new_state/meson_drm is NULL!\n", __func__);
+@@ -209,7 +197,29 @@ static int meson_plane_get_fb_info(struct drm_plane *plane,
+ 		DRM_INFO("%s invalid plane_index!\n", __func__);
+ 		return -EINVAL;
+ 	}
++
++	#ifdef CONFIG_DRM_MESON_USE_ION
++	meson_fb = container_of(fb, struct am_meson_fb, base);
++	if (!meson_fb) {
++		DRM_INFO("meson_fb is NULL!\n");
++		return 0;
++	}
++	phyaddr = am_meson_gem_object_get_phyaddr(drv, meson_fb->bufp);
++	if (meson_fb->bufp->bscatter)
++		DRM_ERROR("ERROR:am_meson_plane meet a scatter framebuffer.\n");
++	plane_info->fb_size = meson_fb->bufp->base.size;
++	#else
++	if (!fb) {
++		DRM_INFO("fb is NULL!\n");
++		return -EINVAL;
++	}
++	/* Update Canvas with buffer address */
++	gem = drm_fb_cma_get_gem_obj(fb, 0);
++	phyaddr = gem->paddr;
++	#endif
++
+ 	plane_info->pixel_format = fb->pixel_format;
++	plane_info->phy_addr = phyaddr;
+ 	plane_info->byte_stride = fb->pitches[0];
+ 
+ 	/*setup afbc info*/
+@@ -360,7 +370,7 @@ static void meson_plane_cleanup_fb(struct drm_plane *plane,
+ {
+ 	struct am_osd_plane *osd_plane = to_am_osd_plane(plane);
+ 
+-	DRM_DEBUG("osd %d.\n", osd_plane->plane_index);
++	DRM_DEBUG("%s osd %d.\n", __func__, osd_plane->plane_index);
+ }
+ 
+ static void meson_plane_atomic_update(struct drm_plane *plane,
+diff --git a/drivers/amlogic/drm/meson_vpu.c b/drivers/amlogic/drm/meson_vpu.c
+index 91102d5d6465..ca025a89b8ea 100644
+--- a/drivers/amlogic/drm/meson_vpu.c
++++ b/drivers/amlogic/drm/meson_vpu.c
+@@ -256,6 +256,9 @@ static struct osd_device_data_s osd_tm2 = {
+ 	.osd0_sc_independ = 1,
+ };
+ struct osd_device_data_s osd_meson_dev;
++static u32 logo_memsize;
++static struct page *logo_page;
++static struct delayed_work osd_dwork;
+ static struct platform_device *gp_dev;
+ static unsigned long gem_mem_start, gem_mem_size;
+ 
+@@ -347,28 +350,6 @@ char *am_meson_crtc_get_voutmode(struct drm_display_mode *mode)
+ 	return NULL;
+ }
+ 
+-bool am_meson_crtc_check_mode(struct drm_display_mode *mode, char *outputmode)
+-{
+-	int i;
+-
+-	if (!mode || !outputmode)
+-		return false;
+-	if (!strcmp(mode->name, "panel"))
+-		return true;
+-
+-	for (i = 0; i < ARRAY_SIZE(am_vout_modes); i++) {
+-		if (!strcmp(am_vout_modes[i].name, outputmode) &&
+-		    am_vout_modes[i].width == mode->hdisplay &&
+-		    am_vout_modes[i].height == mode->vdisplay &&
+-		    am_vout_modes[i].vrefresh == mode->vrefresh &&
+-		    am_vout_modes[i].flags ==
+-		    (mode->flags & DRM_MODE_FLAG_INTERLACE)) {
+-			return true;
+-		}
+-	}
+-	return false;
+-}
+-
+ void am_meson_crtc_handle_vsync(struct am_meson_crtc *amcrtc)
+ {
+ 	unsigned long flags;
+@@ -409,43 +390,18 @@ static irqreturn_t am_meson_vpu_irq(int irq, void *arg)
+ 	return IRQ_HANDLED;
+ }
+ 
+-void am_meson_free_logo_memory(void)
++static void mem_free_work(struct work_struct *work)
+ {
+-	phys_addr_t logo_addr = page_to_phys(logo.logo_page);
+-
+-	if (logo.size > 0) {
++	if (logo_memsize > 0) {
+ #ifdef CONFIG_CMA
+-		DRM_INFO("%s, free memory: addr:0x%pa,size:0x%x\n",
+-			 __func__, &logo_addr, logo.size);
++		pr_info("%s, free memory: addr:0x%x\n",
++			__func__, logo_memsize);
+ 
+ 		dma_release_from_contiguous(&gp_dev->dev,
+-					    logo.logo_page,
+-					    logo.size >> PAGE_SHIFT);
++					    logo_page,
++			logo_memsize >> PAGE_SHIFT);
+ #endif
+ 	}
+-	logo.alloc_flag = 0;
+-}
+-
+-static int am_meson_logo_info_update(struct meson_drm *priv)
+-{
+-	logo.start = page_to_phys(logo.logo_page);
+-	logo.alloc_flag = 1;
+-	/*config 1080p logo as default*/
+-	if (!logo.width || !logo.height) {
+-		logo.width = 1920;
+-		logo.height = 1080;
+-	}
+-	if (!logo.bpp)
+-		logo.bpp = 16;
+-	if (!logo.outputmode_t) {
+-		strcpy(logo.outputmode, "1080p60hz");
+-	} else {
+-		strncpy(logo.outputmode, logo.outputmode_t, VMODE_NAME_LEN_MAX);
+-		logo.outputmode[VMODE_NAME_LEN_MAX - 1] = '\0';
+-	}
+-	priv->logo = &logo;
+-
+-	return 0;
+ }
+ 
+ static int am_meson_vpu_bind(struct device *dev,
+@@ -462,7 +418,7 @@ static int am_meson_vpu_bind(struct device *dev,
+ 	int ret, irq;
+ 
+ 	/* Allocate crtc struct */
+-	DRM_INFO("[%s] in\n", __func__);
++	pr_info("[%s] in\n", __func__);
+ 	amcrtc = devm_kzalloc(dev, sizeof(*amcrtc),
+ 			      GFP_KERNEL);
+ 	if (!amcrtc)
+@@ -478,40 +434,34 @@ static int am_meson_vpu_bind(struct device *dev,
+ 	ret = of_reserved_mem_device_init(&pdev->dev);
+ 	if (ret != 0) {
+ 		dev_err(dev, "failed to init reserved memory\n");
+-	} else {
+ #ifdef CONFIG_CMA
+ 		gp_dev = pdev;
+ 		cma = dev_get_cma_area(&pdev->dev);
+ 		if (cma) {
+-			logo.size = cma_get_size(cma);
+-			DRM_INFO("reserved memory base:0x%x, size:0x%x\n",
+-				 (u32)cma_get_base(cma), logo.size);
+-			if (logo.size > 0) {
+-				logo.logo_page =
++			logo_memsize = cma_get_size(cma);
++			pr_info("reserved memory base:0x%x, size:0x%x\n",
++				(u32)cma_get_base(cma), logo_memsize);
++			if (logo_memsize > 0) {
++				logo_page =
+ 				dma_alloc_from_contiguous(&pdev->dev,
+-							  logo.size >>
++							  logo_memsize >>
+ 							  PAGE_SHIFT,
+ 							  0);
+-				if (!logo.logo_page)
+-					DRM_INFO("allocate buffer failed\n");
+-				else
+-					am_meson_logo_info_update(private);
++				if (!logo_page) {
++					pr_err("allocate buffer failed:%d\n",
++					       logo_memsize);
++				}
+ 			}
+ 		} else {
+-			DRM_INFO("------ NO CMA\n");
++			pr_info("------ NO CMA\n");
+ 		}
+ #endif
+-		if (gem_mem_start) {
+-			dma_declare_coherent_memory(drm_dev->dev,
+-						    gem_mem_start,
+-						    gem_mem_start,
+-						    gem_mem_size,
+-						    DMA_MEMORY_EXCLUSIVE);
+-			pr_info("meson drm mem_start = 0x%x, size = 0x%x\n",
+-				(u32)gem_mem_start, (u32)gem_mem_size);
+-		} else {
+-			DRM_INFO("------ NO reserved dma\n");
+-		}
++	} else {
++		dma_declare_coherent_memory(drm_dev->dev, gem_mem_start,
++					    gem_mem_start, gem_mem_size,
++					    DMA_MEMORY_EXCLUSIVE);
++		pr_info("meson drm mem_start = 0x%x, size = 0x%x\n",
++			(u32)gem_mem_start, (u32)gem_mem_size);
+ 	}
+ 
+ 	ret = am_meson_plane_create(private);
+@@ -545,7 +495,10 @@ static int am_meson_vpu_bind(struct device *dev,
+ 		return ret;
+ 
+ 	disable_irq(amcrtc->vblank_irq);
+-	DRM_INFO("[%s] out\n", __func__);
++
++	INIT_DELAYED_WORK(&osd_dwork, mem_free_work);
++	schedule_delayed_work(&osd_dwork, msecs_to_jiffies(60 * 1000));
++	pr_info("[%s] out\n", __func__);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/amlogic/drm/meson_vpu.h b/drivers/amlogic/drm/meson_vpu.h
+index f400ee263f3a..e288a33be97d 100644
+--- a/drivers/amlogic/drm/meson_vpu.h
++++ b/drivers/amlogic/drm/meson_vpu.h
+@@ -31,10 +31,7 @@ struct am_vout_mode {
+ 	unsigned int flags;
+ };
+ 
+-extern struct am_meson_logo logo;
+ extern struct osd_device_data_s osd_meson_dev;
+ char *am_meson_crtc_get_voutmode(struct drm_display_mode *mode);
+-void am_meson_free_logo_memory(void);
+-bool am_meson_crtc_check_mode(struct drm_display_mode *mode, char *outputmode);
+ 
+ #endif /* __AM_MESON_VPU_H */
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
+index c70fcd7693fb..0901ae47b7af 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
+@@ -694,6 +694,9 @@ static void scaler_hw_init(struct meson_vpu_block *vblk)
+ 	scaler->reg = &osd_scaler_reg[vblk->index];
+ 	scaler->linebuffer = OSD_SCALE_LINEBUFFER;
+ 	scaler->bank_length = OSD_SCALE_BANK_LENGTH;
++	/*disable sc*/
++	osd_sc_en_set(scaler->reg, 0);
++	osd_sc_path_en_set(scaler->reg, 0);
+ 	DRM_DEBUG("%s hw_init called.\n", scaler->base.name);
+ }
+ 
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
+index 01e4ab7e37cf..e66c1687ab60 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
+@@ -534,6 +534,7 @@ static void osd_hw_init(struct meson_vpu_block *vblk)
+ 		return;
+ 	}
+ 	osd->reg = &osd_mif_reg[vblk->index];
++	osd_ctrl_set(osd->reg);
+ 	DRM_DEBUG("%s hw_init done.\n", osd->base.name);
+ }
+ 
+-- 
+2.24.1
+

@@ -1,0 +1,190 @@
+From 1f86326f100c9c28337473bfb69d3fac08650af6 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 3 Jan 2020 15:51:10 -0800
+Subject: [PATCH 2/3] Revert "drm: add premult for plane [1/1]"
+
+This reverts commit bb4accc0e0a29228b5c5099f14285b97330d63ff.
+---
+ drivers/amlogic/drm/meson_plane.c             | 37 -------------------
+ drivers/amlogic/drm/meson_plane.h             |  2 -
+ drivers/amlogic/drm/meson_vpu_pipeline.h      |  2 -
+ .../amlogic/drm/vpu-hw/meson_vpu_osd_mif.c    | 12 ------
+ 4 files changed, 53 deletions(-)
+
+diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
+index 87a4d31eb867..c7a2d079b9ad 100644
+--- a/drivers/amlogic/drm/meson_plane.c
++++ b/drivers/amlogic/drm/meson_plane.c
+@@ -261,13 +261,6 @@ static int meson_plane_atomic_get_property(struct drm_plane *plane,
+ 					struct drm_property *property,
+ 					uint64_t *val)
+ {
+-	struct am_osd_plane *osd_plane;
+-	struct am_meson_plane_state *plane_state;
+-
+-	osd_plane = to_am_osd_plane(plane);
+-	plane_state = to_am_meson_plane_state(state);
+-	if (property == osd_plane->prop_premult_en)
+-		*val = plane_state->premult_en;
+ 	return 0;
+ }
+ 
+@@ -276,14 +269,6 @@ static int meson_plane_atomic_set_property(struct drm_plane *plane,
+ 					 struct drm_property *property,
+ 					 uint64_t val)
+ {
+-	struct am_osd_plane *osd_plane;
+-	struct am_meson_plane_state *plane_state;
+-
+-	osd_plane = to_am_osd_plane(plane);
+-	plane_state = to_am_meson_plane_state(state);
+-	if (property == osd_plane->prop_premult_en)
+-		plane_state->premult_en = val;
+-
+ 	return 0;
+ }
+ 
+@@ -387,7 +372,6 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
+ 	struct meson_vpu_pipeline_state *mvps;
+ 	struct am_osd_plane *osd_plane = to_am_osd_plane(plane);
+ 	struct meson_drm *drv = osd_plane->drv;
+-	struct am_meson_plane_state *plane_state;
+ 	int ret;
+ 
+ 	if (!state || !drv) {
+@@ -426,8 +410,6 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
+ 		return ret;
+ 	}
+ 
+-	plane_state = to_am_meson_plane_state(state);
+-	plane_info->premult_en = plane_state->premult_en;
+ 	plane_info->enable = 1;
+ 	DRM_DEBUG("index=%d, zorder=%d\n",
+ 		plane_info->plane_index, plane_info->zorder);
+@@ -456,24 +438,6 @@ static const struct drm_plane_helper_funcs am_osd_helper_funcs = {
+ 	.atomic_disable	= meson_plane_atomic_disable,
+ };
+ 
+-int drm_plane_create_premult_en_property(struct drm_plane *plane)
+-{
+-	struct drm_device *dev = plane->dev;
+-	struct drm_property *prop;
+-	struct am_osd_plane *osd_plane;
+-
+-	osd_plane = to_am_osd_plane(plane);
+-	prop = drm_property_create_bool(dev, DRM_MODE_PROP_ATOMIC,
+-					"PREMULT_EN");
+-	if (!prop)
+-		return -ENOMEM;
+-
+-	drm_object_attach_property(&plane->base, prop, 0);
+-	osd_plane->prop_premult_en = prop;
+-
+-	return 0;
+-}
+-
+ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
+ {
+ 	struct am_osd_plane *osd_plane;
+@@ -505,7 +469,6 @@ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
+ 				 format_modifiers,
+ 				 type, plane_name);
+ 
+-	drm_plane_create_premult_en_property(plane);
+ 	drm_plane_helper_add(plane, &am_osd_helper_funcs);
+ 	osd_drm_debugfs_add(&osd_plane->plane_debugfs_dir,
+ 			    plane_name, osd_plane->plane_index);
+diff --git a/drivers/amlogic/drm/meson_plane.h b/drivers/amlogic/drm/meson_plane.h
+index 5be8adc5dab0..a1e6f4b13cb8 100644
+--- a/drivers/amlogic/drm/meson_plane.h
++++ b/drivers/amlogic/drm/meson_plane.h
+@@ -31,7 +31,6 @@
+ 
+ struct am_meson_plane_state {
+ 	struct drm_plane_state base;
+-	u32 premult_en;
+ };
+ 
+ struct am_osd_plane {
+@@ -39,7 +38,6 @@ struct am_osd_plane {
+ 	struct meson_drm *drv; //point to struct parent.
+ 	struct dentry *plane_debugfs_dir;
+ 	int plane_index;
+-	struct drm_property *prop_premult_en;
+ };
+ 
+ #define to_am_osd_plane(x) container_of(x, \
+diff --git a/drivers/amlogic/drm/meson_vpu_pipeline.h b/drivers/amlogic/drm/meson_vpu_pipeline.h
+index 2ce8d9f2215f..c1609d83aa4e 100644
+--- a/drivers/amlogic/drm/meson_vpu_pipeline.h
++++ b/drivers/amlogic/drm/meson_vpu_pipeline.h
+@@ -169,7 +169,6 @@ struct meson_vpu_osd_layer_info {
+ 	u32 afbc_inter_format;
+ 	u32 afbc_en;
+ 	u32 fb_size;
+-	u32 premult_en;
+ };
+ 
+ struct meson_vpu_osd {
+@@ -206,7 +205,6 @@ struct meson_vpu_osd_state {
+ 	int r_mode;
+ 	u32 plane_index;
+ 	u32 fb_size;
+-	u32 premult_en;
+ };
+ 
+ struct meson_vpu_afbc {
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
+index e66c1687ab60..ef76d5773023 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_osd_mif.c
+@@ -227,14 +227,6 @@ void osd_block_enable(struct osd_mif_reg_s *reg, bool flag)
+ 	VSYNCOSD_WR_MPEG_REG_BITS(reg->viu_osd_ctrl_stat, flag, 0, 1);
+ }
+ 
+-/*osd alpha_div en
+- *if input is premult,alpha_div=1,else alpha_div=0
+- */
+-void osd_alpha_div_enable(struct osd_mif_reg_s *reg, bool flag)
+-{
+-	VSYNCOSD_WR_MPEG_REG_BITS(reg->viu_osd_mali_unpack_ctrl, flag, 28, 1);
+-}
+-
+ /*osd ctrl config*/
+ void osd_ctrl_set(struct osd_mif_reg_s *reg)
+ {
+@@ -362,7 +354,6 @@ static int osd_check_state(struct meson_vpu_block *vblk,
+ 	mvos->phy_addr = plane_info->phy_addr;
+ 	mvos->pixel_format = plane_info->pixel_format;
+ 	mvos->fb_size = plane_info->fb_size;
+-	mvos->premult_en = plane_info->premult_en;
+ 	return 0;
+ }
+ 
+@@ -380,7 +371,6 @@ static void osd_set_state(struct meson_vpu_block *vblk,
+ 	u32 pixel_format, canvas_index, src_h, byte_stride, phy_addr;
+ 	struct osd_scope_s scope_src = {0, 1919, 0, 1079};
+ 	struct osd_mif_reg_s *reg = osd->reg;
+-	bool alpha_div_en;
+ 
+ 	crtc = vblk->pipeline->crtc;
+ 	amc = to_am_meson_crtc(crtc);
+@@ -389,7 +379,6 @@ static void osd_set_state(struct meson_vpu_block *vblk,
+ 		DRM_DEBUG("set_state break for NULL.\n");
+ 		return;
+ 	}
+-	alpha_div_en = mvos->premult_en ? 1 : 0;
+ 	src_h = mvos->src_h;
+ 	byte_stride = mvos->byte_stride;
+ 	phy_addr = mvos->phy_addr;
+@@ -408,7 +397,6 @@ static void osd_set_state(struct meson_vpu_block *vblk,
+ 	osd_canvas_config(reg, canvas_index);
+ 	osd_input_size_config(reg, scope_src);
+ 	osd_color_config(reg, pixel_format);
+-	osd_alpha_div_enable(reg, alpha_div_en);
+ 	DRM_DEBUG("plane_index=%d,HW-OSD=%d\n",
+ 		mvos->plane_index, vblk->index);
+ 	DRM_DEBUG("canvas_index[%d]=0x%x,phy_addr=0x%x\n",
+-- 
+2.24.1
+

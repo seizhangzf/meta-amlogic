@@ -9,6 +9,7 @@ SRCREV_pn-aml-amaudioutils = "72bc0fb8d471055dbb7c120aaf38e441478cedff"
 SRCREV_pn-aml-audio-hal = "e004da094e3fa243330076c178ff8b8f8d0b6003"
 SRCREV_pn-aml-audio-service = "e8c0d4abb21cd45fb69a3bcc6d2d343f51b3468c"
 SRCREV_pn-aml-hdcp = "890f9701cd6cbc5dbc99e14a653c14fb803e199c"
+SRCREV_pn-aml-provision = "a2afb66072344214dba789cb6ff87e7b3173229c"
 SRCREV_pn-optee-userspace = "5979e2b1229d45f029d4e004238b7ecb6249f11f"
 SRCREV_pn-wififw = "178ad1a6fff666fc927874042573751fedeaeadb"
 
