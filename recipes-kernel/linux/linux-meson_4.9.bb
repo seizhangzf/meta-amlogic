@@ -15,10 +15,10 @@ SRC_URI_append = " file://meson.scc \
             file://systemd.cfg \
             file://meson-user-patches.scc "
 
-SRC_URI_append = " file://0001-Revert-drm-keep-uboot-logo-if-no-new-frame-in-1-2.patch "
-SRC_URI_append = " file://0002-Revert-drm-add-premult-for-plane-1-1.patch "
-SRC_URI_append = " file://0003-drm-Buildroot-TM2-Suspend-WestonOS-can-t-work-after-.patch "
+SRC_URI_append = " file://0001-drm-add-osd-mif-config-for-afbc-and-un-afbc-1-1.patch "
+SRC_URI_append = " file://0002-drm-Buildroot-TM2-Suspend-WestonOS-can-t-work-after-.patch "
 SRC_URI_append = " file://0001-workaround-tee-disable-microCode-loading-by-optee.patch "
+
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
