@@ -1,0 +1,23 @@
+Index: libdrm-2.4.70/xf86drm.c
+===================================================================
+--- libdrm-2.4.70.orig/xf86drm.c
++++ libdrm-2.4.70/xf86drm.c
+@@ -642,17 +642,14 @@ static int drmOpenByName(const char *nam
+     for (i = base; i < base + DRM_MAX_MINOR; i++) {
+         if ((fd = drmOpenMinor(i, 1, type)) >= 0) {
+             if ((version = drmGetVersion(fd))) {
++                drmMsg("drmGetVersion '%s'\n", version->name);
+                 if (!strcmp(version->name, name)) {
+                     drmFreeVersion(version);
+                     id = drmGetBusid(fd);
+                     drmMsg("drmGetBusid returned '%s'\n", id ? id : "NULL");
+-                    if (!id || !*id) {
+                         if (id)
+                             drmFreeBusid(id);
+                         return fd;
+-                    } else {
+-                        drmFreeBusid(id);
+-                    }
+                 } else {
+                     drmFreeVersion(version);
+                 }
