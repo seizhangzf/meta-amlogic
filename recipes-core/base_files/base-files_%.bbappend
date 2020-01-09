@@ -35,5 +35,5 @@ EOF
 
 }
 
-FILES_${PN}_append_tm2 = " /vendor /odm /product /cache /data"
-dirs755_append_tm2 = " /vendor /odm /product /cache /data"
+FILES_${PN}_append = " /vendor /odm /product /cache /data"
+dirs755_append = " /vendor /odm /product /cache /data"
