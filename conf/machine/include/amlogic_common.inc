@@ -21,3 +21,4 @@ KERNEL_MODULE_AUTOLOAD += "mali"
 
 AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
 AML_GIT_PROTOCOL ?= "ssh"
+LINUXLIBCVERSION ?= "4.9%"
