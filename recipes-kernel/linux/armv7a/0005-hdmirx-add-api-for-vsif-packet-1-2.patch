@@ -1,0 +1,139 @@
+From 9a2da6e9533c88e6bd4d02b5b245b6d96e4a3fe6 Mon Sep 17 00:00:00 2001
+From: Lei Yang <lei.yang@amlogic.com>
+Date: Mon, 23 Dec 2019 21:58:44 +0800
+Subject: [PATCH 5/7] hdmirx: add api for vsif packet [1/2]
+
+PD#SWPL-18785
+
+Problem:
+dv16 requirement
+
+Solution:
+add related api
+
+Verify:
+tl1/tm2
+
+Change-Id: I2cac7f39623e53d0623666729242fe9f9765972a
+Signed-off-by: Lei Yang <lei.yang@amlogic.com>
+---
+ .../media/vin/tvin/hdmirx/hdmi_rx_drv.c       |  7 ++++
+ .../media/vin/tvin/hdmirx/hdmi_rx_drv.h       |  2 +-
+ .../media/vin/tvin/hdmirx/hdmi_rx_pktinfo.c   | 32 +++++++++----------
+ drivers/amlogic/media/vin/tvin/tvin_global.h  |  8 +++++
+ 4 files changed, 31 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.c b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.c
+index 768b744a046b..3a1fdf5e2021 100644
+--- a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.c
++++ b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.c
+@@ -779,6 +779,13 @@ void hdmirx_get_vsi_info(struct tvin_sig_property_s *prop)
+ 					rx_pr("dv10 timeout\n");
+ 			}
+ 		}
++		if (rx.vs_info_details.dolby_vision) {
++			memcpy(&prop->dv_vsif_raw,
++			       &rx_pkt.vs_info, 3);
++			memcpy((char *)(&prop->dv_vsif_raw) + 3,
++			       &rx_pkt.vs_info.PB0,
++			       sizeof(struct tvin_dv_vsif_raw_s) - 4);
++		}
+ 		break;
+ 	case E_VSI_4K3D:
+ 	case E_VSI_VSI21:
+diff --git a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
+index fc9e7548931f..b94239da503b 100644
+--- a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
++++ b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_drv.h
+@@ -34,7 +34,7 @@
+ #include "hdmi_rx_edid.h"
+ 
+ 
+-#define RX_VER0 "ver.2019/12/12"
++#define RX_VER0 "ver.2020/01/07"
+ /*
+  *
+  *
+diff --git a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_pktinfo.c b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_pktinfo.c
+index c8e869ed8993..6c8ea92ba3b8 100644
+--- a/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_pktinfo.c
++++ b/drivers/amlogic/media/vin/tvin/hdmirx/hdmi_rx_pktinfo.c
+@@ -672,26 +672,24 @@ static void rx_pktdump_drm(void *pdata)
+ 
+ 	rx_pr(">---drm infoframe detail -------->\n");
+ 	rx_pr("type: 0x%x\n", pktdata->pkttype);
+-	rx_pr("ver: %d\n", pktdata->version);
+-	rx_pr("length: %d\n", pktdata->length);
++	rx_pr("ver: %x\n", pktdata->version);
++	rx_pr("length: %x\n", pktdata->length);
+ 
+ 	rx_pr("b1 eotf: 0x%x\n", pktdata->des_u.tp1.eotf);
+ 	rx_pr("b2 meta des id: 0x%x\n", pktdata->des_u.tp1.meta_des_id);
+ 
+-	rx_pr("dis_pri_x0: %d\n", pktdata->des_u.tp1.dis_pri_x0);
+-	rx_pr("dis_pri_y0: %d\n", pktdata->des_u.tp1.dis_pri_y0);
+-	rx_pr("dis_pri_x1: %d\n", pktdata->des_u.tp1.dis_pri_x1);
+-	rx_pr("dis_pri_y1: %d\n", pktdata->des_u.tp1.dis_pri_y1);
+-	rx_pr("dis_pri_x2: %d\n", pktdata->des_u.tp1.dis_pri_x2);
+-	rx_pr("dis_pri_y2: %d\n", pktdata->des_u.tp1.dis_pri_y2);
+-	rx_pr("white_points_x: %d\n",
+-		pktdata->des_u.tp1.white_points_x);
+-	rx_pr("white_points_y: %d\n",
+-		pktdata->des_u.tp1.white_points_y);
+-	rx_pr("max_dislum: %d\n", pktdata->des_u.tp1.max_dislum);
+-	rx_pr("min_dislum: %d\n", pktdata->des_u.tp1.min_dislum);
+-	rx_pr("max_light_lvl: %d\n", pktdata->des_u.tp1.max_light_lvl);
+-	rx_pr("max_fa_light_lvl: %d\n", pktdata->des_u.tp1.max_fa_light_lvl);
++	rx_pr("dis_pri_x0: %x\n", pktdata->des_u.tp1.dis_pri_x0);
++	rx_pr("dis_pri_y0: %x\n", pktdata->des_u.tp1.dis_pri_y0);
++	rx_pr("dis_pri_x1: %x\n", pktdata->des_u.tp1.dis_pri_x1);
++	rx_pr("dis_pri_y1: %x\n", pktdata->des_u.tp1.dis_pri_y1);
++	rx_pr("dis_pri_x2: %x\n", pktdata->des_u.tp1.dis_pri_x2);
++	rx_pr("dis_pri_y2: %x\n", pktdata->des_u.tp1.dis_pri_y2);
++	rx_pr("white_points_x: %x\n", pktdata->des_u.tp1.white_points_x);
++	rx_pr("white_points_y: %x\n", pktdata->des_u.tp1.white_points_y);
++	rx_pr("max_dislum: %x\n", pktdata->des_u.tp1.max_dislum);
++	rx_pr("min_dislum: %x\n", pktdata->des_u.tp1.min_dislum);
++	rx_pr("max_light_lvl: %x\n", pktdata->des_u.tp1.max_light_lvl);
++	rx_pr("max_fa_light_lvl: %x\n", pktdata->des_u.tp1.max_fa_light_lvl);
+ 	rx_pr(">------------------>end\n");
+ }
+ 
+@@ -1129,7 +1127,7 @@ void rx_pkt_get_vsi_ex(void *pktinfo)
+ 	pkt->checksum = (st0 >> 24) & 0xff;
+ 	pkt->ieee = st0 & 0xffffff;
+ 
+-	pkt->ver_st.version = 0;
++	pkt->ver_st.version = 1;
+ 	pkt->ver_st.chgbit = 0;
+ 
+ 	if (rx.chip_id != CHIP_ID_TXHD) {
+diff --git a/drivers/amlogic/media/vin/tvin/tvin_global.h b/drivers/amlogic/media/vin/tvin/tvin_global.h
+index 25adb68778f6..cb4d10a94802 100644
+--- a/drivers/amlogic/media/vin/tvin/tvin_global.h
++++ b/drivers/amlogic/media/vin/tvin/tvin_global.h
+@@ -448,6 +448,13 @@ struct tvin_hdr_info_s {
+ 	unsigned int hdr_check_cnt;
+ };
+ 
++struct tvin_dv_vsif_raw_s {
++	u8 pkttype;
++	u8 version;
++	u8 length;
++	u8 PB[29];
++};
++
+ struct tvin_hdr10plus_info_s {
+ 	bool hdr10p_on;
+ 	struct tvin_hdr10p_data_s hdr10p_data;
+@@ -489,6 +496,7 @@ struct tvin_sig_property_s {
+ 	enum tvin_color_fmt_range_e color_fmt_range;
+ 	struct tvin_hdr_info_s hdr_info;
+ 	struct tvin_dv_vsif_s dv_vsif;/*dolby vsi info*/
++	struct tvin_dv_vsif_raw_s dv_vsif_raw;
+ 	bool dolby_vision;/*is signal dolby version*/
+ 	bool low_latency;/*is low latency dolby mode*/
+ 	uint8_t fps;
+-- 
+2.24.1
+

@@ -1,7 +1,7 @@
-From 5f1e22fa3f4ac89fd1bbffb23ae2acc10ba1117b Mon Sep 17 00:00:00 2001
+From 564cc16d1bdb638b2fe0cced7d0f69c591547be4 Mon Sep 17 00:00:00 2001
 From: lingjie li <lingjie.li@amlogic.com>
 Date: Tue, 24 Dec 2019 20:31:57 +0800
-Subject: [PATCH 2/2] drm: Buildroot TM2 Suspend: WestonOS can't work after
+Subject: [PATCH 2/7] drm: Buildroot TM2 Suspend: WestonOS can't work after
  resume [1/1]
 
 PD#SWPL-15763

@@ -1,7 +1,7 @@
-From ca2d73e26fb352d3e9200e95d1bedfaee38ce21b Mon Sep 17 00:00:00 2001
+From 67ebaf7767bdb68bdfd34503f713f46373508788 Mon Sep 17 00:00:00 2001
 From: Dezhi Kong <dezhi.kong@amlogic.com>
 Date: Mon, 6 Jan 2020 22:34:04 +0800
-Subject: [PATCH 1/2] drm: add osd mif config for afbc and un-afbc [1/1]
+Subject: [PATCH 1/7] drm: add osd mif config for afbc and un-afbc [1/1]
 
 PD#SWPL-19163
 
