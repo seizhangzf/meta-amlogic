@@ -8,6 +8,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;pro
 SRC_URI_append = " file://COPYING.GPL"
 SRC_URI_append = " file://0001-v4l-fixed-the-problem-of-multi-plane-addr-1-1.patch "
 SRC_URI_append = " file://0002-v4l2-mpeg2-support-multi-planar-1-1.patch "
+SRC_URI_append = " file://0001-v4l2-declear-4K-capability.patch "
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
