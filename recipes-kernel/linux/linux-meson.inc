@@ -17,4 +17,9 @@ do_deploy_append () {
 do_install_append () {
     oe_runmake -C ${B} CC="${KERNEL_CC}" headers_install INSTALL_HDR_PATH=${D}/usr/include/linux-meson-4.9/
 }
+
+sysroot_stage_all_append() {
+    sysroot_stage_dir ${D}/usr/include/linux-meson-4.9 ${SYSROOT_DESTDIR}/usr/include/linux-meson-4.9
+
+}
 ${PN}-dev += " /usr/include/linux-meson-4.9/* "

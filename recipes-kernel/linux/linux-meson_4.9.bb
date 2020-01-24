@@ -25,6 +25,7 @@ SRC_URI_append = " file://0007-debug-tv16.patch "
 SRC_URI_append = " file://0008-hdmirx-fix-dolbyvisoin-10-can-not-work-issue-1-1.patch "
 SRC_URI_append = " file://0009-drm-add-video-overlay-support-1-1.patch "
 SRC_URI_append = " file://0010-add-atmos-edid.patch "
+SRC_URI_append = " file://0011-fix-uapi-struct.patch "
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"

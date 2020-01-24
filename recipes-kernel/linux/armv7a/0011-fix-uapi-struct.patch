@@ -1,0 +1,46 @@
+From ab730f57846d59a56f4a294c464967de2db52fe9 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 23 Jan 2020 18:35:45 -0800
+Subject: [PATCH] fix uapi struct
+
+Change-Id: Ifa3fa32faa429a3f411c117b0579beedd1f0f33f
+---
+ include/uapi/drm/drm_mode.h | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/include/uapi/drm/drm_mode.h b/include/uapi/drm/drm_mode.h
+index 0308adb39244..b6b40f37930a 100644
+--- a/include/uapi/drm/drm_mode.h
++++ b/include/uapi/drm/drm_mode.h
+@@ -651,22 +651,22 @@ struct drm_mode_atomic {
+ struct drm_format_modifier_blob {
+ #define FORMAT_BLOB_CURRENT 1
+ 	/* Version of this blob format */
+-	u32 version;
++	__u32 version;
+ 
+ 	/* Flags */
+-	u32 flags;
++	__u32 flags;
+ 
+ 	/* Number of fourcc formats supported */
+-	u32 count_formats;
++	__u32 count_formats;
+ 
+ 	/* Where in this blob the formats exist (in bytes) */
+-	u32 formats_offset;
++	__u32 formats_offset;
+ 
+ 	/* Number of drm_format_modifiers */
+-	u32 count_modifiers;
++	__u32 count_modifiers;
+ 
+ 	/* Where in this blob the modifiers exist (in bytes) */
+-	u32 modifiers_offset;
++	__u32 modifiers_offset;
+ 
+ 	/* u32 formats[] */
+ 	/* struct drm_format_modifier modifiers[] */
+-- 
+2.24.1
+
