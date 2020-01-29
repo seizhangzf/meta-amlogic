@@ -59,6 +59,7 @@ DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
 do_compile () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
+    export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
         mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
