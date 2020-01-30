@@ -3,9 +3,9 @@ LICENSE = "CLOSED"
 
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/audio;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot"
 SRC_URI_append = " file://0001-remove-dtv.patch"
-SRC_URI_append = " file://0001-audio-hal-fix-audioserver-crash.patch"
-SRC_URI_append = " file://0001-audio-hal-Set-default-HDMI-and-SPEAKER-sink-gain-for.patch"
 SRC_URI_append = " file://0001-audio-hal-Add-separate-hal_data_processing-for-ms12-.patch"
+SRC_URI_append = " file://0001-audio_hal-enable-direct-PCM-output.patch"
+
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"

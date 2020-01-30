@@ -1,0 +1,52 @@
+From 250860824f3f6495030a6e32d7ecddeae61889c5 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Tue, 21 Jan 2020 22:37:13 -0800
+Subject: [PATCH] audio_hal: enable direct PCM output
+
+SWPL-13797
+
+When submix is enabled and output stream is direct pcm usecase, need to
+open PCM device in hw_write().
+
+Change-Id: I429f78bff2267927c84c7d56b1027dea8fad7c46
+---
+ audio_hal/audio_hw.c | 23 +++--------------------
+ 1 file changed, 3 insertions(+), 20 deletions(-)
+
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 1d762d7b..fc068f05 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -7119,26 +7119,9 @@ ssize_t hw_write (struct audio_stream_out *stream
+         }
+ 
+         if (adev->useSubMix) {
+-            if (aml_out->usecase == STREAM_PCM_DIRECT && adev->audio_patching) {
+-                if (adev->is_STB && (adev->ddp).digital_raw > 0 &&
+-                        output_format != AUDIO_FORMAT_PCM_16_BIT && output_format != AUDIO_FORMAT_PCM) {
+-                    // TODO: mbox+dvb and bypass case
+-                    ret = aml_alsa_output_open(stream);
+-                    if (ret) {
+-                        ALOGE("%s() open failed", __func__);
+-                    }
+-                } else {
+-                    ret = aml_alsa_output_open(stream);
+-                    if (ret) {
+-                        ALOGE("%s() open failed", __func__);
+-                    }
+-                }
+-            } else {
+-                // TODO: as discussed with lianlian, these code may still need in the future
+-                //ret = aml_alsa_output_open(stream);
+-                //if (ret) {
+-                //    ALOGE("%s() open failed", __func__);
+-                //}
++            ret = aml_alsa_output_open(stream);
++            if (ret) {
++                ALOGE("%s() open failed", __func__);
+             }
+         } else {
+             if (!adev->tuner2mix_patch) {
+-- 
+2.24.1
+

@@ -3,6 +3,7 @@ LICENSE = "CLOSED"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/audio_server;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI_append = " file://audioserver.service"
+SRC_URI_append = " file://0001-aml_audio_hal-hal-audio-player-for-audio-HAL.-1-1.patch"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"

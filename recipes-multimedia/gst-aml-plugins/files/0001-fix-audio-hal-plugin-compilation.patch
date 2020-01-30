@@ -1,0 +1,46 @@
+From d5f818d57c0d35b70a4f2798360a897aac686374 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 31 Jan 2020 15:09:35 -0800
+Subject: [PATCH] fix compilation
+
+---
+ gst-aml-plugins-1.0/Makefile.am  | 2 +-
+ gst-aml-plugins-1.0/configure.ac | 6 ------
+ 2 files changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/gst-aml-plugins-1.0/Makefile.am b/gst-aml-plugins-1.0/Makefile.am
+index 7662e6b..e80e9a4 100644
+--- a/gst-aml-plugins-1.0/Makefile.am
++++ b/gst-aml-plugins-1.0/Makefile.am
+@@ -1,3 +1,3 @@
+-SUBDIRS = common video/amlvdec video/amlvsink audio/amladec audio/amlasink audio/aml_audio_hal_sink
++SUBDIRS = audio/aml_audio_hal_sink
+ 
+ EXTRA_DIST = autogen.sh
+diff --git a/gst-aml-plugins-1.0/configure.ac b/gst-aml-plugins-1.0/configure.ac
+index b178881..a1edbb9 100755
+--- a/gst-aml-plugins-1.0/configure.ac
++++ b/gst-aml-plugins-1.0/configure.ac
+@@ -8,7 +8,6 @@ dnl required versions of gstreamer and plugins-base
+ GST_REQUIRED=1.0.0
+ GSTPB_REQUIRED=1.0.0
+ 
+-AC_CONFIG_SRCDIR([video/amlvdec/gstamlvdec.c])
+ AC_CONFIG_HEADERS([config.h])
+ 
+ dnl required version of automake
+@@ -83,11 +82,6 @@ GST_PLUGIN_LDFLAGS='-module -avoid-version -export-symbols-regex [_]*\(gst_\|Gst
+ AC_SUBST(GST_PLUGIN_LDFLAGS)
+ 
+ AC_CONFIG_FILES([Makefile 
+-common/Makefile
+-video/amlvdec/Makefile
+-video/amlvsink/Makefile
+-audio/amladec/Makefile
+-audio/amlasink/Makefile
+ audio/aml_audio_hal_sink/Makefile])
+ AC_OUTPUT
+ 
+-- 
+2.24.1
+
