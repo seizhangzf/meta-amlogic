@@ -19,8 +19,6 @@ RPROVIDES_${PN} += "libwayland-egl.so"
 
 
 SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r16p0-RDK"
-#SRC_URI += "file://libMali.so"
-#SRC_URI += "file://gl3ext.h"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
@@ -47,6 +45,7 @@ do_install() {
     install -m 0755 ${S}/include/EGL_platform/platform_wayland/*.h ${D}${includedir}/EGL
     # gbm headers
     install -m 0755 ${S}/include/EGL_platform/platform_wayland/gbm/gbm.h ${D}${includedir}
+    install -m 0755 ${S}/include/weston-egl-ext.h ${D}${includedir}
 
     # Copy the .pc files
     install -d -m 0755 ${D}${libdir}/pkgconfig
