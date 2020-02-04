@@ -23,6 +23,10 @@ if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" 
     if [ $(grep -c 'rdk-generic-hybrid-westeros-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
         sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-westeros-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
     fi
+
+    if [ $(grep -c 'rdk-generic-hybrid-thunder-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-thunder-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    fi
 fi
 
 source meta-cmf/setup-environment $1
@@ -63,12 +67,6 @@ fi
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-meson[^-]') -eq 0 ]; then
     cat >> conf/bblayers.conf <<EOF
 BBLAYERS =+ "\${RDKROOT}/meta-meson"
-EOF
-fi
-# Add meta-customer-* only if a machine configuration choosed from different layer
-if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-customer[^-]') -eq 0 ]; then
-    cat >> conf/bblayers.conf <<EOF
-BBLAYERS =+ "\${RDKROOT}/meta-customer-sky"
 EOF
 fi
 
