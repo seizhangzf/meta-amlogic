@@ -1,0 +1,35 @@
+From 833765052f0a5287d58176f3a29b41ca97147ecc Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 6 Feb 2020 15:11:04 -0800
+Subject: [PATCH 5/5] increase codec memory
+
+Change-Id: I372c9b2c636a97ab9c6a3fbd697750fc06757281
+---
+ arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+index fa5319876b81..a538070b3fd5 100644
+--- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+@@ -75,7 +75,7 @@
+ 		ion_cma_reserved:linux,ion-dev {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+-			size = <0x8000000>;
++			size = <0x20000000>;
+ 			alignment = <0x400000>;
+ 		};
+ 		//di_reserved:linux,di {
+@@ -112,7 +112,7 @@
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+ 			/* ion_codec_mm max can alloc size 80M*/
+-			size = <0x13400000>;
++			size = <0x18400000>;
+ 			alignment = <0x400000>;
+ 			linux,contiguous-region;
+ 		};
+-- 
+2.24.1
+

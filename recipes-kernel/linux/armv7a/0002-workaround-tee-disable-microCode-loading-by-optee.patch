@@ -1,7 +1,7 @@
-From 7c314327b96c8afcb4f4fb1335fb5984028b6ddf Mon Sep 17 00:00:00 2001
+From 88b3ead346d914803c18c4c07d2c983d96fdb453 Mon Sep 17 00:00:00 2001
 From: Song Zhao <song.zhao@amlogic.com>
 Date: Tue, 15 Oct 2019 09:36:23 -0700
-Subject: [PATCH 3/7] workaround: tee: disable microCode loading by optee
+Subject: [PATCH 2/5] workaround: tee: disable microCode loading by optee
 
 Change-Id: I944ae3052fff5e046f4a6e859bbf0bae1c9f02a8
 Signed-off-by: Song Zhao <song.zhao@amlogic.com>
@@ -10,10 +10,10 @@ Signed-off-by: Song Zhao <song.zhao@amlogic.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/amlogic/tee/tee.c b/drivers/amlogic/tee/tee.c
-index 1c2e3ebd1693..d7e6074c9829 100644
+index 296cacef0afd..39f401f438b8 100644
 --- a/drivers/amlogic/tee/tee.c
 +++ b/drivers/amlogic/tee/tee.c
-@@ -161,7 +161,7 @@ bool tee_enabled(void)
+@@ -168,7 +168,7 @@ bool tee_enabled(void)
  	struct arm_smccc_res res;
  	if (disable_flag == 1)
  		return false;

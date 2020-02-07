@@ -29,4 +29,4 @@ SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
 
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-media-modules = "c453a17acc756097c2df2d89be6a5e41092857bf"
-SRCREV_pn-linux-meson = "c1d6207d28a7b44d4529a0d180346b6af1b21601"
+SRCREV_pn-linux-meson = "c2fc92c6420eae097cf356f51de43db82bd7a120"

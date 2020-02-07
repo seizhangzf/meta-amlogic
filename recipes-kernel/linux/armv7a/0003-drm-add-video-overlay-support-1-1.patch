@@ -1,7 +1,7 @@
-From cff0d58b3690a88be92be5a848f9a34b2e7d9518 Mon Sep 17 00:00:00 2001
+From a61a1fc2be5cb159251b5270ada341df52bac393 Mon Sep 17 00:00:00 2001
 From: Dezhi Kong <dezhi.kong@amlogic.com>
 Date: Fri, 27 Dec 2019 18:17:52 +0800
-Subject: [PATCH] drm: add video overlay support [1/1]
+Subject: [PATCH 3/5] drm: add video overlay support [1/1]
 
 PD#SWPL-13818
 
@@ -26,29 +26,30 @@ Signed-off-by: Dezhi Kong <dezhi.kong@amlogic.com>
  drivers/amlogic/drm/meson_drv.h               |  22 +-
  drivers/amlogic/drm/meson_fb.c                |  37 +-
  drivers/amlogic/drm/meson_fb.h                |   2 +-
- drivers/amlogic/drm/meson_plane.c             | 385 ++++++++++++++++--
+ drivers/amlogic/drm/meson_plane.c             | 394 ++++++++++++++++--
  drivers/amlogic/drm/meson_plane.h             |   9 +
  drivers/amlogic/drm/meson_vpu.c               |  96 ++++-
  drivers/amlogic/drm/meson_vpu_pipeline.c      |  18 +
- drivers/amlogic/drm/meson_vpu_pipeline.h      |  68 ++++
+ drivers/amlogic/drm/meson_vpu_pipeline.h      |  68 +++
  .../amlogic/drm/meson_vpu_pipeline_private.c  |  79 +++-
  .../amlogic/drm/meson_vpu_pipeline_traverse.c |  65 ++-
- .../amlogic/drm/vpu-hw/meson_vpu_video_mif.c  | 203 +++++++++
- .../amlogic/drm/vpu-hw/meson_vpu_video_mif.h  |  23 ++
+ drivers/amlogic/drm/meson_vpu_util.h          |   2 +-
+ .../amlogic/drm/vpu-hw/meson_vpu_video_mif.c  | 209 ++++++++++
+ .../amlogic/drm/vpu-hw/meson_vpu_video_mif.h  |  23 +
  include/dt-bindings/display/meson-drm-ids.h   |   6 +-
  include/uapi/drm/drm_fourcc.h                 |   5 +
- 20 files changed, 975 insertions(+), 81 deletions(-)
+ 21 files changed, 989 insertions(+), 84 deletions(-)
  create mode 100644 drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
  create mode 100644 drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 60bd647faa0e..e8a4379ddbdd 100644
+index 4ccf24d88e92..7b36a04bfa17 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -15228,3 +15228,8 @@ F:  arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
- F:  arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
- F:  arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
- F:  arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+@@ -15244,3 +15244,8 @@ F: drivers/amlogic/mailbox/scpi_protocol_dsp.c
+ AMLOGIC SM1/G12A BL40 HEADER
+ M: shunzhou jiang <shunzhou.jiang@amlogic.com>
+ F: drivers/amlogic/firmware/bl40_module.h
 +
 +AMLOGIC DRM DRIVER
 +M:  Dezhi Kong <dezhi.kong@amlogic.com>
@@ -143,7 +144,7 @@ index 022ca0b8385d..65a249bcedea 100644
                  vpu-hw/meson_osd_afbc.o \
                  vpu-hw/meson_osd_scaler.o \
 diff --git a/drivers/amlogic/drm/meson_drv.h b/drivers/amlogic/drm/meson_drv.h
-index 4653befc57e4..3ae8791b4c68 100644
+index 3e35f272e091..2716ec396bb5 100644
 --- a/drivers/amlogic/drm/meson_drv.h
 +++ b/drivers/amlogic/drm/meson_drv.h
 @@ -18,6 +18,7 @@
@@ -185,7 +186,7 @@ index 4653befc57e4..3ae8791b4c68 100644
  
  #ifdef CONFIG_DRM_MESON_USE_ION
  	struct ion_client *gem_client;
-@@ -67,6 +83,8 @@ struct meson_drm {
+@@ -66,6 +82,8 @@ struct meson_drm {
  
  	u32 num_planes;
  	struct am_osd_plane *planes[MESON_MAX_OSD];
@@ -194,7 +195,7 @@ index 4653befc57e4..3ae8791b4c68 100644
  };
  
  static inline int meson_vpu_is_compatible(struct meson_drm *priv,
-@@ -75,9 +93,9 @@ static inline int meson_vpu_is_compatible(struct meson_drm *priv,
+@@ -74,9 +92,9 @@ static inline int meson_vpu_is_compatible(struct meson_drm *priv,
  	return of_device_is_compatible(priv->dev->of_node, compat);
  }
  
@@ -315,7 +316,7 @@ index 0226ee765899..ec82eab4ed16 100644
  };
  
 diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
-index 2c5820641ccb..a8c59153eb90 100644
+index 2c5820641ccb..53c5a6309421 100644
 --- a/drivers/amlogic/drm/meson_plane.c
 +++ b/drivers/amlogic/drm/meson_plane.c
 @@ -36,12 +36,27 @@ static const u32 supported_drm_formats[] = {
@@ -346,22 +347,17 @@ index 2c5820641ccb..a8c59153eb90 100644
  static void
  meson_plane_position_calc(struct meson_vpu_osd_layer_info *plane_info,
  			  struct drm_plane_state *state,
-@@ -110,6 +125,74 @@ meson_plane_position_calc(struct meson_vpu_osd_layer_info *plane_info,
- 	}
- }
+@@ -50,10 +65,80 @@ meson_plane_position_calc(struct meson_vpu_osd_layer_info *plane_info,
+ 	u32 dst_w, dst_h, src_w, src_h, scan_mode_out;
+ 	struct drm_display_mode *mode;
  
-+static void
-+meson_video_plane_position_calc(struct meson_vpu_video_layer_info *plane_info,
-+				struct drm_plane_state *state,
-+			  struct drm_display_mode *disp_mode)
-+{
-+	u32 dst_w, dst_h, src_w, src_h, scan_mode_out;
-+	struct drm_display_mode *mode;
-+
-+	if (IS_ERR_OR_NULL(state->crtc))
-+		mode = disp_mode;
-+	else
+-	if (IS_ERR_OR_NULL(state->crtc))
+-		mode = disp_mode;
++	if (!IS_ERR_OR_NULL(state->crtc) && state->crtc->mode.hdisplay &&
++	    state->crtc->mode.vdisplay)
 +		mode = &state->crtc->mode;
+ 	else
++		mode = disp_mode;
 +
 +	scan_mode_out = mode->flags & DRM_MODE_FLAG_INTERLACE;
 +	plane_info->src_x = state->src_x;
@@ -418,10 +414,32 @@ index 2c5820641ccb..a8c59153eb90 100644
 +	}
 +}
 +
++static void
++meson_video_plane_position_calc(struct meson_vpu_video_layer_info *plane_info,
++				struct drm_plane_state *state,
++			  struct drm_display_mode *disp_mode)
++{
++	u32 dst_w, dst_h, src_w, src_h, scan_mode_out;
++	struct drm_display_mode *mode;
++
++	if (!IS_ERR_OR_NULL(state->crtc) && state->crtc->mode.hdisplay &&
++	    state->crtc->mode.vdisplay)
+ 		mode = &state->crtc->mode;
++	else
++		mode = disp_mode;
+ 
+ 	scan_mode_out = mode->flags & DRM_MODE_FLAG_INTERLACE;
+ 	plane_info->src_x = state->src_x;
+@@ -108,6 +193,8 @@ meson_plane_position_calc(struct meson_vpu_osd_layer_info *plane_info,
+ 		else
+ 			plane_info->dst_h = mode->vdisplay - plane_info->dst_y;
+ 	}
++	DRM_DEBUG("mode->hdisplay=%d, mode->vdisplay=%d\n",
++		  mode->hdisplay, mode->vdisplay);
+ }
+ 
  static int
- meson_plane_check_size_range(struct meson_vpu_osd_layer_info *plane_info)
- {
-@@ -169,8 +252,9 @@ static int meson_plane_fb_check(struct drm_plane *plane,
+@@ -169,8 +256,9 @@ static int meson_plane_fb_check(struct drm_plane *plane,
  	    meson_fb->logo->start) {
  		phyaddr = meson_fb->logo->start;
  		DRM_DEBUG("logo->phyaddr=0x%pa\n", &phyaddr);
@@ -433,7 +451,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  	} else {
  		phyaddr = 0;
  		DRM_INFO("don't find phyaddr!\n");
-@@ -193,6 +277,62 @@ static int meson_plane_fb_check(struct drm_plane *plane,
+@@ -193,6 +281,63 @@ static int meson_plane_fb_check(struct drm_plane *plane,
  	return 0;
  }
  
@@ -469,7 +487,8 @@ index 2c5820641ccb..a8c59153eb90 100644
 +		DRM_INFO("don't find phyaddr!\n");
 +		return -EINVAL;
 +	}
-+	if (meson_fb->bufp[1] && (fb->pixel_format == DRM_FORMAT_NV12 ||
++	if (meson_fb->bufp[1] && meson_fb->bufp[1] != meson_fb->bufp[0] &&
++	    (fb->pixel_format == DRM_FORMAT_NV12 ||
 +				  fb->pixel_format == DRM_FORMAT_NV21))
 +		phyaddr1 = am_meson_gem_object_get_phyaddr(drv,
 +							   meson_fb->bufp[1]);
@@ -496,7 +515,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  static int meson_plane_get_fb_info(struct drm_plane *plane,
  				   struct drm_plane_state *new_state,
  				   struct meson_vpu_osd_layer_info *plane_info)
-@@ -233,21 +373,77 @@ static int meson_plane_get_fb_info(struct drm_plane *plane,
+@@ -233,21 +378,77 @@ static int meson_plane_get_fb_info(struct drm_plane *plane,
  	};
  
  	DRM_DEBUG("flags:%d pixel_format:%d,modifer=%llu\n",
@@ -580,7 +599,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  					struct drm_property *property,
  					uint64_t *val)
  {
-@@ -262,7 +458,7 @@ static int meson_plane_atomic_get_property(struct drm_plane *plane,
+@@ -262,7 +463,7 @@ static int meson_plane_atomic_get_property(struct drm_plane *plane,
  }
  
  static int meson_plane_atomic_set_property(struct drm_plane *plane,
@@ -589,7 +608,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  					 struct drm_property *property,
  					 uint64_t val)
  {
-@@ -287,18 +483,18 @@ meson_plane_duplicate_state(struct drm_plane *plane)
+@@ -287,18 +488,18 @@ meson_plane_duplicate_state(struct drm_plane *plane)
  
  	old_plane_state = to_am_meson_plane_state(plane->state);
  	meson_plane_state = kmemdup(old_plane_state,
@@ -611,7 +630,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  {
  	struct am_meson_plane_state *amps;
  
-@@ -349,6 +545,18 @@ static const struct drm_plane_funcs am_osd_plane_funs = {
+@@ -349,6 +550,18 @@ static const struct drm_plane_funcs am_osd_plane_funs = {
  	.format_mod_supported = am_meson_vpu_check_format_mod,
  };
  
@@ -630,7 +649,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  static int meson_plane_prepare_fb(struct drm_plane *plane,
  				  struct drm_plane_state *new_state)
  {
-@@ -358,20 +566,19 @@ static int meson_plane_prepare_fb(struct drm_plane *plane,
+@@ -358,20 +571,19 @@ static int meson_plane_prepare_fb(struct drm_plane *plane,
  static void meson_plane_cleanup_fb(struct drm_plane *plane,
  				   struct drm_plane_state *old_state)
  {
@@ -654,7 +673,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  {
  	struct meson_vpu_osd_layer_info *plane_info;
  	struct meson_vpu_pipeline_state *mvps;
-@@ -399,14 +606,14 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
+@@ -399,14 +611,14 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
  	if (ret < 0) {
  		plane_info->enable = 0;
  		DRM_INFO("plane%d size check unsupport!!!\n",
@@ -671,7 +690,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  		return 0;
  	}
  	ret = meson_plane_get_fb_info(plane, state, plane_info);
-@@ -420,24 +627,101 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
+@@ -420,24 +632,101 @@ static int meson_plane_atomic_check(struct drm_plane *plane,
  	plane_info->premult_en = plane_state->premult_en;
  	plane_info->enable = 1;
  	DRM_DEBUG("index=%d, zorder=%d\n",
@@ -777,7 +796,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  static const struct drm_plane_helper_funcs am_osd_helper_funcs = {
  	.prepare_fb = meson_plane_prepare_fb,
  	.cleanup_fb = meson_plane_cleanup_fb,
-@@ -446,6 +730,14 @@ static const struct drm_plane_helper_funcs am_osd_helper_funcs = {
+@@ -446,6 +735,14 @@ static const struct drm_plane_helper_funcs am_osd_helper_funcs = {
  	.atomic_disable	= meson_plane_atomic_disable,
  };
  
@@ -792,7 +811,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  int drm_plane_create_premult_en_property(struct drm_plane *plane)
  {
  	struct drm_device *dev = plane->dev;
-@@ -473,7 +765,7 @@ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
+@@ -473,7 +770,7 @@ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
  	const u64 *format_modifiers = afbc_wb_modifier;
  
  	osd_plane = devm_kzalloc(priv->drm->dev, sizeof(*osd_plane),
@@ -801,7 +820,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  	if (!osd_plane)
  		return 0;
  
-@@ -502,12 +794,44 @@ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
+@@ -502,12 +799,44 @@ static struct am_osd_plane *am_plane_create(struct meson_drm *priv, int i)
  	return osd_plane;
  }
  
@@ -848,7 +867,7 @@ index 2c5820641ccb..a8c59153eb90 100644
  
  	for (i = 0; i < pipeline->num_osds; i++) {
  		osd_index = pipeline->osds[i]->base.index;
-@@ -521,6 +845,17 @@ int am_meson_plane_create(struct meson_drm *priv)
+@@ -521,6 +850,17 @@ int am_meson_plane_create(struct meson_drm *priv)
  
  		priv->planes[priv->num_planes++] = plane;
  	}
@@ -1572,12 +1591,23 @@ index 4ff06f26346e..d94d509b9530 100644
  	}
  
  	ret = combinate_layer_path(path, num_planes, mvps, state);
+diff --git a/drivers/amlogic/drm/meson_vpu_util.h b/drivers/amlogic/drm/meson_vpu_util.h
+index 764bcc34167e..920da1aacfeb 100644
+--- a/drivers/amlogic/drm/meson_vpu_util.h
++++ b/drivers/amlogic/drm/meson_vpu_util.h
+@@ -52,5 +52,5 @@ void meson_util_canvas_config(u32 index, unsigned long addr, u32 width,
+ 					u32 height, u32 wrap, u32 blkmode);
+ int meson_util_canvas_pool_alloc_table(const char *owner, u32 *table, int size,
+ 					enum canvas_map_type_e type);
+-
++extern void amvideo_set_scaler_para(int x, int y, int w, int h, int flag);
+ #endif
 diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
 new file mode 100644
-index 000000000000..1930323d08c5
+index 000000000000..953b34098a1a
 --- /dev/null
 +++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,209 @@
 +/*
 + * drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
 + *
@@ -1662,6 +1692,10 @@ index 000000000000..1930323d08c5
 +	mvvs->src_y = plane_info->src_y;
 +	mvvs->src_w = plane_info->src_w;
 +	mvvs->src_h = plane_info->src_h;
++	mvvs->dst_x = plane_info->dst_x;
++	mvvs->dst_y = plane_info->dst_y;
++	mvvs->dst_w = plane_info->dst_w;
++	mvvs->dst_h = plane_info->dst_h;
 +	mvvs->byte_stride = plane_info->byte_stride;
 +	mvvs->phy_addr[0] = plane_info->phy_addr[0];
 +	mvvs->phy_addr[1] = plane_info->phy_addr[1];
@@ -1706,7 +1740,7 @@ index 000000000000..1930323d08c5
 +			phy_addr2 = phy_addr + byte_stride * src_h;
 +		else
 +			phy_addr2 = mvvs->phy_addr[1];
-+		canvas_config(canvas_index1, phy_addr2, byte_stride, src_h,
++		canvas_config(canvas_index1, phy_addr2, byte_stride, src_h/2,
 +			      CANVAS_ADDR_NOWRAP, CANVAS_BLKMODE_LINEAR);
 +	}
 +	video_canvas_index[vblk->index] ^= 1;
@@ -1726,8 +1760,10 @@ index 000000000000..1930323d08c5
 +	} else {
 +		DRM_INFO("free_q get fail!");
 +	}
-+	DRM_DEBUG("plane_index=%d,HW-OSD=%d\n",
-+		  mvvs->plane_index, vblk->index);
++	amvideo_set_scaler_para(mvvs->dst_x, mvvs->dst_y, mvvs->dst_w,
++				mvvs->dst_h, 0);
++	DRM_DEBUG("plane_index=%d,HW-video=%d, byte_stride=%d\n",
++		  mvvs->plane_index, vblk->index, byte_stride);
 +	DRM_DEBUG("canvas_index[%d]=0x%x,phy_addr=0x%x,phy_addr2=0x%x\n",
 +		  video_canvas_index[vblk->index], canvas_index0,
 +		  phy_addr, phy_addr2);
