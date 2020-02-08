@@ -30,3 +30,6 @@ SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-media-modules = "c453a17acc756097c2df2d89be6a5e41092857bf"
 SRCREV_pn-linux-meson = "c2fc92c6420eae097cf356f51de43db82bd7a120"
+
+SRCREV_pn-devicesettings-hal-amlogic = "a59ae8c2079de9a47628040ba49babb5d0131785"
+SRCREV_pn-iarmmgrs-hal-amlogic = "094917bae257d4ead6c3abb2eb095c48f1a4f35f"
