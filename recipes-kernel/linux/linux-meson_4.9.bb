@@ -20,6 +20,8 @@ SRC_URI_append = " file://0002-workaround-tee-disable-microCode-loading-by-optee
 SRC_URI_append = " file://0003-drm-add-video-overlay-support-1-1.patch "
 SRC_URI_append = " file://0004-fix-uapi-struct.patch "
 SRC_URI_append = " file://0005-increase-codec-memory.patch "
+SRC_URI_append = " file://0006-vpp-add-endian-process-sync-with-Q-1-1.patch "
+SRC_URI_append = " file://0007-vpp-add-nv12-format-support-1-1.patch "
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"

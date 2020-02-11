@@ -1,7 +1,7 @@
-From a61a1fc2be5cb159251b5270ada341df52bac393 Mon Sep 17 00:00:00 2001
+From 2bc0c8ec08fe9704e62eb3d8fa7a92a149170de5 Mon Sep 17 00:00:00 2001
 From: Dezhi Kong <dezhi.kong@amlogic.com>
 Date: Fri, 27 Dec 2019 18:17:52 +0800
-Subject: [PATCH 3/5] drm: add video overlay support [1/1]
+Subject: [PATCH 3/7] drm: add video overlay support [1/1]
 
 PD#SWPL-13818
 
@@ -17,39 +17,57 @@ verify by u212
 Change-Id: I7e1391cfea51d1b4b420c9296a75dbe65c6ba5da
 Signed-off-by: Dezhi Kong <dezhi.kong@amlogic.com>
 ---
- MAINTAINERS                                   |   5 +
+ MAINTAINERS                                   |  23 +
  arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi  |   8 +
  arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi   |   8 +
  .../arm64/boot/dts/amlogic/mesong12a_drm.dtsi |   8 +
  arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi |   8 +
  drivers/amlogic/drm/Makefile                  |   1 +
  drivers/amlogic/drm/meson_drv.h               |  22 +-
- drivers/amlogic/drm/meson_fb.c                |  37 +-
+ drivers/amlogic/drm/meson_fb.c                |  39 +-
  drivers/amlogic/drm/meson_fb.h                |   2 +-
  drivers/amlogic/drm/meson_plane.c             | 394 ++++++++++++++++--
  drivers/amlogic/drm/meson_plane.h             |   9 +
- drivers/amlogic/drm/meson_vpu.c               |  96 ++++-
+ drivers/amlogic/drm/meson_vpu.c               |  94 ++++-
  drivers/amlogic/drm/meson_vpu_pipeline.c      |  18 +
  drivers/amlogic/drm/meson_vpu_pipeline.h      |  68 +++
  .../amlogic/drm/meson_vpu_pipeline_private.c  |  79 +++-
  .../amlogic/drm/meson_vpu_pipeline_traverse.c |  65 ++-
  drivers/amlogic/drm/meson_vpu_util.h          |   2 +-
- .../amlogic/drm/vpu-hw/meson_vpu_video_mif.c  | 209 ++++++++++
+ .../amlogic/drm/vpu-hw/meson_vpu_video_mif.c  | 212 ++++++++++
  .../amlogic/drm/vpu-hw/meson_vpu_video_mif.h  |  23 +
  include/dt-bindings/display/meson-drm-ids.h   |   6 +-
  include/uapi/drm/drm_fourcc.h                 |   5 +
- 21 files changed, 989 insertions(+), 84 deletions(-)
+ 21 files changed, 1010 insertions(+), 84 deletions(-)
  create mode 100644 drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
  create mode 100644 drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4ccf24d88e92..7b36a04bfa17 100644
+index 4ccf24d88e92..002607339608 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -15244,3 +15244,8 @@ F: drivers/amlogic/mailbox/scpi_protocol_dsp.c
+@@ -15244,3 +15244,26 @@ F: drivers/amlogic/mailbox/scpi_protocol_dsp.c
  AMLOGIC SM1/G12A BL40 HEADER
  M: shunzhou jiang <shunzhou.jiang@amlogic.com>
  F: drivers/amlogic/firmware/bl40_module.h
++
++AMLOGIC LUT_DMA DRIVER
++M:  PengCheng Chen <pengcheng.chen@amlogic.com>
++F: arch/arm64/configs/meson64_defconfig
++F: arch/arm/configs/meson64_a32_defconfig
++F: arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
++F: arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts
++F: arch/arm64/boot/dts/amlogic/mesontm2_revb.dtsi
++F: arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts
++F:  drivers/amlogic/media/common/Kconfig
++F:  drivers/amlogic/media/common/Makefile
++F:  drivers/amlogic/media/common/lut_dma/Kconfig
++F:  drivers/amlogic/media/common/lut_dma/Makefile
++F:  drivers/amlogic/media/common/lut_dma/lut_dma_io.c
++F:  drivers/amlogic/media/common/lut_dma/lut_dma_io.h
++F:  drivers/amlogic/media/common/lut_dma/lut_dma_mgr.c
++F:  drivers/amlogic/media/common/lut_dma/lut_dma_mgr.h
++F:  include/linux/amlogic/media/lut_dma/lut_dma.h
 +
 +AMLOGIC DRM DRIVER
 +M:  Dezhi Kong <dezhi.kong@amlogic.com>
@@ -208,19 +226,22 @@ index 3e35f272e091..2716ec396bb5 100644
  
  #ifdef CONFIG_DEBUG_FS
 diff --git a/drivers/amlogic/drm/meson_fb.c b/drivers/amlogic/drm/meson_fb.c
-index 81fc0981c595..0a16a395c502 100644
+index 81fc0981c595..e908fd9ab011 100644
 --- a/drivers/amlogic/drm/meson_fb.c
 +++ b/drivers/amlogic/drm/meson_fb.c
-@@ -24,7 +24,7 @@ void am_meson_fb_destroy(struct drm_framebuffer *fb)
+@@ -23,8 +23,10 @@
+ void am_meson_fb_destroy(struct drm_framebuffer *fb)
  {
  	struct am_meson_fb *meson_fb = to_am_meson_fb(fb);
++	int i;
  
 -	drm_gem_object_unreference_unlocked(&meson_fb->bufp->base);
-+	drm_gem_object_unreference_unlocked(&meson_fb->bufp[0]->base);
++	for (i = 0; i < 4 && meson_fb->bufp[i]; i++)
++		drm_gem_object_unreference_unlocked(&meson_fb->bufp[i]->base);
  	drm_framebuffer_cleanup(fb);
  	if (meson_fb->logo && meson_fb->logo->alloc_flag)
  		am_meson_free_logo_memory();
-@@ -39,7 +39,7 @@ int am_meson_fb_create_handle(struct drm_framebuffer *fb,
+@@ -39,7 +41,7 @@ int am_meson_fb_create_handle(struct drm_framebuffer *fb,
  	struct am_meson_fb *meson_fb = to_am_meson_fb(fb);
  
  	return drm_gem_handle_create(file_priv,
@@ -229,7 +250,7 @@ index 81fc0981c595..0a16a395c502 100644
  }
  
  struct drm_framebuffer_funcs am_meson_fb_funcs = {
-@@ -62,9 +62,9 @@ am_meson_fb_alloc(struct drm_device *dev,
+@@ -62,9 +64,9 @@ am_meson_fb_alloc(struct drm_device *dev,
  
  	if (obj) {
  		meson_gem = container_of(obj, struct am_meson_gem_object, base);
@@ -241,7 +262,7 @@ index 81fc0981c595..0a16a395c502 100644
  	}
  	drm_helper_mode_fill_fb_struct(&meson_fb->base, mode_cmd);
  
-@@ -75,10 +75,10 @@ am_meson_fb_alloc(struct drm_device *dev,
+@@ -75,10 +77,10 @@ am_meson_fb_alloc(struct drm_device *dev,
  			ret);
  		goto err_free_fb;
  	}
@@ -254,7 +275,7 @@ index 81fc0981c595..0a16a395c502 100644
  
  	return &meson_fb->base;
  
-@@ -94,23 +94,24 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+@@ -94,23 +96,24 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
  	struct am_meson_fb *meson_fb = 0;
  	struct drm_gem_object *obj = 0;
  	struct am_meson_gem_object *meson_gem;
@@ -289,16 +310,16 @@ index 81fc0981c595..0a16a395c502 100644
  	drm_helper_mode_fill_fb_struct(&meson_fb->base, mode_cmd);
  
  	ret = drm_framebuffer_init(dev, &meson_fb->base, &am_meson_fb_funcs);
-@@ -122,10 +123,10 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
+@@ -122,10 +125,10 @@ struct drm_framebuffer *am_meson_fb_create(struct drm_device *dev,
  		kfree(meson_fb);
  		return ERR_PTR(ret);
  	}
 -	DRM_DEBUG("meson_fb[in:%d,ref:%d]=0x%px,meson_fb->bufp=0x%p\n",
-+	DRM_DEBUG("meson_fb[in:%d,ref:%d]=0x%px,meson_fb->bufp[0]=0x%p\n",
++	DRM_DEBUG("meson_fb[id:%d,ref:%d]=0x%px,meson_fb->bufp[%d-0]=0x%p\n",
  		  meson_fb->base.base.id,
  		  atomic_read(&meson_fb->base.base.refcount.refcount),
 -		  meson_fb, meson_fb->bufp);
-+		  meson_fb, meson_fb->bufp[0]);
++		  meson_fb, i, meson_fb->bufp[0]);
  
  	return &meson_fb->base;
  }
@@ -910,10 +931,10 @@ index 5be8adc5dab0..b3bc9272b2cc 100644
  int am_meson_plane_create(struct meson_drm *priv);
  
 diff --git a/drivers/amlogic/drm/meson_vpu.c b/drivers/amlogic/drm/meson_vpu.c
-index 91102d5d6465..fbe771d97e63 100644
+index 91102d5d6465..9e0a999a3422 100644
 --- a/drivers/amlogic/drm/meson_vpu.c
 +++ b/drivers/amlogic/drm/meson_vpu.c
-@@ -448,6 +448,78 @@ static int am_meson_logo_info_update(struct meson_drm *priv)
+@@ -448,6 +448,76 @@ static int am_meson_logo_info_update(struct meson_drm *priv)
  	return 0;
  }
  
@@ -940,8 +961,6 @@ index 91102d5d6465..fbe771d97e63 100644
 +	if (kfifo_get(&dev->ready_q, &vf)) {
 +		if (!vf)
 +			return NULL;
-+		if (!kfifo_put(&dev->display_q, vf))
-+			DRM_INFO("display_q is full!\n");
 +		return vf;
 +	} else {
 +		return NULL;
@@ -992,7 +1011,7 @@ index 91102d5d6465..fbe771d97e63 100644
  static int am_meson_vpu_bind(struct device *dev,
  				struct device *master, void *data)
  {
-@@ -459,7 +531,7 @@ static int am_meson_vpu_bind(struct device *dev,
+@@ -459,7 +529,7 @@ static int am_meson_vpu_bind(struct device *dev,
  #ifdef CONFIG_CMA
  	struct cma *cma;
  #endif
@@ -1001,7 +1020,7 @@ index 91102d5d6465..fbe771d97e63 100644
  
  	/* Allocate crtc struct */
  	DRM_INFO("[%s] in\n", __func__);
-@@ -522,6 +594,26 @@ static int am_meson_vpu_bind(struct device *dev,
+@@ -522,6 +592,26 @@ static int am_meson_vpu_bind(struct device *dev,
  	if (ret)
  		return ret;
  
@@ -1028,7 +1047,7 @@ index 91102d5d6465..fbe771d97e63 100644
  	am_meson_register_crtc_funcs(private->crtc, &meson_private_crtc_funcs);
  
  	ret = of_property_read_u8(dev->of_node,
-@@ -555,6 +647,8 @@ static void am_meson_vpu_unbind(struct device *dev,
+@@ -555,6 +645,8 @@ static void am_meson_vpu_unbind(struct device *dev,
  	struct drm_device *drm_dev = data;
  	struct meson_drm *private = drm_dev->dev_private;
  
@@ -1038,7 +1057,7 @@ index 91102d5d6465..fbe771d97e63 100644
  #ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT
  	amvecm_drm_gamma_disable(0);
 diff --git a/drivers/amlogic/drm/meson_vpu_pipeline.c b/drivers/amlogic/drm/meson_vpu_pipeline.c
-index bb1d72cae9e3..32ebeae06e15 100644
+index bb1d72cae9e3..6f00b314475a 100644
 --- a/drivers/amlogic/drm/meson_vpu_pipeline.c
 +++ b/drivers/amlogic/drm/meson_vpu_pipeline.c
 @@ -220,6 +220,13 @@ meson_vpu_create_block(struct meson_vpu_block_para *para,
@@ -1063,7 +1082,7 @@ index bb1d72cae9e3..32ebeae06e15 100644
 +		if (mvps->video_plane_info[i].enable) {
 +			mvps->enable_blocks |=
 +				BIT(pipeline->video[i]->base.id);
-+			DRM_INFO("video[%d]-id=%d\n", i,
++			DRM_DEBUG("video[%d]-id=%d\n", i,
 +				 pipeline->video[i]->base.id);
 +		}
 +	}
@@ -1604,10 +1623,10 @@ index 764bcc34167e..920da1aacfeb 100644
  #endif
 diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
 new file mode 100644
-index 000000000000..953b34098a1a
+index 000000000000..012e2b96aae9
 --- /dev/null
 +++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
-@@ -0,0 +1,209 @@
+@@ -0,0 +1,212 @@
 +/*
 + * drivers/amlogic/drm/vpu-hw/meson_vpu_video_mif.c
 + *
@@ -1634,6 +1653,7 @@ index 000000000000..953b34098a1a
 +#include <linux/amlogic/media/canvas/canvas.h>
 +#include <linux/amlogic/media/canvas/canvas_mgr.h>
 +#endif
++#include <linux/amlogic/media/vfm/vframe.h>
 +#include "meson_vpu_pipeline.h"
 +#include "meson_crtc.h"
 +#include "meson_vpu_reg.h"
@@ -1653,6 +1673,9 @@ index 000000000000..953b34098a1a
 +
 +	switch (pixel_format) {
 +	case DRM_FORMAT_NV12:
++		vframe_type = VIDTYPE_VIU_NV12 | VIDTYPE_VIU_FIELD |
++				VIDTYPE_PROGRESSIVE;
++		break;
 +	case DRM_FORMAT_NV21:
 +		vframe_type = VIDTYPE_VIU_NV21 | VIDTYPE_VIU_FIELD |
 +				VIDTYPE_PROGRESSIVE;
@@ -1744,9 +1767,7 @@ index 000000000000..953b34098a1a
 +			      CANVAS_ADDR_NOWRAP, CANVAS_BLKMODE_LINEAR);
 +	}
 +	video_canvas_index[vblk->index] ^= 1;
-+	if (kfifo_get(&private->free_q, &vf)) {
-+		if (!vf)
-+			DRM_INFO("free_q is NULL");
++	if (kfifo_get(&private->free_q, &vf) && vf) {
 +		memset(vf, 0, sizeof(struct vframe_s));
 +		vf->width = mvvs->src_w;
 +		vf->height = mvvs->src_h;
@@ -1755,6 +1776,7 @@ index 000000000000..953b34098a1a
 +		vf->bitdepth = BITDEPTH_Y8 | BITDEPTH_U8 | BITDEPTH_V8;
 +		vf->type = video_type_get(pixel_format);
 +		vf->canvas0Addr = (canvas_index1 << 8) | canvas_index0;
++		vf->flag |= VFRAME_FLAG_VIDEO_LINEAR;
 +		if (!kfifo_put(&private->ready_q, vf))
 +			DRM_INFO("ready_q is full!\n");
 +	} else {
