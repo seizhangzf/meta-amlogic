@@ -20,7 +20,12 @@ do_compile() {
     oe_runmake  -C ${S} all
 }
 do_install() {
-    install -m 755 -D ${S}/audio_server -t ${D}/usr/bin/
+        install -d ${D}/usr/lib
+        install -d ${D}/usr/bin
+        install -d ${D}/usr/include
+        install -d ${D}/usr/include/hardware
+        install -d ${D}/usr/include/system
+        install -m 755 -D ${S}/audio_server -t ${D}/usr/bin/
         install -m 755 -D ${S}/audio_client_test -t ${D}/usr/bin/
         install -m 755 -D ${S}/audio_client_test_ac3 ${D}/usr/bin/
         install -m 644 -D ${S}/libaudio_client.so -t ${D}/usr/lib/

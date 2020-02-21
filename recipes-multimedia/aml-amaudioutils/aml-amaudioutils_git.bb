@@ -23,6 +23,11 @@ do_compile() {
     oe_runmake  -C ${S} all
 }
 do_install() {
+    install -d ${D}/usr/lib
+    install -d ${D}/usr/include/audio_utils
+    install -d ${D}/usr/include/audio_utils/spdif
+    install -d ${D}/usr/include/cutils
+    install -d ${D}/usr/include/android
     cd ${B}
     oe_runmake  -C ${S} install
 }
