@@ -19,21 +19,21 @@ do_install_append_tm2 () {
 #         part-16 = <&data>;
 
 mkdir -p ${D}/vendor
-mkdir -p ${D}/odm
-mkdir -p ${D}/product
-mkdir -p ${D}/cache
+#mkdir -p ${D}/odm
+#mkdir -p ${D}/product
+#mkdir -p ${D}/cache
 mkdir -p ${D}/data
 
 
 cat >> ${D}${sysconfdir}/fstab <<EOF
  /dev/vendor            /vendor                    auto       defaults              0  0
- /dev/odm            /odm                    auto       defaults              0  0
- /dev/cache            /cache                    auto       defaults              0  0
+# /dev/odm            /odm                    auto       defaults              0  0
+# /dev/cache            /cache                    auto       defaults              0  0
  /dev/data            /data                    auto       defaults              0  0
 
 EOF
 
 }
 
-FILES_${PN}_append = " /vendor /odm /product /cache /data"
-dirs755_append = " /vendor /odm /product /cache /data"
+FILES_${PN}_append_tm2 = " /vendor /data"
+dirs755_append_tm2 = " /vendor /data"
