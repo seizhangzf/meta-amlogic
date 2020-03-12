@@ -1707,7 +1707,7 @@ CONFIG_AMLOGIC_CHARGER_DUMMY=y
 # Meson SPI NOR Flash Support
 #
 # CONFIG_SPI_AML_SPIFC is not set
-# CONFIG_DOLBY_FW is not set
+CONFIG_DOLBY_FW=y
 # CONFIG_AMLOGIC_IRCUT is not set
 
 #

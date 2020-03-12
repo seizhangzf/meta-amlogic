@@ -1,0 +1,117 @@
+From 099e9ef917a2415dc32a81f3909587faabeed76d Mon Sep 17 00:00:00 2001
+From: Dezhi Kong <dezhi.kong@amlogic.com>
+Date: Wed, 11 Mar 2020 09:51:52 +0800
+Subject: [PATCH] drm: fix compile error [1/1]
+
+PD#SWPL-xxxxx
+
+Problem:
+compile redefine error in drm after merge the follow CL:
+https://scgit.amlogic.com/#/c/100391/2/include/linux/amlogic/media/amvecm/amvecm.h
+
+Solution:
+redefine f2v_vphase_type_e to osd_scaler_f2v_vphase_type_e
+
+Verify:
+verify by u212
+
+Change-Id: Id7533276dc0b4136f7198d3af576e7d1bf79fbb3
+Signed-off-by: Dezhi Kong <dezhi.kong@amlogic.com>
+---
+ drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c | 16 ++++++-------
+ drivers/amlogic/drm/vpu-hw/meson_osd_scaler.h | 24 +++++++++----------
+ 2 files changed, 20 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
+index c70fcd7693fb..712228919140 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.c
+@@ -352,12 +352,12 @@ void osd_sc_coef_set(struct osd_scaler_reg_s *reg, bool flag, u32 *coef)
+ }
+ /*********sc top ctrl end************/
+ static void f2v_get_vertical_phase(
+-	u32 zoom_ratio, enum f2v_vphase_type_e type,
+-	u8 bank_length, struct f2v_vphase_s *vphase)
++	u32 zoom_ratio, enum osd_scaler_f2v_vphase_type_e type,
++	u8 bank_length, struct osd_scaler_f2v_vphase_s *vphase)
+ {
+-	u8 f2v_420_in_pos_luma[F2V_TYPE_MAX] = {
++	u8 f2v_420_in_pos_luma[OSD_SCALER_F2V_TYPE_MAX] = {
+ 		0, 2, 0, 2, 0, 0, 0, 2, 0};
+-	u8 f2v_420_out_pos[F2V_TYPE_MAX] = {
++	u8 f2v_420_out_pos[OSD_SCALER_F2V_TYPE_MAX] = {
+ 		0, 2, 2, 0, 0, 2, 0, 0, 0};
+ 	s32 offset_in, offset_out;
+ 
+@@ -399,7 +399,7 @@ void osd_scaler_config(struct osd_scaler_reg_s *reg,
+ 	u32 hsc_init_rec_num, hsc_init_rpt_p0_num, hsc_bank_length;
+ 	u32 vsc_bot_init_rec_num, vsc_top_rpt_l0_num, vsc_bot_rpt_l0_num;
+ 	u32 vsc_top_init_phase, vsc_bot_init_phase;
+-	struct f2v_vphase_s vphase;
++	struct osd_scaler_f2v_vphase_s vphase;
+ 	u8 version = vblk->pipeline->osd_version;
+ 	u32 linebuffer = scaler->linebuffer;
+ 	u32 bank_length = scaler->bank_length;
+@@ -436,19 +436,19 @@ void osd_scaler_config(struct osd_scaler_reg_s *reg,
+ 		phase_step_v =
+ 			(height_in << OSD_ZOOM_HEIGHT_BITS) / height_out;
+ 	if (scan_mode_out) {
+-		f2v_get_vertical_phase(phase_step_v, F2V_P2IT,
++		f2v_get_vertical_phase(phase_step_v, OSD_SCALER_F2V_P2IT,
+ 			vsc_bank_length, &vphase);
+ 		vsc_top_init_rec_num = vphase.rcv_num;
+ 		vsc_top_rpt_l0_num = vphase.rpt_num;
+ 		vsc_top_init_phase = vphase.phase;
+-		f2v_get_vertical_phase(phase_step_v, F2V_P2IB,
++		f2v_get_vertical_phase(phase_step_v, OSD_SCALER_F2V_P2IB,
+ 			vsc_bank_length, &vphase);
+ 		vsc_bot_init_rec_num = vphase.rcv_num;
+ 		vsc_bot_rpt_l0_num = vphase.rpt_num;
+ 		vsc_bot_init_phase = vphase.phase;
+ 	} else {
+ 		f2v_get_vertical_phase(
+-			phase_step_v, F2V_P2P,
++			phase_step_v, OSD_SCALER_F2V_P2P,
+ 			vsc_bank_length, &vphase);
+ 		vsc_top_init_rec_num = vphase.rcv_num;
+ 		vsc_top_rpt_l0_num = vphase.rpt_num;
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.h b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.h
+index 91b3d730a669..482c4c0d2fce 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.h
++++ b/drivers/amlogic/drm/vpu-hw/meson_osd_scaler.h
+@@ -88,20 +88,20 @@ enum scaler_coef_e {
+ 	COEFS_4POINT_TRIANGLE
+ };
+ 
+-enum f2v_vphase_type_e {
+-	F2V_IT2IT = 0,
+-	F2V_IB2IB,
+-	F2V_IT2IB,
+-	F2V_IB2IT,
+-	F2V_P2IT,
+-	F2V_P2IB,
+-	F2V_IT2P,
+-	F2V_IB2P,
+-	F2V_P2P,
+-	F2V_TYPE_MAX
++enum osd_scaler_f2v_vphase_type_e {
++	OSD_SCALER_F2V_IT2IT = 0,
++	OSD_SCALER_F2V_IB2IB,
++	OSD_SCALER_F2V_IT2IB,
++	OSD_SCALER_F2V_IB2IT,
++	OSD_SCALER_F2V_P2IT,
++	OSD_SCALER_F2V_P2IB,
++	OSD_SCALER_F2V_IT2P,
++	OSD_SCALER_F2V_IB2P,
++	OSD_SCALER_F2V_P2P,
++	OSD_SCALER_F2V_TYPE_MAX
+ };
+ 
+-struct f2v_vphase_s {
++struct osd_scaler_f2v_vphase_s {
+ 	u8 rcv_num;
+ 	u8 rpt_num;
+ 	u16 phase;
+-- 
+2.24.1
+

@@ -1,0 +1,52 @@
+From be466b1f0c4f92a5860894864693692505a9b3d8 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Wed, 19 Feb 2020 21:43:28 -0800
+Subject: [PATCH 2/2] v4l2: h264: fix kernel panic after EOS
+
+SWPL-20924
+
+After EOS, if there are still frames in dpb, vdec_v4l2_buffer can not be
+fetched from vframe. Because rest flow already clear all buffer_specs[].
+
+Change-Id: I6e22f538bbe01b258acf2b2f6cb5411fdc89e1c4
+---
+ drivers/amvdec_ports/aml_vcodec_dec.c       | 5 +++++
+ drivers/amvdec_ports/decoder/vdec_h264_if.c | 6 ++++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 1a186d4..d3daf32 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -599,6 +599,11 @@ static int get_display_buffer(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffe
+ 
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO, "%s\n", __func__);
+ 
++	if (!ctx->v4l_codec_ready) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
++				"drop buffer in stopping state\n");
++		return -1;
++	}
+ 	ret = vdec_if_get_param(ctx, GET_PARAM_DISP_FRAME_BUFFER, out);
+ 	if (ret) {
+ 		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR,
+diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+index b1e4945..a2fe39f 100644
+--- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+@@ -699,8 +699,10 @@ static void vdec_h264_get_vf(struct vdec_h264_inst *inst, struct vdec_v4l2_buffe
+ 	atomic_set(&vf->use_cnt, 1);
+ 
+ 	fb = (struct vdec_v4l2_buffer *)vf->v4l_mem_handle;
+-	fb->vf_handle = (unsigned long)vf;
+-	fb->status = FB_ST_DISPLAY;
++	if (fb) {
++		fb->vf_handle = (unsigned long)vf;
++		fb->status = FB_ST_DISPLAY;
++	}
+ 
+ 	*out = fb;
+ 
+-- 
+2.24.1
+

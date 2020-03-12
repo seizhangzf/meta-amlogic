@@ -1,9 +1,10 @@
-From 8019300accf35a9bce9ca29fa5a510cbb1b4ff34 Mon Sep 17 00:00:00 2001
+From 038ff0a56deb97f6dcafcd37db972cd45d27a2d4 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Thu, 23 Jan 2020 18:35:45 -0800
-Subject: [PATCH 4/5] fix uapi struct
+Subject: [PATCH 1/5] fix uapi struct
 
 Change-Id: Ifa3fa32faa429a3f411c117b0579beedd1f0f33f
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
 ---
  include/uapi/drm/drm_mode.h | 12 ++++++------
  1 file changed, 6 insertions(+), 6 deletions(-)

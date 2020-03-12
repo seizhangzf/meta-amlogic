@@ -1,7 +1,7 @@
-From 1eeca5c426906d82e0890824687f269fb8663d32 Mon Sep 17 00:00:00 2001
+From 639d791e4c8645262adc5453f4fa24280adcff15 Mon Sep 17 00:00:00 2001
 From: Song Zhao <song.zhao@amlogic.com>
 Date: Wed, 15 Jan 2020 14:43:11 -0800
-Subject: [PATCH] v4l2: declear 4K capability
+Subject: [PATCH 1/2] v4l2: declear 4K capability
 
 Change-Id: If2648ac3a1a41b933933f0e0943da1ad60d5cd13
 ---
@@ -9,7 +9,7 @@ Change-Id: If2648ac3a1a41b933933f0e0943da1ad60d5cd13
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/amvdec_ports/aml_vcodec_dec.h b/drivers/amvdec_ports/aml_vcodec_dec.h
-index 68f878a5..0a069cb4 100644
+index 68f878a..0a069cb 100644
 --- a/drivers/amvdec_ports/aml_vcodec_dec.h
 +++ b/drivers/amvdec_ports/aml_vcodec_dec.h
 @@ -29,8 +29,8 @@
