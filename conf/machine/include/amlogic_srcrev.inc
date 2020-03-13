@@ -13,6 +13,7 @@ SRCREV_pn-aml-provision = "a2afb66072344214dba789cb6ff87e7b3173229c"
 SRCREV_pn-optee-userspace = "5979e2b1229d45f029d4e004238b7ecb6249f11f"
 SRCREV_pn-wififw = "178ad1a6fff666fc927874042573751fedeaeadb"
 SRCREV_pn-gst-aml-plugins = "16961c92dd267a3dbf1c069cfbb9e30254514814"
+SRCREV_pn-aml-mediadrm-widevine = "be9fe078c71d64cae863a65a922eff11e5591c65"
 
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-dvalin = "606bcb0fb7eac5d43c86f98165918250856057bd"
@@ -26,7 +27,6 @@ SRCREV_bl31-1.3_pn-u-boot = "267c9d6c623750fc5c8b30e7d29264438cffdb60"
 
 SRCREV_pn-optee-linux-driver = "5979e2b1229d45f029d4e004238b7ecb6249f11f"
 SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
-
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-media-modules = "a03ea6d2d5c2018a220949452ef6dd1e0ca44667"
 SRCREV_pn-linux-meson = "c6c32a665eb871cc0308e5446d83a176b64df73e"

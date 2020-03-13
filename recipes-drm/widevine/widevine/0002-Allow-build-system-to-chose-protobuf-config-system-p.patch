@@ -1,0 +1,47 @@
+From c6b945b5c1117644eee1c05b38358a0c32475ee7 Mon Sep 17 00:00:00 2001
+From: wouterlucas <wouter@wouterlucas.com>
+Date: Wed, 31 Jan 2018 20:57:11 -0800
+Subject: [PATCH] Allow build system to chose protobuf config, system provided
+ or built in src
+
+---
+ cdm/cdm.gyp                  | 5 +++--
+ platforms/arm/environment.py | 8 ++++----
+ 2 files changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/cdm/cdm.gyp b/cdm/cdm.gyp
+index 1acf1b8..d66d7f0 100644
+--- a/cdm/cdm.gyp
++++ b/cdm/cdm.gyp
+@@ -44,11 +44,12 @@
+     # 3) protobuf_config == 'source'  (default)
+     # Build protobuf and protoc from source.
+     # Specify the path to the protobuf source in protobuf_source.
+-    'protobuf_config%': 'system',
++    # Make sure that a valid config.h for your target is in the source tree.
++    'protobuf_config%': '<!(echo $PROTOBUF_CONFIG)',
+     'protobuf_lib%' : '<!(echo $STAGING)/usr/lib/libprotobuf.so',
+     'protoc_bin%' : '<!(echo $STAGING_NATIVE)/usr/bin/protoc',
+     #'protobuf_config%': 'source',
+-    #'protobuf_source%': '../third_party/protobuf',
++    'protobuf_source%': '../third_party/protobuf',
+     #'protoc_host_target%': 'dummy',
+   },  # variables
+   'includes': ['core.gypi'],    # Get list of core source files.
+diff --git a/platforms/arm/environment.py b/platforms/arm/environment.py
+index 23d128e..aab2e23 100644
+--- a/platforms/arm/environment.py
++++ b/platforms/arm/environment.py
+@@ -7,8 +7,8 @@ export_variables = {
+   'TARGET' : os.environ.get('WV_BOARD'),
+   'CXXFLAGS_host': os.environ.get('WV_HOST_CXX_FLAGS'),
+   'CXX_host': os.environ.get('WV_HOST_CXX'),
+-  'CC_host':  os.environ.get('WV_HOST_CC'),
+-  'STAGING': os.environ.get('WV_STAGING'),
+-  'STAGING_NATIVE': os.environ.get('WV_STAGING_NATIVE'),
+-  'PROTOBUF_CONFIG': os.environ.get('WV_PROTOBUF_CONFIG'),
++  'CC_host' :  os.environ.get('WV_HOST_CC'),
++  'STAGING' : os.environ.get('WV_STAGING'),
++  'STAGING_NATIVE' : os.environ.get('WV_STAGING_NATIVE'),
++  'PROTOBUF_CONFIG' : os.environ.get('WV_PROTOBUF_CONFIG'),
+ }

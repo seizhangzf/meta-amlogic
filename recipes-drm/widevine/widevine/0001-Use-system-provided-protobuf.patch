@@ -1,0 +1,29 @@
+From 6e814f71bc94ddb8cdd6ae279ab7277132b31a8a Mon Sep 17 00:00:00 2001
+From: wouterlucas <wouter@wouterlucas.com>
+Date: Tue, 30 Jan 2018 22:02:43 -0800
+Subject: [PATCH] Use system provided protobuf
+
+---
+ cdm/cdm.gyp | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/cdm/cdm.gyp b/cdm/cdm.gyp
+index 4859734..1acf1b8 100644
+--- a/cdm/cdm.gyp
++++ b/cdm/cdm.gyp
+@@ -44,9 +44,12 @@
+     # 3) protobuf_config == 'source'  (default)
+     # Build protobuf and protoc from source.
+     # Specify the path to the protobuf source in protobuf_source.
+-    'protobuf_config%': 'source',
+-    'protobuf_source%': '../third_party/protobuf',
+-    'protoc_host_target%': 'dummy',
++    'protobuf_config%': 'system',
++    'protobuf_lib%' : '<!(echo $STAGING)/usr/lib/libprotobuf.so',
++    'protoc_bin%' : '<!(echo $STAGING_NATIVE)/usr/bin/protoc',
++    #'protobuf_config%': 'source',
++    #'protobuf_source%': '../third_party/protobuf',
++    #'protoc_host_target%': 'dummy',
+   },  # variables
+   'includes': ['core.gypi'],    # Get list of core source files.
+   'conditions': [
