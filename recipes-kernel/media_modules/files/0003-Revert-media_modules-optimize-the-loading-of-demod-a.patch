@@ -1,7 +1,7 @@
-From 6fe3fcc7ee4aaa3990dd5f211a4a8a0cd4929c79 Mon Sep 17 00:00:00 2001
+From 01cf2afed19339b4777a16c988941c44c4822038 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
-Date: Fri, 21 Feb 2020 08:37:02 -0800
-Subject: [PATCH 3/3] Revert "media_modules: optimize the loading of demod and
+Date: Tue, 17 Mar 2020 12:58:21 -0700
+Subject: [PATCH 3/4] Revert "media_modules: optimize the loading of demod and
  tuner [2/3]"
 
 This reverts commit e396ed3bcfefd5c90b9e9f141fdb22fd52c29454.
@@ -1411,7 +1411,7 @@ index 2c8c09a..1a5e174 100644
  
  	aml_unregist_dmx_class();
 diff --git a/drivers/stream_input/parser/hw_demux/aml_dvb.h b/drivers/stream_input/parser/hw_demux/aml_dvb.h
-index 5c943c8..41c7d0f 100644
+index f6ae58e..abd2a09 100644
 --- a/drivers/stream_input/parser/hw_demux/aml_dvb.h
 +++ b/drivers/stream_input/parser/hw_demux/aml_dvb.h
 @@ -49,6 +49,7 @@

@@ -1,0 +1,2334 @@
+From 855934682b3af9edebd274c512ba2f47a60db1d9 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Mon, 9 Mar 2020 11:02:36 -0700
+Subject: [PATCH 4/4] v4l2: support compressed buffer for h265 & vp9 dec [1/1]
+
+PD#SWPL-20176
+
+Problem:
+Linux project needs a lot of flexibilites on V4L2 pipeline. The decoded
+frame needs to be freely shown on OSD/Video plane. GPU/CPU needs access
+to the decoded frames. Need new UVM framework to acheive that.
+
+Solutoin:
+V4L2 layer supports DMABUF mode, DMABUF should be of UVM format.
+V4L2 layer will bind compress header and SG buffer to V4L2 buffer.
+V4L2 layer owns:
+        compress header (BMMU BOX)
+        SG buffer (MMU BOX)
+        linear buffer (DRM-GEM, doueble write enable)
+Decoder owners:
+        mv buffer (BMMU BOX)
+        work space buffer (BMMU BOX)
+
+To support last frame hold by application. V4L2 layer deffered free of
+MMU/BMMU buffer and AML V4L2 context.
+
+Verify:
+U212 with v4l2-uvm-test.
+No DW + DW 1:1 + DW 1:2 + DW only
+
+Change-Id: I307fa79d8b21d442d46e1d4f0b57b822465c9bda
+Signed-off-by: Song Zhao <song.zhao@amlogic.com>
+Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
+---
+ drivers/amvdec_ports/aml_vcodec_dec.c         | 418 +++++++++++++-----
+ drivers/amvdec_ports/aml_vcodec_dec.h         |   5 +
+ drivers/amvdec_ports/aml_vcodec_dec_drv.c     |  10 +-
+ drivers/amvdec_ports/aml_vcodec_drv.h         |  42 ++
+ drivers/amvdec_ports/decoder/vdec_h264_if.c   |   7 +
+ drivers/amvdec_ports/decoder/vdec_hevc_if.c   |  28 ++
+ drivers/amvdec_ports/decoder/vdec_mpeg12_if.c |   6 +
+ drivers/amvdec_ports/decoder/vdec_vp9_if.c    |  28 ++
+ drivers/amvdec_ports/vdec_drv_if.h            |  16 +-
+ drivers/frame_provider/decoder/h265/vh265.c   | 400 +++++++++--------
+ .../decoder/mpeg12/vmpeg12_multi.c            |   7 +
+ .../decoder/utils/vdec_v4l2_buffer_ops.c      |  16 +
+ .../decoder/utils/vdec_v4l2_buffer_ops.h      |   4 +
+ drivers/frame_provider/decoder/vp9/vvp9.c     | 359 ++++++++++-----
+ 14 files changed, 925 insertions(+), 421 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 2d08818..18172b9 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -21,6 +21,7 @@
+ #include <media/v4l2-mem2mem.h>
+ #include <media/videobuf2-dma-contig.h>
+ 
++#include "../stream_input/amports/amports_priv.h"
+ #include "aml_vcodec_drv.h"
+ #include "aml_vcodec_dec.h"
+ //#include "aml_vcodec_intr.h"
+@@ -31,6 +32,7 @@
+ #include <linux/crc32.h>
+ #include "aml_vcodec_adapt.h"
+ #include <linux/spinlock.h>
++#include <linux/amlogic/meson_uvm_core.h>
+ 
+ #include "aml_vcodec_vfm.h"
+ #include "../frame_provider/decoder/utils/decoder_bmmu_box.h"
+@@ -160,10 +162,11 @@ static const struct aml_codec_framesizes aml_vdec_framesizes[] = {
+ #define NUM_FORMATS ARRAY_SIZE(aml_video_formats)
+ 
+ extern bool multiplanar;
+-extern bool dump_capture_frame;
++extern int dump_capture_frame;
+ 
+ extern int dmabuf_fd_install_data(int fd, void* data, u32 size);
+ extern bool is_v4l2_buf_file(struct file *file);
++static void box_release(struct kref *kref);
+ 
+ static ulong aml_vcodec_ctx_lock(struct aml_vcodec_ctx *ctx)
+ {
+@@ -353,7 +356,9 @@ void vdec_frame_buffer_release(void *data)
+ 
+ int get_fb_from_queue(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer **out_fb)
+ {
++	int i;
+ 	ulong flags;
++	char plane_n[3] = {'Y','U','V'};
+ 	struct vb2_buffer *dst_buf = NULL;
+ 	struct vdec_v4l2_buffer *pfb;
+ 	struct aml_video_dec_buf *dst_buf_info, *info;
+@@ -380,61 +385,37 @@ int get_fb_from_queue(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer **out_
+ 	dst_vb2_v4l2 = container_of(dst_buf, struct vb2_v4l2_buffer, vb2_buf);
+ 	dst_buf_info = container_of(dst_vb2_v4l2, struct aml_video_dec_buf, vb);
+ 
+-	if (dst_buf->num_planes == 1) {
+-		pfb			= &dst_buf_info->frame_buffer;
+-		pfb->m.mem[0].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 0);
+-		pfb->m.mem[0].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[0].dma_addr);
+-		pfb->m.mem[0].size	= ctx->picinfo.y_len_sz + ctx->picinfo.c_len_sz;
+-		pfb->m.mem[0].offset	= ctx->picinfo.y_len_sz;
+-		pfb->num_planes		= dst_buf->num_planes;
+-		pfb->status		= FB_ST_NORMAL;
+-
+-		v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-			"idx: %u, 1 plane, y:(0x%lx, %d)\n", dst_buf->index,
+-			pfb->m.mem[0].addr, pfb->m.mem[0].size);
+-	} else if (dst_buf->num_planes == 2) {
+-		pfb			= &dst_buf_info->frame_buffer;
+-		pfb->m.mem[0].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 0);
+-		pfb->m.mem[0].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[0].dma_addr);
+-		pfb->m.mem[0].size	= ctx->picinfo.y_len_sz;
+-		pfb->m.mem[0].offset	= 0;
+-
+-		pfb->m.mem[1].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 1);
+-		pfb->m.mem[1].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[1].dma_addr);
+-		pfb->m.mem[1].size	= ctx->picinfo.c_len_sz;
+-		pfb->m.mem[1].offset	= ctx->picinfo.c_len_sz >> 1;
+-		pfb->num_planes		= dst_buf->num_planes;
+-		pfb->status		= FB_ST_NORMAL;
+-
+-		v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-			"idx: %u, 2 planes, y:(0x%lx, %d), c:(0x%lx, %d)\n", dst_buf->index,
+-			pfb->m.mem[0].addr, pfb->m.mem[0].size,
+-			pfb->m.mem[1].addr, pfb->m.mem[1].size);
+-	} else {
+-		pfb			= &dst_buf_info->frame_buffer;
+-		pfb->m.mem[0].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 0);
+-		pfb->m.mem[0].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[0].dma_addr);
+-		pfb->m.mem[0].size	= ctx->picinfo.y_len_sz;
+-		pfb->m.mem[0].offset	= 0;
+-
+-		pfb->m.mem[1].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 1);
+-		pfb->m.mem[1].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[2].dma_addr);
+-		pfb->m.mem[1].size	= ctx->picinfo.c_len_sz >> 1;
+-		pfb->m.mem[1].offset	= 0;
+-
+-		pfb->m.mem[2].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, 2);
+-		pfb->m.mem[2].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(), pfb->m.mem[3].dma_addr);
+-		pfb->m.mem[2].size	= ctx->picinfo.c_len_sz >> 1;
+-		pfb->m.mem[2].offset	= 0;
+-		pfb->num_planes		= dst_buf->num_planes;
+-		pfb->status		= FB_ST_NORMAL;
++	pfb = &dst_buf_info->frame_buffer;
++	pfb->num_planes = dst_buf->num_planes;
++	pfb->status		= FB_ST_NORMAL;
++	for (i = 0 ; i < dst_buf->num_planes ; i++) {
++		pfb->m.mem[i].dma_addr	= vb2_dma_contig_plane_dma_addr(dst_buf, i);
++		pfb->m.mem[i].addr	= dma_to_phys(v4l_get_dev_from_codec_mm(),
++				pfb->m.mem[i].dma_addr);
++		if (i == 0) {
++			//Y
++			if (dst_buf->num_planes == 1) {
++				pfb->m.mem[0].size	= ctx->picinfo.y_len_sz +
++					ctx->picinfo.c_len_sz;
++				pfb->m.mem[0].offset = ctx->picinfo.y_len_sz;
++			} else {
++				pfb->m.mem[0].size	= ctx->picinfo.y_len_sz;
++				pfb->m.mem[0].offset = 0;
++			}
++		} else {
++			if (dst_buf->num_planes == 2) {
++				//UV
++				pfb->m.mem[1].size	= ctx->picinfo.c_len_sz;
++				pfb->m.mem[1].offset = ctx->picinfo.c_len_sz >> 1;
++			} else {
++				pfb->m.mem[i].size  = ctx->picinfo.c_len_sz >> 1;
++				pfb->m.mem[i].offset = 0;
++			}
++		}
+ 
+ 		v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-			"idx: %u, 3 planes, y:(0x%lx, %d), u:(0x%lx, %d), v:(0x%lx, %d)\n",
+-			dst_buf->index,
+-			pfb->m.mem[0].addr, pfb->m.mem[0].size,
+-			pfb->m.mem[1].addr, pfb->m.mem[1].size,
+-			pfb->m.mem[2].addr, pfb->m.mem[2].size);
++				"idx: %u, %c:(0x%lx, %d)\n", dst_buf->index,
++				plane_n[i], pfb->m.mem[i].addr, pfb->m.mem[i].size);
+ 	}
+ 
+ 	dst_buf_info->used = true;
+@@ -490,8 +471,10 @@ EXPORT_SYMBOL(put_fb_to_queue);
+ void trans_vframe_to_user(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer *fb)
+ {
+ 	struct aml_video_dec_buf *dstbuf = NULL;
++	struct vb2_buffer *vb2_buf = NULL;
+ 	struct vframe_s *vf = (struct vframe_s *)fb->vf_handle;
+ 
++
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_OUTPUT,
+ 		"FROM (%s %s) vf: %lx, ts: %llx, idx: %d, "
+ 		"Y:(%lx, %u) C/U:(%lx, %u) V:(%lx, %u)\n",
+@@ -503,59 +486,75 @@ void trans_vframe_to_user(struct aml_vcodec_ctx *ctx, struct vdec_v4l2_buffer *f
+ 		fb->m.mem[2].addr, fb->m.mem[2].size);
+ 
+ 	dstbuf = container_of(fb, struct aml_video_dec_buf, frame_buffer);
++	vb2_buf = &dstbuf->vb.vb2_buf;
++
+ 	if (dstbuf->frame_buffer.num_planes == 1) {
+-		vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 0, fb->m.mem[0].bytes_used);
++		vb2_set_plane_payload(vb2_buf, 0, fb->m.mem[0].bytes_used);
+ 	} else if (dstbuf->frame_buffer.num_planes == 2) {
+-		vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 0, fb->m.mem[0].bytes_used);
+-		vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 1, fb->m.mem[1].bytes_used);
++		vb2_set_plane_payload(vb2_buf, 0, fb->m.mem[0].bytes_used);
++		vb2_set_plane_payload(vb2_buf, 1, fb->m.mem[1].bytes_used);
+ 	}
+-	dstbuf->vb.vb2_buf.timestamp = vf->timestamp;
++	vb2_buf->timestamp = vf->timestamp;
+ 	dstbuf->ready_to_display = true;
+ 
+-	if (dump_capture_frame) {
++	do {
++		unsigned int dw_mode = VDEC_DW_NO_AFBC;
+ 		struct file *fp;
++
++		if (!dump_capture_frame || ctx->is_drm_mode)
++			break;
++		if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode))
++			break;
++		if (dw_mode == VDEC_DW_AFBC_ONLY)
++			break;
++
+ 		fp = filp_open("/data/dec_dump.raw",
+ 				O_CREAT | O_RDWR | O_LARGEFILE | O_APPEND, 0600);
+ 		if (!IS_ERR(fp)) {
+-			struct vb2_buffer *vb = &dstbuf->vb.vb2_buf;
++			struct vb2_buffer *vb = vb2_buf;
+ 			kernel_write(fp,vb2_plane_vaddr(vb, 0),vb->planes[0].bytesused, 0);
+ 			if (dstbuf->frame_buffer.num_planes == 2)
+ 				kernel_write(fp,vb2_plane_vaddr(vb, 1),
+ 						vb->planes[1].bytesused, 0);
+ 			filp_close(fp, NULL);
++			dump_capture_frame--;
+ 		}
+-	}
++	} while(0);
+ 
+ 	if (vf->flag & VFRAME_FLAG_EMPTY_FRAME_V4L) {
+ 		dstbuf->lastframe = true;
+ 		dstbuf->vb.flags = V4L2_BUF_FLAG_LAST;
+ 		if (dstbuf->frame_buffer.num_planes == 1) {
+-			vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 0, 0);
++			vb2_set_plane_payload(vb2_buf, 0, 0);
+ 		} else if (dstbuf->frame_buffer.num_planes == 2) {
+-			vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 0, 0);
+-			vb2_set_plane_payload(&dstbuf->vb.vb2_buf, 1, 0);
++			vb2_set_plane_payload(vb2_buf, 0, 0);
++			vb2_set_plane_payload(vb2_buf, 1, 0);
+ 		}
+ 		ctx->has_receive_eos = true;
+ 		v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+ 			"recevie a empty frame. idx: %d, state: %d\n",
+-			dstbuf->vb.vb2_buf.index,
+-			dstbuf->vb.vb2_buf.state);
++			vb2_buf->index, vb2_buf->state);
+ 		ATRACE_COUNTER("v4l2_eos", 0);
+ 	}
+ 
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO,
+ 		"receive vbuf idx: %d, state: %d\n",
+-		dstbuf->vb.vb2_buf.index,
+-		dstbuf->vb.vb2_buf.state);
++		vb2_buf->index, vb2_buf->state);
+ 
+-	if (dstbuf->vb.vb2_buf.state == VB2_BUF_STATE_ACTIVE) {
++	if (vb2_buf->state == VB2_BUF_STATE_ACTIVE) {
+ 		/* binding vframe handle. */
+ 		vf->flag |= VFRAME_FLAG_VIDEO_LINEAR;
+ 		ATRACE_COUNTER("v4l2_from", vf->index_disp);
+ 		dstbuf->privdata.vf = *vf;
+ 		dstbuf->privdata.vf.omx_index =
+-			dstbuf->vb.vb2_buf.index;
++			vb2_buf->index;
+ 
++		if (vb2_buf->memory == VB2_MEMORY_DMABUF) {
++			/* only Y will contain vframe */
++			dmabuf_set_vframe(vb2_buf->planes[0].dbuf, vf);
++			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
++					"set vf(%p) into %dth buf\n", vf, vb2_buf->index);
++		}
+ 		v4l2_m2m_buf_done(&dstbuf->vb, VB2_BUF_STATE_DONE);
+ 	}
+ 
+@@ -1250,6 +1249,7 @@ void aml_vcodec_dec_release(struct aml_vcodec_ctx *ctx)
+ {
+ 	ulong flags;
+ 
++	kref_put(&ctx->box_ref, box_release);
+ 	flags = aml_vcodec_ctx_lock(ctx);
+ 	ctx->state = AML_STATE_ABORT;
+ 	ATRACE_COUNTER("v4l2_state", ctx->state);
+@@ -1382,7 +1382,7 @@ static int vidioc_vdec_dqbuf(struct file *file, void *priv,
+ 		aml_buf->privdata.v4l_inst_id		= ctx->id;
+ 
+ 		file = fget(vb2_v4l2->private);
+-		if (is_v4l2_buf_file(file)) {
++		if (file && is_v4l2_buf_file(file)) {
+ 			dmabuf_fd_install_data(vb2_v4l2->private,
+ 				(void*)&aml_buf->privdata,
+ 				sizeof(struct file_private_data));
+@@ -1390,8 +1390,8 @@ static int vidioc_vdec_dqbuf(struct file *file, void *priv,
+ 			v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO, "disp: %d, vf: %lx\n",
+ 				aml_buf->privdata.vf.index_disp,
+ 				(ulong) v4l_get_vf_handle(vb2_v4l2->private));
++			fput(file);
+ 		}
+-		fput(file);
+ 		mutex_unlock(&ctx->lock);
+ 	}
+ 
+@@ -1945,11 +1945,18 @@ static int vb2ops_vdec_queue_setup(struct vb2_queue *vq,
+ 			alloc_devs[i] = v4l_get_dev_from_codec_mm();//alloc mm from the codec mm
+ 		}
+ 	} else {
++		int dw_mode = VDEC_DW_NO_AFBC;
++
+ 		if (vq->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+ 			*nplanes = 2;
+ 		else
+ 			*nplanes = 1;
+ 
++		if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode))
++			return -EACCES;
++		if (dw_mode == VDEC_DW_AFBC_ONLY)
++			*nplanes = 1;
++
+ 		for (i = 0; i < *nplanes; i++) {
+ 			sizes[i] = q_data->sizeimage[i];
+ 			//alloc_devs[i] = &ctx->dev->plat_dev->dev;
+@@ -1988,6 +1995,158 @@ static int vb2ops_vdec_buf_prepare(struct vb2_buffer *vb)
+ 	return 0;
+ }
+ 
++static int init_mmu_bmmu_box(struct aml_vcodec_ctx *ctx)
++{
++	int i;
++	int mmu_flag = ctx->is_drm_mode? CODEC_MM_FLAGS_TVP:0;
++	int bmmu_flag = mmu_flag;
++
++	/* get header and page size */
++	if (vdec_if_get_param(ctx, GET_PARAM_COMP_BUF_INFO, &ctx->comp_info)) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to get comp info\n");
++		return -EINVAL;
++	}
++
++	ctx->comp_bufs = kzalloc(sizeof(*ctx->comp_bufs) * V4L_CAP_BUFF_MAX,
++			GFP_KERNEL);
++	if (!ctx->comp_bufs)
++		return -ENOMEM;
++
++	/* init bmmu box */
++	ctx->mmu_box = decoder_mmu_box_alloc_box("v4l2_dec",
++			ctx->id, V4L_CAP_BUFF_MAX,
++			ctx->comp_info.max_size * SZ_1M, mmu_flag);
++	if (!ctx->mmu_box) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to create bmmu box\n");
++		return -EINVAL;
++	}
++
++	/* init mmu box */
++	bmmu_flag |= CODEC_MM_FLAGS_CMA_CLEAR | CODEC_MM_FLAGS_FOR_VDECODER;
++	ctx->bmmu_box  = decoder_bmmu_box_alloc_box("v4l2_dec",
++			ctx->id, V4L_CAP_BUFF_MAX,
++			4 + PAGE_SHIFT, bmmu_flag);
++	if (!ctx->bmmu_box) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to create mmu box\n");
++		goto free_mmubox;
++	}
++
++	kref_init(&ctx->box_ref);
++	for (i = 0; i < V4L_CAP_BUFF_MAX; i++) {
++		struct internal_comp_buf *buf;
++		buf = &ctx->comp_bufs[i];
++		buf->index = i;
++		buf->ref = 0;
++		buf->box_ref = &ctx->box_ref;
++		buf->mmu_box = ctx->mmu_box;
++		buf->bmmu_box = ctx->bmmu_box;
++		buf->frame_buffer_size = ctx->comp_info.frame_buffer_size;
++	}
++	kref_get(&ctx->ctx_ref);
++	return 0;
++
++free_mmubox:
++	decoder_mmu_box_free(ctx->mmu_box);
++	ctx->mmu_box = NULL;
++	return -1;
++}
++
++void aml_v4l_ctx_release(struct kref *kref)
++{
++	struct aml_vcodec_ctx * ctx;
++
++	ctx = container_of(kref, struct aml_vcodec_ctx, ctx_ref);
++	kfree(ctx);
++}
++
++static void box_release(struct kref *kref)
++{
++	struct aml_vcodec_ctx * ctx;
++
++	pr_info("%s\n", __func__);
++	ctx = container_of(kref, struct aml_vcodec_ctx, box_ref);
++	decoder_bmmu_box_free(ctx->bmmu_box);
++	decoder_mmu_box_free(ctx->mmu_box);
++	kfree(ctx->comp_bufs);
++	kref_put(&ctx->ctx_ref, aml_v4l_ctx_release);
++}
++
++static void internal_buf_free(void *arg)
++{
++	struct internal_comp_buf* ibuf =
++		(struct internal_comp_buf*)arg;
++
++	pr_info("%s idx:%d\n", __func__, ibuf->index);
++	ibuf->ref = 0;
++	decoder_mmu_box_free_idx(ibuf->mmu_box, ibuf->index);
++	decoder_bmmu_box_free_idx(ibuf->bmmu_box, ibuf->index);
++	kref_put(ibuf->box_ref, box_release);
++}
++
++static int bind_comp_buffer_to_uvm(struct aml_vcodec_ctx *ctx,
++		struct aml_video_dec_buf *buf)
++{
++	struct dma_buf * dma = buf->vb.vb2_buf.planes[0].dbuf;
++	struct uvm_buffer_info b_info;
++	int ret, i;
++	struct internal_comp_buf* ibuf;
++
++	if (!ctx->bmmu_box || !ctx->mmu_box)
++		if (init_mmu_bmmu_box(ctx))
++			return -EINVAL;
++
++	if (!dmabuf_is_uvm(dma)) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "not uvm\n");
++		return -EINVAL;
++	}
++
++	for (i = 0; i < V4L_CAP_BUFF_MAX; i++) {
++		if (!ctx->comp_bufs[i].ref)
++			break;
++	}
++	if (i == V4L_CAP_BUFF_MAX) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "out of internal buf\n");
++		return -EINVAL;
++	}
++
++	buf->internal_index = i;
++	ibuf = &ctx->comp_bufs[i];
++
++	/* allocate header */
++	ret = decoder_bmmu_box_alloc_buf_phy(ctx->bmmu_box,
++			ibuf->index, ctx->comp_info.header_size,
++			"v4l2_dec", &ibuf->header_addr);
++	if (ret < 0) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to alloc %dth bmmu\n", i);
++		return -ENOMEM;
++	}
++	kref_get(&ctx->box_ref);
++	ibuf->ref = 1;
++
++	/* frame SG buffer need to be realloc inside decoder,
++	 * just before slice decoding to save memory
++	 */
++	b_info.size = ctx->comp_info.frame_buffer_size << PAGE_SHIFT;
++	b_info.arg = ibuf;
++	b_info.free = internal_buf_free;
++	ret = dmabuf_set_private_buffer(dma, 0, &b_info);
++	if (ret < 0) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to set dmabuf priv buf\n");
++		goto bmmu_box_free;
++	}
++
++	v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
++			"%s bind vb2:%d <--> internal: %d header_addr 0x%lx\n", __func__,
++			buf->vb.vb2_buf.index, i, ibuf->header_addr);
++	return 0;
++
++bmmu_box_free:
++	decoder_bmmu_box_free_idx(ibuf->bmmu_box, ibuf->index);
++	kref_put(&ctx->box_ref, box_release);
++	ibuf->ref = 0;
++	return EINVAL;
++}
++
+ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+ {
+ 	struct aml_vcodec_ctx *ctx = vb2_get_drv_priv(vb->vb2_queue);
+@@ -2007,6 +2166,13 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+ 	 * check if this buffer is ready to be used after decode
+ 	 */
+ 	if (!V4L2_TYPE_IS_OUTPUT(vb->vb2_queue->type)) {
++		unsigned int dw_mode = VDEC_DW_NO_AFBC;
++
++		if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode)) {
++			v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "invalid dw_mode\n");
++			return;
++
++		}
+ 		if (vb->index >= ctx->dpb_size) {
+ 			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+ 				"enque capture buf idx %d/%d is invalid.\n",
+@@ -2025,6 +2191,13 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+ 				"enque capture buf idx %d, vf: %lx\n",
+ 				vb->index, (ulong) v4l_get_vf_handle(vb2_v4l2->private));
+ 
++			/* bind compressed buffer to uvm */
++			if ((dw_mode != VDEC_DW_NO_AFBC) &&
++					bind_comp_buffer_to_uvm(ctx, buf)) {
++				v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "fail to bind comp buffer\n");
++				return;
++			}
++
+ 			v4l2_m2m_buf_queue(ctx->m2m_ctx, vb2_v4l2);
+ 			buf->que_in_m2m = true;
+ 			buf->queued_in_vb2 = true;
+@@ -2155,7 +2328,6 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+ 	struct aml_video_dec_buf *buf = container_of(vb2_v4l2,
+ 					struct aml_video_dec_buf, vb);
+ 	unsigned int size, phy_addr = 0;
+-	char *owner = __getname();
+ 
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT, "%s, type: %d, idx: %d\n",
+ 		__func__, vb->vb2_queue->type, vb->index);
+@@ -2172,11 +2344,14 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+ 	/* codec_mm buffers count */
+ 	if (V4L2_TYPE_IS_OUTPUT(vb->type)) {
+ 		if (vb->memory == VB2_MEMORY_MMAP) {
++			char *owner = __getname();
++
+ 			size = vb->planes[0].length;
+ 			phy_addr = vb2_dma_contig_plane_dma_addr(vb, 0);
+ 			snprintf(owner, PATH_MAX, "%s-%d", "v4l-input", ctx->id);
+ 			strncpy(buf->mem_onwer, owner, sizeof(buf->mem_onwer));
+ 			buf->mem_onwer[sizeof(buf->mem_onwer) - 1] = '\0';
++			__putname(owner);
+ 
+ 			buf->mem[0] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
+ 					phy_addr, size, vb->index);
+@@ -2185,39 +2360,52 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+ 				phy_addr, size, vb->index);
+ 		}
+ 	} else {
+-		snprintf(owner, PATH_MAX, "%s-%d", "v4l-output", ctx->id);
+-		strncpy(buf->mem_onwer, owner, sizeof(buf->mem_onwer));
+-		buf->mem_onwer[sizeof(buf->mem_onwer) - 1] = '\0';
++		int i;
+ 
+-		if ((vb->memory == VB2_MEMORY_MMAP) && (vb->num_planes == 1)) {
+-			size = vb->planes[0].length;
+-			phy_addr = vb2_dma_contig_plane_dma_addr(vb, 0);
+-			buf->mem[0] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
+-				phy_addr, size, vb->index);
+-			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-				"OUT Y alloc, addr: %x, size: %u, idx: %u\n",
+-				phy_addr, size, vb->index);
+-		} else if ((vb->memory == VB2_MEMORY_MMAP) && (vb->num_planes == 2)) {
+-			size = vb->planes[0].length;
+-			phy_addr = vb2_dma_contig_plane_dma_addr(vb, 0);
+-			buf->mem[0] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
+-				phy_addr, size, vb->index);
+-			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-				"OUT Y alloc, addr: %x, size: %u, idx: %u\n",
+-				phy_addr, size, vb->index);
++		if (vb->memory == VB2_MEMORY_MMAP) {
++			char *owner = __getname();
+ 
+-			size = vb->planes[1].length;
+-			phy_addr = vb2_dma_contig_plane_dma_addr(vb, 1);
+-			buf->mem[1] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
+-					phy_addr, size, vb->index);
+-			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-				"OUT C alloc, addr: %x, size: %u, idx: %u\n",
+-				phy_addr, size, vb->index);
++			snprintf(owner, PATH_MAX, "%s-%d", "v4l-output", ctx->id);
++			strncpy(buf->mem_onwer, owner, sizeof(buf->mem_onwer));
++			buf->mem_onwer[sizeof(buf->mem_onwer) - 1] = '\0';
++			__putname(owner);
++
++			for (i = 0; i < vb->num_planes; i++) {
++				size = vb->planes[i].length;
++				phy_addr = vb2_dma_contig_plane_dma_addr(vb, i);
++				buf->mem[i] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
++						phy_addr, size, vb->index);
++				v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
++						"OUT %c alloc, addr: %x, size: %u, idx: %u\n",
++						(i == 0? 'Y':'C'), phy_addr, size, vb->index);
++			}
++		} else if (vb->memory == VB2_MEMORY_DMABUF) {
++			struct uvm_handle * uvm;
++			struct dma_buf * dma;
++			unsigned int dw_mode = VDEC_DW_NO_AFBC;
++
++			for (i = 0; i < vb->num_planes; i++) {
++				if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode)) {
++					v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "invalid dw_mode\n");
++					return -EINVAL;
++				}
++				/* None-DW mode means single layer */
++				if (dw_mode == VDEC_DW_AFBC_ONLY && i > 0) {
++					v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR,
++							"only support single plane in dw mode 0\n");
++					return -EINVAL;
++				}
++				size = vb->planes[i].length;
++				dma = vb->planes[i].dbuf;
++				uvm = dma->priv;
++				/* sanity check */
++				if (!dmabuf_is_uvm(dma)) {
++					v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR, "not uvm\n");
++					return -EINVAL;
++				}
++			}
+ 		}
+ 	}
+-
+-	__putname(owner);
+-
+ 	return 0;
+ }
+ 
+@@ -2245,17 +2433,16 @@ static void codec_mm_bufs_cnt_clean(struct vb2_queue *q)
+ 		}
+ 
+ 		if (q->memory == VB2_MEMORY_MMAP) {
+-			v4l_freebufs_back_to_codec_mm(buf->mem_onwer, buf->mem[0]);
+-			v4l_freebufs_back_to_codec_mm(buf->mem_onwer, buf->mem[1]);
+-
+-			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-				"OUT Y clean, addr: %lx, size: %u, idx: %u\n",
+-				buf->mem[0]->phy_addr, buf->mem[0]->buffer_size, i);
+-			v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
+-				"OUT C clean, addr: %lx, size: %u, idx: %u\n",
+-				buf->mem[1]->phy_addr, buf->mem[1]->buffer_size, i);
+-			buf->mem[0] = NULL;
+-			buf->mem[1] = NULL;
++			int j;
++
++			for (j = 0; j < q->bufs[i]->num_planes ; j++) {
++				v4l_freebufs_back_to_codec_mm(buf->mem_onwer, buf->mem[j]);
++				v4l_dbg(ctx, V4L_DEBUG_CODEC_BUFMGR,
++					"OUT %c clean, addr: %lx, size: %u, idx: %u\n",
++					(j == 0)? 'Y':'C',
++					buf->mem[j]->phy_addr, buf->mem[j]->buffer_size, i);
++				buf->mem[j] = NULL;
++			}
+ 		}
+ 	}
+ }
+@@ -2483,7 +2670,8 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+ 
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT, "%s\n", __func__);
+ 
+-	if (a->type == V4L2_BUF_TYPE_VIDEO_OUTPUT) {
++	if (a->type == V4L2_BUF_TYPE_VIDEO_OUTPUT ||
++		a->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+ 		struct aml_dec_params *in =
+ 			(struct aml_dec_params *) a->parm.raw_data;
+ 		struct aml_dec_params *dec = &ctx->config.parm.dec;
+@@ -2500,6 +2688,8 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+ 			dec->cnt = in->cnt;
+ 
+ 		dec->parms_status |= in->parms_status;
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT, "%s parms:%x\n",
++				__func__, in->parms_status);
+ 	}
+ 
+ 	return 0;
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.h b/drivers/amvdec_ports/aml_vcodec_dec.h
+index 1a1b918..cee3b5a 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.h
++++ b/drivers/amvdec_ports/aml_vcodec_dec.h
+@@ -20,6 +20,7 @@
+ #ifndef _AML_VCODEC_DEC_H_
+ #define _AML_VCODEC_DEC_H_
+ 
++#include <linux/kref.h>
+ #include <media/videobuf2-core.h>
+ #include <media/videobuf2-v4l2.h>
+ #include <linux/amlogic/media/codec_mm/codec_mm.h>
+@@ -92,6 +93,9 @@ struct aml_video_dec_buf {
+ 	bool queued_in_v4l2;
+ 	bool lastframe;
+ 	bool error;
++
++	/* internal compressed buffer */
++	unsigned int internal_index;
+ };
+ 
+ extern const struct v4l2_ioctl_ops aml_vdec_ioctl_ops;
+@@ -121,5 +125,6 @@ void wait_vcodec_ending(struct aml_vcodec_ctx *ctx);
+ void vdec_frame_buffer_release(void *data);
+ void aml_vdec_dispatch_event(struct aml_vcodec_ctx *ctx, u32 changes);
+ void* v4l_get_vf_handle(int fd);
++void aml_v4l_ctx_release(struct kref *kref);
+ 
+ #endif /* _AML_VCODEC_DEC_H_ */
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec_drv.c b/drivers/amvdec_ports/aml_vcodec_dec_drv.c
+index 710e13c..5f9431b 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec_drv.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec_drv.c
+@@ -62,6 +62,8 @@ static int fops_vcodec_open(struct file *file)
+ 	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
+ 	if (!ctx)
+ 		return -ENOMEM;
++	kref_init(&ctx->ctx_ref);
++
+ 	aml_buf = kzalloc(sizeof(*aml_buf), GFP_KERNEL);
+ 	if (!aml_buf) {
+ 		kfree(ctx);
+@@ -168,7 +170,7 @@ static int fops_vcodec_release(struct file *file)
+ 
+ 	list_del_init(&ctx->list);
+ 	kfree(ctx->empty_flush_buf);
+-	kfree(ctx);
++	kref_put(&ctx->ctx_ref, aml_v4l_ctx_release);
+ 	mutex_unlock(&dev->dev_mutex);
+ 	return 0;
+ }
+@@ -302,8 +304,10 @@ void* v4l_get_vf_handle(int fd)
+ 
+ 	if (!is_v4l2_buf_file(file)) {
+ 		fput(file);
++#if 0
+ 		v4l_dbg(0, V4L_DEBUG_CODEC_ERROR,
+ 			"the buf file checked fail!\n");
++#endif
+ 		return NULL;
+ 	}
+ 
+@@ -612,9 +616,9 @@ bool multiplanar;
+ EXPORT_SYMBOL(multiplanar);
+ module_param(multiplanar, bool, 0644);
+ 
+-bool dump_capture_frame;
++int dump_capture_frame;
+ EXPORT_SYMBOL(dump_capture_frame);
+-module_param(dump_capture_frame, bool, 0644);
++module_param(dump_capture_frame, int, 0644);
+ 
+ EXPORT_SYMBOL(param_sets_from_ucode);
+ module_param(param_sets_from_ucode, bool, 0644);
+diff --git a/drivers/amvdec_ports/aml_vcodec_drv.h b/drivers/amvdec_ports/aml_vcodec_drv.h
+index aaac607..225a43c 100644
+--- a/drivers/amvdec_ports/aml_vcodec_drv.h
++++ b/drivers/amvdec_ports/aml_vcodec_drv.h
+@@ -20,6 +20,7 @@
+ #ifndef _AML_VCODEC_DRV_H_
+ #define _AML_VCODEC_DRV_H_
+ 
++#include <linux/kref.h>
+ #include <linux/platform_device.h>
+ #include <linux/videodev2.h>
+ #include <media/v4l2-ctrls.h>
+@@ -269,6 +270,18 @@ struct vdec_pic_info {
+ 	int ref_frame_count;
+ };
+ 
++/**
++ * struct vdec_comp_buf_info - compressed buffer info
++ * @max_size: max size needed for MMU Box in MB
++ * @header_size: contineous size for the compressed header
++ * @frame_buffer_size: SG page number to store the frame
++ */
++struct vdec_comp_buf_info {
++	u32 max_size;
++	u32 header_size;
++	u32 frame_buffer_size;
++};
++
+ struct aml_vdec_cfg_infos {
+ 	u32 double_write_mode;
+ 	u32 init_width;
+@@ -367,9 +380,30 @@ struct aml_vdec_thread {
+ 	aml_thread_func func;
+ };
+ 
++/* struct internal_comp_buf - compressed buffer
++ * @index: index of this buf within (B)MMU BOX
++ * @ref: reference number of this buf
++ * @mmu_box: mmu_box of context
++ * @bmmu_box: bmmu_box of context
++ * @box_ref: box_ref of context
++ * @header_addr: header for compressed buffer
++ * @frame_buffer_size: SG buffer page number from
++ *  struct vdec_comp_buf_info
++ */
++struct internal_comp_buf {
++	unsigned int index;
++	unsigned int ref;
++	void* mmu_box;
++	void* bmmu_box;
++	struct kref* box_ref;
++
++	ulong header_addr;
++	u32 frame_buffer_size;
++};
+ /**
+  * struct aml_vcodec_ctx - Context (instance) private data.
+  *
++ * @ctx_ref: for deferred free of this context
+  * @type: type of the instance - decoder or encoder
+  * @dev: pointer to the aml_vcodec_dev of the device
+  * @list: link to ctx_list of aml_vcodec_dev
+@@ -407,6 +441,7 @@ struct aml_vdec_thread {
+  *	  aml_video_dec_buf.
+  */
+ struct aml_vcodec_ctx {
++	struct kref ctx_ref;
+ 	enum aml_instance_type type;
+ 	struct aml_vcodec_dev *dev;
+ 	struct list_head list;
+@@ -465,6 +500,13 @@ struct aml_vcodec_ctx {
+ 	u32 display_count;
+ 	struct v4l_buff_pool cap_pool;
+ 	u32 cap_pix_fmt;
++
++	/* compressed buffer support */
++	void * bmmu_box;
++	void * mmu_box;
++	struct kref box_ref;
++	struct vdec_comp_buf_info comp_info;
++	struct internal_comp_buf *comp_bufs;
+ };
+ 
+ /**
+diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+index ad776eb..d7a056c 100644
+--- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+@@ -977,6 +977,13 @@ static int vdec_h264_get_param(unsigned long h_vdec,
+ 	case GET_PARAM_CONFIG_INFO:
+ 		get_param_config_info(inst, out);
+ 		break;
++
++	case GET_PARAM_DW_MODE:
++	{
++		unsigned int* mode = out;
++		*mode = inst->ctx->config.parm.dec.cfg.double_write_mode;
++		break;
++	}
+ 	default:
+ 		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
+ 			"invalid get parameter type=%d\n", type);
+diff --git a/drivers/amvdec_ports/decoder/vdec_hevc_if.c b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
+index 19bb2a8..53775f5 100644
+--- a/drivers/amvdec_ports/decoder/vdec_hevc_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
+@@ -115,6 +115,7 @@ struct vdec_hevc_inst {
+ 	struct vcodec_vfm_s vfm;
+ 	struct aml_dec_params parms;
+ 	struct completion comp;
++	struct vdec_comp_buf_info comp_info;
+ };
+ 
+ static void get_pic_info(struct vdec_hevc_inst *inst,
+@@ -700,6 +701,12 @@ static int vdec_hevc_decode(unsigned long h_vdec, struct aml_vcodec_mem *bs,
+ 		"parms status: %u\n", parms->parms_status);
+  }
+ 
++static void get_param_comp_buf_info(struct vdec_hevc_inst *inst,
++		struct vdec_comp_buf_info *params)
++{
++	memcpy(params, &inst->comp_info, sizeof(*params));
++}
++
+ static int vdec_hevc_get_param(unsigned long h_vdec,
+ 			       enum vdec_get_param_type type, void *out)
+ {
+@@ -736,6 +743,17 @@ static int vdec_hevc_get_param(unsigned long h_vdec,
+ 	case GET_PARAM_CONFIG_INFO:
+ 		get_param_config_info(inst, out);
+ 		break;
++
++	case GET_PARAM_DW_MODE:
++	{
++		unsigned int *mode = out;
++		*mode = inst->ctx->config.parm.dec.cfg.double_write_mode;
++		break;
++	}
++	case GET_PARAM_COMP_BUF_INFO:
++		get_param_comp_buf_info(inst, out);
++		break;
++
+ 	default:
+ 		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
+ 			"invalid get parameter type=%d\n", type);
+@@ -790,6 +808,12 @@ static void set_param_ps_info(struct vdec_hevc_inst *inst,
+ 		dec->dpb_sz);
+ }
+ 
++static void set_param_comp_buf_info(struct vdec_hevc_inst *inst,
++		struct vdec_comp_buf_info *info)
++{
++	memcpy(&inst->comp_info, info, sizeof(*info));
++}
++
+ static void set_param_hdr_info(struct vdec_hevc_inst *inst,
+ 	struct aml_vdec_hdr_infos *hdr)
+ {
+@@ -833,6 +857,10 @@ static int vdec_hevc_set_param(unsigned long h_vdec,
+ 		set_param_ps_info(inst, in);
+ 		break;
+ 
++	case SET_PARAM_COMP_BUF_INFO:
++		set_param_comp_buf_info(inst, in);
++		break;
++
+ 	case SET_PARAM_HDR_INFO:
+ 		set_param_hdr_info(inst, in);
+ 		break;
+diff --git a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
+index ff0fb2e..f652524 100644
+--- a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
+@@ -546,6 +546,12 @@ static int vdec_mpeg12_get_param(unsigned long h_vdec,
+ 		get_crop_info(inst, out);
+ 		break;
+ 
++	case GET_PARAM_DW_MODE:
++	{
++		unsigned int* mode = out;
++		*mode = VDEC_DW_NO_AFBC;
++		break;
++	}
+ 	default:
+ 		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
+ 			"invalid get parameter type=%d\n", type);
+diff --git a/drivers/amvdec_ports/decoder/vdec_vp9_if.c b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+index afb7d9a..a622529 100644
+--- a/drivers/amvdec_ports/decoder/vdec_vp9_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+@@ -126,6 +126,7 @@ struct vdec_vp9_inst {
+ 	struct vcodec_vfm_s vfm;
+ 	struct aml_dec_params parms;
+ 	struct completion comp;
++	struct vdec_comp_buf_info comp_info;
+ };
+ 
+ static int vdec_write_nalu(struct vdec_vp9_inst *inst,
+@@ -817,6 +818,12 @@ static int vdec_vp9_decode(unsigned long h_vdec, struct aml_vcodec_mem *bs,
+ 		"parms status: %u\n", parms->parms_status);
+  }
+ 
++static void get_param_comp_buf_info(struct vdec_vp9_inst *inst,
++		struct vdec_comp_buf_info *params)
++{
++	memcpy(params, &inst->comp_info, sizeof(*params));
++}
++
+ static int vdec_vp9_get_param(unsigned long h_vdec,
+ 			       enum vdec_get_param_type type, void *out)
+ {
+@@ -853,6 +860,17 @@ static int vdec_vp9_get_param(unsigned long h_vdec,
+ 	case GET_PARAM_CONFIG_INFO:
+ 		get_param_config_info(inst, out);
+ 		break;
++
++	case GET_PARAM_DW_MODE:
++	{
++		unsigned int *mode = out;
++		*mode = inst->ctx->config.parm.dec.cfg.double_write_mode;
++		break;
++	}
++	case GET_PARAM_COMP_BUF_INFO:
++		get_param_comp_buf_info(inst, out);
++		break;
++
+ 	default:
+ 		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
+ 			"invalid get parameter type=%d\n", type);
+@@ -908,6 +926,12 @@ static void set_param_ps_info(struct vdec_vp9_inst *inst,
+ 		ps->dpb_size);
+ }
+ 
++static void set_param_comp_buf_info(struct vdec_vp9_inst *inst,
++		struct vdec_comp_buf_info *info)
++{
++	memcpy(&inst->comp_info, info, sizeof(*info));
++}
++
+ static void set_param_hdr_info(struct vdec_vp9_inst *inst,
+ 	struct aml_vdec_hdr_infos *hdr)
+ {
+@@ -951,6 +975,10 @@ static int vdec_vp9_set_param(unsigned long h_vdec,
+ 		set_param_ps_info(inst, in);
+ 		break;
+ 
++	case SET_PARAM_COMP_BUF_INFO:
++		set_param_comp_buf_info(inst, in);
++		break;
++
+ 	case SET_PARAM_HDR_INFO:
+ 		set_param_hdr_info(inst, in);
+ 		break;
+diff --git a/drivers/amvdec_ports/vdec_drv_if.h b/drivers/amvdec_ports/vdec_drv_if.h
+index a5ab735..e38fcbf 100644
+--- a/drivers/amvdec_ports/vdec_drv_if.h
++++ b/drivers/amvdec_ports/vdec_drv_if.h
+@@ -60,6 +60,15 @@ enum vdec_fb_status {
+ 	FB_ST_FREE
+ };
+ 
++enum vdec_dw_mode {
++	VDEC_DW_AFBC_ONLY = 0,
++	VDEC_DW_AFBC_1_1_DW = 1,
++	VDEC_DW_AFBC_1_4_DW = 2,
++	VDEC_DW_AFBC_x2_1_4_DW = 3,
++	VDEC_DW_AFBC_1_2_DW = 4,
++	VDEC_DW_NO_AFBC = 16,
++};
++
+ /* For GET_PARAM_DISP_FRAME_BUFFER and GET_PARAM_FREE_FRAME_BUFFER,
+  * the caller does not own the returned buffer. The buffer will not be
+  *				released before vdec_if_deinit.
+@@ -69,6 +78,8 @@ enum vdec_fb_status {
+  * GET_PARAM_PIC_INFO		: get picture info, struct vdec_pic_info*
+  * GET_PARAM_CROP_INFO		: get crop info, struct v4l2_crop*
+  * GET_PARAM_DPB_SIZE		: get dpb size, unsigned int*
++ * GET_PARAM_DW_MODE:		: get double write mode, unsigned int*
++ * GET_PARAM_COMP_BUF_INFO	: get compressed buf info,  struct vdec_comp_buf_info*
+  */
+ enum vdec_get_param_type {
+ 	GET_PARAM_DISP_FRAME_BUFFER,
+@@ -76,7 +87,9 @@ enum vdec_get_param_type {
+ 	GET_PARAM_PIC_INFO,
+ 	GET_PARAM_CROP_INFO,
+ 	GET_PARAM_DPB_SIZE,
+-	GET_PARAM_CONFIG_INFO
++	GET_PARAM_CONFIG_INFO,
++	GET_PARAM_DW_MODE,
++	GET_PARAM_COMP_BUF_INFO,
+ };
+ 
+ /*
+@@ -85,6 +98,7 @@ enum vdec_get_param_type {
+ enum vdec_set_param_type {
+ 	SET_PARAM_WRITE_FRAME_SYNC,
+ 	SET_PARAM_PS_INFO,
++	SET_PARAM_COMP_BUF_INFO,
+ 	SET_PARAM_HDR_INFO,
+ 	SET_PARAM_POST_EVENT
+ };
+diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
+index 154fbf0..732a497 100644
+--- a/drivers/frame_provider/decoder/h265/vh265.c
++++ b/drivers/frame_provider/decoder/h265/vh265.c
+@@ -1412,7 +1412,6 @@ struct PIC_s {
+ 
+ 	u32 hw_decode_time;
+ 	u32 frame_size; // For frame base mode
+-	bool vframe_bound;
+ } /*PIC_t */;
+ 
+ #define MAX_TILE_COL_NUM    10
+@@ -2720,79 +2719,42 @@ static unsigned int log2i(unsigned int val)
+ 
+ static int init_buf_spec(struct hevc_state_s *hevc);
+ 
+-static bool v4l_is_there_vframe_bound(struct hevc_state_s *hevc)
+-{
+-	int i;
+-
+-	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
+-		struct PIC_s *pic = hevc->m_PIC[i];
+-
+-		if (pic && pic->vframe_bound)
+-			return true;
+-	}
+-
+-	return false;
+-}
+ 
+-static void v4l_mmu_buffer_release(struct hevc_state_s *hevc)
++static void uninit_mmu_buffers(struct hevc_state_s *hevc)
+ {
+-	int i;
++	if (hevc->mmu_box) {
++		decoder_mmu_box_free(hevc->mmu_box);
++		hevc->mmu_box = NULL;
++	}
+ 
+-	/* release workspace */
+-	if (hevc->bmmu_box)
++	if (hevc->bmmu_box) {
++		/* release workspace */
+ 		decoder_bmmu_box_free_idx(hevc->bmmu_box,
+ 			BMMU_WORKSPACE_ID);
+-	/*
+-	 * it's only when vframe get back to driver, right now we can be sure
+-	 * that vframe and fd are related. if the playback exits, the capture
+-	 * requires the upper app to release when the fd is closed, and others
+-	 * buffers drivers are released by driver.
+-	 */
+-	for (i = 0; i < MAX_REF_PIC_NUM; i++) {
+-		struct PIC_s *pic = hevc->m_PIC[i];
+-
+-		if (pic && !pic->vframe_bound) {
+-			if (hevc->bmmu_box)
+-				decoder_bmmu_box_free_idx(hevc->bmmu_box,
+-					VF_BUFFER_IDX(i));
+-			if (hevc->mmu_box)
+-				decoder_mmu_box_free_idx(hevc->mmu_box, i);
+-
+-			hevc_print(hevc, PRINT_FLAG_V4L_DETAIL,
+-				"%s free buffer[%d], bmmu_box: %p, mmu_box: %p\n",
+-				__func__, i, hevc->bmmu_box, hevc->mmu_box);
+-		}
++		decoder_bmmu_box_free(hevc->bmmu_box);
++		hevc->bmmu_box = NULL;
+ 	}
+ }
+ 
+-static void uninit_mmu_buffers(struct hevc_state_s *hevc)
++/* return in MB */
++static int hevc_max_mmu_buf_size(int max_w, int max_h)
+ {
+-	if (hevc->is_used_v4l &&
+-		v4l_is_there_vframe_bound(hevc)) {
+-		if (get_double_write_mode(hevc) != 0x10) {
+-			v4l_mmu_buffer_release(hevc);
+-			return;
+-		}
++	int buf_size = 64;
++
++	if ((max_w * max_h) > 0 &&
++		(max_w * max_h) <= 1920*1088) {
++		buf_size = 24;
+ 	}
++	return buf_size;
++}
+ 
+-	if (hevc->mmu_box)
+-		decoder_mmu_box_free(hevc->mmu_box);
+-	hevc->mmu_box = NULL;
+ 
+-	if (hevc->bmmu_box)
+-		decoder_bmmu_box_free(hevc->bmmu_box);
+-	hevc->bmmu_box = NULL;
+-}
+ static int init_mmu_buffers(struct hevc_state_s *hevc)
+ {
+ 	int tvp_flag = vdec_secure(hw_to_vdec(hevc)) ?
+ 		CODEC_MM_FLAGS_TVP : 0;
+-	int buf_size = 64;
+-
+-	if ((hevc->max_pic_w * hevc->max_pic_h) > 0 &&
+-		(hevc->max_pic_w * hevc->max_pic_h) <= 1920*1088) {
+-		buf_size = 24;
+-	}
++	int buf_size = hevc_max_mmu_buf_size(hevc->max_pic_w,
++			hevc->max_pic_h);
+ 
+ 	if (get_dbg_flag(hevc)) {
+ 		hevc_print(hevc, 0, "%s max_w %d max_h %d\n",
+@@ -2801,8 +2763,7 @@ static int init_mmu_buffers(struct hevc_state_s *hevc)
+ 
+ 	hevc->need_cache_size = buf_size * SZ_1M;
+ 	hevc->sc_start_time = get_jiffies_64();
+-	if (hevc->mmu_enable
+-		&& ((get_double_write_mode(hevc) & 0x10) == 0)) {
++	if (hevc->mmu_enable && !hevc->is_used_v4l) {
+ 		hevc->mmu_box = decoder_mmu_box_alloc_box(DRIVER_NAME,
+ 			hevc->index,
+ 			MAX_REF_PIC_NUM,
+@@ -3092,15 +3053,45 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
+ 	return buf_size;
+ }
+ 
++static int hevc_get_header_size(int w, int h)
++{
++	if ((get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1) &&
++			(IS_8K_SIZE(w, h)))
++		return ALIGN(MMU_COMPRESS_8K_HEADER_SIZE, 0x10000);
++	else
++		return ALIGN(MMU_COMPRESS_HEADER_SIZE, 0x10000);
++}
++
++static struct internal_comp_buf* v4lfb_to_icomp_buf(
++		struct hevc_state_s *hevc,
++		struct vdec_v4l2_buffer *fb)
++{
++	struct aml_video_dec_buf *aml_fb = NULL;
++	struct aml_vcodec_ctx * v4l2_ctx = hevc->v4l2_ctx;
++
++	aml_fb = container_of(fb, struct aml_video_dec_buf, frame_buffer);
++	return &v4l2_ctx->comp_bufs[aml_fb->internal_index];
++}
++
++static struct internal_comp_buf* index_to_icomp_buf(
++		struct hevc_state_s *hevc, int index)
++{
++	struct aml_video_dec_buf *aml_fb = NULL;
++	struct aml_vcodec_ctx * v4l2_ctx = hevc->v4l2_ctx;
++	struct vdec_v4l2_buffer *fb = NULL;
++
++	fb = (struct vdec_v4l2_buffer *)
++		hevc->m_BUF[index].v4l_ref_buf_addr;
++	aml_fb = container_of(fb, struct aml_video_dec_buf, frame_buffer);
++	return &v4l2_ctx->comp_bufs[aml_fb->internal_index];
++}
++
+ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+ {
+ 	int ret = -1;
+ 	int i = pic->index;
+ 	struct vdec_v4l2_buffer *fb = NULL;
+ 
+-	if (hevc->fatal_error & DECODER_FATAL_ERROR_NO_MEM)
+-		return ret;
+-
+ 	ret = vdec_v4l_get_buffer(hevc->v4l2_ctx, &fb);
+ 	if (ret < 0) {
+ 		hevc_print(hevc, 0, "[%d] H265 get buffer fail.\n",
+@@ -3109,23 +3100,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+ 	}
+ 
+ 	if (hevc->mmu_enable) {
+-		if ((get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1) &&
+-			(IS_8K_SIZE(hevc->pic_w, hevc->pic_h)))
+-			hevc->m_BUF[i].header_size =
+-				ALIGN(MMU_COMPRESS_8K_HEADER_SIZE, 0x10000);
+-		else
+-			hevc->m_BUF[i].header_size =
+-				ALIGN(MMU_COMPRESS_HEADER_SIZE, 0x10000);
+-
+-		ret = decoder_bmmu_box_alloc_buf_phy(hevc->bmmu_box,
+-			VF_BUFFER_IDX(i), hevc->m_BUF[i].header_size,
+-			DRIVER_NAME, &hevc->m_BUF[i].header_addr);
+-		if (ret < 0) {
+-			hevc_print(hevc, PRINT_FLAG_ERROR,
+-				"%s[%d], header size: %d, no mem fatal err\n",
+-				__func__, i, hevc->m_BUF[i].header_size);
+-			return ret;
+-		}
++		struct internal_comp_buf *ibuf = v4lfb_to_icomp_buf(hevc, fb);
++		hevc->m_BUF[i].header_addr = ibuf->header_addr;
+ 	}
+ 
+ 	hevc->m_BUF[i].used_flag	= 0;
+@@ -3270,6 +3246,7 @@ static void dealloc_unused_buf(struct hevc_state_s *hevc)
+ 					hevc->bmmu_box,
+ 					VF_BUFFER_IDX(i));
+ 			hevc->m_BUF[i].start_adr = 0;
++			hevc->m_BUF[i].header_addr = 0;
+ 			hevc->m_BUF[i].size = 0;
+ 		}
+ 	}
+@@ -3296,6 +3273,7 @@ static void dealloc_pic_buf(struct hevc_state_s *hevc,
+ 				VF_BUFFER_IDX(i));
+ 		hevc->m_BUF[i].used_flag = 0;
+ 		hevc->m_BUF[i].start_adr = 0;
++		hevc->m_BUF[i].header_addr = 0;
+ 		hevc->m_BUF[i].size = 0;
+ 	}
+ }
+@@ -5805,7 +5783,6 @@ static struct PIC_s *v4l_get_new_pic(struct hevc_state_s *hevc,
+ 	new_pic->referenced = 1;
+ 	new_pic->decode_idx = hevc->decode_idx;
+ 	new_pic->slice_idx = 0;
+-	new_pic->referenced = 1;
+ 	new_pic->output_mark = 0;
+ 	new_pic->recon_mark = 0;
+ 	new_pic->error_mark = 0;
+@@ -6113,6 +6090,41 @@ static void release_aux_data(struct hevc_state_s *hevc,
+ 	pic->aux_data_size = 0;
+ }
+ 
++static int recycle_mmu_buf_tail(struct hevc_state_s *hevc,
++		bool check_dma)
++{
++	hevc->used_4k_num =
++		READ_VREG(HEVC_SAO_MMU_STATUS) >> 16;
++	hevc_print(hevc,
++			H265_DEBUG_BUFMGR_MORE,
++			"%s pic index %d scatter_alloc %d page_start %d\n",
++			"decoder_mmu_box_free_idx_tail",
++			hevc->cur_pic->index,
++			hevc->cur_pic->scatter_alloc,
++			hevc->used_4k_num);
++	if (check_dma)
++		hevc_mmu_dma_check(hw_to_vdec(hevc));
++
++	if (hevc->is_used_v4l) {
++		int index = hevc->cur_pic->BUF_index;
++		struct internal_comp_buf *ibuf =
++			index_to_icomp_buf(hevc, index);
++
++		decoder_mmu_box_free_idx_tail(
++				ibuf->mmu_box,
++				ibuf->index,
++				hevc->used_4k_num);
++	} else {
++		decoder_mmu_box_free_idx_tail(
++				hevc->mmu_box,
++				hevc->cur_pic->index,
++				hevc->used_4k_num);
++	}
++	hevc->cur_pic->scatter_alloc = 2;
++	hevc->used_4k_num = -1;
++	return 0;
++}
++
+ static inline void hevc_pre_pic(struct hevc_state_s *hevc,
+ 			struct PIC_s *pic)
+ {
+@@ -6154,29 +6166,11 @@ static inline void hevc_pre_pic(struct hevc_state_s *hevc,
+ 			if (hevc->mmu_enable
+ 				&& ((hevc->double_write_mode & 0x10) == 0)) {
+ 				if (!hevc->m_ins_flag) {
+-					hevc->used_4k_num =
+-					READ_VREG(HEVC_SAO_MMU_STATUS) >> 16;
+-
+ 					if ((!is_skip_decoding(hevc, pic)) &&
+ 						(hevc->used_4k_num >= 0) &&
+ 						(hevc->cur_pic->scatter_alloc
+-						== 1)) {
+-						hevc_print(hevc,
+-						H265_DEBUG_BUFMGR_MORE,
+-						"%s pic index %d scatter_alloc %d page_start %d\n",
+-						"decoder_mmu_box_free_idx_tail",
+-						hevc->cur_pic->index,
+-						hevc->cur_pic->scatter_alloc,
+-						hevc->used_4k_num);
+-						hevc_mmu_dma_check(hw_to_vdec(hevc));
+-						decoder_mmu_box_free_idx_tail(
+-						hevc->mmu_box,
+-						hevc->cur_pic->index,
+-						hevc->used_4k_num);
+-						hevc->cur_pic->scatter_alloc
+-							= 2;
+-					}
+-					hevc->used_4k_num = -1;
++						== 1))
++						recycle_mmu_buf_tail(hevc, true);
+ 				}
+ 			}
+ 
+@@ -7038,7 +7032,6 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
+ 		WRITE_VREG(HEVC_WAIT_FLAG, READ_VREG(HEVC_WAIT_FLAG) | 0x2);
+ 		hevc->skip_flag = 0;
+ 		/**/
+-		/* if((iPrevPOC != curr_POC)){ */
+ 		if (rpm_param->p.slice_segment_address == 0) {
+ 			struct PIC_s *pic;
+ 
+@@ -7049,7 +7042,7 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
+ 				check_pic_decoded_error_pre(hevc,
+ 					READ_VREG(HEVC_PARSER_LCU_START)
+ 					& 0xffffff);
+-			/**/ if (use_cma == 0) {
++			if (use_cma == 0) {
+ 				if (hevc->pic_list_init_flag == 0) {
+ 					init_pic_list(hevc);
+ 					init_pic_list_hw(hevc);
+@@ -7160,7 +7153,7 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
+ 			hevc->new_pic = 0;
+ 		}
+ 	} else {
+-	if (hevc->wait_buf == 1) {
++		if (hevc->wait_buf == 1) {
+ 			pic_list_process(hevc);
+ 			hevc->cur_pic = hevc->is_used_v4l ?
+ 				v4l_get_new_pic(hevc, rpm_param) :
+@@ -7425,49 +7418,75 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
+ 	return 0;
+ }
+ 
++/* return page number */
++static int hevc_mmu_page_num(struct hevc_state_s *hevc,
++		int w, int h, int save_mode)
++{
++	int picture_size;
++	int page_num;
++	int max_frame_num;
+ 
++	picture_size = compute_losless_comp_body_size(hevc, w,
++				h, save_mode);
++	page_num = ((picture_size + PAGE_SIZE - 1) >> PAGE_SHIFT);
++
++	if (get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1)
++		max_frame_num = MAX_FRAME_8K_NUM;
++	else
++		max_frame_num = MAX_FRAME_4K_NUM;
++
++	if (page_num > max_frame_num) {
++		hevc_print(hevc, 0, "over max !! 0x%x width %d height %d\n",
++			page_num, w, h);
++		return -1;
++	}
++	return page_num;
++}
+ 
+ static int H265_alloc_mmu(struct hevc_state_s *hevc, struct PIC_s *new_pic,
+ 		unsigned short bit_depth, unsigned int *mmu_index_adr) {
+-	int cur_buf_idx = new_pic->index;
+ 	int bit_depth_10 = (bit_depth != 0x00);
+-	int picture_size;
+ 	int cur_mmu_4k_number;
+-	int ret, max_frame_num;
+-	picture_size = compute_losless_comp_body_size(hevc, new_pic->width,
+-				new_pic->height, !bit_depth_10);
+-	cur_mmu_4k_number = ((picture_size+(1<<12)-1) >> 12);
++	int ret;
++
+ 	if (get_double_write_mode(hevc) == 0x10)
+ 		return 0;
+-	/*hevc_print(hevc, 0,
+-	"alloc_mmu cur_idx : %d picture_size : %d mmu_4k_number : %d\r\n",
+-	cur_buf_idx, picture_size, cur_mmu_4k_number);*/
+-	if (new_pic->scatter_alloc) {
+-		decoder_mmu_box_free_idx(hevc->mmu_box, new_pic->index);
+-		new_pic->scatter_alloc = 0;
+-	}
+-	if (get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1)
+-		max_frame_num = MAX_FRAME_8K_NUM;
+-	else
+-		max_frame_num = MAX_FRAME_4K_NUM;
+-	if (cur_mmu_4k_number > max_frame_num) {
+-		hevc_print(hevc, 0, "over max !! 0x%x width %d height %d\n",
+-			cur_mmu_4k_number,
+-			new_pic->width,
+-			new_pic->height);
++
++	cur_mmu_4k_number = hevc_mmu_page_num(hevc, new_pic->width,
++			new_pic->height, !bit_depth_10);
++	if (cur_mmu_4k_number < 0)
+ 		return -1;
++
++	if (hevc->is_used_v4l) {
++		struct internal_comp_buf *ibuf =
++			index_to_icomp_buf(hevc, new_pic->BUF_index);
++
++		if (new_pic->scatter_alloc) {
++			decoder_mmu_box_free_idx(ibuf->mmu_box, ibuf->index);
++			new_pic->scatter_alloc = 0;
++		}
++		ret = decoder_mmu_box_alloc_idx(
++				ibuf->mmu_box,
++				ibuf->index,
++				ibuf->frame_buffer_size,
++				mmu_index_adr);
++	} else {
++		if (new_pic->scatter_alloc) {
++			decoder_mmu_box_free_idx(hevc->mmu_box, new_pic->index);
++			new_pic->scatter_alloc = 0;
++		}
++		ret = decoder_mmu_box_alloc_idx(
++				hevc->mmu_box,
++				new_pic->index,
++				cur_mmu_4k_number,
++				mmu_index_adr);
+ 	}
+-	ret = decoder_mmu_box_alloc_idx(
+-		hevc->mmu_box,
+-		cur_buf_idx,
+-		cur_mmu_4k_number,
+-		mmu_index_adr);
+-	if (ret == 0)
++	if (!ret)
+ 		new_pic->scatter_alloc = 1;
+ 
+ 	hevc_print(hevc, H265_DEBUG_BUFMGR_MORE,
+ 		"%s pic index %d page count(%d) ret =%d\n",
+-		__func__, cur_buf_idx,
++		__func__, new_pic->index,
+ 		cur_mmu_4k_number, ret);
+ 	return ret;
+ }
+@@ -7482,9 +7501,16 @@ static void release_pic_mmu_buf(struct hevc_state_s *hevc,
+ 	pic->scatter_alloc);
+ 
+ 	if (hevc->mmu_enable
+-		&& ((hevc->double_write_mode & 0x10) == 0)
+-		&& pic->scatter_alloc)
+-		decoder_mmu_box_free_idx(hevc->mmu_box, pic->index);
++		&& !(hevc->double_write_mode & 0x10)
++		&& pic->scatter_alloc) {
++		if (!hevc->is_used_v4l)
++			decoder_mmu_box_free_idx(hevc->mmu_box, pic->index);
++		else {
++			struct internal_comp_buf *ibuf =
++				ibuf = index_to_icomp_buf(hevc, pic->BUF_index);
++			decoder_mmu_box_free_idx(ibuf->mmu_box, ibuf->index);
++		}
++	}
+ 	pic->scatter_alloc = 0;
+ }
+ 
+@@ -8312,8 +8338,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
+ 	if (index_top != 0xff
+ 		&& index_top < MAX_REF_PIC_NUM
+ 		&& hevc->m_PIC[index_top]) {
+-		if (hevc->is_used_v4l)
+-			hevc->m_PIC[index_top]->vframe_bound = true;
+ 		if (hevc->m_PIC[index_top]->vf_ref > 0) {
+ 			hevc->m_PIC[index_top]->vf_ref--;
+ 
+@@ -8330,8 +8354,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
+ 	if (index_bot != 0xff
+ 		&& index_bot < MAX_REF_PIC_NUM
+ 		&& hevc->m_PIC[index_bot]) {
+-		if (hevc->is_used_v4l)
+-			hevc->m_PIC[index_bot]->vframe_bound = true;
+ 		if (hevc->m_PIC[index_bot]->vf_ref > 0) {
+ 			hevc->m_PIC[index_bot]->vf_ref--;
+ 
+@@ -8558,10 +8580,14 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+ static void update_vf_memhandle(struct hevc_state_s *hevc,
+ 	struct vframe_s *vf, struct PIC_s *pic)
+ {
+-	if (pic->index < 0) {
+-		vf->mem_handle = NULL;
+-		vf->mem_head_handle = NULL;
+-	} else if (vf->type & VIDTYPE_SCATTER) {
++	vf->mem_handle = NULL;
++	vf->mem_head_handle = NULL;
++
++	/* keeper not needed for v4l solution */
++	if (hevc->is_used_v4l)
++		return;
++
++	if (vf->type & VIDTYPE_SCATTER) {
+ 		vf->mem_handle =
+ 			decoder_mmu_box_get_mem_handle(
+ 				hevc->mmu_box, pic->index);
+@@ -9894,28 +9920,11 @@ pic_done:
+ 					if (hevc->mmu_enable
+ 							&& ((hevc->double_write_mode & 0x10) == 0)) {
+ 						if (!hevc->m_ins_flag) {
+-							hevc->used_4k_num =
+-							READ_VREG(HEVC_SAO_MMU_STATUS) >> 16;
+-
+ 							if ((!is_skip_decoding(hevc, pic)) &&
+ 								(hevc->used_4k_num >= 0) &&
+ 								(hevc->cur_pic->scatter_alloc
+-								== 1)) {
+-								hevc_print(hevc,
+-								H265_DEBUG_BUFMGR_MORE,
+-								"%s pic index %d scatter_alloc %d page_start %d\n",
+-								"decoder_mmu_box_free_idx_tail",
+-								hevc->cur_pic->index,
+-								hevc->cur_pic->scatter_alloc,
+-								hevc->used_4k_num);
+-								decoder_mmu_box_free_idx_tail(
+-								hevc->mmu_box,
+-								hevc->cur_pic->index,
+-								hevc->used_4k_num);
+-								hevc->cur_pic->scatter_alloc
+-									= 2;
+-							}
+-							hevc->used_4k_num = -1;
++								== 1))
++								recycle_mmu_buf_tail(hevc, false);
+ 						}
+ 					}
+ 
+@@ -10333,9 +10342,28 @@ force_output:
+ 						int height = hevc->param.p.pic_height_in_luma_samples;
+ 
+ 						pr_debug("set ucode parse\n");
++						if (get_valid_double_write_mode(hevc) != 16) {
++							struct vdec_comp_buf_info info;
++
++							u16 bit_depth = hevc->param.p.bit_depth;
++							info.max_size = hevc_max_mmu_buf_size(
++									hevc->max_pic_w,
++									hevc->max_pic_h);
++							info.header_size = hevc_get_header_size(
++									width, height);
++							info.frame_buffer_size = hevc_mmu_page_num(
++									hevc, width, height,
++									bit_depth == 0);
++							vdec_v4l_set_comp_buf_info(ctx, &info);
++							pr_debug("set comp info: %d %d %d\n",
++									info.max_size, info.header_size,
++									info.frame_buffer_size);
++						}
++
+ 						vh265_get_ps_info(hevc, width, height, &ps);
+ 						/*notice the v4l2 codec.*/
+ 						vdec_v4l_set_ps_infos(ctx, &ps);
++
+ 						hevc->v4l_params_parsed = true;
+ 						hevc->dec_result = DEC_RESULT_AGAIN;
+ 						amhevc_stop();
+@@ -10352,7 +10380,6 @@ force_output:
+ 					reset_process_time(hevc);
+ 					vdec_schedule_work(&hevc->work);
+ 					return IRQ_HANDLED;
+-
+ 				}
+ 			}
+ 
+@@ -11864,6 +11891,14 @@ static unsigned char get_data_check_sum
+ 	for (jj = 0; jj < size; jj++)
+ 		sum += data[jj];
+ 
++	hevc_print(hevc, PRINT_FLAG_VDEC_STATUS,
++		"%s: size 0x%x sum 0x%x %02x %02x %02x %02x %02x %02x .. %02x %02x %02x %02x\n",
++		__func__, size, sum,
++		data[0], data[1], data[2], data[3],
++		data[4], data[5], data[size - 4],
++		data[size - 3], data[size - 2],
++		data[size - 1]);
++
+ 	if (!hevc->chunk->block->is_mapped)
+ 		codec_mm_unmap_phyaddr(data);
+ 	return sum;
+@@ -12085,26 +12120,11 @@ static void vh265_work_implement(struct hevc_state_s *hevc,
+ 	}
+ #endif
+ 		if (hevc->mmu_enable && ((hevc->double_write_mode & 0x10) == 0)) {
+-			hevc->used_4k_num =
+-				READ_VREG(HEVC_SAO_MMU_STATUS) >> 16;
+ 			if (hevc->used_4k_num >= 0 &&
+ 				hevc->cur_pic &&
+ 				hevc->cur_pic->scatter_alloc
+-				== 1) {
+-				hevc_print(hevc, H265_DEBUG_BUFMGR_MORE,
+-				"%s pic index %d scatter_alloc %d page_start %d\n",
+-				"decoder_mmu_box_free_idx_tail",
+-				hevc->cur_pic->index,
+-				hevc->cur_pic->scatter_alloc,
+-				hevc->used_4k_num);
+-				if (hevc->m_ins_flag)
+-					hevc_mmu_dma_check(hw_to_vdec(hevc));
+-				decoder_mmu_box_free_idx_tail(
+-				hevc->mmu_box,
+-				hevc->cur_pic->index,
+-				hevc->used_4k_num);
+-				hevc->cur_pic->scatter_alloc = 2;
+-			}
++				== 1)
++				recycle_mmu_buf_tail(hevc, hevc->m_ins_flag);
+ 		}
+ 		hevc->pic_decoded_lcu_idx =
+ 			READ_VREG(HEVC_PARSER_LCU_START)
+@@ -12367,7 +12387,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+ 	if (hevc->eos)
+ 		return 0;
+ 	if (!hevc->first_sc_checked && hevc->mmu_enable) {
+-		int size = decoder_mmu_box_sc_check(hevc->mmu_box, tvp);
++		int size;
++		void * mmu_box;
++
++		if (hevc->is_used_v4l) {
++			struct aml_vcodec_ctx *ctx =
++				(struct aml_vcodec_ctx *)(hevc->v4l2_ctx);
++			mmu_box = ctx->mmu_box;
++		} else
++			mmu_box = hevc->mmu_box;
++
++		size = decoder_mmu_box_sc_check(mmu_box, tvp);
+ 		hevc->first_sc_checked =1;
+ 		hevc_print(hevc, 0,
+ 			"vh265 cached=%d  need_size=%d speed= %d ms\n",
+@@ -12991,9 +13021,10 @@ static void vh265_dump_state(struct vdec_s *vdec)
+ 
+ 	for (i = 0; i < BUF_POOL_SIZE; i++) {
+ 		hevc_print(hevc, 0,
+-			"Buf(%d) start_adr 0x%x size 0x%x used %d\n",
++			"Buf(%d) start_adr 0x%x header_addr 0x%x size 0x%x used %d\n",
+ 			i,
+ 			hevc->m_BUF[i].start_adr,
++			hevc->m_BUF[i].header_addr,
+ 			hevc->m_BUF[i].size,
+ 			hevc->m_BUF[i].used_flag);
+ 	}
+@@ -13238,7 +13269,8 @@ static int ammvdec_h265_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (mmu_enable_force == 0) {
+-		if (get_cpu_major_id() < AM_MESON_CPU_MAJOR_ID_GXL)
++		if (get_cpu_major_id() < AM_MESON_CPU_MAJOR_ID_GXL
++			|| hevc->double_write_mode == 0x10)
+ 			hevc->mmu_enable = 0;
+ 		else
+ 			hevc->mmu_enable = 1;
+diff --git a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
+index 1a3ebf5..e196fce 100644
+--- a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
++++ b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
+@@ -464,6 +464,9 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+ 	hw->canvas_config[i][0].endian		=
+ 		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
+ 	canvas_config_config(canvas_y(canvas), &hw->canvas_config[i][0]);
++	/* mpeg2 decoder canvas need to be revert to match display canvas */
++	hw->canvas_config[i][0].endian		=
++		(hw->canvas_mode != CANVAS_BLKMODE_LINEAR) ? 7 : 0;
+ 
+ 	hw->canvas_config[i][1].phy_addr	= decbuf_uv_start;
+ 	hw->canvas_config[i][1].width		= canvas_width;
+@@ -472,6 +475,9 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+ 	hw->canvas_config[i][1].endian		=
+ 		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
+ 	canvas_config_config(canvas_u(canvas), &hw->canvas_config[i][1]);
++	/* mpeg2 decoder canvas need to be revert to match display canvas */
++	hw->canvas_config[i][1].endian		=
++		(hw->canvas_mode != CANVAS_BLKMODE_LINEAR) ? 7 : 0;
+ 
+ 	debug_print(DECODE_ID(hw), PRINT_FLAG_BUFFER_DETAIL,
+ 		"[%d] %s(), canvas: 0x%x mode: %d y: %x uv: %x w: %d h: %d\n",
+@@ -2815,6 +2821,7 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+ #endif
+ 
+ 	if (!is_enough_free_buffer(hw)) {
++		hw->not_run_ready++;
+ 		hw->buffer_not_ready++;
+ 		return 0;
+ 	}
+diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
+index d057eed..6fc17c2 100644
+--- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
++++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
+@@ -47,6 +47,22 @@ int vdec_v4l_set_ps_infos(struct aml_vcodec_ctx *ctx,
+ }
+ EXPORT_SYMBOL(vdec_v4l_set_ps_infos);
+ 
++int vdec_v4l_set_comp_buf_info(struct aml_vcodec_ctx *ctx,
++		struct vdec_comp_buf_info *info)
++{
++	int ret = 0;
++
++	if (ctx->drv_handle == 0)
++		return -EIO;
++
++	ret = ctx->dec_if->set_param(ctx->drv_handle,
++		SET_PARAM_COMP_BUF_INFO, info);
++
++	return ret;
++
++}
++EXPORT_SYMBOL(vdec_v4l_set_comp_buf_info);
++
+ int vdec_v4l_set_hdr_infos(struct aml_vcodec_ctx *ctx,
+ 	struct aml_vdec_hdr_infos *hdr)
+ {
+diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
+index 8bedb88..f71758c 100644
+--- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
++++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
+@@ -16,6 +16,10 @@ int vdec_v4l_set_ps_infos(
+ 	struct aml_vcodec_ctx *ctx,
+ 	struct aml_vdec_ps_infos *ps);
+ 
++int vdec_v4l_set_comp_buf_info(
++	struct aml_vcodec_ctx *ctx,
++	struct vdec_comp_buf_info *info);
++
+ int vdec_v4l_set_hdr_infos(
+ 	struct aml_vcodec_ctx *ctx,
+ 	struct aml_vdec_hdr_infos *hdr);
+diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
+index 7075cd8..862d037 100644
+--- a/drivers/frame_provider/decoder/vp9/vvp9.c
++++ b/drivers/frame_provider/decoder/vp9/vvp9.c
+@@ -586,7 +586,6 @@ struct PIC_BUFFER_CONFIG_s {
+ 
+ 	u32 hw_decode_time;
+ 	u32 frame_size2; // For frame base mode
+-	bool vframe_bound;
+ } PIC_BUFFER_CONFIG;
+ 
+ enum BITSTREAM_PROFILE {
+@@ -1713,6 +1712,54 @@ static int get_double_write_ratio(struct VP9Decoder_s *pbi,
+ 
+ //#define	MAX_4K_NUM		0x1200
+ 
++/* return page number */
++static int vp9_mmu_page_num(struct VP9Decoder_s *pbi,
++		int w, int h, int save_mode)
++{
++	int picture_size;
++	int cur_mmu_4k_number, max_frame_num;
++
++	picture_size = compute_losless_comp_body_size(w, h, save_mode);
++	cur_mmu_4k_number = ((picture_size + (PAGE_SIZE - 1)) >> PAGE_SHIFT);
++
++	if (get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1)
++		max_frame_num = MAX_FRAME_8K_NUM;
++	else
++		max_frame_num = MAX_FRAME_4K_NUM;
++
++	if (cur_mmu_4k_number > max_frame_num) {
++		pr_err("over max !! cur_mmu_4k_number 0x%x width %d height %d\n",
++			cur_mmu_4k_number, w, h);
++		return -1;
++	}
++
++	return cur_mmu_4k_number;
++}
++
++static struct internal_comp_buf* v4lfb_to_icomp_buf(
++		struct VP9Decoder_s *pbi,
++		struct vdec_v4l2_buffer *fb)
++{
++	struct aml_video_dec_buf *aml_fb = NULL;
++	struct aml_vcodec_ctx * v4l2_ctx = pbi->v4l2_ctx;
++
++	aml_fb = container_of(fb, struct aml_video_dec_buf, frame_buffer);
++	return &v4l2_ctx->comp_bufs[aml_fb->internal_index];
++}
++
++static struct internal_comp_buf* index_to_icomp_buf(
++		struct VP9Decoder_s *pbi, int index)
++{
++	struct aml_video_dec_buf *aml_fb = NULL;
++	struct aml_vcodec_ctx * v4l2_ctx = pbi->v4l2_ctx;
++	struct vdec_v4l2_buffer *fb = NULL;
++
++	fb = (struct vdec_v4l2_buffer *)
++		pbi->m_BUF[index].v4l_ref_buf_addr;
++	aml_fb = container_of(fb, struct aml_video_dec_buf, frame_buffer);
++	return &v4l2_ctx->comp_bufs[aml_fb->internal_index];
++}
++
+ int vp9_alloc_mmu(
+ 	struct VP9Decoder_s *pbi,
+ 	int cur_buf_idx,
+@@ -1721,41 +1768,45 @@ int vp9_alloc_mmu(
+ 	unsigned short bit_depth,
+ 	unsigned int *mmu_index_adr)
+ {
++	int ret;
+ 	int bit_depth_10 = (bit_depth == VPX_BITS_10);
+-	int picture_size;
+-	int cur_mmu_4k_number, max_frame_num;
+-	if (!pbi->mmu_box) {
+-		pr_err("error no mmu box!\n");
+-		return -1;
+-	}
++	int cur_mmu_4k_number;
++
+ 	if (get_double_write_mode(pbi) == 0x10)
+ 		return 0;
++
+ 	if (bit_depth >= VPX_BITS_12) {
+ 		pbi->fatal_error = DECODER_FATAL_ERROR_SIZE_OVERFLOW;
+ 		pr_err("fatal_error, un support bit depth 12!\n\n");
+ 		return -1;
+ 	}
+-	picture_size = compute_losless_comp_body_size(pic_width, pic_height,
+-				   bit_depth_10);
+-	cur_mmu_4k_number = ((picture_size + (1 << 12) - 1) >> 12);
+-
+-	if (get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1)
+-		max_frame_num = MAX_FRAME_8K_NUM;
+-	else
+-		max_frame_num = MAX_FRAME_4K_NUM;
+ 
+-	if (cur_mmu_4k_number > max_frame_num) {
+-		pr_err("over max !! cur_mmu_4k_number 0x%x width %d height %d\n",
+-			cur_mmu_4k_number, pic_width, pic_height);
++	cur_mmu_4k_number = vp9_mmu_page_num(pbi,
++				pic_width,
++				pic_height,
++				bit_depth_10);
++	if (cur_mmu_4k_number < 0)
+ 		return -1;
++
++	if (pbi->is_used_v4l) {
++		struct internal_comp_buf *ibuf =
++			index_to_icomp_buf(pbi, cur_buf_idx);
++
++		ret = decoder_mmu_box_alloc_idx(
++				ibuf->mmu_box,
++				ibuf->index,
++				ibuf->frame_buffer_size,
++				mmu_index_adr);
++	} else {
++		ret = decoder_mmu_box_alloc_idx(
++				pbi->mmu_box,
++				cur_buf_idx,
++				cur_mmu_4k_number,
++				mmu_index_adr);
+ 	}
+-	return decoder_mmu_box_alloc_idx(
+-		pbi->mmu_box,
+-		cur_buf_idx,
+-		cur_mmu_4k_number,
+-		mmu_index_adr);
+-}
+ 
++	return ret;
++}
+ 
+ #ifndef MV_USE_FIXED_BUF
+ static void dealloc_mv_bufs(struct VP9Decoder_s *pbi)
+@@ -2224,8 +2275,9 @@ static int v4l_get_free_fb(struct VP9Decoder_s *pbi)
+ 	struct aml_vcodec_ctx * v4l = pbi->v4l2_ctx;
+ 	struct v4l_buff_pool *pool = &v4l->cap_pool;
+ 	struct PIC_BUFFER_CONFIG_s *pic = NULL;
+-	int i, idx = INVALID_IDX;
++	struct PIC_BUFFER_CONFIG_s *free_pic = NULL;
+ 	ulong flags;
++	int i;
+ 
+ 	lock_buffer_pool(cm->buffer_pool, flags);
+ 
+@@ -2240,7 +2292,7 @@ static int v4l_get_free_fb(struct VP9Decoder_s *pbi)
+ 				(pic->vf_ref == 0) &&
+ 				(pic->index != -1) &&
+ 				pic->cma_alloc_addr) {
+-				idx = i;
++				free_pic = pic;
+ 			}
+ 			break;
+ 		case V4L_CAP_BUFF_IN_M2M:
+@@ -2250,7 +2302,7 @@ static int v4l_get_free_fb(struct VP9Decoder_s *pbi)
+ 			if (!v4l_alloc_and_config_pic(pbi, pic)) {
+ 				set_canvas(pbi, pic);
+ 				init_pic_list_hw(pbi);
+-				idx = index;
++				free_pic = pic;
+ 			}
+ 			break;
+ 		default:
+@@ -2258,15 +2310,15 @@ static int v4l_get_free_fb(struct VP9Decoder_s *pbi)
+ 			break;
+ 		}
+ 
+-		if (idx != INVALID_IDX) {
+-			frame_bufs[idx].ref_count = 1;
++		if (free_pic) {
++			frame_bufs[i].ref_count = 1;
+ 			break;
+ 		}
+ 	}
+ 
+ 	unlock_buffer_pool(cm->buffer_pool, flags);
+ 
+-	return idx;
++	return free_pic ? free_pic->index : INVALID_IDX;
+ }
+ 
+ static int get_free_buf_count(struct VP9Decoder_s *pbi)
+@@ -4727,71 +4779,20 @@ void adapt_coef_probs(int pic_count, int prev_kf, int cur_kf, int pre_fc,
+ 
+ }
+ 
+-static bool v4l_is_there_vframe_bound(struct VP9Decoder_s *pbi)
+-{
+-	int i;
+-	struct VP9_Common_s *const cm = &pbi->common;
+-	struct RefCntBuffer_s *frame_bufs = cm->buffer_pool->frame_bufs;
+-
+-	for (i = 0; i < pbi->used_buf_num; ++i) {
+-		if (frame_bufs[i].buf.vframe_bound)
+-			return true;
+-	}
+-
+-	return false;
+-}
+-
+-static void v4l_mmu_buffer_release(struct VP9Decoder_s *pbi)
+-{
+-	struct VP9_Common_s *const cm = &pbi->common;
+-	struct RefCntBuffer_s *frame_bufs = cm->buffer_pool->frame_bufs;
+-	int i;
+-
+-	/* release workspace */
+-	if (pbi->bmmu_box)
+-		decoder_bmmu_box_free_idx(pbi->bmmu_box,
+-			WORK_SPACE_BUF_ID);
+-	/*
+-	 * it's only when vframe get back to driver, right now we can be sure
+-	 * that vframe and fd are related. if the playback exits, the capture
+-	 * requires the upper app to release when the fd is closed, and others
+-	 * buffers drivers are released by driver.
+-	 */
+-	for (i = 0; i < pbi->used_buf_num; ++i) {
+-		if (!frame_bufs[i].buf.vframe_bound) {
+-			if (pbi->bmmu_box)
+-				decoder_bmmu_box_free_idx(pbi->bmmu_box,
+-					HEADER_BUFFER_IDX(i));
+-			if (pbi->mmu_box)
+-				decoder_mmu_box_free_idx(pbi->mmu_box, i);
+-
+-			vp9_print(pbi, PRINT_FLAG_V4L_DETAIL,
+-				"%s free buffer[%d], bmmu_box: %p, mmu_box: %p\n",
+-				__func__, i, pbi->bmmu_box, pbi->mmu_box);
+-		}
+-	}
+-}
+-
+ static void uninit_mmu_buffers(struct VP9Decoder_s *pbi)
+ {
+ #ifndef MV_USE_FIXED_BUF
+ 	dealloc_mv_bufs(pbi);
+ #endif
+-	if (pbi->is_used_v4l &&
+-		v4l_is_there_vframe_bound(pbi)) {
+-		if (get_double_write_mode(pbi) != 0x10) {
+-			v4l_mmu_buffer_release(pbi);
+-			return;
+-		}
+-	}
+-
+-	if (pbi->mmu_box)
++	if (pbi->mmu_box) {
+ 		decoder_mmu_box_free(pbi->mmu_box);
+-	pbi->mmu_box = NULL;
++		pbi->mmu_box = NULL;
++	}
+ 
+-	if (pbi->bmmu_box)
++	if (pbi->bmmu_box) {
+ 		decoder_bmmu_box_free(pbi->bmmu_box);
+-	pbi->bmmu_box = NULL;
++		pbi->bmmu_box = NULL;
++	}
+ }
+ 
+ static int calc_luc_quantity(u32 w, u32 h)
+@@ -4807,6 +4808,31 @@ static int calc_luc_quantity(u32 w, u32 h)
+ 	return pic_width_lcu * pic_height_lcu;
+ }
+ 
++/* return in MB */
++static int vp9_max_mmu_buf_size(int max_w, int max_h)
++{
++	int buf_size = 48;
++
++	if ((max_w * max_h > 1280*736) &&
++		(max_w * max_h <= 1920*1088)) {
++		buf_size = 12;
++	} else if ((max_w * max_h > 0) &&
++		(max_w * max_h <= 1280*736)) {
++		buf_size = 4;
++	}
++
++	return buf_size;
++}
++
++static int vp9_get_header_size(int w, int h)
++{
++	if ((get_cpu_major_id() >= AM_MESON_CPU_MAJOR_ID_SM1) &&
++		IS_8K_SIZE(w, h))
++		return MMU_COMPRESS_8K_HEADER_SIZE;
++
++	return MMU_COMPRESS_HEADER_SIZE;
++}
++
+ static int v4l_alloc_and_config_pic(struct VP9Decoder_s *pbi,
+ 	struct PIC_BUFFER_CONFIG_s *pic)
+ {
+@@ -4831,8 +4857,9 @@ static int v4l_alloc_and_config_pic(struct VP9Decoder_s *pbi,
+ 	}
+ 
+ 	if (pbi->mmu_enable) {
+-		pbi->m_BUF[i].header_addr = decoder_bmmu_box_get_phy_addr(
+-			pbi->bmmu_box, HEADER_BUFFER_IDX(i));
++		struct internal_comp_buf *ibuf = v4lfb_to_icomp_buf(pbi, fb);
++
++		pbi->m_BUF[i].header_addr = ibuf->header_addr;
+ 		if (debug & VP9_DEBUG_BUFMGR_MORE) {
+ 			pr_info("MMU header_adr %d: %ld\n",
+ 				i, pbi->m_BUF[i].header_addr);
+@@ -6905,9 +6932,6 @@ static void vvp9_vf_put(struct vframe_s *vf, void *op_arg)
+ 		if (pool->frame_bufs[index].buf.vf_ref > 0)
+ 			pool->frame_bufs[index].buf.vf_ref--;
+ 
+-		if (pbi->is_used_v4l)
+-			pool->frame_bufs[index].buf.vframe_bound = true;
+-
+ 		if (pbi->wait_buf)
+ 			WRITE_VREG(HEVC_ASSIST_MBOX0_IRQ_REG,
+ 						0x1);
+@@ -7027,10 +7051,14 @@ static int frame_duration_adapt(struct VP9Decoder_s *pbi, struct vframe_s *vf, u
+ static void update_vf_memhandle(struct VP9Decoder_s *pbi,
+ 	struct vframe_s *vf, struct PIC_BUFFER_CONFIG_s *pic)
+ {
+-	if (pic->index < 0) {
+-		vf->mem_handle = NULL;
+-		vf->mem_head_handle = NULL;
+-	} else if (vf->type & VIDTYPE_SCATTER) {
++	vf->mem_handle = NULL;
++	vf->mem_head_handle = NULL;
++
++	/* keeper not needed for v4l solution */
++	if (pbi->is_used_v4l)
++		return;
++
++	if (vf->type & VIDTYPE_SCATTER) {
+ 		vf->mem_handle =
+ 			decoder_mmu_box_get_mem_handle(
+ 				pbi->mmu_box, pic->index);
+@@ -7490,6 +7518,41 @@ static void debug_buffer_mgr_more(struct VP9Decoder_s *pbi)
+ 
+ }
+ 
++static int recycle_mmu_buf_tail(struct VP9Decoder_s *pbi,
++		bool check_dma)
++{
++	struct VP9_Common_s *const cm = &pbi->common;
++
++	pbi->used_4k_num =
++		READ_VREG(HEVC_SAO_MMU_STATUS) >> 16;
++
++	vp9_print(pbi, 0, "pic index %d page_start %d\n",
++		cm->cur_fb_idx_mmu, pbi->used_4k_num);
++
++	if (check_dma)
++		hevc_mmu_dma_check(hw_to_vdec(pbi));
++
++	if (pbi->is_used_v4l) {
++		int index = cm->cur_fb_idx_mmu;
++		struct internal_comp_buf *ibuf =
++			index_to_icomp_buf(pbi, index);
++
++		decoder_mmu_box_free_idx_tail(
++				ibuf->mmu_box,
++				ibuf->index,
++				pbi->used_4k_num);
++	} else {
++		decoder_mmu_box_free_idx_tail(
++				pbi->mmu_box,
++				cm->cur_fb_idx_mmu,
++				pbi->used_4k_num);
++	}
++
++	cm->cur_fb_idx_mmu = INVALID_IDX;
++	pbi->used_4k_num = -1;
++
++	return 0;
++}
+ 
+ static void vp9_recycle_mmu_buf_tail(struct VP9Decoder_s *pbi)
+ {
+@@ -7497,16 +7560,9 @@ static void vp9_recycle_mmu_buf_tail(struct VP9Decoder_s *pbi)
+ 	if (pbi->double_write_mode & 0x10)
+ 		return;
+ 	if (cm->cur_fb_idx_mmu != INVALID_IDX) {
+-		if (pbi->used_4k_num == -1) {
+-			pbi->used_4k_num =
+-			(READ_VREG(HEVC_SAO_MMU_STATUS) >> 16);
+-			if (pbi->m_ins_flag)
+-				hevc_mmu_dma_check(hw_to_vdec(pbi));
+-		}
+-		decoder_mmu_box_free_idx_tail(pbi->mmu_box,
+-			cm->cur_fb_idx_mmu, pbi->used_4k_num);
+-		cm->cur_fb_idx_mmu = INVALID_IDX;
+-		pbi->used_4k_num = -1;
++		recycle_mmu_buf_tail(pbi,
++			((pbi->used_4k_num == -1) &&
++			pbi->m_ins_flag) ? 1 : 0);
+ 	}
+ }
+ 
+@@ -7514,6 +7570,10 @@ static void vp9_recycle_mmu_buf_tail(struct VP9Decoder_s *pbi)
+ static void vp9_recycle_mmu_buf(struct VP9Decoder_s *pbi)
+ {
+ 	struct VP9_Common_s *const cm = &pbi->common;
++
++	if (pbi->is_used_v4l)
++		return;
++
+ 	if (pbi->double_write_mode & 0x10)
+ 		return;
+ 	if (cm->cur_fb_idx_mmu != INVALID_IDX) {
+@@ -7719,7 +7779,14 @@ int continue_decoding(struct VP9Decoder_s *pbi)
+ 			if ((frame_bufs[i].ref_count == 0) &&
+ 				(frame_bufs[i].buf.vf_ref == 0) &&
+ 				(frame_bufs[i].buf.index != -1)) {
+-				decoder_mmu_box_free_idx(pbi->mmu_box, i);
++				if (pbi->is_used_v4l) {
++					struct internal_comp_buf *ibuf =
++						index_to_icomp_buf(pbi, i);
++
++					decoder_mmu_box_free_idx(ibuf->mmu_box, i);
++				} else {
++					decoder_mmu_box_free_idx(pbi->mmu_box, i);
++				}
+ 			}
+ 			pbi->last_put_idx = -1;
+ 		}
+@@ -8198,6 +8265,23 @@ static void get_picture_qos_info(struct VP9Decoder_s *pbi)
+ 	}
+ }
+ 
++static void vvp9_get_comp_buf_info(struct VP9Decoder_s *pbi,
++					struct vdec_comp_buf_info *info)
++{
++	u16 bit_depth = pbi->param.p.bit_depth;
++
++	info->max_size = vp9_max_mmu_buf_size(
++			pbi->max_pic_w,
++			pbi->max_pic_h);
++	info->header_size = vp9_get_header_size(
++			pbi->frame_width,
++			pbi->frame_height);
++	info->frame_buffer_size = vp9_mmu_page_num(
++			pbi, pbi->frame_width,
++			pbi->frame_height,
++			bit_depth == 0);
++}
++
+ static int vvp9_get_ps_info(struct VP9Decoder_s *pbi, struct aml_vdec_ps_infos *ps)
+ {
+ 	int dw_mode = v4l_parser_get_double_write_mode(pbi);
+@@ -8222,6 +8306,8 @@ static int v4l_res_change(struct VP9Decoder_s *pbi)
+ 	if (ctx->param_sets_from_ucode &&
+ 		pbi->res_ch_flag == 0) {
+ 		struct aml_vdec_ps_infos ps;
++		struct vdec_comp_buf_info comp;
++
+ 		if ((cm->width != 0 &&
+ 			cm->height != 0) &&
+ 			(pbi->frame_width != cm->width ||
+@@ -8229,6 +8315,12 @@ static int v4l_res_change(struct VP9Decoder_s *pbi)
+ 
+ 			vp9_print(pbi, 0, "%s (%d,%d)=>(%d,%d)\r\n", __func__, cm->width,
+ 				cm->height, pbi->frame_width, pbi->frame_height);
++
++			if (get_valid_double_write_mode(pbi) != 16) {
++				vvp9_get_comp_buf_info(pbi, &comp);
++				vdec_v4l_set_comp_buf_info(ctx, &comp);
++			}
++
+ 			vvp9_get_ps_info(pbi, &ps);
+ 			vdec_v4l_set_ps_infos(ctx, &ps);
+ 			vdec_v4l_res_ch_event(ctx);
+@@ -8476,8 +8568,14 @@ static irqreturn_t vvp9_isr_thread_fn(int irq, void *data)
+ 		if (!v4l_res_change(pbi)) {
+ 			if (ctx->param_sets_from_ucode && !pbi->v4l_params_parsed) {
+ 				struct aml_vdec_ps_infos ps;
++				struct vdec_comp_buf_info comp;
+ 
+ 				pr_debug("set ucode parse\n");
++				if (get_valid_double_write_mode(pbi) != 16) {
++					vvp9_get_comp_buf_info(pbi, &comp);
++					vdec_v4l_set_comp_buf_info(ctx, &comp);
++				}
++
+ 				vvp9_get_ps_info(pbi, &ps);
+ 				/*notice the v4l2 codec.*/
+ 				vdec_v4l_set_ps_infos(ctx, &ps);
+@@ -9352,22 +9450,16 @@ static int vvp9_stop(struct VP9Decoder_s *pbi)
+ 	pbi->fw = NULL;
+ 	return 0;
+ }
++
+ static int amvdec_vp9_mmu_init(struct VP9Decoder_s *pbi)
+ {
+ 	int tvp_flag = vdec_secure(hw_to_vdec(pbi)) ?
+ 		CODEC_MM_FLAGS_TVP : 0;
+-	int buf_size = 48;
++	int buf_size = vp9_max_mmu_buf_size(pbi->max_pic_w, pbi->max_pic_h);
+ 
+-	if ((pbi->max_pic_w * pbi->max_pic_h > 1280*736) &&
+-		(pbi->max_pic_w * pbi->max_pic_h <= 1920*1088)) {
+-		buf_size = 12;
+-	} else if ((pbi->max_pic_w * pbi->max_pic_h > 0) &&
+-		(pbi->max_pic_w * pbi->max_pic_h <= 1280*736)) {
+-		buf_size = 4;
+-	}
+ 	pbi->need_cache_size = buf_size * SZ_1M;
+ 	pbi->sc_start_time = get_jiffies_64();
+-	if (pbi->mmu_enable && ((pbi->double_write_mode & 0x10) == 0)) {
++	if (pbi->mmu_enable && !pbi->is_used_v4l) {
+ 		pbi->mmu_box = decoder_mmu_box_alloc_box(DRIVER_NAME,
+ 			pbi->index, FRAME_BUFFERS,
+ 			pbi->need_cache_size,
+@@ -9610,6 +9702,20 @@ static unsigned char get_data_check_sum
+ 	for (jj = 0; jj < size; jj++)
+ 		sum += data[jj];
+ 
++	vp9_print(pbi, PRINT_FLAG_VDEC_STATUS,
++		"%s: size 0x%x sum 0x%x %02x %02x %02x %02x %02x %02x .. %02x %02x %02x %02x\n",
++		__func__, size, sum,
++		(size < 1) ? 0 : data[0],
++		(size < 2) ? 0 : data[1],
++		(size < 3) ? 0 : data[2],
++		(size < 4) ? 0 : data[3],
++		(size < 5) ? 0 : data[4],
++		(size < 6) ? 0 : data[5],
++		(size < 4) ? 0 : data[size - 4],
++		(size < 3) ? 0 : data[size - 3],
++		(size < 2) ? 0 : data[size - 2],
++		(size < 1) ? 0 : data[size - 1]);
++
+ 	if (!pbi->chunk->block->is_mapped)
+ 		codec_mm_unmap_phyaddr(data);
+ 	return sum;
+@@ -9899,7 +10005,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+ 	if (!(pbi->pic_list_init_done && pbi->pic_list_init_done2) || pbi->eos)
+ 		return ret;
+ 	if (!pbi->first_sc_checked && pbi->mmu_enable) {
+-		int size = decoder_mmu_box_sc_check(pbi->mmu_box, tvp);
++		int size;
++		void * mmu_box;
++
++		if (pbi->is_used_v4l) {
++			struct aml_vcodec_ctx *ctx =
++				(struct aml_vcodec_ctx *)(pbi->v4l2_ctx);
++			mmu_box = ctx->mmu_box;
++		} else
++			mmu_box = pbi->mmu_box;
++
++		size = decoder_mmu_box_sc_check(mmu_box, tvp);
+ 		pbi->first_sc_checked = 1;
+ 		vp9_print(pbi, 0, "vp9 cached=%d  need_size=%d speed= %d ms\n",
+ 			size, (pbi->need_cache_size >> PAGE_SHIFT),
+@@ -10307,7 +10423,6 @@ static void  init_frame_bufs(struct VP9Decoder_s *pbi)
+ 		frame_bufs[i].buf.decode_idx = 0;
+ 		frame_bufs[i].buf.cma_alloc_addr = 0;
+ 		frame_bufs[i].buf.index = i;
+-		frame_bufs[i].buf.vframe_bound = 0;
+ 	}
+ 
+ 	if (vdec->parallel_dec == 1) {
+@@ -10699,7 +10814,13 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
+ 			pbi->max_pic_w, pbi->max_pic_h);
+ 		return -1;
+ 	}
+-	pbi->mmu_enable = 1;
++
++	if (get_cpu_major_id() < AM_MESON_CPU_MAJOR_ID_GXL ||
++		pbi->double_write_mode == 0x10)
++		pbi->mmu_enable = 0;
++	else
++		pbi->mmu_enable = 1;
++
+ 	video_signal_type = pbi->video_signal_type;
+ 
+ 	if (pdata->sys_info) {
+-- 
+2.24.1
+
