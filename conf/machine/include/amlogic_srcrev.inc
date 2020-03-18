@@ -13,7 +13,7 @@ SRCREV_pn-aml-provision = "a2afb66072344214dba789cb6ff87e7b3173229c"
 SRCREV_pn-optee-userspace = "5979e2b1229d45f029d4e004238b7ecb6249f11f"
 SRCREV_pn-wififw = "178ad1a6fff666fc927874042573751fedeaeadb"
 SRCREV_pn-gst-aml-plugins = "16961c92dd267a3dbf1c069cfbb9e30254514814"
-SRCREV_pn-aml-mediadrm-widevine = "be9fe078c71d64cae863a65a922eff11e5591c65"
+SRCREV_pn-aml-mediadrm-widevine = "4145cccf8aaf3948df209469e68288e6e633cab4"
 
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-dvalin = "606bcb0fb7eac5d43c86f98165918250856057bd"
