@@ -1,0 +1,25 @@
+From 29ce87f37792f420d1b4a2ebb782da743c33ad18 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Fri, 20 Mar 2020 03:00:39 -0700
+Subject: [PATCH] Use host gcc to build ddr parse tool
+
+---
+ lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib.sh b/lib.sh
+index 6e9ab19..7d41002 100755
+--- a/lib.sh
++++ b/lib.sh
+@@ -263,7 +263,7 @@ function prepare_tools() {
+ 	if [ "${CONFIG_DDR_PARSE}" == "1" ]; then
+ 		if [ -d ${FIP_DDR_PARSE} ]; then
+ 			cd ${FIP_DDR_PARSE}
+-			make clean; make
++			CC=gcc make clean; CC=gcc make
+ 			cd ${MAIN_FOLDER}
+ 
+ 			mv -f ${FIP_DDR_PARSE}/parse ${FIP_BUILD_FOLDER}
+-- 
+2.24.1
+

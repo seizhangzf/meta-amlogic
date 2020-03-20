@@ -19,6 +19,9 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GI
 #patches
 SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33/v2015"
 SRC_URI_append = " file://0001-to-support-absystem-excludes-vendor.patch;patchdir=bl33/v2015"
+SRC_URI_append = " file://0001-Use-host-gcc-to-build-ddr-parse-tool.patch;patchdir=fip"
+SRC_URI_append = " file://root_rsa_pub_key.pem"
+SRC_URI_append = " file://root_aes_key.bin"
 
 do_configure[noexec] = "1"
 
@@ -66,8 +69,8 @@ do_compile () {
         mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
         #cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
         ${S}/tdk/ta_export/scripts/pack_kpub.py \
-            --rsk=${S}/tdk/ta_export/keys/root_rsa_pub_key.pem \
-            --rek=${S}/tdk/ta_export/keys/root_aes_key.bin \
+            --rsk=${WORKDIR}/root_rsa_pub_key.pem \
+            --rek=${WORKDIR}/root_aes_key.bin \
             --in=${S}/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
             --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 
