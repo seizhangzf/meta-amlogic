@@ -1,5 +1,6 @@
 # armv7at2hf-neon-rdk-linux-gnueabi
 SRCREV_pn-libplayer = "19ca046757f026bec28e35ee4b5041d59d669240"
+SRCREV_pn-libamavutils = "19ca046757f026bec28e35ee4b5041d59d669240"
 SRCREV_pn-aml-dvb = "f523225ce3492df540dcdebdde5dd9089794da7c"
 SRCREV_pn-optee-video-firmware = "fc7b94d4f43444ee7e747d7dc5eb98827a970693"
 SRCREV_pn-aml-zvbi = "f06e974f1382046ede5de9e7890b5bbf51ee57dc"
@@ -15,6 +16,7 @@ SRCREV_pn-wififw = "178ad1a6fff666fc927874042573751fedeaeadb"
 SRCREV_pn-gst-aml-plugins = "16961c92dd267a3dbf1c069cfbb9e30254514814"
 SRCREV_pn-gst-aml-drm-plugins = "7993885b9a5476a6177864d1ec244eaaa1a41b45"
 SRCREV_pn-aml-mediadrm-widevine = "7f3e5dd99ed9cf5bb895ef53f5829f1c92534479"
+SRCREV_pn-aml-uvm-test = "3606bbc6ee8ae8101269721edd28cf726bf1e8f9"
 
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-dvalin = "606bcb0fb7eac5d43c86f98165918250856057bd"

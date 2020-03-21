@@ -16,8 +16,8 @@ SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"
-DEPENDS += "optee-userspace"
-
+DEPENDS = "optee-userspace"
+RDEPENDS_${PN} = "libamavutils"
 inherit autotools pkgconfig
 ARM_TARGET="arm.aapcs-linux.hard"
 TA_TARGET="noarch"

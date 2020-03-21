@@ -1,0 +1,71 @@
+From 98b4d79353db71d4a1550947a4abcd3dd6a7ed9b Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 9 Apr 2020 19:57:36 -0700
+Subject: [PATCH] only compile utils
+
+---
+ Makefile | 46 +++++++++++++++++++++++-----------------------
+ 1 file changed, 23 insertions(+), 23 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 506ba4839..7fae264d3 100755
+--- a/Makefile
++++ b/Makefile
+@@ -2,31 +2,31 @@
+ 
+ #export CC BUILD_DIR STAGING_DIR TARGET_DIR
+ all:
+-	mkdir -p $(shell pwd)/../../staging/usr/lib/libplayer
+-	-$(MAKE) -C amadec all
+-	-$(MAKE) -C amadec install
++	#mkdir -p $(shell pwd)/../../staging/usr/lib/libplayer
++	#-$(MAKE) -C amadec all
++	#-$(MAKE) -C amadec install
+ 	-$(MAKE) -C amavutils all		
+ 	-$(MAKE) -C amavutils install
+-	-$(MAKE) -C amffmpeg all		
+-	-$(MAKE) -C amffmpeg install
+-	-$(MAKE) -C amcodec all
+-	-$(MAKE) -C amcodec install
+-	-$(MAKE) -C amvdec all
+-	-$(MAKE) -C amvdec install
+-	-$(MAKE) -C audio_codec all
+-	-$(MAKE) -C audio_codec install
+-	-$(MAKE) -C amplayer all
+-	-$(MAKE) -C amplayer install
+-	-$(MAKE) -C streamsource all
+-	-$(MAKE) -C streamsource install
+-	-$(MAKE) -C examples all
+-	-$(MAKE) -C third_parts/libcurl-ffmpeg all
+-	-$(MAKE) -C third_parts/libdash all
+-	-$(MAKE) -C third_parts/libvhls all
+-	-$(MAKE) -C bootplayer all
+-	-$(MAKE) -C bootplayer install
+-	-$(MAKE) -C audioplayer all
+-	-$(MAKE) -C audioplayer install
++	#-$(MAKE) -C amffmpeg all		
++	#-$(MAKE) -C amffmpeg install
++	#-$(MAKE) -C amcodec all
++	#-$(MAKE) -C amcodec install
++	#-$(MAKE) -C amvdec all
++	#-$(MAKE) -C amvdec install
++	#-$(MAKE) -C audio_codec all
++	#-$(MAKE) -C audio_codec install
++	#-$(MAKE) -C amplayer all
++	#-$(MAKE) -C amplayer install
++	#-$(MAKE) -C streamsource all
++	#-$(MAKE) -C streamsource install
++	#-$(MAKE) -C examples all
++	#-$(MAKE) -C third_parts/libcurl-ffmpeg all
++	#-$(MAKE) -C third_parts/libdash all
++	#-$(MAKE) -C third_parts/libvhls all
++	#-$(MAKE) -C bootplayer all
++	#-$(MAKE) -C bootplayer install
++	#-$(MAKE) -C audioplayer all
++	#-$(MAKE) -C audioplayer install
+ 
+ install:
+ 	-$(MAKE) -C examples install
+-- 
+2.24.1
+
