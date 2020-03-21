@@ -1,7 +1,7 @@
-From 250860824f3f6495030a6e32d7ecddeae61889c5 Mon Sep 17 00:00:00 2001
+From 95d38c59f6ba5576c928aa2668ef3414d8655ceb Mon Sep 17 00:00:00 2001
 From: Song Zhao <song.zhao@amlogic.com>
 Date: Tue, 21 Jan 2020 22:37:13 -0800
-Subject: [PATCH] audio_hal: enable direct PCM output
+Subject: [PATCH 4/5] audio_hal: enable direct PCM output
 
 SWPL-13797
 
@@ -14,10 +14,10 @@ Change-Id: I429f78bff2267927c84c7d56b1027dea8fad7c46
  1 file changed, 3 insertions(+), 20 deletions(-)
 
 diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
-index 1d762d7b..fc068f05 100644
+index ad8b9e2..42de4e6 100644
 --- a/audio_hal/audio_hw.c
 +++ b/audio_hal/audio_hw.c
-@@ -7119,26 +7119,9 @@ ssize_t hw_write (struct audio_stream_out *stream
+@@ -7367,26 +7367,9 @@ ssize_t hw_write (struct audio_stream_out *stream
          }
  
          if (adev->useSubMix) {
