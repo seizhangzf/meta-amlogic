@@ -31,5 +31,5 @@ SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
 SRCREV_pn-media-modules = "5652b4fcf60a146c23f7f2faa74d7185e70fad0a"
 SRCREV_pn-linux-meson = "c6c32a665eb871cc0308e5446d83a176b64df73e"
 
-SRCREV_pn-devicesettings-hal-amlogic = "a59ae8c2079de9a47628040ba49babb5d0131785"
+SRCREV_pn-devicesettings-hal-amlogic = "82378d7876fbe04875bebb1313cf81f38784cf47"
 SRCREV_pn-iarmmgrs-hal-amlogic = "094917bae257d4ead6c3abb2eb095c48f1a4f35f"
