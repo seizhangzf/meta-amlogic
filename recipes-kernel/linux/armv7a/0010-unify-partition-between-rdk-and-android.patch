@@ -1,0 +1,256 @@
+From 659bcd0919a9020265872675ffa4d6328c0b1549 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Mon, 23 Mar 2020 15:26:31 +0800
+Subject: [PATCH] unify partition between rdk and android
+
+---
+ .../dts/amlogic/g12a_s905x2_u212_buildroot.dts     |  90 +--------------
+ .../dts/amlogic/partition_mbox_normal_P_rdk.dtsi   | 128 +++++++++++++++++++++
+ 2 files changed, 129 insertions(+), 89 deletions(-)
+ create mode 100644 arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
+
+diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
+index 209217185089..f4c48c8e6e7e 100644
+--- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
+@@ -19,6 +19,7 @@
+ 
+ #include "mesong12a.dtsi"
+ #include "mesong12a_drm.dtsi"
++#include "partition_mbox_normal_P_rdk.dtsi"
+ 
+ / {
+ 	model = "Amlogic";
+@@ -294,95 +295,6 @@
+ 		status = "okay";
+ 	};
+ 
+-
+-	partitions: partitions{
+-		parts = <14>;
+-		part-0 = <&logo>;
+-		part-1 = <&recovery>;
+-		part-2 = <&misc>;
+-		part-3 = <&dto>;
+-		part-4 = <&cri_data>;
+-		part-5 = <&param>;
+-		part-6 = <&boot>;
+-		part-7 = <&rsv>;
+-		part-8 = <&tee>;
+-		part-9 = <&vendor>;
+-		part-10 = <&odm>;
+-		part-11 = <&system>;
+-		part-12 = <&cache>;
+-		part-13 = <&data>;
+-
+-		logo:logo{
+-			pname = "logo";
+-			size = <0x0 0x800000>;
+-			mask = <1>;
+-		};
+-		recovery:recovery{
+-			pname = "recovery";
+-			size = <0x0 0x1800000>;
+-			mask = <1>;
+-		};
+-		misc:misc{
+-			pname = "misc";
+-			size = <0x0 0x800000>;
+-			mask = <1>;
+-		};
+-		dto:dto{
+-			pname = "dto";
+-			size = <0x0 0x800000>;
+-			mask = <1>;
+-		};
+-		cri_data:cri_data{
+-			pname = "cri_data";
+-			size = <0x0 0x800000>;
+-			mask = <2>;
+-		};
+-		rsv:rsv{
+-			pname = "rsv";
+-			size = <0x0 0x1000000>;
+-			mask = <1>;
+-		};
+-		param:param{
+-			pname = "param";
+-			size = <0x0 0x1000000>;
+-			mask = <2>;
+-		};
+-		boot:boot{
+-			pname = "boot";
+-			size = <0x0 0x1000000>;
+-			mask = <1>;
+-		};
+-		tee:tee{
+-			pname = "tee";
+-			size = <0x0 0x2000000>;
+-			mask = <1>;
+-		};
+-		vendor:vendor{
+-			pname = "vendor";
+-			size = <0x0 0x10000000>;
+-			mask = <1>;
+-		};
+-		odm:odm{
+-			pname = "odm";
+-			size = <0x0 0x10000000>;
+-			mask = <1>;
+-		};
+-		system:system{
+-			pname = "system";
+-			size = <0x0 0x80000000>;
+-			mask = <1>;
+-		};
+-		cache:cache{
+-			pname = "cache";
+-			size = <0x0 0x46000000>;
+-			mask = <2>;
+-		};
+-		data:data{
+-			pname = "data";
+-			size = <0xffffffff 0xffffffff>;
+-			mask = <4>;
+-		};
+-	};
+ 	unifykey{
+ 		compatible = "amlogic, unifykey";
+ 		status = "ok";
+diff --git a/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
+new file mode 100644
+index 000000000000..3450817ec42e
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
+@@ -0,0 +1,128 @@
++﻿ /*
++  * Amlogic partition set for normal
++  *
++  * Copyright (c) 2017-2017 Amlogic Ltd
++  *
++  * This file is licensed under a dual GPLv2 or BSD license.
++  *
++  */
++
++/ {
++	partitions: partitions{
++				parts = <19>;
++				part-0 = <&dtbbak>;
++				part-1 = <&bootloaderbak>;
++				part-2 = <&recovery>;
++				part-3 = <&logo>;
++				part-4 = <&misc>;
++				part-5 = <&cri_data>;
++				part-6 = <&rsv>;
++				part-7 = <&param>;
++				part-8 = <&tee>;
++				part-9 = <&oem>;
++				part-10 = <&skyinfo>;
++				part-11 = <&vbmeta_a>;
++				part-12 = <&boot_a>;
++				part-13 = <&system_a>;
++				part-14 = <&vbmeta_b>;
++				part-15 = <&boot_b>;
++				part-16 = <&system_b>;
++				part-17 = <&cache>;
++				part-18 = <&data>;
++		dtbbak:dtbbak{
++				   pname = "dtbbak";
++				   size = <0x0 0x100000>;
++				   mask = <1>;
++			   };
++		bootloaderbak:bootloaderbak{
++						  pname = "bootloaderbak";
++						  size = <0x0 0x200000>;
++						  mask = <1>;
++					  };
++		recovery:recovery{
++					 pname = "recovery";
++					 size = <0x0 0x4000000>;
++					 mask = <1>;
++				 };
++		logo:logo{
++				 pname = "logo";
++				 size = <0x0 0x800000>;
++				 mask = <1>;
++			 };
++		misc:misc{
++				 pname = "misc";
++				 size = <0x0 0x200000>;
++				 mask = <1>;
++			 };
++		cri_data:cri_data {
++					 pname = "cri_data";
++					 size = <0x0 0x400000>;
++					 mask = <2>;
++				 };
++		rsv:rsv{
++				pname = "rsv";
++				size = <0x0 0x1000000>;
++				mask = <1>;
++			};
++		param:param{
++				  pname = "param";
++				  size = <0x0 0x1000000>;
++				  mask = <2>;
++			  };
++		tee:tee{
++				pname = "tee";
++				size = <0x0 0x2000000>;
++				mask = <1>;
++			};
++		oem:oem{
++				pname = "oem";
++				size = <0x0 0x800000>;
++				mask = <1>;
++			};
++		skyinfo:skyinfo{
++					pname = "skyinfo";
++					size = <0x0 0x1000000>;
++					mask = <1>;
++				};
++		vbmeta_a:vbmeta_a{
++					 pname = "vbmeta_a";
++					 size = <0x0 0x200000>;
++					 mask = <1>;
++				 };
++		boot_a:boot_a {
++				   pname = "boot_a";
++				   size = <0x0 0x1000000>;
++				   mask = <1>;
++			   };
++		system_a:system_a {
++					 pname = "system_a";
++					 size = <0x0 0x6A400000>;
++					 mask = <1>;
++				 };
++		vbmeta_b:vbmeta_b {
++					 pname = "vbmeta_b";
++					 size = <0x0 0x200000>;
++					 mask = <1>;
++				 };
++		boot_b:boot_b {
++				   pname = "boot_b";
++				   size = <0x0 0x1000000>;
++				   mask = <1>;
++			   };
++		system_b:system_b {
++					 pname = "system_b";
++					 size = <0x0 0x6A400000>;
++					 mask = <1>;
++				 };
++		cache:cache {
++				  pname = "cache";
++				  size = <0x0 0x32000000>;
++				  mask = <2>;
++			  };
++		data:data {
++		 pname = "data";
++		 size = <0xffffffff 0xffffffff>;
++		 mask = <4>;
++	 };
++			};
++};/* end of / */
+-- 
+2.11.0
+

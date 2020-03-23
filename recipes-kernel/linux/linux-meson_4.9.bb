@@ -24,6 +24,7 @@ SRC_URI_append = " file://0006-uvm-add-dmabuf-wrap-vframe-mechanism-1-1.patch"
 SRC_URI_append = " file://0007-drm-add-uvm-dmabuf-support-in-meson-gem-1-1.patch"
 SRC_URI_append = " file://0008-secmem-add-secmem-driver-1-1.patch"
 SRC_URI_append = " file://0009-drm-Buildroot-TM2-Suspend-WestonOS-can-t-work-after-.patch"
+SRC_URI_append = " file://0010-unify-partition-between-rdk-and-android.patch"
 
 
 LINUX_VERSION ?= "4.9.113"
