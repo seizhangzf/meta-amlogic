@@ -1,0 +1,44 @@
+From 3c448a4566db97676b2de1f7a270d3f8daad013b Mon Sep 17 00:00:00 2001
+From: Geert Bosch <geert@mongodb.com>
+Date: Fri, 23 Jun 2017 16:45:33 -0400
+Subject: [PATCH] Add some fallthrough comments to work around GCC compiler
+ warnings
+
+---
+ murmurhashneutral2.c | 4 ++--
+ util.c               | 3 +++
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+Index: git/util.c
+===================================================================
+--- git.orig/util.c
++++ git/util.c
+@@ -1058,10 +1058,13 @@ parse_size_with_suffix(const char *str,
+ 		switch (*p) {
+ 		case 'T':
+ 			x *= multiplier;
++			// Fallthrough.
+ 		case 'G':
+ 			x *= multiplier;
++			// Fallthrough.
+ 		case 'M':
+ 			x *= multiplier;
++			// Fallthrough.
+ 		case 'K':
+ 		case 'k':
+ 			x *= multiplier;
+Index: git/murmurhashneutral2.c
+===================================================================
+--- git.orig/murmurhashneutral2.c
++++ git/murmurhashneutral2.c
+@@ -36,8 +36,8 @@ murmurhashneutral2(const void *key, int
+ 
+ 	switch (len)
+ 	{
+-	case 3: h ^= data[2] << 16;
+-	case 2: h ^= data[1] << 8;
++	case 3: h ^= data[2] << 16; // Fallthrough.
++	case 2: h ^= data[1] << 8; // Fallthrough.
+ 	case 1: h ^= data[0];
+ 		h *= m;
+ 	};

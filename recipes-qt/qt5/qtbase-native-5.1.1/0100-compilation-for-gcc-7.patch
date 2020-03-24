@@ -1,0 +1,13 @@
+Index: qtbase-opensource-src-5.1.1/src/corelib/thread/qmutex_linux.cpp
+===================================================================
+--- qtbase-opensource-src-5.1.1.orig/src/corelib/thread/qmutex_linux.cpp
++++ qtbase-opensource-src-5.1.1/src/corelib/thread/qmutex_linux.cpp
+@@ -55,7 +55,7 @@
+ #include <asm/unistd.h>
+ 
+ 
+-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
++#if (defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)) && __GNUC__ != 7
+ // C++11 mode
+ #  include <type_traits>
+ 

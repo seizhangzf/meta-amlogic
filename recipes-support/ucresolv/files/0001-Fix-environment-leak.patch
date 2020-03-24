@@ -1,0 +1,26 @@
+From 324be78473aeb7e0b25be5cc71c0ad86ecaaa687 Mon Sep 17 00:00:00 2001
+From: Mingyen Hung <mingyen.hung@amlogic.com>
+Date: Mon, 16 Mar 2020 10:49:27 +0800
+Subject: [PATCH] Fix environment leak
+
+Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>
+---
+ include/sysdeps/generic/_G_config.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/sysdeps/generic/_G_config.h b/include/sysdeps/generic/_G_config.h
+index c34cea8..f44a3d4 100644
+--- a/include/sysdeps/generic/_G_config.h
++++ b/include/sysdeps/generic/_G_config.h
+@@ -29,7 +29,7 @@ typedef struct
+   __mbstate_t __state;
+ } _G_fpos64_t;
+ #if defined _LIBC || defined _GLIBCPP_USE_WCHAR_T
+-# include "/usr/include/gconv.h"
++# include <gconv.h>
+ typedef union
+ {
+   struct __gconv_info __cd;
+-- 
+2.17.1
+
