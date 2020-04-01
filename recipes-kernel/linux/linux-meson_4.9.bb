@@ -17,7 +17,6 @@ SRC_URI_append = " file://meson.scc \
 
 SRC_URI_append = " file://0001-fix-uapi-struct.patch"
 SRC_URI_append = " file://0002-increase-codec-memory.patch"
-SRC_URI_append = " file://0003-workaround-tee-disable-microCode-loading-by-optee.patch"
 SRC_URI_append = " file://0001-drm-fix-compile-error-1-1.patch "
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0001-to-support-absystem-and-remove-unnecessary-partition.patch','',d)}"
 SRC_URI_append = " file://0006-uvm-add-dmabuf-wrap-vframe-mechanism-1-1.patch"

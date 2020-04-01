@@ -1,0 +1,96 @@
+From 3331bbc5d5c9b512ad233e3d8dec01c1f4c4dec0 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Wed, 1 Apr 2020 13:32:07 -0700
+Subject: [PATCH] v4l2: buffer not returned in DMABUF mode [1/1]
+
+PD#SWPL-23493
+
+Problem:
+aml_recycle_dma_buffers() is only called when aml_vdec_worker() is
+schedule. If all buffers are queued into output port, application will
+have no extra output buffer to trigfer aml_vdec_worker(). It will lead
+to freed buffer inside input->vframe_block_free_list can not be returned
+to application.  Thus, deadlock.
+
+Solution:
+Trigger aml_recycle_dma_buffers when capture buffer is dquened.
+
+Verify:
+U212
+
+Signed-off-by: Song Zhao <song.zhao@amlogic.com>
+---
+ drivers/amvdec_ports/aml_vcodec_adapt.c |  2 --
+ drivers/amvdec_ports/aml_vcodec_dec.c   | 11 ++++++++++-
+ drivers/amvdec_ports/aml_vcodec_drv.h   |  2 +-
+ 3 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_adapt.c b/drivers/amvdec_ports/aml_vcodec_adapt.c
+index d179a3a2..8c4a0a98 100644
+--- a/drivers/amvdec_ports/aml_vcodec_adapt.c
++++ b/drivers/amvdec_ports/aml_vcodec_adapt.c
+@@ -487,12 +487,10 @@ static void set_vdec_properity(struct vdec_s *vdec,
+ 			vdec->type = VDEC_TYPE_STREAM_PARSER;
+ 			vdec->port->type &= ~PORT_TYPE_FRAME;
+ 			vdec->port->type |= PORT_TYPE_ES;
+-			ada_ctx->ctx->is_stream_mode = true;
+ 		} else if (aml_set_vdec_type == VDEC_TYPE_FRAME_BLOCK) {
+ 			vdec->type = VDEC_TYPE_FRAME_BLOCK;
+ 			vdec->port->type &= ~PORT_TYPE_ES;
+ 			vdec->port->type |= PORT_TYPE_FRAME;
+-			ada_ctx->ctx->is_stream_mode = false;
+ 		}
+ 	}
+ 
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 18172b9a..e87b084a 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -1362,7 +1362,7 @@ static int vidioc_vdec_dqbuf(struct file *file, void *priv,
+ 			ATRACE_COUNTER("v4l2_dqin_eagain", 0);
+ 		else
+ 			ATRACE_COUNTER("v4l2_dqin_ok", 0);
+-	} else if (!V4L2_TYPE_IS_OUTPUT(buf->type)) {
++	} else {
+ 		if (ret == -EAGAIN)
+ 			ATRACE_COUNTER("v4l2_dqout_eagain", 0);
+ 	}
+@@ -1373,6 +1373,9 @@ static int vidioc_vdec_dqbuf(struct file *file, void *priv,
+ 		struct aml_video_dec_buf *aml_buf = NULL;
+ 		struct file *file = NULL;
+ 
++		if (ctx->is_drm_mode && ctx->output_dma_mode)
++			aml_recycle_dma_buffers(ctx);
++
+ 		mutex_lock(&ctx->lock);
+ 		vq = v4l2_m2m_get_vq(ctx->m2m_ctx, buf->type);
+ 		vb2_v4l2 = to_vb2_v4l2_buffer(vq->bufs[buf->index]);
+@@ -2242,6 +2245,12 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+ 	src_mem.size	= vb->planes[0].bytesused;
+ 	src_mem.model	= vb->memory;
+ 
++	if (vb->memory == VB2_MEMORY_DMABUF) {
++		v4l_dbg(ctx, V4L_DEBUG_CODEC_INPUT,
++				"%s, output_dma_mode set", __func__);
++		ctx->output_dma_mode = true;
++	}
++
+ 	if (vdec_if_probe(ctx, &src_mem, NULL)) {
+ 		v4l2_m2m_src_buf_remove(ctx->m2m_ctx);
+ 
+diff --git a/drivers/amvdec_ports/aml_vcodec_drv.h b/drivers/amvdec_ports/aml_vcodec_drv.h
+index 225a43ca..3c3cc181 100644
+--- a/drivers/amvdec_ports/aml_vcodec_drv.h
++++ b/drivers/amvdec_ports/aml_vcodec_drv.h
+@@ -485,7 +485,7 @@ struct aml_vcodec_ctx {
+ 	bool has_receive_eos;
+ 	struct list_head vdec_thread_list;
+ 	bool is_drm_mode;
+-	bool is_stream_mode;
++	bool output_dma_mode;
+ 	int buf_used_count;
+ 	bool receive_cmd_stop;
+ 	bool param_sets_from_ucode;
+-- 
+2.24.1
+
