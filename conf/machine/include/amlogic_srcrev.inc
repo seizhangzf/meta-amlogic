@@ -1,7 +1,7 @@
 # armv7at2hf-neon-rdk-linux-gnueabi
 SRCREV_pn-libplayer = "19ca046757f026bec28e35ee4b5041d59d669240"
 SRCREV_pn-aml-dvb = "f523225ce3492df540dcdebdde5dd9089794da7c"
-SRCREV_pn-optee-video-firmware = "90bce0e0f0102bdc58bc244d1e85c61395e50895"
+SRCREV_pn-optee-video-firmware = "fc7b94d4f43444ee7e747d7dc5eb98827a970693"
 SRCREV_pn-aml-zvbi = "f06e974f1382046ede5de9e7890b5bbf51ee57dc"
 SRCREV_pn-libgles-eabihf-dvalin-wayland-drm = "a2c108bfccd8a69045c45f53cd5782b013bec965"
 SRCREV_pn-aml-tvserver = "651d523fe6d2c881b47d7304144ffa6bb5be6be5"
@@ -32,5 +32,5 @@ SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
 SRCREV_pn-media-modules = "5652b4fcf60a146c23f7f2faa74d7185e70fad0a"
 SRCREV_pn-linux-meson = "c6c32a665eb871cc0308e5446d83a176b64df73e"
 
-SRCREV_pn-devicesettings-hal-amlogic = "a59ae8c2079de9a47628040ba49babb5d0131785"
+SRCREV_pn-devicesettings-hal-amlogic = "82378d7876fbe04875bebb1313cf81f38784cf47"
 SRCREV_pn-iarmmgrs-hal-amlogic = "094917bae257d4ead6c3abb2eb095c48f1a4f35f"
