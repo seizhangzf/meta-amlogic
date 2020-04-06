@@ -22,6 +22,7 @@ SRC_URI_append = " file://0001-to-support-absystem-excludes-vendor.patch;patchdi
 SRC_URI_append = " file://0001-Use-host-gcc-to-build-ddr-parse-tool.patch;patchdir=fip"
 SRC_URI_append = " file://root_rsa_pub_key.pem"
 SRC_URI_append = " file://root_aes_key.bin"
+SRC_URI_append = " file://bl32.img"
 
 do_configure[noexec] = "1"
 
@@ -49,7 +50,7 @@ BL32_SOC_FAMILY_tlhd = "gx"
 BL32_SOC_FAMILY_txl = "gx"
 BL32_SOC_FAMILY_txlx = "txlx"
 BL32_SOC_FAMILY_sm2 = "g12a"
-BL32_SOC_FAMILY_tm2 = "tl1"
+BL32_SOC_FAMILY_tm2 = "tm2"
 
 PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-none-elf/bin"
 PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
@@ -67,7 +68,8 @@ do_compile () {
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
         mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
-        #cp -rf ${S}/tdk/secureos/* ${S}/bl32/bin/
+        #FIXME: hack to cp special bl32 for u212
+        cp -rf ${WORKDIR}/bl32.img ${S}/tdk/secureos/g12a/bl32.img 
         ${S}/tdk/ta_export/scripts/pack_kpub.py \
             --rsk=${WORKDIR}/root_rsa_pub_key.pem \
             --rek=${WORKDIR}/root_aes_key.bin \
