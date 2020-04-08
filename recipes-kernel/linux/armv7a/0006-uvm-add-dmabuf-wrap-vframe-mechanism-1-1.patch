@@ -1,4 +1,4 @@
-From 7e33a61d032d230b7d831a0e80ce5ffcdd6692b8 Mon Sep 17 00:00:00 2001
+From 632fc82eea186fbb9d5435c36e1e3a57260e59f5 Mon Sep 17 00:00:00 2001
 From: Ao Xu <ao.xu@amlogic.com>
 Date: Mon, 30 Dec 2019 17:45:31 +0800
 Subject: [PATCH 1/2] uvm: add dmabuf wrap vframe mechanism [1/1]
@@ -18,106 +18,148 @@ none
 Change-Id: I24c73b0e9887794175c73faaed83862bbbbe6796
 Signed-off-by: Ao Xu <ao.xu@amlogic.com>
 ---
- arch/arm/configs/meson64_a32_defconfig |   1 +
- arch/arm64/configs/meson64_defconfig   |   1 +
- drivers/amlogic/Kconfig                |   2 +
- drivers/amlogic/Makefile               |   2 +
- drivers/amlogic/uvm/Kconfig            |  12 +
- drivers/amlogic/uvm/Makefile           |   8 +
- drivers/amlogic/uvm/meson_uvm_core.c   | 472 +++++++++++++++++++++++++
- include/linux/amlogic/meson_uvm_core.h | 117 ++++++
- 8 files changed, 615 insertions(+)
- create mode 100644 drivers/amlogic/uvm/Kconfig
- create mode 100644 drivers/amlogic/uvm/Makefile
- create mode 100644 drivers/amlogic/uvm/meson_uvm_core.c
+ MAINTAINERS                                       |  21 +
+ arch/arm/configs/meson64_a32_defconfig            |   3 +-
+ arch/arm64/configs/meson64_defconfig              |   1 +
+ drivers/amlogic/media/common/Kconfig              |   1 +
+ drivers/amlogic/media/common/Makefile             |   1 +
+ drivers/amlogic/media/common/uvm/Kconfig          |  13 +
+ drivers/amlogic/media/common/uvm/Makefile         |   8 +
+ drivers/amlogic/media/common/uvm/meson_uvm_core.c | 581 ++++++++++++++++++++++
+ include/linux/amlogic/meson_uvm_core.h            | 183 +++++++
+ 9 files changed, 810 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/amlogic/media/common/uvm/Kconfig
+ create mode 100644 drivers/amlogic/media/common/uvm/Makefile
+ create mode 100644 drivers/amlogic/media/common/uvm/meson_uvm_core.c
  create mode 100644 include/linux/amlogic/meson_uvm_core.h
 
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 705e36f..c899e9d 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -15282,3 +15282,24 @@ F:  arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
+ F:  arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
+ F:  arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
+ F:  arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
++
++AMLOGIC TM2_REVB PANEL DTSI
++M: Evoke Zhang <evoke.zhang@amlogic.com>
++F: arch/arm/boot/dts/amlogic/mesontm2_revb_t962x3_ab301-panel.dtsi
++F: arch/arm/boot/dts/amlogic/mesontm2_revb_t962x3_ab309-panel.dtsi
++F: arch/arm/boot/dts/amlogic/mesontm2_revb_t962x3_t312-panel.dtsi
++F: arch/arm64/boot/dts/amlogic/mesontm2_revb_t962x3_ab301-panel.dtsi
++F: arch/arm64/boot/dts/amlogic/mesontm2_revb_t962x3_ab309-panel.dtsi
++F: arch/arm64/boot/dts/amlogic/mesontm2_revb_t962x3_t312-panel.dtsi
++
++AMLOGIC ION
++M: Dezhi Kong <dezhi.kong@amlogic.com>
++F:  drivers/staging/android/ion/ion_secure_heap.c
++
++AMLOGIC DECODE RESOURCE MANAGE
++M: Baoguo Chen <baoguo.chen@amlogic.com>
++F: drivers/amlogic/media/common/resource_mgr/*
++
++AMLOGIC UVM
++M:     Ao Xu <ao.xu@amlogic.com>
++F:     drivers/amlogic/media/common/uvm/
 diff --git a/arch/arm/configs/meson64_a32_defconfig b/arch/arm/configs/meson64_a32_defconfig
-index be476f4afc51..a4251a1512bf 100644
+index be476f4..ad92860 100644
 --- a/arch/arm/configs/meson64_a32_defconfig
 +++ b/arch/arm/configs/meson64_a32_defconfig
-@@ -391,6 +391,7 @@ CONFIG_DOLBY_FW=y
- CONFIG_AMLOGIC_HIFI4DSP=y
- CONFIG_AMLOGIC_PIXEL_PROBE=y
- CONFIG_AMLOGIC_FIRMWARE=y
-+CONFIG_AMLOGIC_UVM=y
- CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
- CONFIG_DEVTMPFS=y
- CONFIG_DEVTMPFS_MOUNT=y
+@@ -279,6 +279,7 @@ CONFIG_AMLOGIC_MEDIA_GE2D=y
+ CONFIG_AMLOGIC_ION=y
+ CONFIG_AMLOGIC_MEDIA_RDMA=y
+ CONFIG_AMLOGIC_MEDIA_VSYNC_RDMA=y
++CONFIG_AMLOGIC_UVM_CORE=y
+ CONFIG_AMLOGIC_MEDIA_VFM=y
+ CONFIG_AMLOGIC_VPU=y
+ CONFIG_AMLOGIC_VIDEOBUF_RESOURCE=y
+@@ -300,8 +301,6 @@ CONFIG_AMLOGIC_BL_EXTERN=y
+ CONFIG_AMLOGIC_BL_EXTERN_I2C_LP8556=y
+ CONFIG_AMLOGIC_BL_EXTERN_MIPI_LT070ME05=y
+ CONFIG_AMLOGIC_LOCAL_DIMMING=y
+-CONFIG_AMLOGIC_LOCAL_DIMMING_IW7038=y
+-CONFIG_AMLOGIC_LOCAL_DIMMING_IW7027=y
+ CONFIG_AMLOGIC_VOUT_SERVE=y
+ CONFIG_AMLOGIC_VOUT2_SERVE=y
+ CONFIG_AMLOGIC_MEDIA_FB=y
 diff --git a/arch/arm64/configs/meson64_defconfig b/arch/arm64/configs/meson64_defconfig
-index 10226a7111d1..b39bccf1e895 100644
+index 10226a7..d4d7b46 100644
 --- a/arch/arm64/configs/meson64_defconfig
 +++ b/arch/arm64/configs/meson64_defconfig
-@@ -386,6 +386,7 @@ CONFIG_DOLBY_FW=y
- CONFIG_AMLOGIC_HIFI4DSP=y
- CONFIG_AMLOGIC_PIXEL_PROBE=y
- CONFIG_AMLOGIC_FIRMWARE=y
-+CONFIG_AMLOGIC_UVM=y
- CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
- CONFIG_DEVTMPFS=y
- CONFIG_DEVTMPFS_MOUNT=y
-diff --git a/drivers/amlogic/Kconfig b/drivers/amlogic/Kconfig
-index 914146f80a1e..50dafb125036 100644
---- a/drivers/amlogic/Kconfig
-+++ b/drivers/amlogic/Kconfig
-@@ -148,5 +148,7 @@ source "drivers/amlogic/pixel_probe/Kconfig"
- 
- source "drivers/amlogic/firmware/Kconfig"
- 
-+source "drivers/amlogic/uvm/Kconfig"
-+
- endmenu
- endif
-diff --git a/drivers/amlogic/Makefile b/drivers/amlogic/Makefile
-index 1933aa2b0ebb..2fd76906a107 100644
---- a/drivers/amlogic/Makefile
-+++ b/drivers/amlogic/Makefile
-@@ -145,3 +145,5 @@ obj-$(CONFIG_AMLOGIC_IRCUT) += ircut/
- obj-$(CONFIG_AMLOGIC_PIXEL_PROBE) += pixel_probe/
- 
- obj-$(CONFIG_AMLOGIC_FIRMWARE) += firmware/
-+
-+obj-$(CONFIG_AMLOGIC_UVM) += uvm/
-diff --git a/drivers/amlogic/uvm/Kconfig b/drivers/amlogic/uvm/Kconfig
+@@ -274,6 +274,7 @@ CONFIG_AMLOGIC_MEDIA_GE2D=y
+ CONFIG_AMLOGIC_ION=y
+ CONFIG_AMLOGIC_MEDIA_RDMA=y
+ CONFIG_AMLOGIC_MEDIA_VSYNC_RDMA=y
++CONFIG_AMLOGIC_UVM_CORE=y
+ CONFIG_AMLOGIC_MEDIA_VFM=y
+ CONFIG_AMLOGIC_VPU=y
+ CONFIG_AMLOGIC_VIDEOBUF_RESOURCE=y
+diff --git a/drivers/amlogic/media/common/Kconfig b/drivers/amlogic/media/common/Kconfig
+index b06a63a..0eacd34 100644
+--- a/drivers/amlogic/media/common/Kconfig
++++ b/drivers/amlogic/media/common/Kconfig
+@@ -5,6 +5,7 @@ source "drivers/amlogic/media/common/ge2d/Kconfig"
+ source "drivers/amlogic/media/common/ion_dev/Kconfig"
+ source "drivers/amlogic/media/common/rdma/Kconfig"
+ source "drivers/amlogic/media/common/secmem/Kconfig"
++source "drivers/amlogic/media/common/uvm/Kconfig"
+ source "drivers/amlogic/media/common/vfm/Kconfig"
+ source "drivers/amlogic/media/common/vpu/Kconfig"
+ source "drivers/amlogic/media/common/v4l_util/Kconfig"
+diff --git a/drivers/amlogic/media/common/Makefile b/drivers/amlogic/media/common/Makefile
+index b1f87a4..0745a38 100644
+--- a/drivers/amlogic/media/common/Makefile
++++ b/drivers/amlogic/media/common/Makefile
+@@ -6,6 +6,7 @@ obj-$(CONFIG_AMLOGIC_ION)			+= ion_dev/
+ obj-$(CONFIG_AMLOGIC_MEDIA_GE2D)	+=	ge2d/
+ obj-$(CONFIG_AMLOGIC_MEDIA_RDMA)	+=	rdma/
+ obj-$(CONFIG_AMLOGIC_SECMEM)		+=	secmem/
++obj-$(CONFIG_AMLOGIC_UVM_CORE)		+=	uvm/
+ obj-$(CONFIG_AMLOGIC_MEDIA_VFM)	+=	vfm/
+ obj-$(CONFIG_AMLOGIC_VPU)	+=	vpu/
+ obj-$(CONFIG_AMLOGIC_VIDEOBUF_RESOURCE)	+= v4l_util/
+diff --git a/drivers/amlogic/media/common/uvm/Kconfig b/drivers/amlogic/media/common/uvm/Kconfig
 new file mode 100644
-index 000000000000..bd30bc6bae15
+index 00000000..3157845
 --- /dev/null
-+++ b/drivers/amlogic/uvm/Kconfig
-@@ -0,0 +1,12 @@
++++ b/drivers/amlogic/media/common/uvm/Kconfig
+@@ -0,0 +1,13 @@
 +#
-+# uvm configuration
++# uvm core configuration
 +#
 +
 +
-+menuconfig AMLOGIC_UVM
++menuconfig AMLOGIC_UVM_CORE
 +	bool "Amlogic unified video memory management"
 +	default n
 +	help
 +	  say y to enable Amlogic unified video memory management.
-+	  The uvm driver is based on the ion driver.
++	  uvm wrap the video metadata info vframe_s so that decoder
++	  and display can decouple.
 +
-diff --git a/drivers/amlogic/uvm/Makefile b/drivers/amlogic/uvm/Makefile
+diff --git a/drivers/amlogic/media/common/uvm/Makefile b/drivers/amlogic/media/common/uvm/Makefile
 new file mode 100644
-index 000000000000..6c3cfbdeec8e
+index 00000000..410de66
 --- /dev/null
-+++ b/drivers/amlogic/uvm/Makefile
++++ b/drivers/amlogic/media/common/uvm/Makefile
 @@ -0,0 +1,8 @@
 +#
-+# Makefile for amlogic uvm driver
++# Makefile for amlogic uvm
 +#
 +
 +ccflags-y += -Idrivers/staging/android/ -Idrivers/amlogic/
 +
-+obj-$(CONFIG_AMLOGIC_UVM)		+= meson_uvm_core.o
++obj-$(CONFIG_AMLOGIC_UVM_CORE)		+= meson_uvm_core.o
 +
-diff --git a/drivers/amlogic/uvm/meson_uvm_core.c b/drivers/amlogic/uvm/meson_uvm_core.c
+diff --git a/drivers/amlogic/media/common/uvm/meson_uvm_core.c b/drivers/amlogic/media/common/uvm/meson_uvm_core.c
 new file mode 100644
-index 000000000000..41bb08f3005d
+index 00000000..060a91e
 --- /dev/null
-+++ b/drivers/amlogic/uvm/meson_uvm_core.c
-@@ -0,0 +1,472 @@
++++ b/drivers/amlogic/media/common/uvm/meson_uvm_core.c
+@@ -0,0 +1,581 @@
 +/*
-+ * drivers/amlogic/uvm/meson_uvm.c
++ * drivers/amlogic/media/common/uvm/meson_uvm_core.c
 + *
 + * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
 + *
@@ -148,16 +190,7 @@ index 000000000000..41bb08f3005d
 +#include <linux/module.h>
 +#include <linux/dma-buf.h>
 +#include <linux/pagemap.h>
-+#include <ion/ion.h>
-+#include <ion/ion_priv.h>
-+#include <linux/meson_ion.h>
 +#include <linux/amlogic/meson_uvm_core.h>
-+#include <drm/drm.h>
-+#include <drm/drmP.h>
-+#include <drm/drm_gem.h>
-+#include <drm/drm_vma_manager.h>
-+#include <drm/meson_gem.h>
-+
 +
 +static int debug_level;
 +module_param(debug_level, int, 0644);
@@ -168,13 +201,17 @@ index 000000000000..41bb08f3005d
 +			pr_info("UVM: " fmt, ## arg); \
 +	} while (0)
 +
++static void uvm_hook_mod_release(struct kref *kref);
++static struct uvm_hook_mod *uvm_find_hook_mod(struct uvm_handle *handle,
++						     int type);
++
 +static void uvm_handle_destroy(struct kref *kref)
 +{
 +	struct uvm_handle *handle;
 +
 +	handle = container_of(kref, struct uvm_handle, ref);
 +
-+	kfree(handle->buffer);
++	kfree(handle->ua);
 +
 +	kfree(handle);
 +}
@@ -199,25 +236,23 @@ index 000000000000..41bb08f3005d
 +{
 +	struct dma_buf *dmabuf;
 +	struct uvm_handle *handle;
++	struct uvm_alloc *ua;
 +	struct sg_table *sgt;
-+	struct drm_gem_object *obj;
 +
 +	dmabuf = attachment->dmabuf;
 +	handle = dmabuf->priv;
-+	obj = handle->priv;
++	ua = handle->ua;
++	sgt = ua->sgt;
 +
-+	sgt = am_meson_gem_prime_get_sg_table(obj);
-+	if (!sgt) {
-+		UVM_PRINTK(0, "get_sg_table fail from gem\n");
-+		return ERR_PTR(-ENOMEM);
-+	}
-+
-+	handle->buffer->sgt = sgt;
 +	UVM_PRINTK(1, "meson_uvm_map_dma_buf called, %s.\n", current->comm);
 +
-+	if (!dma_map_sg(attachment->dev, sgt->sgl, sgt->nents, direction)) {
++	if (ua->flags | BIT(UVM_FAKE_ALLOC)) {
++		dma_map_page(attachment->dev, sg_page(sgt->sgl), 0,
++				UVM_FAKE_SIZE, direction);
++	} else if (!dma_map_sg(attachment->dev, sgt->sgl, sgt->nents,
++				direction)) {
 +		UVM_PRINTK(0, "meson_uvm: dma_map_sg call failed.\n");
-+		sgt = ERR_PTR(-ENOMEM);
++		return ERR_PTR(-ENOMEM);
 +	}
 +	dma_sync_sg_for_device(NULL, sgt->sgl, sgt->nents, DMA_BIDIRECTIONAL);
 +	return sgt;
@@ -227,20 +262,35 @@ index 000000000000..41bb08f3005d
 +				    struct sg_table *sgt,
 +				    enum dma_data_direction direction)
 +{
++	struct dma_buf *dmabuf;
++	struct uvm_handle *handle;
++	struct uvm_alloc *ua;
++
++	dmabuf = attachment->dmabuf;
++	handle = dmabuf->priv;
++	ua = handle->ua;
++
 +	UVM_PRINTK(1, "meson_uvm_unmap_dma_buf called, %s.\n", current->comm);
-+	dma_unmap_sg(attachment->dev, sgt->sgl, sgt->nents, direction);
++	if (ua->flags | BIT(UVM_FAKE_ALLOC))
++		dma_unmap_page(attachment->dev, sgt->sgl->dma_address,
++			UVM_FAKE_SIZE, direction);
++	else
++		dma_unmap_sg(attachment->dev, sgt->sgl, sgt->nents, direction);
 +}
 +
 +static void meson_uvm_release(struct dma_buf *dmabuf)
 +{
++	struct uvm_hook_mod *uhmod, *uhtmp;
++
 +	struct uvm_handle *handle = dmabuf->priv;
-+	struct drm_gem_object *obj = handle->priv;
++	struct uvm_alloc *ua = handle->ua;
 +
 +	UVM_PRINTK(1, "meson_uvm_release called.\n");
 +
-+	drm_gem_object_unreference_unlocked(obj);
++	ua->free(ua->obj);
 +
-+	dmabuf_put_private_buffer(dmabuf, 0);
++	list_for_each_entry_safe(uhmod, uhtmp, &handle->mod_attached, list)
++		kref_put(&uhmod->ref, uvm_hook_mod_release);
 +
 +	kref_put(&handle->ref, uvm_handle_destroy);
 +}
@@ -289,7 +339,6 @@ index 000000000000..41bb08f3005d
 +static void *meson_uvm_vmap(struct dma_buf *dmabuf)
 +{
 +	struct uvm_handle *handle;
-+	struct drm_gem_object *obj;
 +	struct sg_table *sgt;
 +	struct scatterlist *sg;
 +	struct page **pages;
@@ -299,9 +348,8 @@ index 000000000000..41bb08f3005d
 +	void *vaddr;
 +
 +	handle = dmabuf->priv;
-+	obj = handle->priv;
-+	sgt = handle->buffer->sgt;
-+	npages = PAGE_ALIGN(obj->size) / PAGE_SIZE;
++	sgt = handle->ua->sgt;
++	npages = PAGE_ALIGN(handle->size) / PAGE_SIZE;
 +	pgprot = pgprot_writecombine(PAGE_KERNEL);
 +
 +	pages = vmalloc(sizeof(struct page *) * npages);
@@ -323,7 +371,7 @@ index 000000000000..41bb08f3005d
 +	if (vaddr == NULL)
 +		return ERR_PTR(-ENOMEM);
 +
-+	handle->buffer->vaddr = vaddr;
++	handle->ua->vaddr = vaddr;
 +	UVM_PRINTK(1, "meson_uvm_vmap called.\n");
 +	return vaddr;
 +}
@@ -332,19 +380,18 @@ index 000000000000..41bb08f3005d
 +{
 +	struct uvm_handle *handle = dmabuf->priv;
 +	UVM_PRINTK(1, "meson_uvm_vunmap called.\n");
-+	vunmap(handle->buffer->vaddr);
++	vunmap(handle->ua->vaddr);
 +}
 +
 +static int meson_uvm_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 +{
 +	int i;
 +	int ret;
-+
++	struct scatterlist *sg;
 +	struct uvm_handle *handle = dmabuf->priv;
-+	struct sg_table *table = handle->buffer->sgt;
++	struct sg_table *table = handle->ua->sgt;
 +	unsigned long addr = vma->vm_start;
 +	unsigned long offset = vma->vm_pgoff * PAGE_SIZE;
-+	struct scatterlist *sg;
 +
 +	UVM_PRINTK(1, "meson_uvm_mmap called.\n");
 +
@@ -396,22 +443,11 @@ index 000000000000..41bb08f3005d
 +	.mmap = meson_uvm_mmap,
 +};
 +
-+static struct uvm_buffer *uvm_buffer_alloc(struct uvm_handle *handle)
-+{
-+	struct uvm_buffer *buffer;
-+
-+	buffer = kzalloc(sizeof(*buffer), GFP_KERNEL);
-+	if (!buffer)
-+		return ERR_PTR(-ENOMEM);
-+
-+	return buffer;
-+}
-+
 +static struct uvm_handle *uvm_handle_alloc(size_t len, size_t align,
 +					   ulong flags)
 +{
 +	struct uvm_handle *handle;
-+	struct uvm_buffer *buffer;
++	struct uvm_alloc *ua;
 +
 +	handle = kzalloc(sizeof(*handle), GFP_KERNEL);
 +	if (!handle)
@@ -422,16 +458,14 @@ index 000000000000..41bb08f3005d
 +	handle->size = len;
 +	handle->align = align;
 +	handle->flags = flags;
++	INIT_LIST_HEAD(&handle->mod_attached);
 +
-+	if (!(flags & UVM_DELAY_ALLOC)) {
-+		buffer = uvm_buffer_alloc(handle);
-+
-+		if (!buffer) {
-+			kfree(handle);
-+			return ERR_PTR(-ENOMEM);
-+		}
-+		handle->buffer = buffer;
++	ua = kzalloc(sizeof(*ua), GFP_KERNEL);
++	if (!ua) {
++		kfree(handle);
++		return ERR_PTR(-ENOMEM);
 +	}
++	handle->ua = ua;
 +
 +	return handle;
 +}
@@ -485,9 +519,75 @@ index 000000000000..41bb08f3005d
 +}
 +EXPORT_SYMBOL(dmabuf_is_uvm);
 +
++static struct sg_table *uvm_copy_sgt(struct sg_table *src_table)
++{
++	struct sg_table *dst_table = NULL;
++	struct scatterlist *dst_sgl = NULL;
++	struct scatterlist *src_sgl = NULL;
++	int i, ret;
++
++	dst_table = kzalloc(sizeof(*dst_table), GFP_KERNEL);
++	if (!dst_table)
++		return ERR_PTR(-ENOMEM);
++
++	ret = sg_alloc_table(dst_table, src_table->nents, GFP_KERNEL);
++	if (ret) {
++		kfree(dst_table);
++		return ERR_PTR(-ENOMEM);
++	}
++
++	dst_sgl = dst_table->sgl;
++	src_sgl = src_table->sgl;
++	for (i = 0; i < src_table->nents; i++) {
++		sg_set_page(dst_sgl, sg_page(src_sgl), src_sgl->length, 0);
++		sg_dma_address(dst_sgl) = sg_phys(src_sgl);
++		sg_dma_len(dst_sgl) = sg_dma_len(src_sgl);
++		dst_sgl = sg_next(dst_sgl);
++		src_sgl = sg_next(src_sgl);
++	}
++
++	return dst_table;
++
++}
++
++int dmabuf_bind_uvm_alloc(struct dma_buf *dmabuf, struct uvm_alloc_info *info)
++{
++	struct uvm_handle *handle;
++	struct uvm_alloc *ua;
++
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return -EINVAL;
++	}
++
++	handle = dmabuf->priv;
++	ua = handle->ua;
++
++	if (!info->sgt) {
++		UVM_PRINTK(0, "invalid sg_table.\n");
++		return -EINVAL;
++	}
++
++	ua->size = info->size;
++	ua->flags = info->flags;
++	ua->sgt = uvm_copy_sgt(info->sgt);
++	ua->obj = info->obj;
++	ua->obj->dmabuf = dmabuf;
++	ua->free = info->free;
++
++	return 0;
++
++}
++EXPORT_SYMBOL(dmabuf_bind_uvm_alloc);
++
 +int dmabuf_set_vframe(struct dma_buf *dmabuf, struct vframe_s *vf)
 +{
 +	struct uvm_handle *handle;
++
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return -EINVAL;
++	}
 +
 +	handle = dmabuf->priv;
 +	memcpy(&handle->vf, vf, sizeof(struct vframe_s));
@@ -501,6 +601,11 @@ index 000000000000..41bb08f3005d
 +{
 +	struct uvm_handle *handle;
 +
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return ERR_PTR(-EINVAL);
++	}
++
 +	handle = dmabuf->priv;
 +	kref_get(&handle->ref);
 +
@@ -512,90 +617,136 @@ index 000000000000..41bb08f3005d
 +{
 +	struct uvm_handle *handle;
 +
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return -EINVAL;
++	}
++
 +	handle = dmabuf->priv;
 +	return kref_put(&handle->ref, uvm_handle_destroy);
 +}
 +EXPORT_SYMBOL(dmabuf_put_vframe);
 +
-+int dmabuf_set_private_buffer(struct dma_buf *dmabuf, int buffer_type,
-+			      struct uvm_buffer_info *info)
++int uvm_attach_hook_mod(struct dma_buf *dmabuf,
++			      struct uvm_hook_mod_info *info)
 +{
 +	struct uvm_handle *handle;
-+	struct uvm_private_buffer *upb;
++	struct uvm_hook_mod *uhmod;
 +
-+	handle = dmabuf->priv;
-+	upb = kzalloc(sizeof(*upb), GFP_KERNEL);
-+	if (!upb) {
-+		UVM_PRINTK(0, "kzalloc uvm_private_buffer fail.\n");
-+		return -ENOMEM;
-+	}
-+
-+	kref_init(&upb->ref);
-+	upb->size = info->size;
-+	upb->arg = info->arg;
-+	upb->free = info->free;
-+
-+	handle->buffs[buffer_type] = upb;
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(dmabuf_set_private_buffer);
-+
-+struct uvm_private_buffer *dmabuf_get_private_buffer(struct dma_buf *dmabuf,
-+						     int buffer_type)
-+{
-+	struct uvm_handle *handle;
-+	struct uvm_private_buffer *upb;
-+
-+	handle = dmabuf->priv;
-+	upb = handle->buffs[buffer_type];
-+
-+	if (!upb) {
-+		UVM_PRINTK(0, "dmabuf_get_private_buffer fail.\n");
-+		return ERR_PTR(-EINVAL);
-+	}
-+
-+	kref_get(&upb->ref);
-+
-+	return upb;
-+}
-+EXPORT_SYMBOL(dmabuf_get_private_buffer);
-+
-+static void uvm_private_buffer_release(struct kref *kref)
-+{
-+	struct uvm_private_buffer *upb;
-+
-+	upb = container_of(kref, struct uvm_private_buffer, ref);
-+	UVM_PRINTK(1, "uvm_private_buffer_release.\n");
-+	upb->free(upb->arg);
-+
-+	kfree(upb);
-+}
-+
-+int dmabuf_put_private_buffer(struct dma_buf *dmabuf, int buffer_type)
-+{
-+	struct uvm_handle *handle;
-+	struct uvm_private_buffer *upb;
-+
-+	handle = dmabuf->priv;
-+	upb = handle->buffs[buffer_type];
-+
-+	if (!upb) {
-+		UVM_PRINTK(1, "dmabuf_put_private_buffer fail.\n");
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
 +		return -EINVAL;
 +	}
 +
-+	return kref_put(&upb->ref, uvm_private_buffer_release);
++	handle = dmabuf->priv;
++	uhmod = kzalloc(sizeof(*uhmod), GFP_KERNEL);
++	if (!uhmod) {
++		UVM_PRINTK(0, "kzalloc uvm_hook_mod fail.\n");
++		return -ENOMEM;
++	}
++
++	kref_init(&uhmod->ref);
++	uhmod->type = info->type;
++	uhmod->arg = info->arg;
++	uhmod->free = info->free;
++	uhmod->acquire_fence = info->acquire_fence;
++
++	mutex_lock(&handle->lock);
++	list_add_tail(&uhmod->list, &handle->mod_attached);
++	handle->n_mod_attached++;
++	handle->mod_attached_mask |= 1 << (uhmod->type);
++	mutex_unlock(&handle->lock);
++
++	UVM_PRINTK(1, "%s called.\n", __func__);
++
++	return 0;
 +}
-+EXPORT_SYMBOL(dmabuf_put_private_buffer);
++EXPORT_SYMBOL(uvm_attach_hook_mod);
++
++int uvm_detach_hook_mod(struct dma_buf *dmabuf, int type)
++{
++	UVM_PRINTK(1, "%s called.\n", __func__);
++	return uvm_put_hook_mod(dmabuf, type);
++}
++EXPORT_SYMBOL(uvm_detach_hook_mod);
++
++static struct uvm_hook_mod *uvm_find_hook_mod(struct uvm_handle *handle,
++						     int type)
++{
++	struct uvm_hook_mod *uhmod = NULL;
++
++	mutex_lock(&handle->lock);
++	list_for_each_entry(uhmod, &handle->mod_attached, list) {
++		if (uhmod->type == type)
++			break;
++	}
++	mutex_unlock(&handle->lock);
++
++	if (!uhmod) {
++		UVM_PRINTK(0, "uvm_find_hook_mod fail.\n");
++		return ERR_PTR(-EINVAL);
++	}
++
++	return uhmod;
++}
++
++struct uvm_hook_mod *uvm_get_hook_mod(struct dma_buf *dmabuf,
++						     int type)
++{
++	struct uvm_handle *handle;
++	struct uvm_hook_mod *uhmod = NULL;
++
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return ERR_PTR(-EINVAL);
++	}
++
++	handle = dmabuf->priv;
++	uhmod = uvm_find_hook_mod(handle, type);
++	if (uhmod)
++		kref_get(&uhmod->ref);
++
++	return uhmod;
++}
++EXPORT_SYMBOL(uvm_get_hook_mod);
++
++static void uvm_hook_mod_release(struct kref *kref)
++{
++	struct uvm_hook_mod *uhmod;
++
++	uhmod = container_of(kref, struct uvm_hook_mod, ref);
++	list_del(&uhmod->list);
++	UVM_PRINTK(1, "uvm_hook_mod_release.\n");
++	uhmod->free(uhmod->arg);
++}
++
++int uvm_put_hook_mod(struct dma_buf *dmabuf, int type)
++{
++	struct uvm_handle *handle;
++	struct uvm_hook_mod *uhmod = NULL;
++
++	if (!dmabuf || !dmabuf_is_uvm(dmabuf)) {
++		UVM_PRINTK(0, "dmabuf is not uvm.\n");
++		return -EINVAL;
++	}
++
++	handle = dmabuf->priv;
++	uhmod = uvm_find_hook_mod(handle, type);
++
++	if (uhmod)
++		return kref_put(&uhmod->ref, uvm_hook_mod_release);
++	else
++		return -EINVAL;
++}
++EXPORT_SYMBOL(uvm_put_hook_mod);
 diff --git a/include/linux/amlogic/meson_uvm_core.h b/include/linux/amlogic/meson_uvm_core.h
 new file mode 100644
-index 000000000000..81c25df9be4c
+index 00000000..2750246
 --- /dev/null
 +++ b/include/linux/amlogic/meson_uvm_core.h
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,183 @@
 +/*
-+ * drivers/amlogic/uvm/meson_uvm.h
++ * include/linux/amlogic/meson_uvm_core.h
 + *
 + * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
 + *
@@ -628,23 +779,36 @@ index 000000000000..81c25df9be4c
 +#include <linux/amlogic/media/vfm/vframe.h>
 +
 +#define MAX_BUFF_NUMS	4
++#define UVM_FAKE_SIZE 4096
 +
-+enum UVM_ALLOC_FLAG {
++enum uvm_alloc_flag {
 +	UVM_IMM_ALLOC,
 +	UVM_DELAY_ALLOC,
++	UVM_FAKE_ALLOC,
 +};
 +
 +/**
-+ * struct uvm_handle - metadata for the vframe based buffer
++ * struct uvm_handle - video dmabuffer wrap vframe
++ *
 + * @ref:	reference count
 + * @lock:	protects the uvm_handle fields
-+ * @uvm_buffer:	the buffer info
++ * @uvm_alloc:	buffer alloc info
++ * @dma_buf:	dmabuf structure
++ * @alloc:		non-alloc or allocated
++ * @size:		dmabuf size
++ * @align:		dmabuf align size
++ * @flags:		alloc flag and usage flag
++ * @vf:			builtin vframe
++ * @vfp:		pointer the origin vframe
++ * @mod_attached:	list of attached module
++ * @n_mod_attached:	num of attached module
++ * @mod_attached_mask:	mask of attached module
 + */
 +struct uvm_handle {
 +	struct kref ref;
 +	struct mutex lock;
 +
-+	struct uvm_buffer *buffer;
++	struct uvm_alloc *ua;
 +	struct dma_buf *dmabuf;
 +	bool alloc;
 +	size_t size;
@@ -653,64 +817,117 @@ index 000000000000..81c25df9be4c
 +
 +	struct vframe_s vf;
 +	struct vframe_s *vfp;
-+	atomic_t umap_count;
-+	atomic_t kmap_count;
 +
-+	struct uvm_private_buffer *buffs[MAX_BUFF_NUMS];
-+	u8 num_buffers;
-+
-+	void *priv;
++	struct list_head mod_attached;
++	size_t n_mod_attached;
++	unsigned long mod_attached_mask;
 +};
 +
-+struct uvm_buffer {
-+	int alloc_type;
-+	struct ion_client *client;
-+	struct ion_handle *handle;
++/**
++ * struct uvm_buf_obj - uvm buffer object
++ * This structure define the uvm buffer object. uvm do not allocate buffer.
++ * device that allocate buffer, wrap this structure.
++ *
++ * @arg:	uvm dmabuf exporter device priv structure
++ * @dev:	uvm dmabuf exporter device
++ */
++struct uvm_buf_obj {
++	void *arg;
++	struct device *dev;
++	struct dma_buf *dmabuf;
++};
 +
++/**
++ * struct uvm_alloc - uvm buffer alloc struct
++ *
++ * @sgt:	dmabuf sg_table
++ * @pages:	dmabuf page array
++ * @vaddr:	dmabuf kernel address
++ * @size:	dmabuf real size
++ * @obj:	uvm buffer object
++ * @free:	free uvm_buf_obj related
++ */
++struct uvm_alloc {
 +	struct sg_table *sgt;
 +	struct page **pages;
 +	void *vaddr;
-+	phys_addr_t paddr;
++	size_t size;
++	uint64_t flags;
++	struct uvm_buf_obj *obj;
++	void (*free)(struct uvm_buf_obj *obj);
 +};
 +
-+struct uvm_private_buffer {
++struct uvm_alloc_info {
++	size_t size;
++	uint64_t flags;
++	struct sg_table *sgt;
++	struct uvm_buf_obj *obj;
++	void (*free)(struct uvm_buf_obj *obj);
++};
++
++enum uvm_hook_mod_type {
++	VF_SRC_DECODER,
++	VF_SRC_VDIN,
++	VF_PROCESS_V4LVIDEO,
++	VF_PROCESS_DI,
++	VF_PROCESS_VIDEOCOMPOSER,
++};
++
++/**
++ * struct uvm_hook_mod - uvm hook module
++ *
++ * @ref:	reference count
++ * @type:	module type
++ * @arg:	module private data
++ * @free:	module free function
++ * @acquire_fence:	module acquire fence
++ * @head:	module link node
++ */
++struct uvm_hook_mod {
 +	struct kref ref;
-+	int buffer_type;
-+
-+	size_t size;
-+	size_t align;
-+	unsigned long flags;
-+	bool alloc;
-+
++	enum uvm_hook_mod_type type;
 +	void *arg;
 +	void (*free)(void *arg);
++	struct sync_fence *acquire_fence;
++	struct list_head list;
 +};
 +
-+struct uvm_buffer_info {
-+	size_t size;
++struct uvm_hook_mod_info {
++	enum uvm_hook_mod_type type;
 +	void *arg;
 +	void (*free)(void *arg);
++	struct sync_fence *acquire_fence;
 +};
 +
 +struct dma_buf *uvm_alloc_dmabuf(size_t len, size_t align, ulong flags);
 +
 +bool dmabuf_is_uvm(struct dma_buf *dmabuf);
 +
++int dmabuf_bind_uvm_alloc(struct dma_buf *dmabuf, struct uvm_alloc_info *info);
++
++/**
++ * uvm vframe interface
++ */
 +int dmabuf_set_vframe(struct dma_buf *dmabuf, struct vframe_s *vf);
 +
 +struct vframe_s *dmabuf_get_vframe(struct dma_buf *dmabuf);
 +
 +int dmabuf_put_vframe(struct dma_buf *dmabuf);
 +
-+int dmabuf_set_private_buffer(struct dma_buf *dmabuf, int buffer_type,
-+			      struct uvm_buffer_info *info);
++/**
++ * uvm hook module interface
++ */
++int uvm_attach_hook_mod(struct dma_buf *dmabuf,
++					struct uvm_hook_mod_info *info);
++int uvm_detach_hook_mod(struct dma_buf *dmabuf,
++					int type);
 +
-+struct uvm_private_buffer *dmabuf_get_private_buffer(struct dma_buf *dmabuf,
-+						     int buffer_type);
++struct uvm_hook_mod *uvm_get_hook_mod(struct dma_buf *dmabuf,
++						     int type);
 +
-+int dmabuf_put_private_buffer(struct dma_buf *dmabuf, int buffer_type);
++int uvm_put_hook_mod(struct dma_buf *dmabuf, int type);
 +
 +#endif
 -- 
-2.24.1
+2.7.4
 

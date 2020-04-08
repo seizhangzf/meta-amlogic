@@ -31,8 +31,7 @@ SRCREV_bl31-1.3_pn-u-boot = "b5033a270667bc21a8c1b6a999cd6ac2e5d0ad59"
 SRCREV_pn-optee-linux-driver = "5979e2b1229d45f029d4e004238b7ecb6249f11f"
 SRCREV_pn-qca6174 = "0ad44276dde437aa27b4f3aeeb578a46b9b86ad7"
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
-SRCREV_pn-media-modules = "5652b4fcf60a146c23f7f2faa74d7185e70fad0a"
-SRCREV_pn-linux-meson = "c6c32a665eb871cc0308e5446d83a176b64df73e"
-
+SRCREV_pn-media-modules = "91dfc6e75b8cdeb551487d5fa6341ee2739193a7"
+SRCREV_pn-linux-meson = "f872a95c9da53815fc4ef20704067be343d1731f"
 SRCREV_pn-devicesettings-hal-amlogic = "82378d7876fbe04875bebb1313cf81f38784cf47"
 SRCREV_pn-iarmmgrs-hal-amlogic = "094917bae257d4ead6c3abb2eb095c48f1a4f35f"

@@ -1,9 +1,9 @@
-From f1ab382f0510d6314d0173be170a14ae4fb4265b Mon Sep 17 00:00:00 2001
+From 5a995b133335de407a790c3378101369bad0560d Mon Sep 17 00:00:00 2001
 From: Ao Xu <ao.xu@amlogic.com>
 Date: Tue, 31 Dec 2019 14:59:21 +0800
 Subject: [PATCH 2/2] drm: add uvm dmabuf support in meson-gem [1/1]
 
-PD#SWPL-18483
+PD#SWPL-22911
 
 Problem:
 For video buffer, need use the uvm as the metadata.
@@ -18,22 +18,22 @@ none
 Change-Id: Ia54cf8440b08666825cb8af91a86fa414de0e2db
 Signed-off-by: Ao Xu <ao.xu@amlogic.com>
 ---
- drivers/amlogic/drm/meson_drv.c               |   6 +-
- drivers/amlogic/drm/meson_gem.c               | 104 ++++++++++++++++++
- drivers/amlogic/drm/meson_gem.h               |  12 ++
- drivers/amlogic/drm/meson_plane.c             |  17 ++-
- drivers/amlogic/drm/meson_plane.h             |   2 +-
- drivers/amlogic/drm/meson_vpu_pipeline.h      |   4 +
- .../drm/vpu-hw/meson_vpu_video_wrapper.c      |  94 +++++++++-------
- include/uapi/drm/drm_fourcc.h                 |   5 -
- include/uapi/drm/meson_drm.h                  |   3 +-
- 9 files changed, 188 insertions(+), 59 deletions(-)
+ drivers/amlogic/drm/meson_drv.c                    |   6 +-
+ drivers/amlogic/drm/meson_gem.c                    | 201 ++++++++++++++++++++-
+ drivers/amlogic/drm/meson_gem.h                    |  16 +-
+ drivers/amlogic/drm/meson_plane.c                  |  18 +-
+ drivers/amlogic/drm/meson_plane.h                  |   2 +-
+ drivers/amlogic/drm/meson_vpu_pipeline.h           |   4 +
+ .../amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c   | 118 ++++++------
+ include/uapi/drm/drm_fourcc.h                      |   5 -
+ include/uapi/drm/meson_drm.h                       |   3 +-
+ 9 files changed, 296 insertions(+), 77 deletions(-)
 
 diff --git a/drivers/amlogic/drm/meson_drv.c b/drivers/amlogic/drm/meson_drv.c
-index 7506a3dc77dd..e4f16de28d54 100644
+index f81b0f5..504f309 100644
 --- a/drivers/amlogic/drm/meson_drv.c
 +++ b/drivers/amlogic/drm/meson_drv.c
-@@ -466,10 +466,10 @@ static struct drm_driver meson_driver = {
+@@ -487,10 +487,10 @@ static struct drm_driver meson_driver = {
  	.prime_handle_to_fd	= drm_gem_prime_handle_to_fd,
  	.prime_fd_to_handle	= drm_gem_prime_fd_to_handle,
  
@@ -46,7 +46,7 @@ index 7506a3dc77dd..e4f16de28d54 100644
  	/*
  	 * If gem_prime_import_sg_table is NULL,only buffer created
  	 * by meson driver can be imported ok.
-@@ -526,7 +526,7 @@ static int am_meson_drm_bind(struct device *dev)
+@@ -547,7 +547,7 @@ static int am_meson_drm_bind(struct device *dev)
  
  	meson_driver.driver_features = DRIVER_HAVE_IRQ | DRIVER_GEM |
  		DRIVER_MODESET | DRIVER_PRIME |
@@ -56,23 +56,25 @@ index 7506a3dc77dd..e4f16de28d54 100644
  	drm = drm_dev_alloc(&meson_driver, dev);
  	if (!drm)
 diff --git a/drivers/amlogic/drm/meson_gem.c b/drivers/amlogic/drm/meson_gem.c
-index b7dd7b27c492..bd903f8bac25 100644
+index b7dd7b2..cbafea0 100644
 --- a/drivers/amlogic/drm/meson_gem.c
 +++ b/drivers/amlogic/drm/meson_gem.c
-@@ -24,10 +24,12 @@
+@@ -24,10 +24,13 @@
  #include <linux/dma-buf.h>
  #include <linux/meson_ion.h>
  #include <ion/ion.h>
+-
 +#include <linux/amlogic/meson_uvm_core.h>
- 
++#include <linux/amlogic/media/codec_mm/codec_mm.h>
  #include "meson_gem.h"
  
  #define to_am_meson_gem_obj(x) container_of(x, struct am_meson_gem_object, base)
-+#define AFBC_FAKE_SIZE 4096
++#define uvm_to_gem_obj(x) container_of(x, struct am_meson_gem_object, ubo)
++#define MESON_GEM_NAME "meson_gem"
  
  static int am_meson_gem_alloc_ion_buff(
  	struct ion_client *client,
-@@ -49,6 +51,15 @@ static int am_meson_gem_alloc_ion_buff(
+@@ -49,6 +52,15 @@ static int am_meson_gem_alloc_ion_buff(
  		|| (flags == 0)) {
  		handle = ion_alloc(client, meson_gem_obj->base.size,
  				0, (1 << ION_HEAP_TYPE_DMA), 0);
@@ -83,29 +85,165 @@ index b7dd7b27c492..bd903f8bac25 100644
 +	} else if (flags & MESON_USE_VIDEO_AFBC) {
 +		meson_gem_obj->is_uvm = true;
 +		meson_gem_obj->is_afbc = true;
-+		handle = ion_alloc(client, AFBC_FAKE_SIZE,
++		handle = ion_alloc(client, UVM_FAKE_SIZE,
 +				0, (1 << ION_HEAP_TYPE_SYSTEM), 0);
  	} else {
  		handle = ion_alloc(client, meson_gem_obj->base.size,
  					0, (1 << ION_HEAP_TYPE_SYSTEM), 0);
-@@ -376,6 +387,48 @@ void am_meson_gem_cleanup(struct meson_drm  *drmdrv)
+@@ -85,6 +97,39 @@ static void am_meson_gem_free_ion_buf(
  	}
  }
  
-+struct sg_table *am_meson_gem_create_fake_sg_table(
-+	struct drm_gem_object *obj)
++static int am_meson_gem_alloc_video_secure_buff(
++	struct am_meson_gem_object *meson_gem_obj)
++{
++	unsigned long addr;
++
++	if (!meson_gem_obj)
++		return -EINVAL;
++	addr = codec_mm_alloc_for_dma(MESON_GEM_NAME,
++				      meson_gem_obj->base.size / PAGE_SIZE,
++				      0, CODEC_MM_FLAGS_TVP);
++	if (!addr) {
++		DRM_ERROR("alloc %d secure memory FAILED.\n",
++			  (unsigned int)meson_gem_obj->base.size);
++		return -ENOMEM;
++	}
++	meson_gem_obj->addr = addr;
++	meson_gem_obj->is_secure = true;
++	meson_gem_obj->is_uvm = true;
++	DRM_DEBUG("allocate secure addr (%p).\n", &meson_gem_obj->addr);
++	return 0;
++}
++
++static void am_meson_gem_free_video_secure_buf(
++	struct am_meson_gem_object *meson_gem_obj)
++{
++	if (!meson_gem_obj || !meson_gem_obj->addr) {
++		DRM_ERROR("meson_gem_obj or addr is null.\n");
++		return;
++	}
++	codec_mm_free_for_dma(MESON_GEM_NAME, meson_gem_obj->addr);
++	DRM_DEBUG("free secure addr (%p).\n", &meson_gem_obj->addr);
++}
++
+ struct am_meson_gem_object *am_meson_gem_object_create(
+ 	struct drm_device *dev,
+ 	unsigned int flags,
+@@ -110,12 +155,22 @@ struct am_meson_gem_object *am_meson_gem_object_create(
+ 		goto error;
+ 	}
+ 
+-	ret = am_meson_gem_alloc_ion_buff(client, meson_gem_obj, flags);
++	if ((flags & MESON_USE_VIDEO_PLANE) && (flags & MESON_USE_PROTECTED))
++		ret = am_meson_gem_alloc_video_secure_buff(meson_gem_obj);
++	else
++		ret = am_meson_gem_alloc_ion_buff(client, meson_gem_obj, flags);
+ 	if (ret < 0) {
+ 		drm_gem_object_release(&meson_gem_obj->base);
+ 		goto error;
+ 	}
+ 
++	if (meson_gem_obj->is_uvm) {
++		meson_gem_obj->ubo.arg = meson_gem_obj;
++		meson_gem_obj->ubo.dev = dev->dev;
++	}
++	/*for release check*/
++	meson_gem_obj->flags = flags;
++
+ 	return meson_gem_obj;
+ 
+ error:
+@@ -130,7 +185,10 @@ void am_meson_gem_object_free(struct drm_gem_object *obj)
+ 	DRM_DEBUG("am_meson_gem_object_free %p handle count = %d\n",
+ 		meson_gem_obj, obj->handle_count);
+ 
+-	if (obj->import_attach == false)
++	if ((meson_gem_obj->flags & MESON_USE_VIDEO_PLANE) &&
++	    (meson_gem_obj->flags & MESON_USE_PROTECTED))
++		am_meson_gem_free_video_secure_buf(meson_gem_obj);
++	else if (obj->import_attach == false)
+ 		am_meson_gem_free_ion_buf(obj->dev, meson_gem_obj);
+ 	else
+ 		drm_prime_gem_destroy(obj, meson_gem_obj->sg);
+@@ -219,9 +277,8 @@ int am_meson_gem_object_get_phyaddr(
+ 	int addr;
+ 	size_t len;
+ 
+-	if (meson_gem->sg) {
++	if (meson_gem->sg || meson_gem->is_secure)
+ 		return meson_gem->addr;
+-	}
+ 
+ 	ion_phys(drm->gem_client, meson_gem->handle,
+ 						(ion_phys_addr_t *)&addr, &len);
+@@ -390,6 +447,7 @@ struct sg_table *am_meson_gem_prime_get_sg_table(
+ 	DRM_DEBUG("am_meson_gem_prime_get_sg_table %p.\n", meson_gem_obj);
+ 
+ 	if (meson_gem_obj->base.import_attach == false) {
++
+ 		src_table = meson_gem_obj->handle->buffer->sg_table;
+ 		dst_table = kmalloc(sizeof(struct sg_table), GFP_KERNEL);
+ 		if (!dst_table) {
+@@ -407,9 +465,12 @@ struct sg_table *am_meson_gem_prime_get_sg_table(
+ 		src_sg = src_table->sgl;
+ 		for (i = 0; i < src_table->nents; i++) {
+ 			sg_set_page(dst_sg, sg_page(src_sg), src_sg->length, 0);
++			sg_dma_address(dst_sg) = sg_phys(src_sg);
++			sg_dma_len(dst_sg) = sg_dma_len(src_sg);
+ 			dst_sg = sg_next(dst_sg);
+ 			src_sg = sg_next(src_sg);
+ 		}
++
+ 		return dst_table;
+ 	}
+ 	DRM_ERROR("Not support import buffer from other driver.\n");
+@@ -473,3 +534,133 @@ int am_meson_gem_prime_mmap(
+ 
+ 	return am_meson_gem_object_mmap(meson_gem_obj, vma);
+ }
++
++static void am_meson_drm_gem_unref_uvm(struct uvm_buf_obj *ubo)
++{
++	struct am_meson_gem_object *meson_gem_obj;
++
++	meson_gem_obj = uvm_to_gem_obj(ubo);
++
++	drm_gem_object_unreference_unlocked(&meson_gem_obj->base);
++}
++
++static struct sg_table *am_meson_gem_create_sg_table(struct drm_gem_object *obj)
 +{
 +	struct am_meson_gem_object *meson_gem_obj;
 +	struct sg_table *dst_table = NULL;
 +	struct scatterlist *dst_sg = NULL;
 +	struct sg_table *src_table = NULL;
 +	struct scatterlist *src_sg = NULL;
-+	dma_addr_t tmp;
++	struct page *gem_page = NULL;
 +	int ret;
 +
 +	meson_gem_obj = to_am_meson_gem_obj(obj);
 +
-+	if (meson_gem_obj->base.import_attach == false) {
++	if ((meson_gem_obj->flags & MESON_USE_VIDEO_PLANE) &&
++	    (meson_gem_obj->flags & MESON_USE_PROTECTED)) {
++		gem_page = phys_to_page(meson_gem_obj->addr);
++		dst_table = kmalloc(sizeof(struct sg_table), GFP_KERNEL);
++		if (!dst_table) {
++			ret = -ENOMEM;
++			return ERR_PTR(ret);
++		}
++		ret = sg_alloc_table(dst_table, 1, GFP_KERNEL);
++		if (ret) {
++			kfree(dst_table);
++			return ERR_PTR(ret);
++		}
++		dst_sg = dst_table->sgl;
++		sg_set_page(dst_sg, gem_page, obj->size, 0);
++		sg_dma_address(dst_sg) = meson_gem_obj->addr;
++		sg_dma_len(dst_sg) = obj->size;
++
++		return dst_table;
++	} else if (meson_gem_obj->is_afbc) {
 +		src_table = meson_gem_obj->handle->buffer->sg_table;
 +		dst_table = kmalloc(sizeof(struct sg_table), GFP_KERNEL);
 +		if (!dst_table) {
@@ -125,45 +263,12 @@ index b7dd7b27c492..bd903f8bac25 100644
 +		sg_set_page(dst_sg, sg_page(src_sg), obj->size, 0);
 +		sg_dma_address(dst_sg) = sg_phys(src_sg);
 +		sg_dma_len(dst_sg) = obj->size;
-+		tmp = sg_dma_address(dst_sg);
 +
 +		return dst_table;
 +	}
 +	DRM_ERROR("Not support import buffer from other driver.\n");
 +	return NULL;
-+
 +}
-+
- struct sg_table *am_meson_gem_prime_get_sg_table(
- 	struct drm_gem_object *obj)
- {
-@@ -390,6 +443,9 @@ struct sg_table *am_meson_gem_prime_get_sg_table(
- 	DRM_DEBUG("am_meson_gem_prime_get_sg_table %p.\n", meson_gem_obj);
- 
- 	if (meson_gem_obj->base.import_attach == false) {
-+		if (meson_gem_obj->is_afbc)
-+			return am_meson_gem_create_fake_sg_table(obj);
-+
- 		src_table = meson_gem_obj->handle->buffer->sg_table;
- 		dst_table = kmalloc(sizeof(struct sg_table), GFP_KERNEL);
- 		if (!dst_table) {
-@@ -407,9 +463,12 @@ struct sg_table *am_meson_gem_prime_get_sg_table(
- 		src_sg = src_table->sgl;
- 		for (i = 0; i < src_table->nents; i++) {
- 			sg_set_page(dst_sg, sg_page(src_sg), src_sg->length, 0);
-+			sg_dma_address(dst_sg) = sg_phys(src_sg);
-+			sg_dma_len(dst_sg) = sg_dma_len(src_sg);
- 			dst_sg = sg_next(dst_sg);
- 			src_sg = sg_next(src_sg);
- 		}
-+
- 		return dst_table;
- 	}
- 	DRM_ERROR("Not support import buffer from other driver.\n");
-@@ -473,3 +532,48 @@ int am_meson_gem_prime_mmap(
- 
- 	return am_meson_gem_object_mmap(meson_gem_obj, vma);
- }
 +
 +struct dma_buf *am_meson_drm_gem_prime_export(struct drm_device *dev,
 +					      struct drm_gem_object *obj,
@@ -171,16 +276,32 @@ index b7dd7b27c492..bd903f8bac25 100644
 +{
 +	struct dma_buf *dmabuf;
 +	struct am_meson_gem_object *meson_gem_obj;
-+	struct uvm_handle *handle;
++	struct uvm_alloc_info info;
 +
 +	meson_gem_obj = to_am_meson_gem_obj(obj);
++	memset(&info, 0, sizeof(struct uvm_alloc_info));
 +
 +	if (meson_gem_obj->is_uvm) {
 +		dmabuf = uvm_alloc_dmabuf(obj->size, 0, 0);
 +		if (dmabuf) {
-+			handle = dmabuf->priv;
-+			handle->priv = obj;
-+			meson_gem_obj->dma_handle = dmabuf->priv;
++			if (meson_gem_obj->is_afbc || meson_gem_obj->is_secure)
++				info.sgt =
++				am_meson_gem_create_sg_table(obj);
++			else
++				info.sgt =
++				meson_gem_obj->handle->buffer->sg_table;
++
++			if (meson_gem_obj->is_afbc)
++				info.flags |= BIT(UVM_FAKE_ALLOC);
++			info.obj = &meson_gem_obj->ubo;
++			info.free = am_meson_drm_gem_unref_uvm;
++			dmabuf_bind_uvm_alloc(dmabuf, &info);
++
++			if (meson_gem_obj->is_afbc ||
++				meson_gem_obj->is_secure) {
++				sg_free_table(info.sgt);
++				kfree(info.sgt);
++			}
 +		}
 +
 +		return dmabuf;
@@ -193,27 +314,38 @@ index b7dd7b27c492..bd903f8bac25 100644
 +struct drm_gem_object *am_meson_drm_gem_prime_import(struct drm_device *dev,
 +						  struct dma_buf *dmabuf)
 +{
-+	struct drm_gem_object *obj;
-+	struct uvm_handle *handle;
-+
 +	if (dmabuf_is_uvm(dmabuf)) {
++		struct uvm_handle *handle;
++		struct uvm_buf_obj *ubo;
++		struct am_meson_gem_object *meson_gem_obj;
++
 +		handle = dmabuf->priv;
-+		obj = handle->priv;
++		ubo = handle->ua->obj;
++		meson_gem_obj = uvm_to_gem_obj(ubo);
 +
-+		if (obj->dev == dev)
-+			drm_gem_object_reference(obj);
-+
-+		return obj;
++		if (ubo->dev == dev->dev) {
++			drm_gem_object_reference(&meson_gem_obj->base);
++			return &meson_gem_obj->base;
++		}
 +	}
 +
 +	return drm_gem_prime_import(dev, dmabuf);
 +}
 +
 diff --git a/drivers/amlogic/drm/meson_gem.h b/drivers/amlogic/drm/meson_gem.h
-index c644112bd8fc..5a880df098e0 100644
+index c644112..d423150 100644
 --- a/drivers/amlogic/drm/meson_gem.h
 +++ b/drivers/amlogic/drm/meson_gem.h
-@@ -34,6 +34,11 @@ struct am_meson_gem_object {
+@@ -20,7 +20,7 @@
+ #include <drm/drm_gem.h>
+ #include <uapi/drm/meson_drm.h>
+ #include <ion/ion_priv.h>
+-
++#include <linux/amlogic/meson_uvm_core.h>
+ #include "meson_drv.h"
+ 
+ struct am_meson_gem_object {
+@@ -34,6 +34,13 @@ struct am_meson_gem_object {
  	/* for buffer import form other driver */
  	phys_addr_t addr;
  	struct sg_table *sg;
@@ -221,11 +353,13 @@ index c644112bd8fc..5a880df098e0 100644
 +	/* for uvm related field */
 +	bool is_uvm;
 +	bool is_afbc;
++	bool is_secure;
 +	struct uvm_handle *dma_handle;
++	struct uvm_buf_obj ubo;
  };
  
  /* GEM MANAGER CREATE*/
-@@ -102,4 +107,11 @@ int am_meson_gem_prime_mmap(
+@@ -102,4 +109,11 @@ int am_meson_gem_prime_mmap(
  	struct drm_gem_object *obj,
  	struct vm_area_struct *vma);
  
@@ -238,7 +372,7 @@ index c644112bd8fc..5a880df098e0 100644
 +
  #endif /* __AM_MESON_GEM_H */
 diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
-index a6e4e6f4880b..83bc111c4478 100644
+index abcd22a..00dbede 100644
 --- a/drivers/amlogic/drm/meson_plane.c
 +++ b/drivers/amlogic/drm/meson_plane.c
 @@ -49,14 +49,6 @@ static u64 afbc_wb_modifier[] = {
@@ -260,34 +394,35 @@ index a6e4e6f4880b..83bc111c4478 100644
  	struct am_video_plane *video_plane = to_am_video_plane(plane);
  	struct meson_drm *drv = video_plane->drv;
  	struct am_meson_fb *meson_fb;
-+	struct uvm_handle *handle;
++	struct uvm_buf_obj *ubo;
  	#else
  	struct drm_gem_cma_object *gem;
  	#endif
-@@ -333,6 +326,12 @@ static int meson_video_plane_fb_check(struct drm_plane *plane,
+@@ -333,6 +326,13 @@ static int meson_video_plane_fb_check(struct drm_plane *plane,
  				  fb->pixel_format == DRM_FORMAT_NV21))
  		phyaddr1 = am_meson_gem_object_get_phyaddr(drv,
  							   meson_fb->bufp[1]);
 +	/* start to get vframe from uvm */
 +	if (meson_fb->bufp[0]->is_uvm) {
-+		handle = meson_fb->bufp[0]->dma_handle;
-+		plane_info->vf = &(handle->vf);
++		ubo = &(meson_fb->bufp[0]->ubo);
++		plane_info->vf = dmabuf_get_vframe(ubo->dmabuf);
++		dmabuf_put_vframe(ubo->dmabuf);
 +		plane_info->is_uvm = meson_fb->bufp[0]->is_uvm;
 +	}
  	#else
  	if (!fb) {
  		DRM_INFO("fb is NULL!\n");
-@@ -810,7 +809,7 @@ static struct am_video_plane *am_video_plane_create(struct meson_drm *priv,
- 	struct am_video_plane *video_plane;
+@@ -816,7 +816,7 @@ static struct am_video_plane *am_video_plane_create(struct meson_drm *priv,
  	struct drm_plane *plane;
  	char plane_name[8];
+ 	u32 zpos, min_zpos, max_zpos;
 -	const u64 *format_modifiers = video_wb_modifier;
 +	const u64 *format_modifiers = NULL;
  
  	video_plane = devm_kzalloc(priv->drm->dev, sizeof(*video_plane),
  				   GFP_KERNEL);
 diff --git a/drivers/amlogic/drm/meson_plane.h b/drivers/amlogic/drm/meson_plane.h
-index 98995349eb13..af903997c3e7 100644
+index e00ffa48..193932f8 100644
 --- a/drivers/amlogic/drm/meson_plane.h
 +++ b/drivers/amlogic/drm/meson_plane.h
 @@ -24,7 +24,7 @@
@@ -300,7 +435,7 @@ index 98995349eb13..af903997c3e7 100644
  #include "osd_drm.h"
  #include "meson_fb.h"
 diff --git a/drivers/amlogic/drm/meson_vpu_pipeline.h b/drivers/amlogic/drm/meson_vpu_pipeline.h
-index 9b8a266d17e3..5586d4e45626 100644
+index 9b8a266..5586d4e 100644
 --- a/drivers/amlogic/drm/meson_vpu_pipeline.h
 +++ b/drivers/amlogic/drm/meson_vpu_pipeline.h
 @@ -236,6 +236,8 @@ struct meson_vpu_video_layer_info {
@@ -322,7 +457,7 @@ index 9b8a266d17e3..5586d4e45626 100644
  
  struct meson_vpu_afbc {
 diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
-index 6a9d5019873b..f788846b2d97 100644
+index 578f402..6ee1031 100644
 --- a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
 +++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
 @@ -161,6 +161,9 @@ static int video_check_state(struct meson_vpu_block *vblk,
@@ -335,7 +470,7 @@ index 6a9d5019873b..f788846b2d97 100644
  	if (!video->video_path_reg) {
  		kfifo_reset(&video->ready_q);
  		kfifo_reset(&video->free_q);
-@@ -193,51 +196,62 @@ static void video_set_state(struct meson_vpu_block *vblk,
+@@ -193,62 +196,73 @@ static void video_set_state(struct meson_vpu_block *vblk,
  	byte_stride = mvvs->byte_stride;
  	phy_addr = mvvs->phy_addr[0];
  	pixel_format = mvvs->pixel_format;
@@ -354,6 +489,18 @@ index 6a9d5019873b..f788846b2d97 100644
 -		vf->source_mode = VFRAME_SOURCE_MODE_OTHERS;
 -		vf->bitdepth = BITDEPTH_Y8 | BITDEPTH_U8 | BITDEPTH_V8;
 -		vf->type = video_type_get(pixel_format);
+-		vf->axis[0] = mvvs->dst_x;
+-		vf->axis[1] = mvvs->dst_y;
+-		vf->axis[2] = mvvs->dst_x + mvvs->dst_w - 1;
+-		vf->axis[3] = mvvs->dst_y + mvvs->dst_h - 1;
+-		vf->crop[0] = mvvs->src_y;/*crop top*/
+-		vf->crop[1] = mvvs->src_x;/*crop left*/
+-		/*vf->width is from mvvs->src_w which is the valid content
+-		 *so the crop of bottom and right could be 0
+-		 */
+-		vf->crop[2] = 0;/*crop bottow*/
+-		vf->crop[3] = 0;/*crop right*/
+-		vf->flag |= VFRAME_FLAG_VIDEO_DRM;
 -		/*need sync with vpp*/
 -		vf->canvas0Addr = (u32)-1;
 -		/*Todo: if canvas0_config.endian = 1
@@ -394,6 +541,19 @@ index 6a9d5019873b..f788846b2d97 100644
 +			vf->source_mode = VFRAME_SOURCE_MODE_OTHERS;
 +			vf->bitdepth = BITDEPTH_Y8 | BITDEPTH_U8 | BITDEPTH_V8;
 +			vf->type = video_type_get(pixel_format);
++			vf->axis[0] = mvvs->dst_x;
++			vf->axis[1] = mvvs->dst_y;
++			vf->axis[2] = mvvs->dst_x + mvvs->dst_w - 1;
++			vf->axis[3] = mvvs->dst_y + mvvs->dst_h - 1;
++			vf->crop[0] = mvvs->src_y;/*crop top*/
++			vf->crop[1] = mvvs->src_x;/*crop left*/
++			/*vf->width is from mvvs->src_w which is the
++			 *valid content so the crop of bottom and right
++			 *could be 0
++			 */
++			vf->crop[2] = 0;/*crop bottow*/
++			vf->crop[3] = 0;/*crop right*/
++			vf->flag |= VFRAME_FLAG_VIDEO_DRM;
 +			/*need sync with vpp*/
 +			vf->canvas0Addr = (u32)-1;
 +			/*Todo: if canvas0_config.endian = 1
@@ -434,12 +594,10 @@ index 6a9d5019873b..f788846b2d97 100644
 -	} else {
 -		DRM_INFO("free_q get fail!");
  	}
-+
  	amvideo_set_scaler_para(mvvs->dst_x, mvvs->dst_y, mvvs->dst_w,
  				mvvs->dst_h, 0);
- 	DRM_DEBUG("plane_index=%d,HW-video=%d, byte_stride=%d\n",
 diff --git a/include/uapi/drm/drm_fourcc.h b/include/uapi/drm/drm_fourcc.h
-index ad3611ba4517..9f74715c586c 100644
+index ad3611b..9f74715 100644
 --- a/include/uapi/drm/drm_fourcc.h
 +++ b/include/uapi/drm/drm_fourcc.h
 @@ -258,11 +258,6 @@ extern "C" {
@@ -455,7 +613,7 @@ index ad3611ba4517..9f74715c586c 100644
  #if defined(__cplusplus)
  }
 diff --git a/include/uapi/drm/meson_drm.h b/include/uapi/drm/meson_drm.h
-index 5b12674b9a0b..70ee76cc7e66 100644
+index 5b12674..70ee76c 100644
 --- a/include/uapi/drm/meson_drm.h
 +++ b/include/uapi/drm/meson_drm.h
 @@ -25,7 +25,8 @@
@@ -469,5 +627,5 @@ index 5b12674b9a0b..70ee76cc7e66 100644
  /**
   * User-desired buffer creation information structure.
 -- 
-2.24.1
+2.7.4
 

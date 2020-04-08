@@ -1,18 +1,19 @@
-From 659bcd0919a9020265872675ffa4d6328c0b1549 Mon Sep 17 00:00:00 2001
-From: Matthew Shyu <matthew.shyu@amlogic.com>
-Date: Mon, 23 Mar 2020 15:26:31 +0800
-Subject: [PATCH] unify partition between rdk and android
+From f276d2f50543165263f299303f3f30f2c073e7c9 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Tue, 7 Apr 2020 16:40:00 -0700
+Subject: [PATCH 13/13] support AB partition
 
+Change-Id: I222fcb113050ebc05c96041ec1ed25bdfc7650c4
 ---
- .../dts/amlogic/g12a_s905x2_u212_buildroot.dts     |  90 +--------------
- .../dts/amlogic/partition_mbox_normal_P_rdk.dtsi   | 128 +++++++++++++++++++++
- 2 files changed, 129 insertions(+), 89 deletions(-)
+ .../g12a_s905x2_u212_drm_buildroot.dts        |  89 +------------
+ .../amlogic/partition_mbox_normal_P_rdk.dtsi  | 122 ++++++++++++++++++
+ 2 files changed, 123 insertions(+), 88 deletions(-)
  create mode 100644 arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
 
-diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
-index 209217185089..f4c48c8e6e7e 100644
---- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
-+++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
+diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+index 5507d829359b..7355f1f804b4 100644
+--- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 @@ -19,6 +19,7 @@
  
  #include "mesong12a.dtsi"
@@ -21,11 +22,10 @@ index 209217185089..f4c48c8e6e7e 100644
  
  / {
  	model = "Amlogic";
-@@ -294,95 +295,6 @@
- 		status = "okay";
+@@ -281,94 +282,6 @@
  	};
  
--
+ 
 -	partitions: partitions{
 -		parts = <14>;
 -		part-0 = <&logo>;
@@ -119,10 +119,10 @@ index 209217185089..f4c48c8e6e7e 100644
  		status = "ok";
 diff --git a/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
 new file mode 100644
-index 000000000000..3450817ec42e
+index 000000000000..0a2daae77346
 --- /dev/null
 +++ b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
-@@ -0,0 +1,128 @@
+@@ -0,0 +1,122 @@
 +﻿ /*
 +  * Amlogic partition set for normal
 +  *
@@ -134,7 +134,7 @@ index 000000000000..3450817ec42e
 +
 +/ {
 +	partitions: partitions{
-+				parts = <19>;
++				parts = <18>;
 +				part-0 = <&dtbbak>;
 +				part-1 = <&bootloaderbak>;
 +				part-2 = <&recovery>;
@@ -145,15 +145,14 @@ index 000000000000..3450817ec42e
 +				part-7 = <&param>;
 +				part-8 = <&tee>;
 +				part-9 = <&oem>;
-+				part-10 = <&skyinfo>;
-+				part-11 = <&vbmeta_a>;
-+				part-12 = <&boot_a>;
-+				part-13 = <&system_a>;
-+				part-14 = <&vbmeta_b>;
-+				part-15 = <&boot_b>;
-+				part-16 = <&system_b>;
-+				part-17 = <&cache>;
-+				part-18 = <&data>;
++				part-10 = <&vbmeta_a>;
++				part-11 = <&boot_a>;
++				part-12 = <&system_a>;
++				part-13 = <&vbmeta_b>;
++				part-14 = <&boot_b>;
++				part-15 = <&system_b>;
++				part-16 = <&cache>;
++				part-17 = <&data>;
 +		dtbbak:dtbbak{
 +				   pname = "dtbbak";
 +				   size = <0x0 0x100000>;
@@ -204,11 +203,6 @@ index 000000000000..3450817ec42e
 +				size = <0x0 0x800000>;
 +				mask = <1>;
 +			};
-+		skyinfo:skyinfo{
-+					pname = "skyinfo";
-+					size = <0x0 0x1000000>;
-+					mask = <1>;
-+				};
 +		vbmeta_a:vbmeta_a{
 +					 pname = "vbmeta_a";
 +					 size = <0x0 0x200000>;
@@ -221,7 +215,7 @@ index 000000000000..3450817ec42e
 +			   };
 +		system_a:system_a {
 +					 pname = "system_a";
-+					 size = <0x0 0x6A400000>;
++					 size = <0x0 0x96000000>;
 +					 mask = <1>;
 +				 };
 +		vbmeta_b:vbmeta_b {
@@ -236,12 +230,12 @@ index 000000000000..3450817ec42e
 +			   };
 +		system_b:system_b {
 +					 pname = "system_b";
-+					 size = <0x0 0x6A400000>;
++					 size = <0x0 0x96000000>;
 +					 mask = <1>;
 +				 };
 +		cache:cache {
 +				  pname = "cache";
-+				  size = <0x0 0x32000000>;
++				  size = <0x0 0xC800000>;
 +				  mask = <2>;
 +			  };
 +		data:data {
@@ -252,5 +246,5 @@ index 000000000000..3450817ec42e
 +			};
 +};/* end of / */
 -- 
-2.11.0
+2.24.1
 

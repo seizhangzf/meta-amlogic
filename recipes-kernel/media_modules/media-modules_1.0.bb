@@ -7,11 +7,8 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-4.9-dev"
 SRC_URI_append = " file://COPYING.GPL"
 SRC_URI_append = " file://0001-v4l2-declear-4K-capability.patch "
-SRC_URI_append = " file://0002-v4l2-h264-fix-kernel-panic-after-EOS.patch "
 SRC_URI_append = " file://0003-Revert-media_modules-optimize-the-loading-of-demod-a.patch "
 SRC_URI_append = " file://0004-v4l2-support-compressed-buffer-for-h265-vp9-dec-1-1.patch "
-SRC_URI_append = " file://0005-v4l2-buffer-not-returned-in-DMABUF-mode-1-1.patch "
-SRC_URI_append = " file://0006-h264-fix-nv12-color-revert-issue.patch "
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 

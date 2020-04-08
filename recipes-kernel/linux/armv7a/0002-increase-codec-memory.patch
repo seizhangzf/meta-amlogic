@@ -1,7 +1,7 @@
-From 050ece41d73c60daf0ff7487870f1b0744e4e565 Mon Sep 17 00:00:00 2001
+From 26fb67783b25ffcbff593ffd61c9defc18966949 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Thu, 6 Feb 2020 15:11:04 -0800
-Subject: [PATCH 2/5] increase codec memory
+Subject: [PATCH 02/13] increase codec memory
 
 Change-Id: I372c9b2c636a97ab9c6a3fbd697750fc06757281
 Signed-off-by: Mingyen Hung <mingyen.hung@amlogic.com>

@@ -1,7 +1,7 @@
-From e7c88418d76d3b78e125ff258b942eb7b0276472 Mon Sep 17 00:00:00 2001
+From 5eb646de96e9c17bba45018bedc937d149821642 Mon Sep 17 00:00:00 2001
 From: lingjie li <lingjie.li@amlogic.com>
 Date: Tue, 24 Dec 2019 20:31:57 +0800
-Subject: [PATCH 9/9] drm: Buildroot TM2 Suspend: WestonOS can't work after
+Subject: [PATCH 03/13] drm: Buildroot TM2 Suspend: WestonOS can't work after
  resume [1/1]
 
 PD#SWPL-15763
@@ -59,7 +59,7 @@ index 011f87172b1b..56d355fe8f0e 100644
  
  static void am_meson_crtc_commit(struct drm_crtc *crtc)
 diff --git a/drivers/amlogic/drm/meson_drv.c b/drivers/amlogic/drm/meson_drv.c
-index e4f16de28d54..a99d21a382ce 100644
+index 7506a3dc77dd..42e89c9935aa 100644
 --- a/drivers/amlogic/drm/meson_drv.c
 +++ b/drivers/amlogic/drm/meson_drv.c
 @@ -15,6 +15,7 @@

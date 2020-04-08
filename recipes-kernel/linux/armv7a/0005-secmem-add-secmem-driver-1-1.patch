@@ -1,7 +1,7 @@
-From a4f64b8fc68171c9af2fc118af2412b1714bea62 Mon Sep 17 00:00:00 2001
+From 882dee3cb898d207519fba368e4fd3a889c5706c Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Thu, 30 Jan 2020 20:52:16 +0800
-Subject: [PATCH] secmem: add secmem driver [1/1]
+Subject: [PATCH 05/13] secmem: add secmem driver [1/1]
 
 PD#SWPL-18234
 
@@ -13,9 +13,9 @@ Signed-off-by: Tao Guo <tao.guo@amlogic.com>
  drivers/amlogic/media/common/Makefile        |   1 +
  drivers/amlogic/media/common/secmem/Kconfig  |  10 +
  drivers/amlogic/media/common/secmem/Makefile |   2 +
- drivers/amlogic/media/common/secmem/secmem.c | 478 +++++++++++++++++++
+ drivers/amlogic/media/common/secmem/secmem.c | 477 +++++++++++++++++++
  drivers/amlogic/media/common/secmem/secmem.h |  37 ++
- 7 files changed, 533 insertions(+)
+ 7 files changed, 532 insertions(+)
  create mode 100644 drivers/amlogic/media/common/secmem/Kconfig
  create mode 100644 drivers/amlogic/media/common/secmem/Makefile
  create mode 100644 drivers/amlogic/media/common/secmem/secmem.c
@@ -86,10 +86,10 @@ index 000000000000..7a4503cc3082
 +
 diff --git a/drivers/amlogic/media/common/secmem/secmem.c b/drivers/amlogic/media/common/secmem/secmem.c
 new file mode 100644
-index 000000000000..4465d4767a1c
+index 000000000000..e9bdd3877954
 --- /dev/null
 +++ b/drivers/amlogic/media/common/secmem/secmem.c
-@@ -0,0 +1,478 @@
+@@ -0,0 +1,477 @@
 +/*
 + * drivers/amlogic/media/common/secmem/secmem.c
 + *
@@ -222,9 +222,8 @@ index 000000000000..4465d4767a1c
 +#else
 +	sgt->sgl->length = PAGE_ALIGN(info->size);
 +#endif
-+/*	pr_dbg("nents %d, %llx, %d, %d\n", sgt->nents, sg_dma_address(sgt->sgl),
++	pr_dbg("nents %d, %llx, %d, %d\n", sgt->nents,(long long unsigned int) sg_dma_address(sgt->sgl),
 +			sg_dma_len(sgt->sgl), info->size);
-+*/
 +	attach->dma_dir = dma_dir;
 +
 +	mutex_unlock(lock);
@@ -426,7 +425,7 @@ index 000000000000..4465d4767a1c
 +	}
 +
 +	paddr = sg_dma_address(sgt->sgl);
-+	//pr_info("paddr = %llx\n", paddr);
++	pr_info("paddr = %llx\n",(long long unsigned int) paddr);
 +
 +	res = (long) (paddr & (0xffffffff));
 +	dma_buf_unmap_attachment(attach, sgt, DMA_FROM_DEVICE);

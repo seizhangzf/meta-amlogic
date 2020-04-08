@@ -1,7 +1,7 @@
-From 794bb9f0babec1bd340ed318a56f94a8dea6be92 Mon Sep 17 00:00:00 2001
+From b66c8c07b9b6ce5c8e44a987fab833b6ca7189d4 Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Wed, 25 Mar 2020 10:30:26 +0800
-Subject: [PATCH] codec_mm: fix codec_mm range [1/1]
+Subject: [PATCH 04/13] codec_mm: fix codec_mm range [1/1]
 
 PD#SWPL-22078
 
@@ -17,16 +17,21 @@ RDK
 Change-Id: I09bd85ec7d1d483afa200c8f96c13c2e516da1fc
 Signed-off-by: Tao Guo <tao.guo@amlogic.com>
 ---
+ arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
-index fa53198..66e1f55b 100644
+index a538070b3fd5..5507d829359b 100644
 --- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 @@ -114,6 +114,7 @@
  			/* ion_codec_mm max can alloc size 80M*/
- 			size = <0x13400000>;
+ 			size = <0x18400000>;
  			alignment = <0x400000>;
 +			alloc-ranges = <0x0 0x30000000>;
  			linux,contiguous-region;
  		};
  		/* codec shared reserved */
+-- 
+2.24.1
+
