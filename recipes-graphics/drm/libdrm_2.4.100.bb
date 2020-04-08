@@ -13,6 +13,7 @@ DEPENDS = "libpthread-stubs"
 SRC_URI = "http://dri.freedesktop.org/libdrm/${BP}.tar.bz2 \
            file://musl-ioctl.patch \
             file://meson_headers.patch  \
+            file://install_headers.patch  \
           "
 
 
