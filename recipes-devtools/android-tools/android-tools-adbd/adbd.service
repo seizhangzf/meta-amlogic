@@ -1,0 +1,10 @@
+[Unit]
+Description=adbd start up script
+
+[Service]
+ExecStartPre=/usr/bin/adbd_prepare.sh
+ExecStart=/usr/bin/adbd
+ExecStartPost=/usr/bin/adbd_post.sh
+
+[Install]
+WantedBy=multi-user.target
