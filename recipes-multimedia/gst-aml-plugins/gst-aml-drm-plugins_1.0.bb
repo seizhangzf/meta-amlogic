@@ -5,6 +5,7 @@ DEPENDS += "gstreamer1.0-plugins-bad"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstdrmplugin1.x"
 #SRC_URI += " file://0001-rdk-dev.patch;patchdir=../"
+SRC_URI += " file://0001-gst-aml-drm-disable-parse-1-1.patch;patchdir=../"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
