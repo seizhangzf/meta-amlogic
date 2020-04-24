@@ -1,0 +1,70 @@
+From 5fb23a4799f5b99916a8fd461598c86f17a40fc3 Mon Sep 17 00:00:00 2001
+From: Ao Xu <ao.xu@amlogic.com>
+Date: Fri, 24 Apr 2020 20:12:25 +0800
+Subject: [PATCH] uvm: fix uvm secure buf map crash issue [1/1]
+
+---
+ drivers/amlogic/drm/meson_gem.c                   |  4 ++++
+ drivers/amlogic/media/common/uvm/meson_uvm_core.c | 11 +++++++++--
+ include/linux/amlogic/meson_uvm_core.h            |  1 +
+ 3 files changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/drm/meson_gem.c b/drivers/amlogic/drm/meson_gem.c
+index cbafea0a720b..a8fe6956b11a 100644
+--- a/drivers/amlogic/drm/meson_gem.c
++++ b/drivers/amlogic/drm/meson_gem.c
+@@ -625,6 +625,10 @@ struct dma_buf *am_meson_drm_gem_prime_export(struct drm_device *dev,
+ 
+ 			if (meson_gem_obj->is_afbc)
+ 				info.flags |= BIT(UVM_FAKE_ALLOC);
++
++			if (meson_gem_obj->is_secure)
++				info.flags |= BIT(UVM_SECURE_ALLOC);
++
+ 			info.obj = &meson_gem_obj->ubo;
+ 			info.free = am_meson_drm_gem_unref_uvm;
+ 			dmabuf_bind_uvm_alloc(dmabuf, &info);
+diff --git a/drivers/amlogic/media/common/uvm/meson_uvm_core.c b/drivers/amlogic/media/common/uvm/meson_uvm_core.c
+index 060a91eee2b9..6858a8e803f5 100644
+--- a/drivers/amlogic/media/common/uvm/meson_uvm_core.c
++++ b/drivers/amlogic/media/common/uvm/meson_uvm_core.c
+@@ -86,7 +86,10 @@ static struct sg_table *meson_uvm_map_dma_buf(
+ 
+ 	UVM_PRINTK(1, "meson_uvm_map_dma_buf called, %s.\n", current->comm);
+ 
+-	if (ua->flags | BIT(UVM_FAKE_ALLOC)) {
++	if (ua->flags & BIT(UVM_SECURE_ALLOC))
++		return sgt;
++
++	if (ua->flags & BIT(UVM_FAKE_ALLOC)) {
+ 		dma_map_page(attachment->dev, sg_page(sgt->sgl), 0,
+ 				UVM_FAKE_SIZE, direction);
+ 	} else if (!dma_map_sg(attachment->dev, sgt->sgl, sgt->nents,
+@@ -111,7 +114,11 @@ static void meson_uvm_unmap_dma_buf(struct dma_buf_attachment *attachment,
+ 	ua = handle->ua;
+ 
+ 	UVM_PRINTK(1, "meson_uvm_unmap_dma_buf called, %s.\n", current->comm);
+-	if (ua->flags | BIT(UVM_FAKE_ALLOC))
++
++	if (ua->flags & BIT(UVM_SECURE_ALLOC))
++		return;
++
++	if (ua->flags & BIT(UVM_FAKE_ALLOC))
+ 		dma_unmap_page(attachment->dev, sgt->sgl->dma_address,
+ 			UVM_FAKE_SIZE, direction);
+ 	else
+diff --git a/include/linux/amlogic/meson_uvm_core.h b/include/linux/amlogic/meson_uvm_core.h
+index 2750246cfdb8..83ec4906b366 100644
+--- a/include/linux/amlogic/meson_uvm_core.h
++++ b/include/linux/amlogic/meson_uvm_core.h
+@@ -38,6 +38,7 @@ enum uvm_alloc_flag {
+ 	UVM_IMM_ALLOC,
+ 	UVM_DELAY_ALLOC,
+ 	UVM_FAKE_ALLOC,
++	UVM_SECURE_ALLOC,
+ };
+ 
+ /**
+-- 
+2.26.1
+
