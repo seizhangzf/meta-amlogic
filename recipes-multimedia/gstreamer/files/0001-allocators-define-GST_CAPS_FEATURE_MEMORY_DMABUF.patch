@@ -1,0 +1,73 @@
+From f5eb366335f1535023df8b9ec1183e908328c88d Mon Sep 17 00:00:00 2001
+From: Julien Isorce <j.isorce@samsung.com>
+Date: Fri, 11 Dec 2015 17:05:14 +0000
+Subject: [PATCH] allocators: define GST_CAPS_FEATURE_MEMORY_DMABUF
+
+Adds "memory:DMABuf" caps feature. Since 1.11 tag.
+Useful when the the dma-buf buffer cannot be mapped to CPU for r/w requests.
+Example: protected content or platform constraints.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=759358
+---
+ docs/libs/gst-plugins-base-libs-sections.txt |  1 +
+ gst-libs/gst/allocators/gstdmabuf.h          | 32 ++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
+
+diff --git a/docs/libs/gst-plugins-base-libs-sections.txt b/docs/libs/gst-plugins-base-libs-sections.txt
+index 605451241..e82050beb 100644
+--- a/docs/libs/gst-plugins-base-libs-sections.txt
++++ b/docs/libs/gst-plugins-base-libs-sections.txt
+@@ -4,6 +4,7 @@
+ <FILE>gstdmabuf</FILE>
+ <TITLE>dmabuf</TITLE>
+ <INCLUDE>gst/allocators/gstdmabuf.h</INCLUDE>
++GST_CAPS_FEATURE_MEMORY_DMABUF
+ gst_dmabuf_allocator_new
+ gst_dmabuf_allocator_alloc
+ gst_dmabuf_memory_get_fd
+diff --git a/gst-libs/gst/allocators/gstdmabuf.h b/gst-libs/gst/allocators/gstdmabuf.h
+index 951b1f07c..653ce321f 100644
+--- a/gst-libs/gst/allocators/gstdmabuf.h
++++ b/gst-libs/gst/allocators/gstdmabuf.h
+@@ -26,6 +26,38 @@
+ 
+ G_BEGIN_DECLS
+ 
++/**
++ * GST_CAPS_FEATURE_MEMORY_DMABUF:
++ *
++ * Constant that defines the caps feature name for DMA buffer sharing.
++ *
++ * It has to be used for non-mappable dma-buf only, i.e. when the underlying
++ * memory is not mappable to user space. Or when the mapped memory contains
++ * non meaningful data. It can be the case for protected content or when the
++ * user wants explicitly avoid any software post processing.
++ *
++ * In these cases all elements between the exported and the importer has to work
++ * in passthrough mode. This is done by adding this caps feature.
++ *
++ * When the memory is mappable for read and write requests then it is assumes
++ * to be a fast path and so this caps feature should not be used. Though
++ * according to the dma-buf protocal, while it is mapped it prevents the
++ * exporter to migrate the buffer.
++ *
++ * This caps feature should not serve at all the purpose of selecting the
++ * @GST_ALLOCATOR_DMABUF allocator during caps negotiation.
++ * When the exporter is the upstream element from the importer point of view,
++ * the exporter should try to map the dma buffer at runtime (preferrably during
++ * decide_allocation phase). When it succeeds for #GST_MAP_READWRITE this caps
++ * feature should not be used. This allows scalers, color converts and any image
++ * processing filters to work directly on the dma buffer.
++ * In this case the importer element should check all incomming memory using
++ * gst_is_dmabuf_memory().
++ *
++ * Since: 1.11
++ */
++#define GST_CAPS_FEATURE_MEMORY_DMABUF "memory:DMABuf"
++
+ #define GST_ALLOCATOR_DMABUF "dmabuf"
+ 
+ #define GST_TYPE_DMABUF_ALLOCATOR              (gst_dmabuf_allocator_get_type())
+-- 
+2.26.0
+
