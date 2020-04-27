@@ -10,6 +10,7 @@ SRC_URI_append = " file://0001-v4l2-declear-4K-capability.patch "
 SRC_URI_append = " file://0003-Revert-media_modules-optimize-the-loading-of-demod-a.patch "
 SRC_URI_append = " file://0004-v4l2-support-compressed-buffer-for-h265-vp9-dec-1-1.patch "
 SRC_URI_append = " file://0005-v4l2-fix-kernel-panic-after-EOS-1-1.patch "
+SRC_URI_append = " file://0006-v4l2-return-coded-w-h-in-S_FMT.patch "
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
