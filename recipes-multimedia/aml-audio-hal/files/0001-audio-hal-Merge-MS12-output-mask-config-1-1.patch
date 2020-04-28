@@ -1,0 +1,602 @@
+From 761134c7225ecae17177156d955204f2883f4677 Mon Sep 17 00:00:00 2001
+From: Tim Yao <tim.yao@amlogic.com>
+Date: Thu, 16 Apr 2020 22:49:14 -0700
+Subject: [PATCH] audio-hal: Merge MS12 output mask config [1/1]
+
+PD#SWPL-17555
+
+[Problem]
+For g12a U212 platform in OTT case, there is no DAP
+for speaker output and the default MS12 configuration
+is set to multi-channel output type. For HDMI output,
+only the first two channels get mapped to SPDIF and then
+connect to HDMI side by default SPDIF->HDMI HW mux.
+The volume will be low for 5.1 case and only LR output
+are rendered.
+
+[Solution]
+Merge audio HAL changes to support flxible MS12 output
+configurations and set to downmixed PCM output when
+SPEAKER output is selected so the HDMI output can get
+2 channel PCM output from I2S-SPDIF same source path.
+
+[Test]
+Local
+
+Change-Id: I927da241b52e253dacdab6e2afc996832f014744
+---
+ audio_hal/audio_hw_ms12.c                    |  34 ++++--
+ libms12v2/include/DolbyMS12ConfigParams.h    |  24 +---
+ libms12v2/include/aml_audio_ms12.h           |   5 +-
+ libms12v2/include/dolby_ms12_config_params.h |  10 +-
+ libms12v2/include/dolby_ms12_output_mask.h   |  15 +++
+ libms12v2/src/DolbyMS12ConfigParams.cpp      | 112 ++++++-------------
+ libms12v2/src/aml_audio_ms12.c               |  26 +++--
+ libms12v2/src/dolby_ms12_config_params.cpp   |  37 +-----
+ 8 files changed, 105 insertions(+), 158 deletions(-)
+ create mode 100644 libms12v2/include/dolby_ms12_output_mask.h
+
+diff --git a/audio_hal/audio_hw_ms12.c b/audio_hal/audio_hw_ms12.c
+index 8fb9276..576a14a 100644
+--- a/audio_hal/audio_hw_ms12.c
++++ b/audio_hal/audio_hw_ms12.c
+@@ -80,6 +80,18 @@ static void dump_ms12_output_data(void *buffer, int size, char *file_name)
+ 
+ static void *dolby_ms12_threadloop(void *data);
+ 
++static int _get_ms12_output_config(audio_format_t format)
++{
++    if (format == AUDIO_FORMAT_AC3)
++        return MS12_OUTPUT_MASK_DD;
++    else if (format == AUDIO_FORMAT_E_AC3)
++        return MS12_OUTPUT_MASK_DDP;
++    else if (format == AUDIO_FORMAT_MAT)
++        return MS12_OUTPUT_MASK_MAT;
++    else
++        return MS12_OUTPUT_MASK_SPEAKER;
++}
++
+ /*
+  *@brief get dolby ms12 prepared
+  */
+@@ -199,23 +211,29 @@ int get_the_dolby_ms12_prepared(
+ 
+     //init the dolby ms12
+     if (out->dual_output_flag) {
+-        dolby_ms12_set_dual_output_flag(out->dual_output_flag);
+-        aml_ms12_config(ms12, input_format, input_channel_mask, input_sample_rate, adev->optical_format);
++        int output_config = _get_ms12_output_config(adev->optical_format);
++        aml_ms12_config(ms12, input_format, input_channel_mask, input_sample_rate, output_config | MS12_OUTPUT_MASK_SPEAKER);
+     } else {
+-        dolby_ms12_set_dual_output_flag(out->dual_output_flag);
+-        aml_ms12_config(ms12, input_format, input_channel_mask, input_sample_rate, adev->sink_format);
++        int output_config = _get_ms12_output_config(adev->sink_format);
++        aml_ms12_config(ms12, input_format, input_channel_mask, input_sample_rate, output_config);
+     }
+     if (ms12->dolby_ms12_enable) {
+         //register Dolby MS12 callback
+         dolby_ms12_register_output_callback(ms12_output, (void *)out);
+         ms12->device = usecase_device_adapter_with_ms12(out->device, adev->sink_format);
+-        ALOGI("%s out [dual_output_flag %d] adev [format sink %#x optical %#x] ms12 [output-format %#x device %d]",
+-              __FUNCTION__, out->dual_output_flag, adev->sink_format, adev->optical_format, ms12->output_format, ms12->device);
++        ALOGI("%s out [dual_output_flag %d] adev [format sink %#x optical %#x] ms12 [output-config %#x device %d]",
++              __FUNCTION__, out->dual_output_flag, adev->sink_format, adev->optical_format, ms12->output_config, ms12->device);
+         memcpy((void *) & (adev->ms12_config), (const void *) & (out->config), sizeof(struct pcm_config));
+         get_hardware_config_parameters(
+             &(adev->ms12_config)
+             , adev->sink_format
+-            , audio_channel_count_from_out_mask(ms12->output_channelmask)
++            /* for tv_platform, the I2S PCM output is always 8 channel, and because there are
++             * other processing like 16->32 bit change and 2->8 channel change, the ALSA device
++             * channel number should not be related to ms12 output channelmask
++             * hard code to 8 channel firstly for tv_platform.
++             * TODO: for non_tv_platform
++             */
++            , (out->is_tv_platform) ? 8: audio_channel_count_from_out_mask(ms12->output_channelmask)
+             , ms12->output_samplerate
+             , out->is_tv_platform);
+ 
+@@ -593,7 +611,7 @@ int get_dolby_ms12_cleanup(struct dolby_ms12_desc *ms12)
+     dolby_ms12_flush_main_input_buffer();
+     dolby_ms12_config_params_set_system_flag(false);
+     aml_ms12_cleanup(ms12);
+-    ms12->output_format = AUDIO_FORMAT_INVALID;
++    ms12->output_config = 0;
+     ms12->dolby_ms12_enable = false;
+     ms12->is_dolby_atmos = false;
+     ms12->input_total_ms = 0;
+diff --git a/libms12v2/include/DolbyMS12ConfigParams.h b/libms12v2/include/DolbyMS12ConfigParams.h
+index ae967d1..a9a01ae 100644
+--- a/libms12v2/include/DolbyMS12ConfigParams.h
++++ b/libms12v2/include/DolbyMS12ConfigParams.h
+@@ -24,6 +24,7 @@
+ #include <mutex>
+ 
+ #include "dolby_ms12_config_parameter_struct.h"
++#include "dolby_ms12_output_mask.h"
+ 
+ //@@@DDPlus input file
+ #define DEFAULT_MAIN_DDP_FILE_NAME "/data/main.ac3"
+@@ -52,8 +53,7 @@ public:
+                                          , audio_format_t input_format
+                                          , audio_channel_mask_t channel_mask
+                                          , int sample_rate
+-                                         , audio_format_t output_format);
+-    virtual bool SetDolbyMS12ParamsbyOutProfile();
++                                         , int output_format);
+     virtual int SetInputOutputFileName(char **ConfigParams, int *row_index);
+     virtual int SetFunctionalSwitches(char **ConfigParams, int *row_index);
+ #if 0
+@@ -84,9 +84,9 @@ public:
+     //cleanup the mConfigParams Array
+     virtual void CleanupConfigParams(char **ConfigParams, int max_raw_size);
+ 
+-    virtual audio_format_t GetDoblyConfigOutputFormat(void)
++    virtual int GetDoblyConfigOutputConfig(void)
+     {
+-        return mDolbyMS12OutFormat;
++        return mDolbyMS12OutConfig;
+     }
+     virtual int GetDolbyConfigOutputSampleRate(void)
+     {
+@@ -399,17 +399,6 @@ public:
+         }
+     }
+ 
+-    virtual void setDualOutputFlag(bool need_dual_output)
+-    {
+-        mDualOutputFlag = need_dual_output;
+-        ALOGI("%s() set mDualOutputFlag %d", __FUNCTION__, mDualOutputFlag);
+-    }
+-
+-    virtual bool getDualOutputFlag(void)
+-    {
+-        return mDualOutputFlag;
+-    }
+-
+     /*OTT Processing Graph Begin*/
+     virtual int SetOTTProcessingGraphSwitches(char **ConfigParams, int *row_index);
+ 
+@@ -518,11 +507,10 @@ private:
+ 
+     //dolby ms12 output
+ 
+-    audio_format_t mDolbyMS12OutFormat;
++    int mDolbyMS12OutConfig;
+     int mDolbyMS12OutSampleRate;
+     audio_channel_mask_t mDolbyMS12OutChannelMask;
+     char **mConfigParams;//[MAX_ARGC][MAX_ARGV_STRING_LEN];
+-    bool mStereoOutputFlag;
+ 
+ 
+     // bool mMultiOutputFlag;
+@@ -658,8 +646,6 @@ private:
+         .de_ducking = 0,
+     };
+ 
+-    bool mDualOutputFlag;
+-
+     bool mActivateOTTSignal;
+     int mChannelConfOTTSoundsIn;
+     int mLFEPresentInOTTSoundIn;
+diff --git a/libms12v2/include/aml_audio_ms12.h b/libms12v2/include/aml_audio_ms12.h
+index 99a9104..a73a202 100644
+--- a/libms12v2/include/aml_audio_ms12.h
++++ b/libms12v2/include/aml_audio_ms12.h
+@@ -32,7 +32,7 @@ struct dolby_ms12_desc {
+     audio_format_t input_config_format;
+     audio_channel_mask_t config_channel_mask;
+     int config_sample_rate;
+-    audio_format_t output_format;
++    int output_config;
+     int output_samplerate;
+     audio_channel_mask_t output_channelmask;
+     int ms12_out_bytes;
+@@ -109,12 +109,13 @@ int get_dolby_ms12_init(struct dolby_ms12_desc *ms12_desc);
+  * ms12_config_format: AUDIO_FORMAT_PCM_16_BIT/AUDIO_FORMAT_PCM_32_BIT/AUDIO_FORMAT_AC3/AUDIO_FORMAT_E_AC3/AUDIO_FORMAT_MAT
+  * config_channel_mask: AUDIO_CHANNEL_OUT_STEREO/AUDIO_CHANNEL_OUT_5POINT1/AUDIO_CHANNEL_OUT_7POINT1
+  * config_sample_rate: sample rate.
++ * output_config: bit mask | of {MS12_OUTPUT_MASK_DD/DDP/MAT/STEREO/SPEAKER}
+  */
+ int aml_ms12_config(struct dolby_ms12_desc *ms12_desc
+                     , audio_format_t config_format
+                     , audio_channel_mask_t config_channel_mask
+                     , int config_sample_rate
+-                    , audio_format_t output_format);
++                    , int output_config);
+ /*
+  *@brief cleanup the dolby ms12
+  */
+diff --git a/libms12v2/include/dolby_ms12_config_params.h b/libms12v2/include/dolby_ms12_config_params.h
+index 1f9f9f2..146b3fd 100644
+--- a/libms12v2/include/dolby_ms12_config_params.h
++++ b/libms12v2/include/dolby_ms12_config_params.h
+@@ -21,6 +21,7 @@
+ #include <system/audio.h>
+ //#include <system/audio_policy.h>
+ #include "dolby_ms12_config_parameter_struct.h"
++#include "dolby_ms12_output_mask.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -51,19 +52,14 @@ bool dolby_ms12_config_params_get_system_flag(void);
+  * @audio_format_t input_format //audio stream out format
+  * @audio_channel_mask_t channel_mask //audio stream out channel mask
+  * @int sample_rate //audio stream out sample rate
+- * @audio_format_t output_format //dolby ms12 output format[ec3/ac3/pcm]
++ * @int output_config //dolby ms12 output mask[dd/ddp/mat/stereo/mc/speaker]
+  */
+ void dolby_ms12_config_params_set_audio_stream_out_params(
+     audio_output_flags_t flags
+     , audio_format_t input_format
+     , audio_channel_mask_t channel_mask
+     , int sample_rate
+-    , audio_format_t output_format);
+-
+-/**
+- * @brief Set the surround sound to DolbyMS12GetOutProfile
+- */
+-bool dolby_ms12_config_params_set_surround_sound_by_out_profile(void);
++    , int output_config);
+ 
+ // /*config params begin*/
+ // /**/
+diff --git a/libms12v2/include/dolby_ms12_output_mask.h b/libms12v2/include/dolby_ms12_output_mask.h
+new file mode 100644
+index 0000000..89255ee
+--- /dev/null
++++ b/libms12v2/include/dolby_ms12_output_mask.h
+@@ -0,0 +1,15 @@
++#ifndef DOLBY_MS12_OUTPUT_MASK_H_
++#define DOLBY_MS12_OUTPUT_MASK_H_
++
++#define MS12_OUTPUT_MASK_DD       0x0001
++#define MS12_OUTPUT_MASK_DDP      0x0002
++#define MS12_OUTPUT_MASK_MAT      0x0004
++#define MS12_OUTPUT_MASK_STEREO   0x0008
++#define MS12_OUTPUT_MASK_MC       0x0010
++#define MS12_OUTPUT_MASK_SPEAKER  0x0020
++
++#define MS12_OUTPUT_MASK_PUBLIC   0x00ff
++#define MS12_OUTPUT_MASK_DAP      0x0100
++
++#endif
++
+diff --git a/libms12v2/src/DolbyMS12ConfigParams.cpp b/libms12v2/src/DolbyMS12ConfigParams.cpp
+index 18fddba..6233a24 100644
+--- a/libms12v2/src/DolbyMS12ConfigParams.cpp
++++ b/libms12v2/src/DolbyMS12ConfigParams.cpp
+@@ -91,12 +91,11 @@ DolbyMS12ConfigParams::DolbyMS12ConfigParams():
+     , mAudioStreamOutChannelMask(AUDIO_CHANNEL_OUT_STEREO)
+     , mAudioSteamOutSampleRate(48000)
+     // , mAudioSteamOutDevices(AUDIO_DEVICE_OUT_SPEAKER)
+-    , mDolbyMS12OutFormat(AUDIO_FORMAT_AC3)
++    , mDolbyMS12OutConfig(MS12_OUTPUT_MASK_DD)
+     , mDolbyMS12OutSampleRate(48000)
+     , mDolbyMS12OutChannelMask(AUDIO_CHANNEL_OUT_7POINT1)
+     //, mDolbyMS12OutChannelMask(AUDIO_CHANNEL_OUT_STEREO)
+     , mConfigParams(NULL)
+-    , mStereoOutputFlag(false)
+     // , mMultiOutputFlag(true)
+     , mDRCBoost(100)
+     , mDRCCut(100)
+@@ -120,7 +119,6 @@ DolbyMS12ConfigParams::DolbyMS12ConfigParams():
+     , mDonwnmix71PCMto51(0)
+     , mLockingChannelModeENC(1)//Encoder Channel Mode Locking Mode as 5.1
+     , mRISCPrecisionFlag(1)
+-    , mDualMonoReproMode(0)
+     , mVerbosity(2)
+     , mOutputBitDepth(16)//use 16 bit per sample
+     , mAssociatedAudioMixing(1)
+@@ -153,7 +151,6 @@ DolbyMS12ConfigParams::DolbyMS12ConfigParams():
+     , mDAPSurDecEnable(true)
+     , mHasAssociateInput(false)
+     , mHasSystemInput(false)
+-    , mDualOutputFlag(false)
+     , mActivateOTTSignal(false)
+     , mChannelConfOTTSoundsIn(2)//2.0 if mActivateOTTSignal is true
+     , mLFEPresentInOTTSoundIn(0)//on(default) if mActivateOTTSignal is true
+@@ -198,7 +195,7 @@ void DolbyMS12ConfigParams::SetAudioStreamOutParams(
+     , audio_format_t input_format
+     , audio_channel_mask_t channel_mask
+     , int sample_rate
+-    , audio_format_t output_format)
++    , int output_config)
+ {
+     ALOGD("+%s()", __FUNCTION__);
+     mAudioOutFlags = flags;
+@@ -217,44 +214,20 @@ void DolbyMS12ConfigParams::SetAudioStreamOutParams(
+     }
+ 
+     mAudioSteamOutSampleRate = sample_rate;
+-    mDolbyMS12OutFormat = output_format;
+-    ALOGI("-%s() Flags %x Format %#x InputChannelMask %x SampleRate %d OutputFormat %#x\n",
+-          __FUNCTION__, mAudioOutFlags, mAudioStreamOutFormat, mAudioStreamOutChannelMask,
+-          mAudioSteamOutSampleRate, mDolbyMS12OutFormat);
+-}
+-
+-bool DolbyMS12ConfigParams::SetDolbyMS12ParamsbyOutProfile()
+-{
+-    ALOGD("+%s()", __FUNCTION__);
++    mDolbyMS12OutConfig = output_config & MS12_OUTPUT_MASK_PUBLIC;
+ 
+-    if (mDolbyMS12OutChannelMask == AUDIO_CHANNEL_OUT_7POINT1) {
+-        mStereoOutputFlag = false;
+-    } else if (mDolbyMS12OutChannelMask == AUDIO_CHANNEL_OUT_5POINT1) {
+-        mStereoOutputFlag = false;
+-    } else { //AUDIO_CHANNEL_OUT_STEREO
+-        mStereoOutputFlag = true;
+-    }
+-    ALOGD("%s() mStereoOutputFlag %#x\n", __FUNCTION__, mStereoOutputFlag);
+-    ALOGD("%s() mAudioStreamOutFormat %#x mDolbyMS12OutFormat %#x\n",
+-          __FUNCTION__, mAudioStreamOutFormat, mDolbyMS12OutFormat);
+-
+-    //Todo, if DAP is enable, here need to modify!!!
+-    /*
+-        if ((mAudioStreamOutFormat == mDolbyMS12OutFormat) && \
+-                (mHasAssociateInput == false) && \
+-                (mHasSystemInput == false) && \
+-                (mAudioStreamOutChannelMask == mDolbyMS12OutChannelMask) && \
+-                (mAudioSteamOutSampleRate == mDolbyMS12OutSampleRate)) {
+-            ALOGD("-%s() dolbyms12 in/out Format/channelMask/SampleRate is same, bypass the audio!\n", __FUNCTION__);
+-            return false;//do not use dolbyms12
+-        }
+-        else {
+-            ALOGD("-%s() dolbyms12 in format is differ with out format!\n", __FUNCTION__);
+-            return true;
++    // speaker output w/o a DAP tuning file will use downmix output instead
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_SPEAKER) {
++        if (mDAPInitMode) {
++            mDolbyMS12OutConfig |= MS12_OUTPUT_MASK_DAP;
++        } else {
++            mDolbyMS12OutConfig |= MS12_OUTPUT_MASK_STEREO;
+         }
+-    */
+-    ALOGD("-%s() Enable dolbyms12!\n", __FUNCTION__);
+-    return true;
++    }
++
++    ALOGD("-%s() AudioStreamOut Flags %x Format %#x InputChannelMask %x SampleRate %d OutputConfig %#x\n",
++          __FUNCTION__, mAudioOutFlags, mAudioStreamOutFormat, mAudioStreamOutChannelMask,
++          mAudioSteamOutSampleRate, mDolbyMS12OutConfig);
+ }
+ 
+ //input and output
+@@ -417,63 +390,42 @@ int DolbyMS12ConfigParams::SetInputOutputFileName(char **ConfigParams, int *row_
+     }
+ 
+ 
+-    //OUTPUT mDolbyMS12OutFormat(AUDIO_FORMAT_E_AC3)
+-    if (mDolbyMS12OutFormat == AUDIO_FORMAT_AC3) {
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_DD) {
+         sprintf(ConfigParams[*row_index], "%s", "-od");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_DD_FILE_NAME);
+         (*row_index)++;
+-        if (mDualOutputFlag == true) {
+-            if (mDAPInitMode != 0) {
+-                sprintf(ConfigParams[*row_index], "%s", "-o_dap_speaker");
+-                (*row_index)++;
+-                sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_DAP_FILE_NAME);
+-                (*row_index)++;
+-            } else {
+-                sprintf(ConfigParams[*row_index], "%s", "-oms");
+-                (*row_index)++;
+-                sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_PCM_DOWNMIX_FILE_NAME);
+-                (*row_index)++;
+-            }
+-        }
+-    } else if (mDolbyMS12OutFormat == AUDIO_FORMAT_E_AC3) {
++    }
++
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_DDP) {
+         sprintf(ConfigParams[*row_index], "%s", "-odp");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_DDP_FILE_NAME);
+         (*row_index)++;
+-        if (mDualOutputFlag == true) {
+-            if (mDAPInitMode != 0) {
+-                sprintf(ConfigParams[*row_index], "%s", "-o_dap_speaker");
+-                (*row_index)++;
+-                sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_DAP_FILE_NAME);
+-                (*row_index)++;
+-            } else {
+-                sprintf(ConfigParams[*row_index], "%s", "-oms");
+-                (*row_index)++;
+-                sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_PCM_DOWNMIX_FILE_NAME);
+-                (*row_index)++;
+-            }
+-        }
+-    } else if (mDolbyMS12OutFormat == AUDIO_FORMAT_MAT) {
++    }
++
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_MAT) {
+         sprintf(ConfigParams[*row_index], "%s", "-omat");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_MAT_FILE_NAME);
+         (*row_index)++;
+-    } else if ((mDolbyMS12OutFormat == AUDIO_FORMAT_PCM_16_BIT) && (mDAPInitMode != 0)) {
+-        // DAP output
++    }
++
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_DAP) {
+         sprintf(ConfigParams[*row_index], "%s", "-o_dap_speaker");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_DAP_FILE_NAME);
+         (*row_index)++;
+-    } else if ((mDolbyMS12OutFormat == AUDIO_FORMAT_PCM_16_BIT) &&
+-        (audio_channel_count_from_out_mask(mDolbyMS12OutChannelMask) > 2) && (mDAPInitMode == 0)) {
+-        // pcm multichannel
++    }
++
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_MC) {
+         sprintf(ConfigParams[*row_index], "%s", "-om");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_PCM_MULTI_FILE_NAME);
+         (*row_index)++;
+-    } else {
+-        // pcm 2-channel downmix output
++    }
++
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_STEREO) {
+         sprintf(ConfigParams[*row_index], "%s", "-oms");
+         (*row_index)++;
+         sprintf(ConfigParams[*row_index], "%s", DEFAULT_OUTPUT_PCM_DOWNMIX_FILE_NAME);
+@@ -564,7 +516,7 @@ int DolbyMS12ConfigParams::SystemSoundChannelMaskConvertToChannelConfiguration(a
+ int DolbyMS12ConfigParams::SetFunctionalSwitches(char **ConfigParams, int *row_index)
+ {
+     ALOGV("+%s() line %d\n", __FUNCTION__, __LINE__);
+-    if (mStereoOutputFlag == true) {
++    if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_STEREO) {
+         if ((mDRCBoostStereo >= 0) && (mDRCBoostStereo <= 100)) {
+             sprintf(ConfigParams[*row_index], "%s", "-bs");
+             (*row_index)++;
+@@ -1466,7 +1418,7 @@ char **DolbyMS12ConfigParams::GetDolbyMS12ConfigParams(int *argc)
+         SetPCMSwitches(mConfigParams, &mParamNum);
+         SetHEAACSwitches(mConfigParams, &mParamNum);
+         SetOTTProcessingGraphSwitches(mConfigParams, &mParamNum);
+-        if (mDAPInitMode) {
++        if (mDolbyMS12OutConfig & MS12_OUTPUT_MASK_DAP) {
+             SetDAPDeviceSwitches(mConfigParams, &mParamNum, 0);
+             SetDAPContentSwitches(mConfigParams, &mParamNum);
+         }
+diff --git a/libms12v2/src/aml_audio_ms12.c b/libms12v2/src/aml_audio_ms12.c
+index 326f9d1..b212122 100644
+--- a/libms12v2/src/aml_audio_ms12.c
++++ b/libms12v2/src/aml_audio_ms12.c
+@@ -27,8 +27,8 @@ int get_dolby_ms12_output_details(struct dolby_ms12_desc *ms12_desc)
+     ms12_desc->dolby_ms12_init_argv = dolby_ms12_config_params_get_config_params(&ms12_desc->dolby_ms12_init_argc);
+     ms12_desc->output_samplerate = dolby_ms12_config_params_get_dolby_config_output_samplerate();
+     ms12_desc->output_channelmask = dolby_ms12_config_params_get_dolby_config_output_channelmask();
+-    ALOGD("%s() dolby_ms12_init_argv %p argc %d dolby ms12 output format %#x samplerate %d channelmask %#x\n",
+-          __func__, ms12_desc->dolby_ms12_init_argv, ms12_desc->dolby_ms12_init_argc, ms12_desc->output_format,
++    ALOGD("%s() dolby_ms12_init_argv %p argc %d dolby ms12 output config %#x samplerate %d channelmask %#x\n",
++          __func__, ms12_desc->dolby_ms12_init_argv, ms12_desc->dolby_ms12_init_argc, ms12_desc->output_config,
+           ms12_desc->output_samplerate, ms12_desc->output_channelmask);
+     return 0;
+ }
+@@ -65,8 +65,15 @@ int get_dolby_ms12_init(struct dolby_ms12_desc *ms12_desc)
+ #endif
+         else {
+             ms12_desc->dolby_ms12_enable = true;
+-            ALOGD("%s() dolby ms12 output format %#x\n", __FUNCTION__, ms12_desc->output_format);
+-            set_offload_playback_dolby_ms12_output_format(ms12_desc->output_format);
++            ALOGD("%s() dolby ms12 output config %#x\n", __FUNCTION__, ms12_desc->output_config);
++            if (ms12_desc->output_config & MS12_OUTPUT_MASK_DD)
++                set_offload_playback_dolby_ms12_output_format(AUDIO_FORMAT_AC3);
++            else if (ms12_desc->output_config & MS12_OUTPUT_MASK_DDP)
++                set_offload_playback_dolby_ms12_output_format(AUDIO_FORMAT_E_AC3);
++            else if (ms12_desc->output_config & MS12_OUTPUT_MASK_MAT)
++                set_offload_playback_dolby_ms12_output_format(AUDIO_FORMAT_MAT);
++            else
++                set_offload_playback_dolby_ms12_output_format(AUDIO_FORMAT_PCM);
+             ALOGD("%s() init DolbyMS12 success\n", __FUNCTION__);
+         }
+         ms12_desc->curDBGain = 0;
+@@ -79,16 +86,15 @@ int aml_ms12_config(struct dolby_ms12_desc *ms12_desc
+                     , audio_format_t config_format
+                     , audio_channel_mask_t config_channel_mask
+                     , int config_sample_rate
+-                    , audio_format_t output_format)
++                    , int output_config)
+ {
+     ALOGD("+%s() %d\n", __FUNCTION__, __LINE__);
+     ms12_desc->input_config_format = config_format;
+     ms12_desc->config_channel_mask = config_channel_mask;
+     ms12_desc->config_sample_rate = config_sample_rate;
+-    //ms12_desc->output_format = get_dolby_ms12_suitable_output_format();
+-    ms12_desc->output_format = output_format;
+-    ALOGI("%s() config input format %#x channel mask %#x samplerate %d output format %#x\n",
+-          __FUNCTION__, config_format, config_channel_mask, config_sample_rate, output_format);
++    ms12_desc->output_config = output_config;
++    ALOGI("%s() config input format %#x channle mask %#x samplerate %d output config %#x\n",
++          __FUNCTION__, config_format, config_channel_mask, config_sample_rate, output_config);
+     dolby_ms12_config_params_reset_config_params();
+     if (get_audio_system_format() == AUDIO_FORMAT_PCM_16_BIT) {
+         dolby_ms12_config_params_set_system_flag(true);
+@@ -101,7 +107,7 @@ int aml_ms12_config(struct dolby_ms12_desc *ms12_desc
+         , ms12_desc->input_config_format
+         , ms12_desc->config_channel_mask
+         , ms12_desc->config_sample_rate
+-        , ms12_desc->output_format);
++        , ms12_desc->output_config);
+     get_dolby_ms12_output_details(ms12_desc);
+ 
+     get_dolby_ms12_init(ms12_desc);
+diff --git a/libms12v2/src/dolby_ms12_config_params.cpp b/libms12v2/src/dolby_ms12_config_params.cpp
+index c785761..b02be5a 100644
+--- a/libms12v2/src/dolby_ms12_config_params.cpp
++++ b/libms12v2/src/dolby_ms12_config_params.cpp
+@@ -113,33 +113,15 @@ extern "C" void dolby_ms12_config_params_set_audio_stream_out_params(
+     , audio_format_t input_format
+     , audio_channel_mask_t channel_mask
+     , int sample_rate
+-    , audio_format_t output_format)
++    , int output_config)
+ {
+     ALOGV("%s()\n", __FUNCTION__);
+     android::DolbyMS12ConfigParams *config_param = getInstance();
+     if (config_param) {
+-        config_param->SetAudioStreamOutParams(flags, input_format, channel_mask, sample_rate, output_format);
++        config_param->SetAudioStreamOutParams(flags, input_format, channel_mask, sample_rate, output_config);
+     }
+ }
+ 
+-extern "C" bool dolby_ms12_config_params_set_surround_sound_by_out_profile(void)
+-{
+-    ALOGV("%s()\n", __FUNCTION__);
+-#if 0
+-    // compile error, nor this function was called by anyone, comment out here
+-    android::DolbyMS12ConfigParams *config_param = getInstance();
+-    if (config_param) {
+-        audio_policy_forced_cfg_t force_use = android::AudioSystem::getForceUse(AUDIO_POLICY_FORCE_FOR_ENCODED_SURROUND);
+-        return config_param->SetDolbyMS12ParamsbyOutProfile(force_use);
+-    } else {
+-        return false;
+-    }
+-#else
+-    return false;
+-#endif
+-
+-}
+-
+ /*config params begin*/
+ /**/
+ extern "C" int dolby_ms12_config_params_set_input_output_file_name(char **ConfigParams, int *row_index)
+@@ -293,14 +275,14 @@ extern "C" void dolby_ms12_config_params_cleanup_config_params(char **ConfigPara
+         return config_param->CleanupConfigParams(ConfigParams, max_raw_size);
+     }
+ }
+-extern "C" audio_format_t dolby_ms12_config_params_get_dobly_config_output_format(void)
++extern "C" int dolby_ms12_config_params_get_dobly_config_output_config(void)
+ {
+     ALOGV("%s()\n", __FUNCTION__);
+     android::DolbyMS12ConfigParams *config_param = getInstance();
+     if (config_param) {
+-        return config_param->GetDoblyConfigOutputFormat();
++        return config_param->GetDoblyConfigOutputConfig();
+     } else {
+-        return AUDIO_FORMAT_INVALID;
++        return 0;
+     }
+ }
+ 
+@@ -814,15 +796,6 @@ extern "C" void dolby_ms12_set_dap_dialogue_enhancer(DAPDialogueEnhancer *dapDia
+     }
+ }
+ 
+-extern "C" void dolby_ms12_set_dual_output_flag(bool need_dual_output)
+-{
+-    ALOGV("%s()\n", __FUNCTION__);
+-    android::DolbyMS12ConfigParams *config_param = getInstance();
+-    if (config_param) {
+-        config_param->setDualOutputFlag(need_dual_output);
+-    }
+-}
+-
+ extern "C" void set_dolby_ms12_continuous_mode(bool flag)
+ {
+     ALOGV("%s()\n", __FUNCTION__);
+-- 
+2.24.1
+

@@ -1,0 +1,28 @@
+diff --git a/audio_hal/audio_route.c b/audio_hal/audio_route.c
+index 60221fb..b746581 100644
+--- a/audio_hal/audio_route.c
++++ b/audio_hal/audio_route.c
+@@ -606,6 +606,11 @@ static int alloc_mixer_state(struct audio_route *ar)
+         if (!is_supported_ctl_type(type))
+             continue;
+ 
++        if (num_values > 512) {
++            ar->mixer_state[i].num_values = 0;
++            continue;
++        }
++
+         size_t value_sz = sizeof_ctl_type(type);
+         ar->mixer_state[i].old_value.ptr = calloc(num_values, value_sz);
+         ar->mixer_state[i].new_value.ptr = calloc(num_values, value_sz);
+@@ -649,6 +654,11 @@ int audio_route_update_mixer(struct audio_route *ar)
+     unsigned int j;
+     struct mixer_ctl *ctl;
+ 
++    if (!ar) {
++        ALOGE("invalid audio_route");
++        return -1;
++    }
++
+     for (i = 0; i < ar->num_mixer_ctls; i++) {
+         unsigned int num_values = ar->mixer_state[i].num_values;
+         enum mixer_ctl_type type;
