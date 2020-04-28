@@ -1,14 +1,5 @@
-From ac9d43dbc33b0de5a2a977ffdaa075f056ce6622 Mon Sep 17 00:00:00 2001
-From: Pradeep Sriram <pradeep.sriram@amlogic.com>
-Date: Fri, 6 Dec 2019 14:54:20 -0800
-Subject: [PATCH] compile fix
-
----
- Makefile | 18 ++++++------------
- 1 file changed, 6 insertions(+), 12 deletions(-)
-
 diff --git a/Makefile b/Makefile
-index 10e9b30..b2c4ade 100644
+index 10e9b30..ec4a7cd 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -13,8 +13,8 @@ CUTILS_OBJS=src/cutils/hashmap.o \
@@ -22,7 +13,7 @@ index 10e9b30..b2c4ade 100644
  
  %.o: %.cpp
  	$(CC) -c $(CFLAGS) $(CXXFLAGS) -o $@ $<
-@@ -35,28 +35,22 @@ libcutils.so: $(CUTILS_OBJS)
+@@ -35,28 +35,16 @@ libcutils.so: $(CUTILS_OBJS)
  
  .PHONY: install
  install:
@@ -36,15 +27,13 @@ index 10e9b30..b2c4ade 100644
  	done
  	for f in $(@D)/include/audio_utils/spdif/*.h; do \
 -		install -m 644 -D $${f} -t $(STAGING_DIR)/usr/include/audio_utils/spdif; \
-+		install -m 644 -D $${f} -t $(TARGET_DIR)/usr/include/audio_utils/spdif; \
- 	done
- 	for f in $(@D)/include/cutils/*.h; do \
+-	done
+-	for f in $(@D)/include/cutils/*.h; do \
 -		install -m 644 -D $${f} -t $(STAGING_DIR)/usr/include/cutils; \
-+		install -m 644 -D $${f} -t $(TARGET_DIR)/usr/include/cutils; \
- 	done
- 	for f in $(@D)/include/android/*.h; do \
+-	done
+-	for f in $(@D)/include/android/*.h; do \
 -		install -m 644 -D $${f} -t $(STAGING_DIR)/usr/include/android; \
-+		install -m 644 -D $${f} -t $(TARGET_DIR)/usr/include/android; \
++		install -m 644 -D $${f} -t $(TARGET_DIR)/usr/include/audio_utils/spdif; \
  	done
  
  .PHONY: clean
@@ -55,6 +44,3 @@ index 10e9b30..b2c4ade 100644
 -	rm -f $(TARGET_DIR)/usr/lib/libamaudioutils.so
 -	rm -f $(STAGING_DIR)/usr/lib/libamaudioutils.so
  
--- 
-2.7.4
-

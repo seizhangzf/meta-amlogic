@@ -1,9 +1,11 @@
 SUMMARY = "aml audio utils"
 LICENSE = "CLOSED"
 
+DEPENDS = "liblog"
+
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/amaudioutils;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI_append = " file://0001-compile-fix.patch"
-SRC_URI_append = " file://0001-add-liblog-support.patch"
+#SRC_URI_append = " file://0001-add-liblog-support.patch"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"

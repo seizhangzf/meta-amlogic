@@ -1,0 +1,86 @@
+diff --git a/liblog/include/cutils/list.h b/liblog/include/cutils/list.h
+index 83e702b..dfdc53b 100644
+--- a/liblog/include/cutils/list.h
++++ b/liblog/include/cutils/list.h
+@@ -19,7 +19,9 @@
+ 
+ #include <stddef.h>
+ 
+-#include <stddef.h>
++#ifdef __cplusplus
++extern "C" {
++#endif /* __cplusplus */
+ 
+ struct listnode
+ {
+@@ -32,20 +34,20 @@ struct listnode
+ 
+ #define list_declare(name) \
+     struct listnode name = { \
+-        .next = &name, \
+-        .prev = &name, \
++        .next = &(name), \
++        .prev = &(name), \
+     }
+ 
+ #define list_for_each(node, list) \
+-    for (node = (list)->next; node != (list); node = node->next)
++    for ((node) = (list)->next; (node) != (list); (node) = (node)->next)
+ 
+ #define list_for_each_reverse(node, list) \
+-    for (node = (list)->prev; node != (list); node = node->prev)
++    for ((node) = (list)->prev; (node) != (list); (node) = (node)->prev)
+ 
+ #define list_for_each_safe(node, n, list) \
+-    for (node = (list)->next, n = node->next; \
+-         node != (list); \
+-         node = n, n = node->next)
++    for ((node) = (list)->next, (n) = (node)->next; \
++         (node) != (list); \
++         (node) = (n), (n) = (node)->next)
+ 
+ static inline void list_init(struct listnode *node)
+ {
+@@ -61,6 +63,14 @@ static inline void list_add_tail(struct listnode *head, struct listnode *item)
+     head->prev = item;
+ }
+ 
++static inline void list_add_head(struct listnode *head, struct listnode *item)
++{
++    item->next = head->next;
++    item->prev = head;
++    head->next->prev = item;
++    head->next = item;
++}
++
+ static inline void list_remove(struct listnode *item)
+ {
+     item->next->prev = item->prev;
+@@ -71,4 +81,8 @@ static inline void list_remove(struct listnode *item)
+ #define list_head(list) ((list)->next)
+ #define list_tail(list) ((list)->prev)
+ 
++#ifdef __cplusplus
++};
++#endif /* __cplusplus */
++
+ #endif
+diff --git a/liblog/include/cutils/logger.h b/liblog/include/cutils/logger.h
+index 97f2c56..58523fb 100644
+--- a/liblog/include/cutils/logger.h
++++ b/liblog/include/cutils/logger.h
+@@ -22,10 +22,10 @@ struct logger_entry {
+     char        msg[0]; /* the entry's payload */
+ };
+ 
+-#define LOGGER_LOG_MAIN		"log/main"
+-#define LOGGER_LOG_RADIO	"log/radio"
+-#define LOGGER_LOG_EVENTS	"log/events"
+-#define LOGGER_LOG_SYSTEM	"log/system"
++#define LOGGER_LOG_MAIN		"log_main"
++#define LOGGER_LOG_RADIO	"log_radio"
++#define LOGGER_LOG_EVENTS	"log_events"
++#define LOGGER_LOG_SYSTEM	"log_system"
+ 
+ #define LOGGER_ENTRY_MAX_LEN		(4*1024)
+ #define LOGGER_ENTRY_MAX_PAYLOAD	\

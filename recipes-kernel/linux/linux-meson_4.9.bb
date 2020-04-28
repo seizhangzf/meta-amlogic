@@ -13,6 +13,7 @@ SRC_URI_append = " file://meson.scc \
             file://meson.cfg \
             file://meson-user-config.cfg \
             file://systemd.cfg \
+            file://logcat.cfg \
             file://meson-user-patches.scc "
 
 SRC_URI_append = " file://0001-Revert-cvbsout-add-cvbsout-DRM-support-1-1.patch"
