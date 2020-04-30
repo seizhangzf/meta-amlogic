@@ -27,7 +27,17 @@ SRC_URI_append = " file://0007-drm-add-uvm-dmabuf-support-in-meson-gem-1-1.patch
 SRC_URI_append = " file://0011-drm-sync-vout-mode-with-meson_hdmi-1-1.patch "
 SRC_URI_append = " file://0014-uvm-fix-uvm-secure-buf-map-crash-issue-1-1.patch "
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0013-support-AB-partition.patch','',d)}"
-SRC_URI_append = " file://0015-audio-hal-support-for-g12a.patch "
+#This patch cant work with alsa
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','alsa','','file://0015-audio-hal-support-for-g12a.patch ',d)}" 
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0014-AB-tv-partition.patch','',d)}"
+SRC_URI_append = " file://0015-drm-add-second-video-overlay-plane-1-1.patch"
+SRC_URI_append = " file://0016-drm-add-hdr-dv-support-1-1.patch"
+SRC_URI_append = " file://0017-drm-add-video-overlay-fence-support-1-1.patch"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0019-ab311-ab-partition.patch','',d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0020-ab301-ab-partition.patch','',d)}"
+SRC_URI_append = " file://0020-sha-add-scpi-for-sha-check-during-suspend-2-2.patch"
+SRC_URI_append = " file://0021-audio-set-arc-source-from-spdifA-when-earc-is-disabl.patch"
+
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"

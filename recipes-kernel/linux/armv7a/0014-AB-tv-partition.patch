@@ -1,0 +1,126 @@
+From e43b5e745a96894e8d54ba67e9a4f68de0fba92d Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Mon, 13 Apr 2020 09:40:01 -0700
+Subject: [PATCH] AB tv partition
+
+Change-Id: I8d71e3efd944b66296a2bb70413968d5ce3cc1b4
+---
+ .../boot/dts/amlogic/partition_tv_ab_rdk.dtsi | 106 ++++++++++++++++++
+ 1 file changed, 106 insertions(+)
+ create mode 100644 arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
+
+diff --git a/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
+new file mode 100644
+index 000000000000..b6f0b8efad73
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
+@@ -0,0 +1,106 @@
++﻿ /*
++  * Amlogic partition set for normal
++  *
++  * Copyright (c) 2017-2017 Amlogic Ltd
++  *
++  * This file is licensed under a dual GPLv2 or BSD license.
++  *
++  */
++
++/ {
++	partitions: partitions{
++				parts = <15>;
++				part-0 = <&recovery>;
++				part-1 = <&logo>;
++				part-2 = <&misc>;
++				part-3 = <&cri_data>;
++				part-4 = <&rsv>;
++				part-5 = <&param>;
++				part-6 = <&tee>;
++				part-7 = <&vendor>;
++				part-8 = <&vbmeta_a>;
++				part-9 = <&boot_a>;
++				part-10 = <&system_a>;
++				part-11 = <&vbmeta_b>;
++				part-12 = <&boot_b>;
++				part-13 = <&system_b>;
++				part-14 = <&data>;
++		recovery:recovery{
++					 pname = "recovery";
++					 size = <0x0 0x4000000>;
++					 mask = <1>;
++				 };
++		logo:logo{
++				 pname = "logo";
++				 size = <0x0 0x800000>;
++				 mask = <1>;
++			 };
++		misc:misc{
++				 pname = "misc";
++				 size = <0x0 0x200000>;
++				 mask = <1>;
++			 };
++		cri_data:cri_data {
++					 pname = "cri_data";
++					 size = <0x0 0x400000>;
++					 mask = <2>;
++				 };
++		rsv:rsv{
++				pname = "rsv";
++				size = <0x0 0x1000000>;
++				mask = <1>;
++			};
++		param:param{
++				  pname = "param";
++				  size = <0x0 0x1000000>;
++				  mask = <2>;
++			  };
++		tee:tee{
++				pname = "tee";
++				size = <0x0 0x2000000>;
++				mask = <1>;
++			};
++		vendor:vendor
++		{
++			pname = "vendor";
++			size = <0x0 0x14000000>;
++			mask = <1>;
++		};
++
++		vbmeta_a:vbmeta_a{
++					 pname = "vbmeta_a";
++					 size = <0x0 0x200000>;
++					 mask = <1>;
++				 };
++		boot_a:boot_a {
++				   pname = "boot_a";
++				   size = <0x0 0x1000000>;
++				   mask = <1>;
++			   };
++		system_a:system_a {
++					 pname = "system_a";
++					 size = <0x0 0x96000000>;
++					 mask = <1>;
++				 };
++		vbmeta_b:vbmeta_b {
++					 pname = "vbmeta_b";
++					 size = <0x0 0x200000>;
++					 mask = <1>;
++				 };
++		boot_b:boot_b {
++				   pname = "boot_b";
++				   size = <0x0 0x1000000>;
++				   mask = <1>;
++			   };
++		system_b:system_b {
++					 pname = "system_b";
++					 size = <0x0 0x96000000>;
++					 mask = <1>;
++				 };
++		data:data {
++		 pname = "data";
++		 size = <0xffffffff 0xffffffff>;
++		 mask = <4>;
++	 };
++			};
++};/* end of / */
+-- 
+2.24.1
+

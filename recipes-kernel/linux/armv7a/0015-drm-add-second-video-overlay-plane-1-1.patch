@@ -1,0 +1,267 @@
+From c989a2b7d530de05659a41c9e211e84eca37d5c0 Mon Sep 17 00:00:00 2001
+From: Dezhi Kong <dezhi.kong@amlogic.com>
+Date: Thu, 19 Mar 2020 11:46:10 +0800
+Subject: [PATCH 1/4] drm: add second video overlay plane [1/1]
+
+PD#SWPL-18742
+
+Problem:
+drm have not support second video overlay
+
+Solution:
+1.add second video overlay
+2.add auto enable/disable video
+3.config video vsync process as freerun for drm video
+
+Verify:
+verify by u212
+
+Change-Id: I6cd659cd5b9977a0f86c2ee7ed7e9ff5d251bbf3
+Signed-off-by: Dezhi Kong <dezhi.kong@amlogic.com>
+---
+ arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi  |  8 +++++++
+ arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi   |  8 +++++++
+ .../arm64/boot/dts/amlogic/mesong12a_drm.dtsi |  8 +++++++
+ arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi |  8 +++++++
+ drivers/amlogic/drm/meson_plane.c             |  7 ++++--
+ drivers/amlogic/drm/meson_vpu_util.h          |  2 +-
+ .../drm/vpu-hw/meson_vpu_video_wrapper.c      | 22 ++++++++++++-------
+ .../drm/vpu-hw/meson_vpu_video_wrapper.h      |  1 -
+ drivers/amlogic/media/video_sink/video.c      |  3 +++
+ drivers/amlogic/media/video_sink/video_hw.c   | 14 ++++++++++++
+ 10 files changed, 69 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi b/arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi
+index 8948d6d917b9..e1cdf9a878bb 100644
+--- a/arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi
++++ b/arch/arm/boot/dts/amlogic/mesong12a_drm.dtsi
+@@ -233,6 +233,14 @@
+ 					num_in_links = /bits/ 8  <0x0>;
+ 					num_out_links = /bits/ 8  <0x0>;
+ 				};
++				video2_block: block@14 {
++					id = /bits/ 8 <VIDEO2_BLOCK>;
++					index = /bits/ 8  <1>;
++					type = /bits/ 8  <7>;
++					block_name = "video2_block";
++					num_in_links = /bits/ 8  <0x0>;
++					num_out_links = /bits/ 8  <0x0>;
++				};
+ 			};
+ 		};
+ 
+diff --git a/arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi b/arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi
+index 0c753f87aace..b4e39c59b8f5 100644
+--- a/arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi
++++ b/arch/arm/boot/dts/amlogic/mesontm2_drm.dtsi
+@@ -233,6 +233,14 @@
+ 					num_in_links = /bits/ 8  <0x0>;
+ 					num_out_links = /bits/ 8  <0x0>;
+ 				};
++				video2_block: block@14 {
++					id = /bits/ 8 <VIDEO2_BLOCK>;
++					index = /bits/ 8  <1>;
++					type = /bits/ 8  <7>;
++					block_name = "video2_block";
++					num_in_links = /bits/ 8  <0x0>;
++					num_out_links = /bits/ 8  <0x0>;
++				};
+ 			};
+ 		};
+ 
+diff --git a/arch/arm64/boot/dts/amlogic/mesong12a_drm.dtsi b/arch/arm64/boot/dts/amlogic/mesong12a_drm.dtsi
+index 12194edbb61d..dd5ea1ac50c5 100644
+--- a/arch/arm64/boot/dts/amlogic/mesong12a_drm.dtsi
++++ b/arch/arm64/boot/dts/amlogic/mesong12a_drm.dtsi
+@@ -233,6 +233,14 @@
+ 					num_in_links = /bits/ 8  <0x0>;
+ 					num_out_links = /bits/ 8  <0x0>;
+ 				};
++				video2_block: block@14 {
++					id = /bits/ 8 <VIDEO2_BLOCK>;
++					index = /bits/ 8  <1>;
++					type = /bits/ 8  <7>;
++					block_name = "video2_block";
++					num_in_links = /bits/ 8  <0x0>;
++					num_out_links = /bits/ 8  <0x0>;
++				};
+ 			};
+ 		};
+ 
+diff --git a/arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi b/arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi
+index 0c753f87aace..b4e39c59b8f5 100644
+--- a/arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi
++++ b/arch/arm64/boot/dts/amlogic/mesontm2_drm.dtsi
+@@ -233,6 +233,14 @@
+ 					num_in_links = /bits/ 8  <0x0>;
+ 					num_out_links = /bits/ 8  <0x0>;
+ 				};
++				video2_block: block@14 {
++					id = /bits/ 8 <VIDEO2_BLOCK>;
++					index = /bits/ 8  <1>;
++					type = /bits/ 8  <7>;
++					block_name = "video2_block";
++					num_in_links = /bits/ 8  <0x0>;
++					num_out_links = /bits/ 8  <0x0>;
++				};
+ 			};
+ 		};
+ 
+diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
+index 569e7e2e9ad0..ba4fff5007d7 100644
+--- a/drivers/amlogic/drm/meson_plane.c
++++ b/drivers/amlogic/drm/meson_plane.c
+@@ -827,8 +827,10 @@ static struct am_video_plane *am_video_plane_create(struct meson_drm *priv,
+ 
+ 	video_plane = devm_kzalloc(priv->drm->dev, sizeof(*video_plane),
+ 				   GFP_KERNEL);
+-	if (!video_plane)
++	if (!video_plane) {
++		DRM_INFO("no memory to alloc video plane\n");
+ 		return 0;
++	}
+ 
+ 	video_plane->drv = priv;
+ 	video_plane->plane_index = i;
+@@ -850,6 +852,7 @@ static struct am_video_plane *am_video_plane_create(struct meson_drm *priv,
+ 	drm_plane_helper_add(plane, &am_video_helper_funcs);
+ 	osd_drm_debugfs_add(&video_plane->plane_debugfs_dir,
+ 			    plane_name, video_plane->plane_index);
++	DRM_INFO("video plane %d create done\n", i);
+ 	return video_plane;
+ }
+ 
+@@ -868,7 +871,7 @@ int am_meson_plane_create(struct meson_drm *priv)
+ 		if (!video_plane)
+ 			return -ENOMEM;
+ 
+-		priv->video_planes[i++] = video_plane;
++		priv->video_planes[i] = video_plane;
+ 		priv->num_planes++;
+ 	}
+ 	DRM_DEBUG("create %d video plane done\n", pipeline->num_video);
+diff --git a/drivers/amlogic/drm/meson_vpu_util.h b/drivers/amlogic/drm/meson_vpu_util.h
+index 2bc2500776ba..4cd61d3703a6 100644
+--- a/drivers/amlogic/drm/meson_vpu_util.h
++++ b/drivers/amlogic/drm/meson_vpu_util.h
+@@ -52,5 +52,5 @@ void meson_util_canvas_config(u32 index, unsigned long addr, u32 width,
+ 					u32 height, u32 wrap, u32 blkmode);
+ int meson_util_canvas_pool_alloc_table(const char *owner, u32 *table, int size,
+ 					enum canvas_map_type_e type);
+-void amvideo_set_scaler_para(int x, int y, int w, int h, int flag);
++void set_video_enabled(u32 value, u32 index);
+ #endif
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
+index 6ee1031239dd..ba05d3545f63 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.c
+@@ -113,8 +113,7 @@ static int vp_vf_states(struct vframe_states *states, void *op_arg)
+ 
+ 	states->vf_pool_size = BUFFER_NUM;
+ 	states->buf_recycle_num = 0;
+-	states->buf_free_num = BUFFER_NUM
+-		- kfifo_len(&video->ready_q);
++	states->buf_free_num = kfifo_len(&video->free_q);
+ 	states->buf_avail_num = kfifo_len(&video->ready_q);
+ 	return 0;
+ }
+@@ -264,8 +263,6 @@ static void video_set_state(struct meson_vpu_block *vblk,
+ 			DRM_INFO("free_q get fail!");
+ 		}
+ 	}
+-	amvideo_set_scaler_para(mvvs->dst_x, mvvs->dst_y, mvvs->dst_w,
+-				mvvs->dst_h, 0);
+ 	DRM_DEBUG("plane_index=%d,HW-video=%d, byte_stride=%d\n",
+ 		  mvvs->plane_index, vblk->index, byte_stride);
+ 	DRM_DEBUG("phy_addr=0x%x,phy_addr2=0x%x\n",
+@@ -281,6 +278,7 @@ static void video_hw_enable(struct meson_vpu_block *vblk)
+ 		DRM_DEBUG("enable break for NULL.\n");
+ 		return;
+ 	}
++	set_video_enabled(1, vblk->index);
+ 	DRM_DEBUG("%s enable done.\n", video->base.name);
+ }
+ 
+@@ -292,6 +290,7 @@ static void video_hw_disable(struct meson_vpu_block *vblk)
+ 		DRM_DEBUG("disable break for NULL.\n");
+ 		return;
+ 	}
++	set_video_enabled(0, vblk->index);
+ 	if (video->video_path_reg) {
+ 		vf_unreg_provider(&video->vprov);
+ 		video->video_path_reg = 0;
+@@ -321,11 +320,18 @@ static void video_hw_init(struct meson_vpu_block *vblk)
+ 	kfifo_reset(&video->display_q);
+ 	for (i = 0; i < BUFFER_NUM; i++)
+ 		kfifo_put(&video->free_q, &video->vframe[i]);
+-	snprintf(video->vfm_map_chain, VP_MAP_STRUCT_SIZE,
+-		 "%s %s", video->base.name,
+-		 "amvideo");
++	if (vblk->id == VIDEO1_BLOCK)
++		snprintf(video->vfm_map_chain, VP_MAP_STRUCT_SIZE,
++			 "%s %s", video->base.name,
++			 "amvideo");
++	else if (vblk->id == VIDEO2_BLOCK)
++		snprintf(video->vfm_map_chain, VP_MAP_STRUCT_SIZE,
++			 "%s %s", video->base.name,
++			 "videopip");
++	else
++		DRM_DEBUG("unsupported block id %d\n", vblk->id);
+ 	snprintf(video->vfm_map_id, VP_MAP_STRUCT_SIZE,
+-		 "video-map");
++		 "video-map-%d", vblk->index);
+ 	vfm_map_add(video->vfm_map_id, video->vfm_map_chain);
+ 	vf_provider_init(&video->vprov,
+ 			 video->base.name,
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.h b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.h
+index e9b65bebdcb8..7f3eba3f06fd 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.h
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_video_wrapper.h
+@@ -19,5 +19,4 @@
+ #define _MESON_VPU_VIDEO_WRAPPER_H_
+ 
+ #define HW_VIDEO_MIF_NUM 2
+-
+ #endif
+diff --git a/drivers/amlogic/media/video_sink/video.c b/drivers/amlogic/media/video_sink/video.c
+index 9aa14939b142..9f8ffeaa0e11 100644
+--- a/drivers/amlogic/media/video_sink/video.c
++++ b/drivers/amlogic/media/video_sink/video.c
+@@ -1908,6 +1908,9 @@ static inline bool vpts_expire(struct vframe_s *cur_vf,
+ 	/*freerun for game mode*/
+ 	if (next_vf->flag & VFRAME_FLAG_GAME_MODE)
+ 		return true;
++	/*freerun for drm video*/
++	if (next_vf->flag & VFRAME_FLAG_VIDEO_DRM)
++		return true;
+ 
+ 	if (step_enable) {
+ 		if (step_flag)
+diff --git a/drivers/amlogic/media/video_sink/video_hw.c b/drivers/amlogic/media/video_sink/video_hw.c
+index d897cfdca6c7..4fba443ba6e0 100644
+--- a/drivers/amlogic/media/video_sink/video_hw.c
++++ b/drivers/amlogic/media/video_sink/video_hw.c
+@@ -364,6 +364,20 @@ u32 get_videopip_enabled(void)
+ }
+ EXPORT_SYMBOL(get_videopip_enabled);
+ 
++void set_video_enabled(u32 value, u32 index)
++{
++	u32 disable_video = value ? 0 : 1;
++
++	if (index >= MAX_VD_LAYER)
++		return;
++	vd_layer[index].global_output = value;
++	if (index == 0)
++		_video_set_disable(disable_video);
++	else
++		_videopip_set_disable(disable_video);
++}
++EXPORT_SYMBOL(set_video_enabled);
++
+ bool is_di_on(void)
+ {
+ 	bool ret = false;
+-- 
+2.24.1
+

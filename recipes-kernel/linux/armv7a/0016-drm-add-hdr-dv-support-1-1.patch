@@ -1,0 +1,284 @@
+From cbbd28dd7f838e6b7166ca129b21e047a90df501 Mon Sep 17 00:00:00 2001
+From: Dezhi Kong <dezhi.kong@amlogic.com>
+Date: Fri, 28 Feb 2020 15:57:06 +0800
+Subject: [PATCH 2/4] drm: add hdr/dv support [1/1]
+
+PD#SWPL-20672
+
+Problem:
+drm have not support hdr/dv
+
+Solution:
+add hdr/dv support
+
+Verify:
+verify by u212
+
+Change-Id: I3d3c62d8e1414cea8f89f51f0c1874ba78b9259f
+Signed-off-by: Dezhi Kong <dezhi.kong@amlogic.com>
+---
+ drivers/amlogic/drm/meson_crtc.c              | 99 +++++++++++++++++++
+ drivers/amlogic/drm/meson_crtc.h              | 13 ++-
+ .../amlogic/drm/vpu-hw/meson_vpu_osdblend.c   | 13 +++
+ .../amlogic/drm/vpu-hw/meson_vpu_osdblend.h   |  4 +
+ .../amlogic/media/enhancement/amvecm/amcsc.c  | 10 ++
+ include/uapi/drm/drm_mode.h                   |  8 ++
+ 6 files changed, 146 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/drm/meson_crtc.c b/drivers/amlogic/drm/meson_crtc.c
+index 56d355fe8f0e..b06cda7b8493 100644
+--- a/drivers/amlogic/drm/meson_crtc.c
++++ b/drivers/amlogic/drm/meson_crtc.c
+@@ -63,7 +63,23 @@ static int meson_crtc_atomic_get_property(struct drm_crtc *crtc,
+ 					struct drm_property *property,
+ 					uint64_t *val)
+ {
++	struct am_meson_crtc *amcrtc;
++	struct am_meson_crtc_state *meson_crtc_state;
+ 
++	amcrtc = to_am_meson_crtc(crtc);
++	meson_crtc_state = to_am_meson_crtc_state(state);
++	if (property == amcrtc->prop_hdr_policy) {
++		#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
++		meson_crtc_state->hdr_policy = get_hdr_policy();
++		#endif
++		*val = meson_crtc_state->hdr_policy;
++	} else if (property == amcrtc->prop_dv_policy) {
++		#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
++		meson_crtc_state->dv_policy = get_dolby_vision_policy();
++		#endif
++		*val = meson_crtc_state->dv_policy;
++	} else
++		DRM_INFO("unsupported crtc property\n");
+ 	return 0;
+ }
+ 
+@@ -72,6 +88,23 @@ static int meson_crtc_atomic_set_property(struct drm_crtc *crtc,
+ 					struct drm_property *property,
+ 					uint64_t val)
+ {
++	struct am_meson_crtc *amcrtc;
++	struct am_meson_crtc_state *meson_crtc_state;
++
++	amcrtc = to_am_meson_crtc(crtc);
++	meson_crtc_state = to_am_meson_crtc_state(state);
++	if (property == amcrtc->prop_hdr_policy) {
++		meson_crtc_state->hdr_policy = val;
++		#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
++		set_hdr_policy(val);
++		#endif
++	} else if (property == amcrtc->prop_dv_policy) {
++		meson_crtc_state->dv_policy = val;
++		#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
++		set_dolby_vision_policy(val);
++		#endif
++	} else
++		DRM_INFO("unsupported crtc property\n");
+ 	return 0;
+ }
+ 
+@@ -260,6 +293,70 @@ static const struct drm_crtc_helper_funcs am_crtc_helper_funcs = {
+ 	.atomic_flush		= am_meson_crtc_atomic_flush,
+ };
+ 
++/* Optional hdr_policy properties. */
++static const struct drm_prop_enum_list drm_hdr_policy_enum_list[] = {
++	{ DRM_MODE_HDR_FOLLOW_SINK, "HDR_follow_sink" },
++	{ DRM_MODE_HDR_FOLLOW_SOURCE, "HDR_follow_source" },
++};
++
++/* Optional dv_policy properties. */
++static const struct drm_prop_enum_list drm_dv_policy_enum_list[] = {
++	{ DRM_MODE_DV_FOLLOW_SINK, "DV_follow_sink" },
++	{ DRM_MODE_DV_FOLLOW_SOURCE, "DV_follow_source" },
++};
++
++int drm_plane_create_hdr_policy_property(struct drm_crtc *crtc)
++{
++	struct drm_device *dev = crtc->dev;
++	struct drm_property *prop;
++	struct am_meson_crtc *amcrtc;
++	int hdr_policy;
++
++	#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
++	hdr_policy = get_hdr_policy();
++	#else
++	hdr_policy = DRM_MODE_HDR_FOLLOW_SINK
++	#endif
++
++	amcrtc = to_am_meson_crtc(crtc);
++	prop = drm_property_create_enum(dev, 0, "hdr_policy",
++					drm_hdr_policy_enum_list,
++					ARRAY_SIZE(drm_hdr_policy_enum_list));
++	if (!prop)
++		return -ENOMEM;
++
++	drm_object_attach_property(&crtc->base, prop, hdr_policy);
++	amcrtc->prop_hdr_policy = prop;
++
++	return 0;
++}
++
++int drm_plane_create_dv_policy_property(struct drm_crtc *crtc)
++{
++	struct drm_device *dev = crtc->dev;
++	struct drm_property *prop;
++	struct am_meson_crtc *amcrtc;
++	int dv_policy;
++
++	#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
++	dv_policy = get_dolby_vision_policy();
++	#else
++	dv_policy = DRM_MODE_DV_FOLLOW_SINK
++	#endif
++
++	amcrtc = to_am_meson_crtc(crtc);
++	prop = drm_property_create_enum(dev, 0, "dv_policy",
++					drm_dv_policy_enum_list,
++					ARRAY_SIZE(drm_dv_policy_enum_list));
++	if (!prop)
++		return -ENOMEM;
++
++	drm_object_attach_property(&crtc->base, prop, dv_policy);
++	amcrtc->prop_dv_policy = prop;
++
++	return 0;
++}
++
+ int am_meson_crtc_create(struct am_meson_crtc *amcrtc)
+ {
+ 	struct meson_drm *priv = amcrtc->priv;
+@@ -279,6 +376,8 @@ int am_meson_crtc_create(struct am_meson_crtc *amcrtc)
+ 		return ret;
+ 	}
+ 
++	drm_plane_create_hdr_policy_property(crtc);
++	drm_plane_create_dv_policy_property(crtc);
+ 	drm_crtc_helper_add(crtc, &am_crtc_helper_funcs);
+ 	osd_drm_init(&osd_meson_dev);
+ 
+diff --git a/drivers/amlogic/drm/meson_crtc.h b/drivers/amlogic/drm/meson_crtc.h
+index d97dd7b1fa62..d58ea2a0f177 100644
+--- a/drivers/amlogic/drm/meson_crtc.h
++++ b/drivers/amlogic/drm/meson_crtc.h
+@@ -35,6 +35,8 @@
+ 
+ struct am_meson_crtc_state {
+ 	struct drm_crtc_state base;
++	u32 hdr_policy;
++	u32 dv_policy;
+ };
+ 
+ struct am_meson_crtc {
+@@ -53,6 +55,8 @@ struct am_meson_crtc {
+ 	struct dentry *crtc_debugfs_dir;
+ 
+ 	struct meson_vpu_pipeline *pipeline;
++	struct drm_property *prop_hdr_policy;
++	struct drm_property *prop_dv_policy;
+ 
+ 	int dump_enable;
+ 	int blank_enable;
+@@ -67,5 +71,12 @@ struct am_meson_crtc {
+ 		struct am_meson_crtc_state, base)
+ 
+ int am_meson_crtc_create(struct am_meson_crtc *amcrtc);
+-
++#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
++extern void set_dolby_vision_policy(int policy);
++extern int get_dolby_vision_policy(void);
++#endif
++#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_VECM
++extern void set_hdr_policy(int policy);
++extern int get_hdr_policy(void);
++#endif
+ #endif
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.c b/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.c
+index e3fb091c490d..3c15400dc1a0 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.c
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.c
+@@ -211,6 +211,15 @@ static void osd_blend1_size_set(struct osdblend_reg_s *reg,
+ 	VSYNCOSD_WR_MPEG_REG(reg->viu_osd_blend1_size,
+ 		(v_size << 16) | h_size);
+ }
++/*osd blend0 size config*/
++static void osd_dv_core_size_set(u32 h_size, u32 v_size)
++{
++	VSYNCOSD_WR_MPEG_REG(DOLBY_CORE2A_SWAP_CTRL1,
++			     ((h_size + 0x40) << 16) |
++			     (v_size + 0x80));
++	VSYNCOSD_WR_MPEG_REG(DOLBY_CORE2A_SWAP_CTRL2,
++			     (h_size << 16) | v_size);
++}
+ /*osd blend0 & blend1 4 din inputs premult flag config as 0 default*/
+ void osd_blend01_premult_config(struct osdblend_reg_s *reg)
+ {
+@@ -496,6 +505,10 @@ static void osdblend_set_state(struct meson_vpu_block *vblk,
+ 	#else
+ 	osdblend_hw_update(reg, mvobs);
+ 	#endif
++	/*osd dv core size same with blend0 size*/
++	if (vblk->pipeline->osd_version >= OSD_V1)
++		osd_dv_core_size_set(mvobs->input_width[OSD_SUB_BLEND0],
++				     mvobs->input_height[OSD_SUB_BLEND0]);
+ 
+ 	DRM_DEBUG("%s set_state done.\n", osdblend->base.name);
+ }
+diff --git a/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.h b/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.h
+index 3c1f3a619b00..b736bc3020af 100644
+--- a/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.h
++++ b/drivers/amlogic/drm/vpu-hw/meson_vpu_osdblend.h
+@@ -41,6 +41,10 @@
+ #define VIU_OSD_BLEND_RO_CURRENT_XY                0x39bf
+ #define VIU_OSD_BLEND_CTRL1                        0x39c0
+ 
++/* add for osd dv core2 */
++#define DOLBY_CORE2A_SWAP_CTRL1	                   0x3434
++#define DOLBY_CORE2A_SWAP_CTRL2	                   0x3435
++
+ struct osdblend_reg_s {
+ 	u32 viu_osd_blend_ctrl;
+ 	u32 viu_osd_blend_din0_scope_h;
+diff --git a/drivers/amlogic/media/enhancement/amvecm/amcsc.c b/drivers/amlogic/media/enhancement/amvecm/amcsc.c
+index 00ea08b64bb1..39883b6f6707 100644
+--- a/drivers/amlogic/media/enhancement/amvecm/amcsc.c
++++ b/drivers/amlogic/media/enhancement/amvecm/amcsc.c
+@@ -411,6 +411,16 @@ int get_hdr_policy(void)
+ }
+ EXPORT_SYMBOL(get_hdr_policy);
+ 
++void set_hdr_policy(int policy)
++{
++	#ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
++	if (is_dolby_vision_enable())
++		set_dolby_vision_policy(policy);
++	#endif
++	hdr_policy = policy;
++}
++EXPORT_SYMBOL(set_hdr_policy);
++
+ void set_cur_hdr_policy(uint policy)
+ {
+ 	cur_hdr_policy = policy;
+diff --git a/include/uapi/drm/drm_mode.h b/include/uapi/drm/drm_mode.h
+index b6b40f37930a..350acdc0b256 100644
+--- a/include/uapi/drm/drm_mode.h
++++ b/include/uapi/drm/drm_mode.h
+@@ -112,6 +112,14 @@ extern "C" {
+ #define DRM_MODE_CONTENT_PROTECTION_DESIRED     1
+ #define DRM_MODE_CONTENT_PROTECTION_ENABLED     2
+ 
++/* HDR policy options */
++#define DRM_MODE_HDR_FOLLOW_SINK	0
++#define DRM_MODE_HDR_FOLLOW_SOURCE	1
++
++/* DV policy options */
++#define DRM_MODE_DV_FOLLOW_SINK		0
++#define DRM_MODE_DV_FOLLOW_SOURCE	1
++
+ struct drm_mode_modeinfo {
+ 	__u32 clock;
+ 	__u16 hdisplay;
+-- 
+2.24.1
+

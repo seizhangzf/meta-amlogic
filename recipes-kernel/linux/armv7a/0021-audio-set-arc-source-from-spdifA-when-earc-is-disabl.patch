@@ -1,0 +1,741 @@
+From 85ca488eb3d6dd060c394bb0d2b16d97ff6e1a22 Mon Sep 17 00:00:00 2001
+From: Zhe Wang <Zhe.Wang@amlogic.com>
+Date: Thu, 26 Mar 2020 17:43:42 +0800
+Subject: [PATCH] audio: set arc source from spdifA when earc is disable [1/1]
+
+PD#SWPL-23120
+
+Problem:
+spdif and arc need output at sametime
+
+Solution:
+set arc source from spdifA when earc is disable
+
+Verify:
+ab301
+
+Change-Id: Id8caf8098419b4a5abcc5715fe82c61f18274f62
+Signed-off-by: Zhe Wang <Zhe.Wang@amlogic.com>
+(cherry picked from commit 427dc7f6de0b09c797c431fa70ff301c970b78c7)
+---
+ arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts    |  2 +-
+ .../dts/amlogic/tm2_revb_t962e2_ab311.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962e2_ab319.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962x3_ab301.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962x3_ab309.dts     |  2 +-
+ .../boot/dts/amlogic/tm2_revb_t962x3_t312.dts |  2 +-
+ .../arm/boot/dts/amlogic/tm2_t962e2_ab311.dts |  2 +-
+ .../amlogic/tm2_t962e2_ab311_buildroot.dts    |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab311_drm.dts |  2 +-
+ .../tm2_t962e2_ab311_drm_buildroot.dts        |  2 +-
+ .../dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts  |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts |  2 +-
+ .../arm/boot/dts/amlogic/tm2_t962e2_ab319.dts |  2 +-
+ .../arm/boot/dts/amlogic/tm2_t962x3_ab301.dts |  2 +-
+ .../amlogic/tm2_t962x3_ab301_buildroot.dts    |  2 +-
+ .../boot/dts/amlogic/tm2_t962x3_ab301_drm.dts |  2 +-
+ .../tm2_t962x3_ab301_drm_buildroot.dts        |  2 +-
+ .../arm/boot/dts/amlogic/tm2_t962x3_ab309.dts |  2 +-
+ arch/arm/boot/dts/amlogic/tm2_t962x3_t312.dts |  2 +-
+ arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts  |  2 +-
+ .../dts/amlogic/tm2_revb_t962e2_ab311.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962e2_ab319.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962x3_ab301.dts     |  2 +-
+ .../dts/amlogic/tm2_revb_t962x3_ab309.dts     |  2 +-
+ .../boot/dts/amlogic/tm2_revb_t962x3_t312.dts |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab311.dts     |  2 +-
+ .../amlogic/tm2_t962e2_ab311_buildroot.dts    |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab311_drm.dts |  2 +-
+ .../tm2_t962e2_ab311_drm_buildroot.dts        |  2 +-
+ .../dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts  |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts |  2 +-
+ .../boot/dts/amlogic/tm2_t962e2_ab319.dts     |  2 +-
+ .../boot/dts/amlogic/tm2_t962x3_ab301.dts     |  2 +-
+ .../amlogic/tm2_t962x3_ab301_buildroot.dts    |  2 +-
+ .../boot/dts/amlogic/tm2_t962x3_ab301_drm.dts |  2 +-
+ .../tm2_t962x3_ab301_drm_buildroot.dts        |  2 +-
+ .../boot/dts/amlogic/tm2_t962x3_ab309.dts     |  2 +-
+ .../boot/dts/amlogic/tm2_t962x3_t312.dts      |  2 +-
+ sound/soc/amlogic/auge/audio_utils.c          | 15 +++++++
+ sound/soc/amlogic/auge/audio_utils.h          | 24 ++++++++----
+ sound/soc/amlogic/auge/earc.c                 |  5 +++
+ sound/soc/amlogic/auge/extn.c                 | 39 ++++++++++++-------
+ sound/soc/amlogic/auge/regs.h                 |  4 +-
+ 43 files changed, 103 insertions(+), 60 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts b/arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts
+index 9eadf16b5502..c2b06738d99e 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_pxp.dts
+@@ -1577,7 +1577,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
+index 4643e228f382..d307f5eb8b22 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
+@@ -1584,7 +1584,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
+index 642ba855c2c8..f54734daa1fd 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
+@@ -1522,7 +1522,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
+index 4d486768e8d6..cc357f8fbb2b 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
+@@ -1569,7 +1569,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
+index fec218bdc2c2..a1b12f80dde4 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
+@@ -1569,7 +1569,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_t312.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
+index 7af1047a4456..8facb31d45e0 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
+@@ -1569,7 +1569,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311.dts
+index 41d7fa051a7d..669cdf23959c 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311.dts
+@@ -1371,7 +1371,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
+index 61350d186049..b9ce12d5248a 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
+@@ -1366,7 +1366,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+index 1647789534d0..eaa3e8c67ce1 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+@@ -1356,7 +1356,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+index 50d17f3e1da2..b5fa29f32086 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+@@ -1357,7 +1357,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
+index d484e3bdd21c..4db78ce8852a 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
+@@ -1336,7 +1336,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
+index d43aefc17015..f88c109975d3 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
+@@ -1336,7 +1336,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab319.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab319.dts
+index 6389a6587117..1ef9145f62d0 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab319.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab319.dts
+@@ -1289,7 +1289,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301.dts
+index 916d34a61dac..3b52b465092d 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301.dts
+@@ -1376,7 +1376,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
+index 609aed2269c8..f8f1c4fa249a 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
+@@ -1371,7 +1371,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
+index 4dc8160294a4..307967a970a5 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
+@@ -1367,7 +1367,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+index 6b9105353540..4003215b2927 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+@@ -1368,7 +1368,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab309.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab309.dts
+index 4849ed6c1d2d..3193ad96e8b6 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab309.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab309.dts
+@@ -1297,7 +1297,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_t312.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_t312.dts
+index c7d40fa97cfc..8ad48bddb124 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_t312.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_t312.dts
+@@ -1351,7 +1351,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts
+index 4eaa6ee26dc2..034054c65778 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_pxp.dts
+@@ -1574,7 +1574,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
+index 7bf429644c76..b01219337157 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab311.dts
+@@ -1580,7 +1580,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
+index f4e3f64afdad..10f852ada781 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_t962e2_ab319.dts
+@@ -1522,7 +1522,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
+index cb18f8ec8ec4..46bd4914a799 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab301.dts
+@@ -1566,7 +1566,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
+index 13ff52f6ccde..16551c9f1b62 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_ab309.dts
+@@ -1566,7 +1566,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_t312.dts b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
+index 288f37e1a633..292005e647b5 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_revb_t962x3_t312.dts
+@@ -1566,7 +1566,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
+index 9c9b1ec866ec..b7df02fac31f 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
+@@ -1367,7 +1367,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
+index 0abc80439100..e89dfa286cf4 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_buildroot.dts
+@@ -1361,7 +1361,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+index 60ae1856cf2f..c1c9f1de4fd0 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+@@ -1351,7 +1351,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+index f21631ac5902..9fdec06e9fd3 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+@@ -1352,7 +1352,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
+index 03af2436db0b..368dc5a2d612 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_gva_sbr.dts
+@@ -1331,7 +1331,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
+index 353e1deec1f1..28dd0d998b9e 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_sbr.dts
+@@ -1331,7 +1331,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab319.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab319.dts
+index b8581bc75582..953a228c7dd5 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab319.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab319.dts
+@@ -1289,7 +1289,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301.dts
+index b51182aad651..82010725cccf 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301.dts
+@@ -1372,7 +1372,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
+index 226ddee8e175..ff57a30de21f 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_buildroot.dts
+@@ -1367,7 +1367,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
+index c25c2f4d5e79..3fab03dbb7f0 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm.dts
+@@ -1363,7 +1363,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+index fe8f1ab73948..a95eb7a4051d 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+@@ -1364,7 +1364,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab309.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab309.dts
+index 51684fd47bcf..9e6ab0704cad 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab309.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_ab309.dts
+@@ -1296,7 +1296,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962x3_t312.dts b/arch/arm64/boot/dts/amlogic/tm2_t962x3_t312.dts
+index 182e11045da5..b12103e44ce3 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962x3_t312.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962x3_t312.dts
+@@ -1352,7 +1352,7 @@
+ 	};
+ 
+ 	extn:extn {
+-		compatible = "amlogic, snd-extn";
++		compatible = "amlogic, tm2-snd-extn";
+ 		#sound-dai-cells = <0>;
+ 
+ 		interrupts =
+diff --git a/sound/soc/amlogic/auge/audio_utils.c b/sound/soc/amlogic/auge/audio_utils.c
+index bc618e00ebf0..8d3b07004ad9 100644
+--- a/sound/soc/amlogic/auge/audio_utils.c
++++ b/sound/soc/amlogic/auge/audio_utils.c
+@@ -978,3 +978,18 @@ void cec_arc_enable(int src, bool enable)
+ 		0x1f << 0,
+ 		src << 2 | (enable ? 0x1 : 0) << 0);
+ }
++
++void tm2_arc_source_select(int src)
++{
++	if (src == SPDIFA_TO_HDMIRX || src == SPDIFB_TO_HDMIRX) {
++		/* spdif_a = 1; spdif_b = 2*/
++		aml_write_hiubus(HHI_HDMIRX_ARC_CNTL, 0xfffffff8 | src);
++		/* analog registers, enable arc*/
++		aml_write_hiubus(HHI_HDMIRX_EARCTX_CNTL0, 0x94810490);
++		aml_write_hiubus(HHI_HDMIRX_EARCTX_CNTL1, 0x40013508);
++	} else {
++		/* earctx_spdif*/
++		aml_write_hiubus(HHI_HDMIRX_ARC_CNTL, 0x0);
++	}
++}
++
+diff --git a/sound/soc/amlogic/auge/audio_utils.h b/sound/soc/amlogic/auge/audio_utils.h
+index a665e4929df6..c8c9a971b074 100644
+--- a/sound/soc/amlogic/auge/audio_utils.h
++++ b/sound/soc/amlogic/auge/audio_utils.h
+@@ -20,17 +20,27 @@
+ 
+ #include <sound/soc.h>
+ 
+-extern int snd_card_add_kcontrols(struct snd_soc_card *card);
++enum {
++	EARCTX_SPDIF_TO_HDMIRX = 0,
++	SPDIFA_TO_HDMIRX = 1,
++	SPDIFB_TO_HDMIRX = 2,
++	HDMIRX_SPDIF_TO_HDMIRX = 3,
++};
+ 
+-extern void audio_locker_set(int enable);
++int snd_card_add_kcontrols(struct snd_soc_card *card);
+ 
+-extern int audio_locker_get(void);
++void audio_locker_set(int enable);
+ 
+-extern void fratv_enable(bool enable);
++int audio_locker_get(void);
+ 
+-extern void fratv_src_select(bool src);
++void fratv_enable(bool enable);
+ 
+-extern void fratv_LR_swap(bool swap);
++void fratv_src_select(bool src);
++
++void fratv_LR_swap(bool swap);
++
++void cec_arc_enable(int src, bool enable);
++
++void tm2_arc_source_select(int src);
+ 
+-extern void cec_arc_enable(int src, bool enable);
+ #endif
+diff --git a/sound/soc/amlogic/auge/earc.c b/sound/soc/amlogic/auge/earc.c
+index 70a30e77f5c5..ce417e1ce727 100644
+--- a/sound/soc/amlogic/auge/earc.c
++++ b/sound/soc/amlogic/auge/earc.c
+@@ -36,11 +36,13 @@
+ #include <sound/soc.h>
+ #include <sound/pcm_params.h>
+ #include <linux/workqueue.h>
++#include <linux/amlogic/iomap.h>
+ 
+ #include <linux/amlogic/media/sound/hdmi_earc.h>
+ #include <linux/amlogic/media/sound/mixer.h>
+ #include "ddr_mngr.h"
+ #include "earc_hw.h"
++#include "audio_utils.h"
+ 
+ #define DRV_NAME "EARC"
+ 
+@@ -1420,6 +1422,9 @@ static int earctx_cmdc_setup(struct earc *p_earc)
+ 	/* Default: arc arc_initiated */
+ 	earctx_cmdc_int_mask(p_earc->tx_top_map);
+ 
++	/* select hdmirx arc source from earctx spdif */
++	tm2_arc_source_select(EARCTX_SPDIF_TO_HDMIRX);
++
+ 	return ret;
+ }
+ 
+diff --git a/sound/soc/amlogic/auge/extn.c b/sound/soc/amlogic/auge/extn.c
+index fcf9ad1e430f..de4ca1e3a5bc 100644
+--- a/sound/soc/amlogic/auge/extn.c
++++ b/sound/soc/amlogic/auge/extn.c
+@@ -55,17 +55,19 @@ enum {
+ 	HDMIRX_MODE_PAO = 1,
+ };
+ 
+-struct extn_chipinfo {
+-	/* try to check papb before fetch pcpd
+-	 * no nonpcm2pcm irq for tl1
+-	 */
+-	bool no_nonpcm2pcm_clr;
++/*
++ * TXLX: hdmirx arc from spdif
++ * TL1: hdmirx arc from spdifA/spdifB
++ * TM2: hdmirx arc from spdifA/spdifB/earctx_spdif
++ */
++enum {
++	TXLX = 0,
++	TL1 = 1,
++	TM2 = 2,
++};
+ 
+-	/* eARC-ARC or CEC-ARC
+-	 * CEC-ARC: tl1
+-	 * eARC-ARC: sm1/tm2, etc
+-	 */
+-	bool cec_arc;
++struct extn_chipinfo {
++	int arc_version;
+ };
+ 
+ struct extn {
+@@ -445,9 +447,12 @@ static int extn_dai_probe(struct snd_soc_dai *cpu_dai)
+ 
+ 	pr_info("asoc debug: %s-%d\n", __func__, __LINE__);
+ 
+-	if (p_extn->chipinfo && p_extn->chipinfo->cec_arc)
++	if (p_extn->chipinfo && p_extn->chipinfo->arc_version == TL1)
+ 		extn_create_controls(card, p_extn);
+ 
++	if (p_extn->chipinfo && p_extn->chipinfo->arc_version == TM2)
++		tm2_arc_source_select(SPDIFA_TO_HDMIRX);
++
+ 	return 0;
+ }
+ 
+@@ -974,8 +979,11 @@ static const struct snd_soc_component_driver extn_component = {
+ };
+ 
+ struct extn_chipinfo tl1_extn_chipinfo = {
+-	.no_nonpcm2pcm_clr = true,
+-	.cec_arc           = true,
++	.arc_version	= TL1,
++};
++
++struct extn_chipinfo tm2_extn_chipinfo = {
++	.arc_version	= TM2,
+ };
+ 
+ static const struct of_device_id extn_device_id[] = {
+@@ -986,7 +994,10 @@ static const struct of_device_id extn_device_id[] = {
+ 		.compatible = "amlogic, tl1-snd-extn",
+ 		.data       = &tl1_extn_chipinfo,
+ 	},
+-	{},
++	{
++		.compatible = "amlogic, tm2-snd-extn",
++		.data       = &tm2_extn_chipinfo,
++	},
+ };
+ 
+ MODULE_DEVICE_TABLE(of, extn_device_id);
+diff --git a/sound/soc/amlogic/auge/regs.h b/sound/soc/amlogic/auge/regs.h
+index 3c58fb50db83..03fadb1c0c1b 100644
+--- a/sound/soc/amlogic/auge/regs.h
++++ b/sound/soc/amlogic/auge/regs.h
+@@ -633,7 +633,9 @@ struct register_table {
+ /*
+  *	HIU, ARC
+  */
+-#define HHI_HDMIRX_ARC_CNTL                0xe8
++#define HHI_HDMIRX_ARC_CNTL                0x0e8
++#define HHI_HDMIRX_EARCTX_CNTL0            0x069
++#define HHI_HDMIRX_EARCTX_CNTL1            0x06a
+ 
+ /*
+  *	AUDIO MUX CONTROLS
+-- 
+2.24.1
+
