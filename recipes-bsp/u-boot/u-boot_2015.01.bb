@@ -19,6 +19,7 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GI
 #patches
 SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33/v2015"
 SRC_URI_append = " file://0001-to-support-absystem-excludes-vendor.patch;patchdir=bl33/v2015"
+SRC_URI_append = " file://0001-remove-werror.patch;patchdir=bl33/v2015"
 SRC_URI_append = " file://0001-Use-host-gcc-to-build-ddr-parse-tool.patch;patchdir=fip"
 SRC_URI_append = " file://root_rsa_pub_key.pem"
 SRC_URI_append = " file://root_aes_key.bin"

@@ -1,0 +1,25 @@
+From 36ba8e25e2f452c3dcba9bd6af0a297b7d7f3520 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 30 Apr 2020 13:00:49 -0700
+Subject: [PATCH] remove werror
+
+---
+ arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile b/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile
+index 7917e2042e..873b8e6600 100644
+--- a/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile
++++ b/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile
+@@ -16,7 +16,7 @@ OBJDUMP=$(CROSS_COMPILE)objdump
+ 
+ ARM_ARCH=armv7-m
+ ARM_CPU=cortex-m3
+-CFLAGS_WARN=-Wall -Werror -Wundef -Wstrict-prototypes -Wno-trigraphs      \
++CFLAGS_WARN=-Wall -Wundef -Wstrict-prototypes -Wno-trigraphs      \
+             -fno-strict-aliasing -fno-common -fomit-frame-pointer         \
+             -Werror-implicit-function-declaration -Wno-format-security    \
+             -fno-delete-null-pointer-checks -Wdeclaration-after-statement \
+-- 
+2.24.1
+
