@@ -1,7 +1,14 @@
+<<<<<<< HEAD:recipes-multimedia/aml-audio-hal/files/0001-remove-dtv.patch
+From 7e4b7589a00276f13487e6810550c5e1978759c4 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Sat, 7 Dec 2019 12:04:54 -0800
+Subject: [PATCH 1/5] remove dtv
+=======
 From 7b07cf60b841b6bc255fb249311b4f7e2c48349a Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Sat, 7 Dec 2019 12:04:54 -0800
 Subject: [PATCH 5/5] remove dtv
+>>>>>>> 7ccca6e... rdk: remove audio-hal deps on libplayer and aml-dvb:recipes-multimedia/aml-audio-hal/files/0005-remove-dtv.patch
 
 Change-Id: Ie2206e73294b4f7fc14544a9c42264b666b028bd
 ---
@@ -10,7 +17,11 @@ Change-Id: Ie2206e73294b4f7fc14544a9c42264b666b028bd
  2 files changed, 6 insertions(+), 8 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
+<<<<<<< HEAD:recipes-multimedia/aml-audio-hal/files/0001-remove-dtv.patch
+index 34559d8..05610af 100644
+=======
 index fabbab2..d675809 100644
+>>>>>>> 7ccca6e... rdk: remove audio-hal deps on libplayer and aml-dvb:recipes-multimedia/aml-audio-hal/files/0005-remove-dtv.patch
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -40,10 +40,8 @@ add_library(audio_hal SHARED
@@ -42,7 +53,11 @@ index fabbab2..d675809 100644
  install(TARGETS audio_hal
  	LIBRARY DESTINATION "lib")
 diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+<<<<<<< HEAD:recipes-multimedia/aml-audio-hal/files/0001-remove-dtv.patch
+index 1d762d7..e377889 100644
+=======
 index 42de4e6..3e53817 100644
+>>>>>>> 7ccca6e... rdk: remove audio-hal deps on libplayer and aml-dvb:recipes-multimedia/aml-audio-hal/files/0005-remove-dtv.patch
 --- a/audio_hal/audio_hw.c
 +++ b/audio_hal/audio_hw.c
 @@ -77,7 +77,6 @@

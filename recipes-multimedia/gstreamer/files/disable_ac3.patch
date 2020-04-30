@@ -1,0 +1,12 @@
+Index: gst-libav-1.10.4/configure.ac
+===================================================================
+--- gst-libav-1.10.4.orig/configure.ac
++++ gst-libav-1.10.4/configure.ac
+@@ -368,6 +368,7 @@ else
+         --disable-filters --enable-filter=yadif --disable-doc --disable-vda --disable-d3d11va --disable-dxva2 \
+         --disable-audiotoolbox --disable-videotoolbox --disable-vaapi --disable-crystalhd \
+         --disable-mediacodec --disable-nvenc --disable-mmal --disable-omx \
++        --disable-decoder=ac3 --disable-decoder=eac3 --disable-decoder=ac3_fixed\
+         --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
+         --disable-libnpp --disable-iconv --disable-jni --enable-optimizations"
+ 

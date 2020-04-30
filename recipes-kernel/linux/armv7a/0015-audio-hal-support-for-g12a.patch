@@ -1,0 +1,30 @@
+From 21d46429b6170c127dbc83620c6402db69fa938d Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Tue, 28 Apr 2020 17:42:37 -0700
+Subject: [PATCH] audio hal support for g12a
+
+Change-Id: I13cb8018e885a7e00502c9a8b172a32f8fd6636e
+---
+ .../arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+index 7355f1f804b4..8d68d48745f1 100644
+--- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
+@@ -545,9 +545,9 @@
+ 			suffix-name = "alsaPORT-i2s";
+ 			cpu {
+ 				sound-dai = <&aml_tdmb>;
+-				dai-tdm-slot-tx-mask = <1 1>;
+-				dai-tdm-slot-rx-mask = <1 1>;
+-				dai-tdm-slot-num = <2>;
++                dai-tdm-slot-tx-mask = <1 1 1 1 1 1 1 1>;
++                dai-tdm-slot-rx-mask = <1 1 1 1 1 1 1 1>;
++                dai-tdm-slot-num = <8>;
+ 				/*
+ 				 * dai-tdm-slot-tx-mask =
+ 				 *	<1 1 1 1 1 1 1 1>;
+-- 
+2.24.1
+
