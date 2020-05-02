@@ -1,0 +1,806 @@
+From 1965c428d66f13483dd272995d1cc31c1f8665db Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Fri, 1 May 2020 23:35:19 -0700
+Subject: [PATCH] v4l2: update size parameter with double write mode
+
+PD#SWPL-25351
+
+Problem:
+After applcation set the double write mode, driver doesn't update the
+coded/visible size correctly.
+
+Solution:
+Update coded/visible size according to current double write mode.
+
+Verify:
+U212 + Westeros-sink
+---
+ drivers/amvdec_ports/aml_vcodec_dec.c         | 91 ++++++++++++-------
+ drivers/frame_provider/decoder/avs2/vavs2.c   | 32 ++-----
+ .../decoder/h264_multi/vmh264.c               | 33 ++-----
+ drivers/frame_provider/decoder/h265/vh265.c   | 71 +++++----------
+ drivers/frame_provider/decoder/utils/amvdec.c | 15 ++-
+ drivers/frame_provider/decoder/utils/amvdec.h |  1 +
+ .../decoder/utils/vdec_v4l2_buffer_ops.c      | 14 +++
+ .../decoder/utils/vdec_v4l2_buffer_ops.h      |  3 +
+ drivers/frame_provider/decoder/vav1/vav1.c    | 50 +++++-----
+ drivers/frame_provider/decoder/vp9/vvp9.c     | 75 ++++-----------
+ 10 files changed, 168 insertions(+), 217 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 4918d056..d74cce4c 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -186,6 +186,7 @@ extern int dump_capture_frame;
+ 
+ extern int dmabuf_fd_install_data(int fd, void* data, u32 size);
+ extern bool is_v4l2_buf_file(struct file *file);
++extern int get_double_write_ratio(int dw_mode);
+ static void box_release(struct kref *kref);
+ 
+ static ulong aml_vcodec_ctx_lock(struct aml_vcodec_ctx *ctx)
+@@ -1594,33 +1595,33 @@ static int vidioc_vdec_g_selection(struct file *file, void *priv,
+ {
+ 	struct aml_vcodec_ctx *ctx = fh_to_ctx(priv);
+ 	struct aml_q_data *q_data;
++	int ratio = 1;
+ 
+ 	if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
+ 		return -EINVAL;
+ 
++	if (ctx->state >= AML_STATE_PROBE) {
++		unsigned int dw_mode = VDEC_DW_NO_AFBC;
++		if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode))
++			return -EBUSY;
++		ratio = get_double_write_ratio(dw_mode);
++	}
++
+ 	q_data = &ctx->q_data[AML_Q_DATA_DST];
+ 
+ 	switch (s->target) {
+ 	case V4L2_SEL_TGT_COMPOSE_DEFAULT:
++	case V4L2_SEL_TGT_COMPOSE:
+ 		s->r.left = 0;
+ 		s->r.top = 0;
+-		s->r.width = ctx->picinfo.visible_width;
+-		s->r.height = ctx->picinfo.visible_height;
++		s->r.width = ctx->picinfo.visible_width/ratio;
++		s->r.height = ctx->picinfo.visible_height/ratio;
+ 		break;
+ 	case V4L2_SEL_TGT_COMPOSE_BOUNDS:
+ 		s->r.left = 0;
+ 		s->r.top = 0;
+-		s->r.width = ctx->picinfo.coded_width;
+-		s->r.height = ctx->picinfo.coded_height;
+-		break;
+-	case V4L2_SEL_TGT_COMPOSE:
+-		if (vdec_if_get_param(ctx, GET_PARAM_CROP_INFO, &(s->r))) {
+-			/* set to default value if header info not ready yet*/
+-			s->r.left = 0;
+-			s->r.top = 0;
+-			s->r.width = q_data->visible_width;
+-			s->r.height = q_data->visible_height;
+-		}
++		s->r.width = ctx->picinfo.coded_width/ratio;
++		s->r.height = ctx->picinfo.coded_height/ratio;
+ 		break;
+ 	default:
+ 		return -EINVAL;
+@@ -1643,6 +1644,7 @@ static int vidioc_vdec_g_selection(struct file *file, void *priv,
+ static int vidioc_vdec_s_selection(struct file *file, void *priv,
+ 	struct v4l2_selection *s)
+ {
++	int ratio = 1;
+ 	struct aml_vcodec_ctx *ctx = fh_to_ctx(priv);
+ 
+ 	v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT, "%s, type: %d\n",
+@@ -1651,12 +1653,19 @@ static int vidioc_vdec_s_selection(struct file *file, void *priv,
+ 	if (s->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
+ 		return -EINVAL;
+ 
++	if (ctx->state >= AML_STATE_PROBE) {
++		unsigned int dw_mode = VDEC_DW_NO_AFBC;
++		if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode))
++			return -EBUSY;
++		ratio = get_double_write_ratio(dw_mode);
++	}
++
+ 	switch (s->target) {
+ 	case V4L2_SEL_TGT_COMPOSE:
+ 		s->r.left = 0;
+ 		s->r.top = 0;
+-		s->r.width = ctx->picinfo.visible_width;
+-		s->r.height = ctx->picinfo.visible_height;
++		s->r.width = ctx->picinfo.visible_width/ratio;
++		s->r.height = ctx->picinfo.visible_height/ratio;
+ 		break;
+ 	default:
+ 		return -EINVAL;
+@@ -1665,6 +1674,36 @@ static int vidioc_vdec_s_selection(struct file *file, void *priv,
+ 	return 0;
+ }
+ 
++/* called when it is beyong AML_STATE_PROBE */
++static void update_ctx_dimension(struct aml_vcodec_ctx *ctx, u32 type)
++{
++	struct aml_q_data *q_data;
++	unsigned int dw_mode = VDEC_DW_NO_AFBC;
++	int ratio = 1;
++
++	q_data = aml_vdec_get_q_data(ctx, type);
++	if (vdec_if_get_param(ctx, GET_PARAM_DW_MODE, &dw_mode))
++		return;
++
++	ratio = get_double_write_ratio(dw_mode);
++	/* Until STREAMOFF is called on the CAPTURE queue
++	 * (acknowledging the event), the driver operates as if
++	 * the resolution hasn't changed yet.
++	 * So we just return picinfo yet, and update picinfo in
++	 * stop_streaming hook function
++	 */
++	/* it is used for alloc the decode buffer size. */
++	q_data->sizeimage[0] = ctx->picinfo.y_len_sz/ratio/ratio;
++	q_data->sizeimage[1] = ctx->picinfo.c_len_sz/ratio/ratio;
++
++	/* it is used for alloc the EGL image buffer size. */
++	q_data->coded_width = ctx->picinfo.coded_width/ratio;
++	q_data->coded_height = ctx->picinfo.coded_height/ratio;
++
++	q_data->bytesperline[0] = ctx->picinfo.coded_width/ratio;
++	q_data->bytesperline[1] = ctx->picinfo.coded_width/ratio;
++}
++
+ static void copy_v4l2_format_dimention(struct v4l2_pix_format_mplane *pix_mp,
+ 		struct aml_q_data *q_data, u32 type)
+ {
+@@ -1781,8 +1820,10 @@ static int vidioc_vdec_s_fmt(struct file *file, void *priv,
+ 
+ 	if (!V4L2_TYPE_IS_OUTPUT(f->type)) {
+ 		ctx->cap_pix_fmt = pix_mp->pixelformat;
+-	    if (ctx->state >= AML_STATE_PROBE)
++	    if (ctx->state >= AML_STATE_PROBE) {
++			update_ctx_dimension(ctx, f->type);
+ 			copy_v4l2_format_dimention(pix_mp, q_data, f->type);
++		}
+ 	}
+ 
+ 	return 0;
+@@ -1896,23 +1937,7 @@ static int vidioc_vdec_g_fmt(struct file *file, void *priv,
+ 
+ 	if ((!V4L2_TYPE_IS_OUTPUT(f->type)) &&
+ 	    (ctx->state >= AML_STATE_PROBE)) {
+-		/* Until STREAMOFF is called on the CAPTURE queue
+-		 * (acknowledging the event), the driver operates as if
+-		 * the resolution hasn't changed yet.
+-		 * So we just return picinfo yet, and update picinfo in
+-		 * stop_streaming hook function
+-		 */
+-		/* it is used for alloc the decode buffer size. */
+-		q_data->sizeimage[0] = ctx->picinfo.y_len_sz;
+-		q_data->sizeimage[1] = ctx->picinfo.c_len_sz;
+-
+-		/* it is used for alloc the EGL image buffer size. */
+-		q_data->coded_width = ctx->picinfo.coded_width;
+-		q_data->coded_height = ctx->picinfo.coded_height;
+-
+-		q_data->bytesperline[0] = ctx->picinfo.coded_width;
+-		q_data->bytesperline[1] = ctx->picinfo.coded_width;
+-
++		update_ctx_dimension(ctx, f->type);
+ 		copy_v4l2_format_dimention(pix_mp, q_data, f->type);
+ 	} else if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+ 		/*
+diff --git a/drivers/frame_provider/decoder/avs2/vavs2.c b/drivers/frame_provider/decoder/avs2/vavs2.c
+index 938312e2..573ea57a 100644
+--- a/drivers/frame_provider/decoder/avs2/vavs2.c
++++ b/drivers/frame_provider/decoder/avs2/vavs2.c
+@@ -929,18 +929,6 @@ static int get_double_write_mode_init(struct AVS2Decoder_s *dec)
+ 	return dw;
+ }
+ 
+-static int get_double_write_ratio(struct AVS2Decoder_s *dec,
+-	int dw_mode)
+-{
+-	int ratio = 1;
+-	if ((dw_mode == 2) ||
+-			(dw_mode == 3))
+-		ratio = 4;
+-	else if (dw_mode == 4)
+-		ratio = 2;
+-	return ratio;
+-}
+-
+ //#define	MAX_4K_NUM		0x1200
+ #ifdef AVS2_10B_MMU
+ int avs2_alloc_mmu(
+@@ -1948,9 +1936,9 @@ static void init_buf_list(struct AVS2Decoder_s *dec)
+ 
+ 	if (dw_mode) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(dec, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(dec, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int lcu_size = 64; /*fixed 64*/
+ 		int pic_width_64 = (pic_width_dw + 63) & (~0x3f);
+ 		int pic_height_32 = (pic_height_dw + 31) & (~0x1f);
+@@ -2073,9 +2061,9 @@ static int config_pic(struct AVS2Decoder_s *dec,
+ 
+ 	if (dw_mode) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(dec, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(dec, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int pic_width_64_dw = (pic_width_dw + 63) & (~0x3f);
+ 		int pic_height_32_dw = (pic_height_dw + 31) & (~0x1f);
+ 		int pic_width_lcu_dw  = (pic_width_64_dw % lcu_size) ?
+@@ -3971,11 +3959,9 @@ static void set_canvas(struct AVS2Decoder_s *dec,
+ 	/*CANVAS_BLKMODE_64X32*/
+ 	if	(pic->double_write_mode) {
+ 		canvas_w = pic->pic_w	/
+-				get_double_write_ratio(dec,
+-					pic->double_write_mode);
++				get_double_write_ratio(pic->double_write_mode);
+ 		canvas_h = pic->pic_h /
+-				get_double_write_ratio(dec,
+-					pic->double_write_mode);
++				get_double_write_ratio(pic->double_write_mode);
+ 
+ 		if (mem_map_mode == 0)
+ 			canvas_w = ALIGN(canvas_w, 32);
+@@ -4486,11 +4472,9 @@ static void set_vframe(struct AVS2Decoder_s *dec,
+ 		   vf->width,vf->height, pic->width,
+ 			pic->height); */
+ 		vf->width = pic->pic_w /
+-			get_double_write_ratio(dec,
+-				pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 		vf->height = pic->pic_h /
+-			get_double_write_ratio(dec,
+-				pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 		if (force_w_h != 0) {
+ 			vf->width = (force_w_h >> 16) & 0xffff;
+ 			vf->height = force_w_h & 0xffff;
+diff --git a/drivers/frame_provider/decoder/h264_multi/vmh264.c b/drivers/frame_provider/decoder/h264_multi/vmh264.c
+index 27daf962..145668c2 100644
+--- a/drivers/frame_provider/decoder/h264_multi/vmh264.c
++++ b/drivers/frame_provider/decoder/h264_multi/vmh264.c
+@@ -1029,19 +1029,6 @@ static int  compute_losless_comp_header_size(int width, int height)
+ 	return  hsize;
+ }
+ 
+-static int get_double_write_ratio(struct vdec_h264_hw_s *hw)
+-{
+-	int ratio = 1;
+-	int dw_mode = hw->double_write_mode;
+-	if ((dw_mode == 2) ||
+-			(dw_mode == 3))
+-		ratio = 4;
+-	else if (dw_mode == 4)
+-		ratio = 2;
+-	return ratio;
+-}
+-
+-
+ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
+ {
+ 	int pic_width, pic_height;
+@@ -1056,9 +1043,9 @@ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
+ 
+ 	if (dw_mode) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(hw);
++			get_double_write_ratio(hw->double_write_mode);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(hw);
++			get_double_write_ratio(hw->double_write_mode);
+ 
+ 		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
+ 			pic_width_dw / lcu_size + 1 :
+@@ -1141,9 +1128,9 @@ static void hevc_mcr_config_canv2axitbl(struct vdec_h264_hw_s *hw, int restore)
+ 			int canvas_h;
+ 
+ 			canvas_w = hw->frame_width /
+-				get_double_write_ratio(hw);
++				get_double_write_ratio(hw->double_write_mode);
+ 			canvas_h = hw->frame_height /
+-				get_double_write_ratio(hw);
++				get_double_write_ratio(hw->double_write_mode);
+ 
+ 			if (hw->canvas_mode == 0)
+ 				canvas_w = ALIGN(canvas_w, 32);
+@@ -2064,9 +2051,9 @@ static void config_decode_canvas_ex(struct vdec_h264_hw_s *hw, int i)
+ 	int canvas_h;
+ 
+ 	canvas_w = hw->frame_width /
+-		get_double_write_ratio(hw);
++		get_double_write_ratio(hw->double_write_mode);
+ 	canvas_h = hw->frame_height /
+-		get_double_write_ratio(hw);
++		get_double_write_ratio(hw->double_write_mode);
+ 
+ 	if (hw->canvas_mode == 0)
+ 		canvas_w = ALIGN(canvas_w, 32);
+@@ -2848,9 +2835,9 @@ int prepare_display_buf(struct vdec_s *vdec, struct FrameStore *frame)
+ 
+ 		if (hw->mmu_enable && hw->double_write_mode) {
+ 			vf->width = hw->frame_width /
+-				get_double_write_ratio(hw);
++				get_double_write_ratio(hw->double_write_mode);
+ 			vf->height = hw->frame_height /
+-				get_double_write_ratio(hw);
++				get_double_write_ratio(hw->double_write_mode);
+ 		}
+ 
+ 		vf->flag = 0;
+@@ -3940,9 +3927,9 @@ static struct vframe_s *vh264_vf_get(void *op_arg)
+ 
+ 			if (hw->double_write_mode) {
+ 				vf->width = hw->frame_width /
+-					get_double_write_ratio(hw);
++					get_double_write_ratio(hw->double_write_mode);
+ 				vf->height = hw->frame_height /
+-					get_double_write_ratio(hw);
++					get_double_write_ratio(hw->double_write_mode);
+ 			}
+ 		} else {
+ 			vf->type = VIDTYPE_PROGRESSIVE | VIDTYPE_VIU_FIELD |
+diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
+index a02061af..f51dbb87 100644
+--- a/drivers/frame_provider/decoder/h265/vh265.c
++++ b/drivers/frame_provider/decoder/h265/vh265.c
+@@ -1940,30 +1940,15 @@ static int get_double_write_mode(struct hevc_state_s *hevc)
+ 	int w = hevc->pic_w;
+ 	int h = hevc->pic_h;
+ 	u32 dw = 0x1; /*1:1*/
+-	switch (valid_dw_mode) {
+-	case 0x100:
+-		if (w > 1920 && h > 1088)
+-			dw = 0x4; /*1:2*/
+-		break;
+-	case 0x200:
+-		if (w > 1920 && h > 1088)
+-			dw = 0x2; /*1:4*/
+-		break;
+-	case 0x300:
+-		if (w > 1280 && h > 720)
+-			dw = 0x4; /*1:2*/
+-		break;
+-	default:
+-		dw = valid_dw_mode;
+-		break;
++
++	if (hevc->is_used_v4l) {
++		unsigned int out;
++
++		vdec_v4l_get_dw_mode(hevc->v4l2_ctx, &out);
++		dw = out;
++		return dw;
+ 	}
+-	return dw;
+-}
+ 
+-static int v4l_parser_get_double_write_mode(struct hevc_state_s *hevc, int w, int h)
+-{
+-	u32 valid_dw_mode = get_valid_double_write_mode(hevc);
+-	u32 dw = 0x1; /*1:1*/
+ 	switch (valid_dw_mode) {
+ 	case 0x100:
+ 		if (w > 1920 && h > 1088)
+@@ -1984,18 +1969,6 @@ static int v4l_parser_get_double_write_mode(struct hevc_state_s *hevc, int w, in
+ 	return dw;
+ }
+ 
+-
+-static int get_double_write_ratio(struct hevc_state_s *hevc,
+-	int dw_mode)
+-{
+-	int ratio = 1;
+-	if ((dw_mode == 2) ||
+-			(dw_mode == 3))
+-		ratio = 4;
+-	else if (dw_mode == 4)
+-		ratio = 2;
+-	return ratio;
+-}
+ #ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
+ static unsigned char get_idx(struct hevc_state_s *hevc)
+ {
+@@ -3012,9 +2985,9 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
+ 
+ 	if (dw_mode) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(hevc, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(hevc, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 
+ 		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
+ 			pic_width_dw / lcu_size + 1 :
+@@ -7693,9 +7666,9 @@ static void set_canvas(struct hevc_state_s *hevc, struct PIC_s *pic)
+ #ifdef SUPPORT_10BIT
+ 	if	(pic->double_write_mode) {
+ 		canvas_w = pic->width /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 		canvas_h = pic->height /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 
+ 		if (hevc->mem_map_mode == 0)
+ 			canvas_w = ALIGN(canvas_w, 32);
+@@ -8006,9 +7979,9 @@ static void set_frame_info(struct hevc_state_s *hevc, struct vframe_s *vf,
+ 		= &vf->prop.master_display_colour;
+ 
+ 	vf->width = pic->width /
+-		get_double_write_ratio(hevc, pic->double_write_mode);
++		get_double_write_ratio(pic->double_write_mode);
+ 	vf->height = pic->height /
+-		get_double_write_ratio(hevc, pic->double_write_mode);
++		get_double_write_ratio(pic->double_write_mode);
+ 
+ 	vf->duration = hevc->frame_dur;
+ 	vf->duration_pulldown = 0;
+@@ -8242,9 +8215,9 @@ static struct vframe_s *vh265_vf_get(void *op_arg)
+ 		set_frame_info(hevc, vf);
+ 
+ 		vf->width = pic->width /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 		vf->height = pic->height /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 
+ 		force_disp_pic_index |= 0x200;
+ 		return vf;
+@@ -9003,9 +8976,9 @@ static int prepare_display_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+ 		}
+ 
+ 		vf->width = vf->width /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ 		vf->height = vf->height /
+-			get_double_write_ratio(hevc, pic->double_write_mode);
++			get_double_write_ratio(pic->double_write_mode);
+ #ifdef HEVC_PIC_STRUCT_SUPPORT
+ 		if (pic->pic_struct == 3 || pic->pic_struct == 4) {
+ 			struct vframe_s *vf2;
+@@ -9621,12 +9594,10 @@ static void read_decode_info(struct hevc_state_s *hevc)
+ 
+ static int vh265_get_ps_info(struct hevc_state_s *hevc, int width, int height, struct aml_vdec_ps_infos *ps)
+ {
+-	int dw_mode = v4l_parser_get_double_write_mode(hevc, width, height);
+-
+-	ps->visible_width 	= width / get_double_write_ratio(hevc, dw_mode);
+-	ps->visible_height 	= height / get_double_write_ratio(hevc, dw_mode);
+-	ps->coded_width 	= ALIGN(width, 32) / get_double_write_ratio(hevc, dw_mode);
+-	ps->coded_height 	= ALIGN(height, 32) / get_double_write_ratio(hevc, dw_mode);
++	ps->visible_width 	= width;
++	ps->visible_height 	= height;
++	ps->coded_width 	= ALIGN(width, 32);
++	ps->coded_height 	= ALIGN(height, 32);
+ 	ps->dpb_size 		= v4l_parser_work_pic_num(hevc);
+ 
+ 	return 0;
+diff --git a/drivers/frame_provider/decoder/utils/amvdec.c b/drivers/frame_provider/decoder/utils/amvdec.c
+index c37b473b..8d92c8ad 100644
+--- a/drivers/frame_provider/decoder/utils/amvdec.c
++++ b/drivers/frame_provider/decoder/utils/amvdec.c
+@@ -963,6 +963,19 @@ void amhevc_disable(void)
+ }
+ EXPORT_SYMBOL(amhevc_disable);
+ 
++int get_double_write_ratio(int dw_mode)
++{
++	int ratio = 1;
++
++	if ((dw_mode == 2) ||
++			(dw_mode == 3))
++		ratio = 4;
++	else if (dw_mode == 4)
++		ratio = 2;
++	return ratio;
++}
++EXPORT_SYMBOL(get_double_write_ratio);
++
+ #ifdef CONFIG_PM
+ int amvdec_suspend(struct platform_device *dev, pm_message_t event)
+ {
+@@ -1017,8 +1030,6 @@ int amhevc_resume(struct platform_device *dev)
+ 	return 0;
+ }
+ EXPORT_SYMBOL(amhevc_resume);
+-
+-
+ #endif
+ 
+ #ifdef CONFIG_WAKELOCK
+diff --git a/drivers/frame_provider/decoder/utils/amvdec.h b/drivers/frame_provider/decoder/utils/amvdec.h
+index a3deecd9..09b68d45 100644
+--- a/drivers/frame_provider/decoder/utils/amvdec.h
++++ b/drivers/frame_provider/decoder/utils/amvdec.h
+@@ -73,6 +73,7 @@ extern int amhevc_resume(struct platform_device *dec);
+ 
+ #endif
+ 
++extern int get_double_write_ratio(int dw_mode);
+ int amvdec_init(void);
+ void amvdec_exit(void);
+ 
+diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
+index f691ecce..3dec5768 100644
+--- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
++++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
+@@ -182,3 +182,17 @@ int vdec_v4l_write_frame_sync(struct aml_vcodec_ctx *ctx)
+ }
+ EXPORT_SYMBOL(vdec_v4l_write_frame_sync);
+ 
++int vdec_v4l_get_dw_mode(struct aml_vcodec_ctx *ctx,
++	unsigned int *dw_mode)
++{
++	int ret = -1;
++
++	if (ctx->drv_handle == 0)
++		return -EIO;
++
++	ret = ctx->dec_if->get_param(ctx->drv_handle,
++		GET_PARAM_DW_MODE, dw_mode);
++
++	return ret;
++}
++EXPORT_SYMBOL(vdec_v4l_get_dw_mode);
+diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
+index f71758ca..bce2db68 100644
+--- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
++++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
+@@ -34,4 +34,7 @@ int vdec_v4l_post_evet(
+ int vdec_v4l_res_ch_event(
+ 	struct aml_vcodec_ctx *ctx);
+ 
++int vdec_v4l_get_dw_mode(
++	struct aml_vcodec_ctx *ctx,
++	unsigned int *dw_mode);
+ #endif
+diff --git a/drivers/frame_provider/decoder/vav1/vav1.c b/drivers/frame_provider/decoder/vav1/vav1.c
+index d98c5ec9..082d0c8b 100644
+--- a/drivers/frame_provider/decoder/vav1/vav1.c
++++ b/drivers/frame_provider/decoder/vav1/vav1.c
+@@ -943,6 +943,15 @@ static int get_double_write_mode(struct AV1HW_s *hw)
+ 
+ 	if (!cm->cur_frame)
+ 		return 1;/*no valid frame,*/
++
++	if (hw->is_used_v4l) {
++		unsigned int out;
++
++		vdec_v4l_get_dw_mode(hw->v4l2_ctx, &out);
++		dw = out;
++		return dw;
++	}
++
+ 	cur_pic_config = &cm->cur_frame->buf;
+ 	w = cur_pic_config->y_crop_width;
+ 	h = cur_pic_config->y_crop_height;
+@@ -998,19 +1007,6 @@ static int get_double_write_mode_init(struct AV1HW_s *hw)
+ }
+ #endif
+ 
+-static int get_double_write_ratio(struct AV1HW_s *hw,
+-	int dw_mode)
+-{
+-	int ratio = 1;
+-	int dw_mode_ratio = dw_mode & 0xf;
+-	if ((dw_mode_ratio == 2) ||
+-			(dw_mode_ratio == 3))
+-		ratio = 4;
+-	else if (dw_mode_ratio == 4)
+-		ratio = 2;
+-	return ratio;
+-}
+-
+ //#define	MAX_4K_NUM		0x1200
+ int av1_alloc_mmu(
+ 	struct AV1HW_s *hw,
+@@ -2323,9 +2319,9 @@ static int config_pic(struct AV1HW_s *hw,
+ 
+ 	if (dw_mode && (dw_mode & 0x20) == 0) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(hw, dw_mode);
++			get_double_write_ratio(dw_mode & 0xf);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(hw, dw_mode);
++			get_double_write_ratio(dw_mode & 0xf);
+ 
+ 		int pic_width_64_dw = (pic_width_dw + 63) & (~0x3f);
+ 		int pic_height_32_dw = (pic_height_dw + 31) & (~0x1f);
+@@ -5034,11 +5030,11 @@ static void set_canvas(struct AV1HW_s *hw,
+ 	/*CANVAS_BLKMODE_64X32*/
+ 	if	(pic_config->double_write_mode) {
+ 		canvas_w = pic_config->y_crop_width	/
+-				get_double_write_ratio(hw,
+-					pic_config->double_write_mode);
++				get_double_write_ratio(
++					pic_config->double_write_mode & 0xf);
+ 		canvas_h = pic_config->y_crop_height /
+-				get_double_write_ratio(hw,
+-					pic_config->double_write_mode);
++				get_double_write_ratio(
++					pic_config->double_write_mode & 0xf);
+ 
+ 		if (mem_map_mode == 0)
+ 			canvas_w = ALIGN(canvas_w, 32);
+@@ -5685,11 +5681,11 @@ static int prepare_display_buf(struct AV1HW_s *hw,
+ 		   vf->width,vf->height, pic_config->width,
+ 			pic_config->height); */
+ 		vf->width = pic_config->y_crop_width /
+-			get_double_write_ratio(hw,
+-				pic_config->double_write_mode);
++			get_double_write_ratio(
++				pic_config->double_write_mode & 0xf);
+ 		vf->height = pic_config->y_crop_height /
+-			get_double_write_ratio(hw,
+-				pic_config->double_write_mode);
++			get_double_write_ratio(
++				pic_config->double_write_mode & 0xf);
+ 		if (force_w_h != 0) {
+ 			vf->width = (force_w_h >> 16) & 0xffff;
+ 			vf->height = force_w_h & 0xffff;
+@@ -5698,11 +5694,11 @@ static int prepare_display_buf(struct AV1HW_s *hw,
+ 			((pic_config->double_write_mode & 0xf) == 2 ||
+ 			(pic_config->double_write_mode & 0xf) == 4)) {
+ 			vf->compWidth = pic_config->y_crop_width /
+-				get_double_write_ratio(hw,
+-					pic_config->double_write_mode);
++				get_double_write_ratio(
++					pic_config->double_write_mode & 0xf);
+ 			vf->compHeight = pic_config->y_crop_height /
+-				get_double_write_ratio(hw,
+-					pic_config->double_write_mode);
++				get_double_write_ratio(
++					pic_config->double_write_mode & 0xf);
+ 		} else {
+ 			vf->compWidth = pic_config->y_crop_width;
+ 			vf->compHeight = pic_config->y_crop_height;
+diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
+index 57233e00..88a181c5 100644
+--- a/drivers/frame_provider/decoder/vp9/vvp9.c
++++ b/drivers/frame_provider/decoder/vp9/vvp9.c
+@@ -1594,49 +1594,22 @@ static u32 get_valid_double_write_mode(struct VP9Decoder_s *pbi)
+ 		(double_write_mode & 0x7fffffff);
+ }
+ 
+-static int v4l_parser_get_double_write_mode(struct VP9Decoder_s *pbi)
++static int get_double_write_mode(struct VP9Decoder_s *pbi)
+ {
+ 	u32 valid_dw_mode = get_valid_double_write_mode(pbi);
+ 	u32 dw;
+ 	int w, h;
++	struct VP9_Common_s *cm = &pbi->common;
++	struct PIC_BUFFER_CONFIG_s *cur_pic_config;
+ 
+-	/* mask for supporting double write value bigger than 0x100 */
+-	if (valid_dw_mode & 0xffffff00) {
+-		w = pbi->frame_width;
+-		h = pbi->frame_height;
++	if (pbi->is_used_v4l) {
++		unsigned int out;
+ 
+-		dw = 0x1; /*1:1*/
+-		switch (valid_dw_mode) {
+-		case 0x100:
+-			if (w > 1920 && h > 1088)
+-				dw = 0x4; /*1:2*/
+-			break;
+-		case 0x200:
+-			if (w > 1920 && h > 1088)
+-				dw = 0x2; /*1:4*/
+-			break;
+-		case 0x300:
+-			if (w > 1280 && h > 720)
+-				dw = 0x4; /*1:2*/
+-			break;
+-		default:
+-			break;
+-		}
++		vdec_v4l_get_dw_mode(pbi->v4l2_ctx, &out);
++		dw = out;
+ 		return dw;
+ 	}
+ 
+-	return valid_dw_mode;
+-}
+-
+-
+-static int get_double_write_mode(struct VP9Decoder_s *pbi)
+-{
+-	u32 valid_dw_mode = get_valid_double_write_mode(pbi);
+-	u32 dw;
+-	int w, h;
+-	struct VP9_Common_s *cm = &pbi->common;
+-	struct PIC_BUFFER_CONFIG_s *cur_pic_config;
+-
+ 	/* mask for supporting double write value bigger than 0x100 */
+ 	if (valid_dw_mode & 0xffffff00) {
+ 		if (!cm->cur_frame)
+@@ -1698,18 +1671,6 @@ static int get_double_write_mode_init(struct VP9Decoder_s *pbi)
+ }
+ #endif
+ 
+-static int get_double_write_ratio(struct VP9Decoder_s *pbi,
+-	int dw_mode)
+-{
+-	int ratio = 1;
+-	if ((dw_mode == 2) ||
+-			(dw_mode == 3))
+-		ratio = 4;
+-	else if (dw_mode == 4)
+-		ratio = 2;
+-	return ratio;
+-}
+-
+ //#define	MAX_4K_NUM		0x1200
+ 
+ /* return page number */
+@@ -4968,9 +4929,9 @@ static int config_pic(struct VP9Decoder_s *pbi,
+ 
+ 	if (dw_mode) {
+ 		int pic_width_dw = pic_width /
+-			get_double_write_ratio(pbi, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 		int pic_height_dw = pic_height /
+-			get_double_write_ratio(pbi, dw_mode);
++			get_double_write_ratio(dw_mode);
+ 
+ 		int pic_width_64_dw = (pic_width_dw + 63) & (~0x3f);
+ 		int pic_height_32_dw = (pic_height_dw + 31) & (~0x1f);
+@@ -6763,10 +6724,10 @@ static void set_canvas(struct VP9Decoder_s *pbi,
+ 	/*CANVAS_BLKMODE_64X32*/
+ 	if	(pic_config->double_write_mode) {
+ 		canvas_w = pic_config->y_crop_width	/
+-				get_double_write_ratio(pbi,
++				get_double_write_ratio(
+ 					pic_config->double_write_mode);
+ 		canvas_h = pic_config->y_crop_height /
+-				get_double_write_ratio(pbi,
++				get_double_write_ratio(
+ 					pic_config->double_write_mode);
+ 
+ 		if (pbi->mem_map_mode == 0)
+@@ -7332,10 +7293,10 @@ static int prepare_display_buf(struct VP9Decoder_s *pbi,
+ 		   vf->width,vf->height, pic_config->width,
+ 			pic_config->height); */
+ 		vf->width = pic_config->y_crop_width /
+-			get_double_write_ratio(pbi,
++			get_double_write_ratio(
+ 				pic_config->double_write_mode);
+ 		vf->height = pic_config->y_crop_height /
+-			get_double_write_ratio(pbi,
++			get_double_write_ratio(
+ 				pic_config->double_write_mode);
+ 		if (force_w_h != 0) {
+ 			vf->width = (force_w_h >> 16) & 0xffff;
+@@ -8284,12 +8245,10 @@ static void vvp9_get_comp_buf_info(struct VP9Decoder_s *pbi,
+ 
+ static int vvp9_get_ps_info(struct VP9Decoder_s *pbi, struct aml_vdec_ps_infos *ps)
+ {
+-	int dw_mode = v4l_parser_get_double_write_mode(pbi);
+-
+-	ps->visible_width 	= pbi->frame_width / get_double_write_ratio(pbi, dw_mode);
+-	ps->visible_height 	= pbi->frame_height / get_double_write_ratio(pbi, dw_mode);
+-	ps->coded_width 	= ALIGN(pbi->frame_width, 32) / get_double_write_ratio(pbi, dw_mode);
+-	ps->coded_height 	= ALIGN(pbi->frame_height, 32) / get_double_write_ratio(pbi, dw_mode);
++	ps->visible_width 	= pbi->frame_width;
++	ps->visible_height 	= pbi->frame_height;
++	ps->coded_width 	= ALIGN(pbi->frame_width, 32);
++	ps->coded_height 	= ALIGN(pbi->frame_height, 32);
+ 	ps->dpb_size 		= pbi->used_buf_num;
+ 
+ 	return 0;
+-- 
+2.24.1
+
