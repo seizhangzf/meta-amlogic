@@ -16,7 +16,7 @@ SRCREV_pn-wififw = "178ad1a6fff666fc927874042573751fedeaeadb"
 SRCREV_pn-gst-aml-plugins = "16961c92dd267a3dbf1c069cfbb9e30254514814"
 SRCREV_pn-gst-aml-drm-plugins = "6387002d5dbaa9e78bf3fc3e9ab860be818edaf7"
 SRCREV_pn-aml-mediadrm-widevine = "87e71fffe30439747b4ca37363fa41f07a7445aa"
-SRCREV_pn-aml-uvm-test = "3606bbc6ee8ae8101269721edd28cf726bf1e8f9"
+SRCREV_pn-aml-uvm-test = "33f4cc36b60b23f6ce4def24d13bd43c55940c41"
 
 # mesontm2_t962e2_llama-rdk-linux-gnueabi
 SRCREV_pn-dvalin = "606bcb0fb7eac5d43c86f98165918250856057bd"

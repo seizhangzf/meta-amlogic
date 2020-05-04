@@ -2,7 +2,7 @@ SUMMARY = "aml uvm test"
 LICENSE = "CLOSED"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia;protocol=${AML_GIT_PROTOCOL};branch=master"
-SRC_URI_append = " file://0001-v4l2-uvm-test-support-SVP-1-1.patch"
+#SRC_URI_append = " file://0001-v4l2-uvm-test-support-SVP-1-1.patch"
 
 
 SRCREV ?= "${AUTOREV}"
