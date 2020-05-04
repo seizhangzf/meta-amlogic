@@ -1,0 +1,39 @@
+From 7cf82dc017212022955fcd71a47fc2401d3da6d8 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Mon, 4 May 2020 13:29:06 -0700
+Subject: [PATCH] ab311/301: ab partition
+
+---
+ arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts | 2 +-
+ arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+index df8b6d643ce2..e28daff4e286 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesontm2.dtsi"
+ #include "mesontm2_drm.dtsi"
+-#include "partition_mbox_normal.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ 
+ / {
+ 	model = "Amlogic TM2 T962E2 AB311";
+diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+index 64eca2beb5e2..552dede5cf83 100644
+--- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
++++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesontm2.dtsi"
+ #include "mesontm2_drm.dtsi"
+-#include "partition_mbox_normal.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ #include "mesontm2_t962x3_ab301-panel.dtsi"
+ 
+ / {
+-- 
+2.24.1
+

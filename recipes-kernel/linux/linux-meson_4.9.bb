@@ -18,9 +18,9 @@ SRC_URI_append = " file://meson.scc \
 
 SRC_URI_append = " file://0001-Revert-cvbsout-add-cvbsout-DRM-support-1-1.patch"
 SRC_URI_append = " file://0001-fix-uapi-struct.patch"
-SRC_URI_append = " file://0002-increase-codec-memory.patch"
+SRC_URI_append = " file://0002-g12a-tm2-adjust-memory-layout.patch"
 SRC_URI_append = " file://0003-drm-Buildroot-TM2-Suspend-WestonOS-can-t-work-after-.patch"
-SRC_URI_append = " file://0004-codec_mm-fix-codec_mm-range-1-1.patch"
+SRC_URI_append = " file://0004-ab311-301-ab-partition.patch"
 SRC_URI_append = " file://0005-secmem-add-secmem-driver-1-1.patch"
 SRC_URI_append = " file://0006-uvm-add-dmabuf-wrap-vframe-mechanism-1-1.patch"
 SRC_URI_append = " file://0007-drm-add-uvm-dmabuf-support-in-meson-gem-1-1.patch"
@@ -33,8 +33,6 @@ SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://001
 SRC_URI_append = " file://0015-drm-add-second-video-overlay-plane-1-1.patch"
 SRC_URI_append = " file://0016-drm-add-hdr-dv-support-1-1.patch"
 SRC_URI_append = " file://0017-drm-add-video-overlay-fence-support-1-1.patch"
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0019-ab311-ab-partition.patch','',d)}"
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES','absystem','file://0020-ab301-ab-partition.patch','',d)}"
 SRC_URI_append = " file://0020-sha-add-scpi-for-sha-check-during-suspend-2-2.patch"
 SRC_URI_append = " file://0021-audio-set-arc-source-from-spdifA-when-earc-is-disabl.patch"
 
