@@ -12,6 +12,7 @@ SRC_URI_append = " file://0004-v4l2-support-compressed-buffer-for-h265-vp9-dec-1
 SRC_URI_append = " file://0005-v4l2-fix-kernel-panic-after-EOS-1-1.patch "
 SRC_URI_append = " file://0006-v4l2-fill-all-fields-in-S_FMT-1-1.patch "
 SRC_URI_append = " file://0007-v4l2-skip-size-check-for-dmabuf-on-output-port-1-1.patch "
+SRC_URI_append = " file://0009-update-to-patch-37-of-CL99272.patch "
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
