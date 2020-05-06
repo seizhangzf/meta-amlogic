@@ -4,6 +4,8 @@ LICENSE = "CLOSED"
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/audio_server;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI_append = " file://audioserver.service"
 SRC_URI_append = " file://0001-aml_audio_hal-hal-audio-player-for-audio-HAL.-1-1.patch"
+SRC_URI_append = " file://dolby_fw_dms12_32bits"
+SRC_URI_append = " file://libdolbyms12.so"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
@@ -40,6 +42,8 @@ do_install() {
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then
         install -D -m 0644 ${WORKDIR}/audioserver.service ${D}${systemd_unitdir}/system/audioserver.service
     fi
+    install -m 755 -D ${WORKDIR}/dolby_fw_dms12_32bits ${D}/usr/bin
+    install -m 644 -D ${WORKDIR}/libdolbyms12.so ${D}/usr/lib
 
 }
 

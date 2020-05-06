@@ -1,0 +1,60 @@
+From cd2e55090bd252f597570b847e027a953e888842 Mon Sep 17 00:00:00 2001
+From: Yan Wang <yan.wang@amlogic.com>
+Date: Tue, 14 Apr 2020 18:13:30 +0800
+Subject: [PATCH] G12A: dolbyfw: G12A enable dolbyfw in dts. [2/2]
+
+PD#SWPL-23707
+
+Problem:
+G12A dolbyfw ms12 2.4 support
+
+Solution:
+Add dolbyfw in g12a dts
+
+Verify:
+u200
+
+Change-Id: I408f4c93df7629eae9617feaf66bda1f5fedab39
+Signed-off-by: Yan Wang <yan.wang@amlogic.com>
+---
+ arch/arm/boot/dts/amlogic/mesong12a.dtsi   | 6 ++++++
+ arch/arm64/boot/dts/amlogic/mesong12a.dtsi | 6 ++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/arch/arm/boot/dts/amlogic/mesong12a.dtsi b/arch/arm/boot/dts/amlogic/mesong12a.dtsi
+index b0223826cbe2..3a19c676adf7 100644
+--- a/arch/arm/boot/dts/amlogic/mesong12a.dtsi
++++ b/arch/arm/boot/dts/amlogic/mesong12a.dtsi
+@@ -285,6 +285,12 @@
+ 		sys_poweroff = <0x84000008>;
+ 	};
+ 
++	dolby_fw: dolby_fw {
++		compatible = "amlogic, dolby_fw";
++		mem_size = <0x100000>;
++		status = "okay";
++	};
++
+ 	vpu {
+ 		compatible = "amlogic, vpu-g12a";
+ 		dev_name = "vpu";
+diff --git a/arch/arm64/boot/dts/amlogic/mesong12a.dtsi b/arch/arm64/boot/dts/amlogic/mesong12a.dtsi
+index dba9814429ac..d410d7e7473d 100644
+--- a/arch/arm64/boot/dts/amlogic/mesong12a.dtsi
++++ b/arch/arm64/boot/dts/amlogic/mesong12a.dtsi
+@@ -284,6 +284,12 @@
+ 		sys_poweroff = <0x84000008>;
+ 	};
+ 
++	dolby_fw: dolby_fw {
++		compatible = "amlogic, dolby_fw";
++		mem_size = <0x100000>;
++		status = "okay";
++	};
++
+ 	vpu {
+ 		compatible = "amlogic, vpu-g12a";
+ 		dev_name = "vpu";
+-- 
+2.24.1
+

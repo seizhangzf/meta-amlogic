@@ -35,6 +35,8 @@ SRC_URI_append = " file://0016-drm-add-hdr-dv-support-1-1.patch"
 SRC_URI_append = " file://0017-drm-add-video-overlay-fence-support-1-1.patch"
 SRC_URI_append = " file://0020-sha-add-scpi-for-sha-check-during-suspend-2-2.patch"
 SRC_URI_append = " file://0021-audio-set-arc-source-from-spdifA-when-earc-is-disabl.patch"
+SRC_URI_append = " file://0022-G12A-dolbyfw-G12A-enable-dolbyfw-in-dts.-2-2.patch"
+SRC_URI_append = " file://0023-disable-annoying-debug-prints.patch"
 
 
 LINUX_VERSION ?= "4.9.113"
