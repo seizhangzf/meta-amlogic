@@ -1,97 +1,60 @@
-From 882dee3cb898d207519fba368e4fd3a889c5706c Mon Sep 17 00:00:00 2001
+From 08065f59e31aff4d8d29fc14b024fb5cd843b5d2 Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Thu, 30 Jan 2020 20:52:16 +0800
-Subject: [PATCH 05/13] secmem: add secmem driver [1/1]
+Subject: [PATCH 2/4] secmem: add secmem driver [1/1]
 
 PD#SWPL-18234
+
+Problem:
+Need to export secure memory into dmabuf
+
+Solution:
+Add this driver
+
+Verify:
+U212 + Wpewebkit + EME test
 
 Change-Id: If900b6d4fadcce7e3b4a103a282d504242cd11e5
 Signed-off-by: Tao Guo <tao.guo@amlogic.com>
 ---
- MAINTAINERS                                  |   4 +
- drivers/amlogic/media/common/Kconfig         |   1 +
- drivers/amlogic/media/common/Makefile        |   1 +
- drivers/amlogic/media/common/secmem/Kconfig  |  10 +
- drivers/amlogic/media/common/secmem/Makefile |   2 +
- drivers/amlogic/media/common/secmem/secmem.c | 477 +++++++++++++++++++
- drivers/amlogic/media/common/secmem/secmem.h |  37 ++
- 7 files changed, 532 insertions(+)
- create mode 100644 drivers/amlogic/media/common/secmem/Kconfig
- create mode 100644 drivers/amlogic/media/common/secmem/Makefile
- create mode 100644 drivers/amlogic/media/common/secmem/secmem.c
- create mode 100644 drivers/amlogic/media/common/secmem/secmem.h
+ MAINTAINERS                                    |   1 +
+ drivers/amlogic/media/common/codec_mm/Makefile |   1 +
+ drivers/amlogic/media/common/codec_mm/secmem.c | 476 +++++++++++++++++++++++++
+ drivers/amlogic/media/common/codec_mm/secmem.h |  37 ++
+ 4 files changed, 515 insertions(+)
+ create mode 100644 drivers/amlogic/media/common/codec_mm/secmem.c
+ create mode 100644 drivers/amlogic/media/common/codec_mm/secmem.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4d897559c8a9..db45d41e3905 100644
+index 177a356..1f5ff475 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -13633,6 +13633,10 @@ M: Evoke Zhang <evoke.zhang@amlogic.com>
- F: drivers/amlogic/vpu/*
- F: include/linux/amlogic/vpu.h
+@@ -13615,6 +13615,7 @@ F:	arch/arm64/boot/dts/amlogic/gxm_q200_2g.dts
  
-+AMLOGIC SECMEM Driver
-+M: Tao Guo <tao.guo@amlogic.com>
-+F: drivers/amlogic/media/common/secmem/*
-+
- AMLOGIC driver for vout
- M: Evoke Zhang <evoke.zhang@amlogic.com>
- F: drivers/amlogic/dispaly/*
-diff --git a/drivers/amlogic/media/common/Kconfig b/drivers/amlogic/media/common/Kconfig
-index 0823040e5e57..b06a63ad9b47 100644
---- a/drivers/amlogic/media/common/Kconfig
-+++ b/drivers/amlogic/media/common/Kconfig
-@@ -4,6 +4,7 @@ source "drivers/amlogic/media/common/canvas/Kconfig"
- source "drivers/amlogic/media/common/ge2d/Kconfig"
- source "drivers/amlogic/media/common/ion_dev/Kconfig"
- source "drivers/amlogic/media/common/rdma/Kconfig"
-+source "drivers/amlogic/media/common/secmem/Kconfig"
- source "drivers/amlogic/media/common/vfm/Kconfig"
- source "drivers/amlogic/media/common/vpu/Kconfig"
- source "drivers/amlogic/media/common/v4l_util/Kconfig"
-diff --git a/drivers/amlogic/media/common/Makefile b/drivers/amlogic/media/common/Makefile
-index da24e3e6164a..b1f87a436b1f 100644
---- a/drivers/amlogic/media/common/Makefile
-+++ b/drivers/amlogic/media/common/Makefile
-@@ -5,6 +5,7 @@ obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	codec_mm/
- obj-$(CONFIG_AMLOGIC_ION)			+= ion_dev/
- obj-$(CONFIG_AMLOGIC_MEDIA_GE2D)	+=	ge2d/
- obj-$(CONFIG_AMLOGIC_MEDIA_RDMA)	+=	rdma/
-+obj-$(CONFIG_AMLOGIC_SECMEM)		+=	secmem/
- obj-$(CONFIG_AMLOGIC_MEDIA_VFM)	+=	vfm/
- obj-$(CONFIG_AMLOGIC_VPU)	+=	vpu/
- obj-$(CONFIG_AMLOGIC_VIDEOBUF_RESOURCE)	+= v4l_util/
-diff --git a/drivers/amlogic/media/common/secmem/Kconfig b/drivers/amlogic/media/common/secmem/Kconfig
+ AMLOGIC multimedia
+ M:	Nanxin Qin <nanxin.qin@amlogic.com>
++M:	Tao Guo <tao.guo@amlogic.com>
+ F:	drivers/amlogic/media/common/arch/registers/*
+ F:	drivers/amlogic/media/common/canvas/*
+ F:	drivers/amlogic/media/common/codec_mm/*
+diff --git a/drivers/amlogic/media/common/codec_mm/Makefile b/drivers/amlogic/media/common/codec_mm/Makefile
+index 5c3293e..f75016a 100644
+--- a/drivers/amlogic/media/common/codec_mm/Makefile
++++ b/drivers/amlogic/media/common/codec_mm/Makefile
+@@ -10,4 +10,5 @@
+ obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	codec_mm.o
+ obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	codec_mm_scatter.o
+ obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	codec_mm_keeper.o
++obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	secmem.o
+ obj-$(CONFIG_AMLOGIC_MEDIA_CODEC_MM)	+=	configs/
+diff --git a/drivers/amlogic/media/common/codec_mm/secmem.c b/drivers/amlogic/media/common/codec_mm/secmem.c
 new file mode 100644
-index 000000000000..c3a1e4aae026
+index 00000000..6d0572e
 --- /dev/null
-+++ b/drivers/amlogic/media/common/secmem/Kconfig
-@@ -0,0 +1,10 @@
-+#
-+# Amlogic secmem driver configuration
-+#
-+
-+config AMLOGIC_SECMEM
-+	bool "Amlogic Secmem Driver"
-+	select DMA_SHARED_BUFFER
-+	default y
-+	help
-+		Select to enable Secmem Driver
-diff --git a/drivers/amlogic/media/common/secmem/Makefile b/drivers/amlogic/media/common/secmem/Makefile
-new file mode 100644
-index 000000000000..7a4503cc3082
---- /dev/null
-+++ b/drivers/amlogic/media/common/secmem/Makefile
-@@ -0,0 +1,2 @@
-+obj-$(CONFIG_AMLOGIC_SECMEM)	+= secmem.o
-+
-diff --git a/drivers/amlogic/media/common/secmem/secmem.c b/drivers/amlogic/media/common/secmem/secmem.c
-new file mode 100644
-index 000000000000..e9bdd3877954
---- /dev/null
-+++ b/drivers/amlogic/media/common/secmem/secmem.c
-@@ -0,0 +1,477 @@
++++ b/drivers/amlogic/media/common/codec_mm/secmem.c
+@@ -0,0 +1,476 @@
 +/*
-+ * drivers/amlogic/media/common/secmem/secmem.c
++ * drivers/amlogic/media/common/codec_mm/secmem.c
 + *
 + * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
 + *
@@ -222,7 +185,7 @@ index 000000000000..e9bdd3877954
 +#else
 +	sgt->sgl->length = PAGE_ALIGN(info->size);
 +#endif
-+	pr_dbg("nents %d, %llx, %d, %d\n", sgt->nents,(long long unsigned int) sg_dma_address(sgt->sgl),
++	pr_dbg("nents %d, %x, %d, %d\n", sgt->nents, info->paddr,
 +			sg_dma_len(sgt->sgl), info->size);
 +	attach->dma_dir = dma_dir;
 +
@@ -425,7 +388,6 @@ index 000000000000..e9bdd3877954
 +	}
 +
 +	paddr = sg_dma_address(sgt->sgl);
-+	pr_info("paddr = %llx\n",(long long unsigned int) paddr);
 +
 +	res = (long) (paddr & (0xffffffff));
 +	dma_buf_unmap_attachment(attach, sgt, DMA_FROM_DEVICE);
@@ -567,14 +529,14 @@ index 000000000000..e9bdd3877954
 +module_init(secmem_init);
 +module_exit(secmem_exit);
 +MODULE_LICENSE("GPL");
-diff --git a/drivers/amlogic/media/common/secmem/secmem.h b/drivers/amlogic/media/common/secmem/secmem.h
+diff --git a/drivers/amlogic/media/common/codec_mm/secmem.h b/drivers/amlogic/media/common/codec_mm/secmem.h
 new file mode 100644
-index 000000000000..fc21db7a0b4e
+index 00000000..7e632a29
 --- /dev/null
-+++ b/drivers/amlogic/media/common/secmem/secmem.h
++++ b/drivers/amlogic/media/common/codec_mm/secmem.h
 @@ -0,0 +1,37 @@
 +/*
-+ * drivers/amlogic/media/common/secmem/secmem.h
++ * drivers/amlogic/media/common/codec_mm/secmem.h
 + *
 + * Copyright (C) 2017 Amlogic, Inc. All rights reserved.
 + *
@@ -611,5 +573,5 @@ index 000000000000..fc21db7a0b4e
 +
 +#endif /* _LINUX_SECMEM_H_ */
 -- 
-2.24.1
+2.7.4
 
