@@ -37,3 +37,17 @@ EOF
 
 FILES_${PN}_append_tm2 = " /vendor /data"
 dirs755_append_tm2 = " /vendor /data"
+
+
+do_install_append_g12a () {
+
+mkdir -p ${D}/vendor/lib
+mkdir -p ${D}/data
+mkdir -p ${D}/opt
+
+ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
+
+}
+FILES_${PN}_append_g12a = " /vendor/* /data /opt "
+dirs755_append_g12a = " /vendor /data /opt"
+INSANE_SKIP_${PN} = "dev-so"
