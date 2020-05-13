@@ -4,7 +4,6 @@ DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base glib-2.0 zlib aml-audio-servi
 RDEPENDS_${PN} = " aml-audio-service"
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstplugin1.x"
 SRC_URI_append = " file://0001-fix-audio-hal-plugin-compilation.patch;patchdir=../"
-SRC_URI_append = " file://0001-make-plugin-default.patch;patchdir=../"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
