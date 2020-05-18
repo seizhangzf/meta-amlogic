@@ -6,7 +6,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/audio;protocol=${AML_
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
-DEPENDS += "aml-amaudioutils expat tinyalsa "
+DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils"
 RDEPENDS_${PN} += "aml-amaudioutils"
 
 inherit cmake pkgconfig
