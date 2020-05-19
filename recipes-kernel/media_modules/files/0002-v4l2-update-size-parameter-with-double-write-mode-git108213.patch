@@ -1,7 +1,7 @@
-From fd45fd600910606e7ae940d64c939aa027555a6e Mon Sep 17 00:00:00 2001
+From c595210e757fa911bc719d3c3dcb54b0ec4851bd Mon Sep 17 00:00:00 2001
 From: Song Zhao <song.zhao@amlogic.com>
 Date: Sat, 2 May 2020 00:06:53 -0700
-Subject: [PATCH 2/2] v4l2: update size parameter with double write mode [1/1]
+Subject: [PATCH] v4l2: update size parameter with double write mode [1/1]
 
 PD#SWPL-25351
 
@@ -18,20 +18,21 @@ U212 + Westeros-sink
 Change-Id: If866a0042c57a05ea008010d1c1cc7f86b7f752f
 Signed-off-by: Song Zhao <song.zhao@amlogic.com>
 ---
- drivers/amvdec_ports/aml_vcodec_dec.c              | 91 ++++++++++++++--------
- drivers/frame_provider/decoder/avs2/vavs2.c        | 32 ++------
- drivers/frame_provider/decoder/h264_multi/vmh264.c | 33 +++-----
- drivers/frame_provider/decoder/h265/vh265.c        | 71 +++++------------
- drivers/frame_provider/decoder/utils/vdec.c        | 13 ++++
- drivers/frame_provider/decoder/utils/vdec.h        |  1 +
- .../decoder/utils/vdec_v4l2_buffer_ops.c           | 14 ++++
- .../decoder/utils/vdec_v4l2_buffer_ops.h           |  3 +
- drivers/frame_provider/decoder/vav1/vav1.c         | 50 ++++++------
- drivers/frame_provider/decoder/vp9/vvp9.c          | 75 ++++--------------
- 10 files changed, 168 insertions(+), 215 deletions(-)
+ drivers/amvdec_ports/aml_vcodec_dec.c         | 117 +++++++++++++-----
+ drivers/amvdec_ports/aml_vcodec_drv.h         |   1 +
+ drivers/frame_provider/decoder/avs2/vavs2.c   |  32 ++---
+ .../decoder/h264_multi/vmh264.c               |  33 ++---
+ drivers/frame_provider/decoder/h265/vh265.c   |  71 ++++-------
+ drivers/frame_provider/decoder/utils/vdec.c   |  13 ++
+ drivers/frame_provider/decoder/utils/vdec.h   |   1 +
+ .../decoder/utils/vdec_v4l2_buffer_ops.c      |  14 +++
+ .../decoder/utils/vdec_v4l2_buffer_ops.h      |   3 +
+ drivers/frame_provider/decoder/vav1/vav1.c    |  50 ++++----
+ drivers/frame_provider/decoder/vp9/vvp9.c     |  75 +++--------
+ 11 files changed, 194 insertions(+), 216 deletions(-)
 
 diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
-index bdcf58c..e8a48bd 100644
+index bdcf58cb..901b3379 100644
 --- a/drivers/amvdec_ports/aml_vcodec_dec.c
 +++ b/drivers/amvdec_ports/aml_vcodec_dec.c
 @@ -187,6 +187,7 @@ extern int dump_capture_frame;
@@ -193,8 +194,61 @@ index bdcf58c..e8a48bd 100644
  		copy_v4l2_format_dimention(pix_mp, q_data, f->type);
  	} else if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
  		/*
+@@ -2717,6 +2742,15 @@ static int vidioc_vdec_g_parm(struct file *file, void *fh,
+ 	return 0;
+ }
+ 
++static int check_valid_dw_mode(u32 old, u32 new)
++{
++	/* no transition for 0 and 16 */
++	if ( (old == 0 || old == 16) && old != new)
++		return -1;
++	/* transition between 1/2/4 are allowed */
++	return 0;
++}
++
+ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+ 	struct v4l2_streamparm *a)
+ {
+@@ -2732,8 +2766,23 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+ 
+ 		ctx->config.type = V4L2_CONFIG_PARM_DECODE;
+ 
+-		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_CFGINFO)
++		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_CFGINFO) {
++			if (ctx->config.set &&
++				check_valid_dw_mode(
++				dec->cfg.double_write_mode,
++				in->cfg.double_write_mode)) {
++				v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR,
++					"invalid dw: %d to %d\n",
++					dec->cfg.double_write_mode,
++					in->cfg.double_write_mode);
++				return -EINVAL;
++			} else
++				v4l_dbg(ctx, V4L_DEBUG_CODEC_PRINFO,
++					"double write: %d\n",
++					in->cfg.double_write_mode);
+ 			dec->cfg = in->cfg;
++			ctx->config.set = true;
++		}
+ 		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_PSINFO)
+ 			dec->ps = in->ps;
+ 		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_HDRINFO)
+diff --git a/drivers/amvdec_ports/aml_vcodec_drv.h b/drivers/amvdec_ports/aml_vcodec_drv.h
+index 5505a8ee..11261ab7 100644
+--- a/drivers/amvdec_ports/aml_vcodec_drv.h
++++ b/drivers/amvdec_ports/aml_vcodec_drv.h
+@@ -332,6 +332,7 @@ struct aml_dec_params {
+ struct v4l2_config_parm {
+ 	u32 type;
+ 	u32 length;
++	bool set;
+ 	union {
+ 		struct aml_dec_params dec;
+ 		struct aml_enc_params enc;
 diff --git a/drivers/frame_provider/decoder/avs2/vavs2.c b/drivers/frame_provider/decoder/avs2/vavs2.c
-index 4c2cb54..5303bee 100644
+index 4c2cb54b..5303bee7 100644
 --- a/drivers/frame_provider/decoder/avs2/vavs2.c
 +++ b/drivers/frame_provider/decoder/avs2/vavs2.c
 @@ -931,18 +931,6 @@ static int get_double_write_mode_init(struct AVS2Decoder_s *dec)
@@ -269,10 +323,10 @@ index 4c2cb54..5303bee 100644
  			vf->width = (force_w_h >> 16) & 0xffff;
  			vf->height = force_w_h & 0xffff;
 diff --git a/drivers/frame_provider/decoder/h264_multi/vmh264.c b/drivers/frame_provider/decoder/h264_multi/vmh264.c
-index 22eab2b..0b673d2 100644
+index 5db4ce83..15dad199 100644
 --- a/drivers/frame_provider/decoder/h264_multi/vmh264.c
 +++ b/drivers/frame_provider/decoder/h264_multi/vmh264.c
-@@ -1041,19 +1041,6 @@ static int  compute_losless_comp_header_size(int width, int height)
+@@ -1039,19 +1039,6 @@ static int  compute_losless_comp_header_size(int width, int height)
  	return  hsize;
  }
  
@@ -292,7 +346,7 @@ index 22eab2b..0b673d2 100644
  static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
  {
  	int pic_width, pic_height;
-@@ -1068,9 +1055,9 @@ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
+@@ -1066,9 +1053,9 @@ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
  
  	if (dw_mode) {
  		int pic_width_dw = pic_width /
@@ -304,7 +358,7 @@ index 22eab2b..0b673d2 100644
  
  		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
  			pic_width_dw / lcu_size + 1 :
-@@ -1153,9 +1140,9 @@ static void hevc_mcr_config_canv2axitbl(struct vdec_h264_hw_s *hw, int restore)
+@@ -1151,9 +1138,9 @@ static void hevc_mcr_config_canv2axitbl(struct vdec_h264_hw_s *hw, int restore)
  			int canvas_h;
  
  			canvas_w = hw->frame_width /
@@ -316,7 +370,7 @@ index 22eab2b..0b673d2 100644
  
  			if (hw->canvas_mode == 0)
  				canvas_w = ALIGN(canvas_w, 32);
-@@ -2076,9 +2063,9 @@ static void config_decode_canvas_ex(struct vdec_h264_hw_s *hw, int i)
+@@ -2074,9 +2061,9 @@ static void config_decode_canvas_ex(struct vdec_h264_hw_s *hw, int i)
  	int canvas_h;
  
  	canvas_w = hw->frame_width /
@@ -328,7 +382,7 @@ index 22eab2b..0b673d2 100644
  
  	if (hw->canvas_mode == 0)
  		canvas_w = ALIGN(canvas_w, 32);
-@@ -2859,9 +2846,9 @@ int prepare_display_buf(struct vdec_s *vdec, struct FrameStore *frame)
+@@ -2857,9 +2844,9 @@ int prepare_display_buf(struct vdec_s *vdec, struct FrameStore *frame)
  
  		if (hw->mmu_enable && hw->double_write_mode) {
  			vf->width = hw->frame_width /
@@ -340,7 +394,7 @@ index 22eab2b..0b673d2 100644
  		}
  
  		vf->flag = 0;
-@@ -3968,9 +3955,9 @@ static struct vframe_s *vh264_vf_get(void *op_arg)
+@@ -3966,9 +3953,9 @@ static struct vframe_s *vh264_vf_get(void *op_arg)
  
  			if (hw->double_write_mode) {
  				vf->width = hw->frame_width /
@@ -353,7 +407,7 @@ index 22eab2b..0b673d2 100644
  		} else {
  			vf->type = VIDTYPE_PROGRESSIVE | VIDTYPE_VIU_FIELD |
 diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
-index b9d8690..a8dabfd 100644
+index 8f3c2522..92f7f745 100644
 --- a/drivers/frame_provider/decoder/h265/vh265.c
 +++ b/drivers/frame_provider/decoder/h265/vh265.c
 @@ -1943,30 +1943,15 @@ static int get_double_write_mode(struct hevc_state_s *hevc)
@@ -425,7 +479,7 @@ index b9d8690..a8dabfd 100644
  
  		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
  			pic_width_dw / lcu_size + 1 :
-@@ -7729,9 +7702,9 @@ static void set_canvas(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -7714,9 +7687,9 @@ static void set_canvas(struct hevc_state_s *hevc, struct PIC_s *pic)
  #ifdef SUPPORT_10BIT
  	if	(pic->double_write_mode) {
  		canvas_w = pic->width /
@@ -437,7 +491,7 @@ index b9d8690..a8dabfd 100644
  
  		if (hevc->mem_map_mode == 0)
  			canvas_w = ALIGN(canvas_w, 32);
-@@ -8042,9 +8015,9 @@ static void set_frame_info(struct hevc_state_s *hevc, struct vframe_s *vf,
+@@ -8027,9 +8000,9 @@ static void set_frame_info(struct hevc_state_s *hevc, struct vframe_s *vf,
  		= &vf->prop.master_display_colour;
  
  	vf->width = pic->width /
@@ -449,7 +503,7 @@ index b9d8690..a8dabfd 100644
  
  	vf->duration = hevc->frame_dur;
  	vf->duration_pulldown = 0;
-@@ -8281,9 +8254,9 @@ static struct vframe_s *vh265_vf_get(void *op_arg)
+@@ -8266,9 +8239,9 @@ static struct vframe_s *vh265_vf_get(void *op_arg)
  		set_frame_info(hevc, vf);
  
  		vf->width = pic->width /
@@ -461,7 +515,7 @@ index b9d8690..a8dabfd 100644
  
  		force_disp_pic_index |= 0x200;
  		return vf;
-@@ -9045,9 +9018,9 @@ static int prepare_display_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -9030,9 +9003,9 @@ static int prepare_display_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
  		}
  
  		vf->width = vf->width /
@@ -473,7 +527,7 @@ index b9d8690..a8dabfd 100644
  #ifdef HEVC_PIC_STRUCT_SUPPORT
  		if (pic->pic_struct == 3 || pic->pic_struct == 4) {
  			struct vframe_s *vf2;
-@@ -9672,12 +9645,10 @@ static void read_decode_info(struct hevc_state_s *hevc)
+@@ -9657,12 +9630,10 @@ static void read_decode_info(struct hevc_state_s *hevc)
  
  static int vh265_get_ps_info(struct hevc_state_s *hevc, int width, int height, struct aml_vdec_ps_infos *ps)
  {
@@ -491,7 +545,7 @@ index b9d8690..a8dabfd 100644
  
  	return 0;
 diff --git a/drivers/frame_provider/decoder/utils/vdec.c b/drivers/frame_provider/decoder/utils/vdec.c
-index 00b154a..5f1a323 100644
+index 00b154af..5f1a323b 100644
 --- a/drivers/frame_provider/decoder/utils/vdec.c
 +++ b/drivers/frame_provider/decoder/utils/vdec.c
 @@ -5421,6 +5421,19 @@ u32  vdec_get_frame_vdec(struct vdec_s *vdec,  struct vframe_counter_s *tmpbuf)
@@ -515,7 +569,7 @@ index 00b154a..5f1a323 100644
  /*
  uint force_hevc_clock_cntl;
 diff --git a/drivers/frame_provider/decoder/utils/vdec.h b/drivers/frame_provider/decoder/utils/vdec.h
-index bc4ef21..2a644ef 100644
+index bc4ef216..2a644efe 100644
 --- a/drivers/frame_provider/decoder/utils/vdec.h
 +++ b/drivers/frame_provider/decoder/utils/vdec.h
 @@ -462,4 +462,5 @@ extern u32  vdec_get_frame_vdec(struct vdec_s *vdec,  struct vframe_counter_s *t
@@ -525,7 +579,7 @@ index bc4ef21..2a644ef 100644
 +extern int get_double_write_ratio(int dw_mode);
  #endif				/* VDEC_H */
 diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
-index f691ecc..3dec576 100644
+index f691ecce..3dec5768 100644
 --- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
 +++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.c
 @@ -182,3 +182,17 @@ int vdec_v4l_write_frame_sync(struct aml_vcodec_ctx *ctx)
@@ -547,7 +601,7 @@ index f691ecc..3dec576 100644
 +}
 +EXPORT_SYMBOL(vdec_v4l_get_dw_mode);
 diff --git a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
-index f71758c..bce2db6 100644
+index f71758ca..bce2db68 100644
 --- a/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
 +++ b/drivers/frame_provider/decoder/utils/vdec_v4l2_buffer_ops.h
 @@ -34,4 +34,7 @@ int vdec_v4l_post_evet(
@@ -559,7 +613,7 @@ index f71758c..bce2db6 100644
 +	unsigned int *dw_mode);
  #endif
 diff --git a/drivers/frame_provider/decoder/vav1/vav1.c b/drivers/frame_provider/decoder/vav1/vav1.c
-index e84ee3e..87a3c9d 100644
+index e84ee3e3..87a3c9dc 100644
 --- a/drivers/frame_provider/decoder/vav1/vav1.c
 +++ b/drivers/frame_provider/decoder/vav1/vav1.c
 @@ -962,6 +962,15 @@ static int get_double_write_mode(struct AV1HW_s *hw)
@@ -659,7 +713,7 @@ index e84ee3e..87a3c9d 100644
  			vf->compWidth = pic_config->y_crop_width;
  			vf->compHeight = pic_config->y_crop_height;
 diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
-index fd61a34..fe8188e 100644
+index fd61a348..fe8188eb 100644
 --- a/drivers/frame_provider/decoder/vp9/vvp9.c
 +++ b/drivers/frame_provider/decoder/vp9/vvp9.c
 @@ -1598,49 +1598,22 @@ static u32 get_valid_double_write_mode(struct VP9Decoder_s *pbi)
@@ -794,5 +848,5 @@ index fd61a34..fe8188e 100644
  
  	return 0;
 -- 
-2.7.4
+2.24.1
 
