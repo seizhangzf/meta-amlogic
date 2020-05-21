@@ -5,7 +5,7 @@ inherit ${SDKEXTCLASS}
 DEPENDS_${PN}_append = " android-tools-native"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-IMAGE_INSTALL = "udev busybox ${ROOTFS_PKGMANAGE_BOOTSTRAP}" 
+IMAGE_INSTALL = "udev busybox ${ROOTFS_PKGMANAGE_BOOTSTRAP}"
 IMAGE_INSTALL_append = "\
                     initramfs-meson-boot \
                     e2fsprogs \
@@ -46,7 +46,7 @@ do_rootfs_append () {
 KERNEL_BOOTARGS = "rootfstype=ext4"
 
 do_bundle_initramfs_dtb() {
-	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}-${KERNEL_DEVICETREE} --output ${DEPLOY_DIR_IMAGE}/boot.img
+	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --output ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 addtask bundle_initramfs_dtb before do_image_complete after do_image_cpio

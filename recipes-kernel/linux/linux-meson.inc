@@ -4,13 +4,14 @@ require recipes-kernel/linux/linux-yocto_amlogic.inc
 
 do_copy_dtb() {
 	cp -f ${B}/arch/${ARCH}/boot/dts/amlogic/*.dtb ${B}/arch/${ARCH}/boot/
+	${THISDIR}/armv7a/dtbTool -o ${B}/arch/${ARCH}/boot/multi.dtb -p ${B}/scripts/dtc/ ${B}/arch/${ARCH}/boot/dts/amlogic/
 }
 
 addtask copy_dtb before do_install after do_compile
 #addtask install_headers after do_install before do_deploy
 
 do_deploy_append () {
-    DTB_PATH=`get_real_dtb_path_in_kernel ${KERNEL_DEVICETREE}`
+    DTB_PATH=`get_real_dtb_path_in_kernel multi.dtb`
     install -m 0644 ${DTB_PATH} ${DEPLOYDIR}/dtb.img
 }
 
