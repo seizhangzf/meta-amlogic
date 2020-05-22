@@ -4,8 +4,6 @@ LICENSE = "CLOSED"
 DEPENDS = "liblog"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/amaudioutils;protocol=${AML_GIT_PROTOCOL};branch=master"
-SRC_URI_append = " file://0001-compile-fix.patch"
-#SRC_URI_append = " file://0001-add-liblog-support.patch"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
@@ -20,18 +18,24 @@ export AML_AMAUDIOUTILS_TARGET_DIR = "${D}"
 export AML_AMAUDIOUTILS_BR2_ARCH = "${TARGET_ARCH}"
 export TARGET_DIR = "${D}"
 
+EXTRA_OEMAKE="STAGING_DIR=${D} \
+                  TARGET_DIR=${D} \
+                                "
+
 do_compile() {
     cd ${B}
-    oe_runmake  -C ${S} all
+    oe_runmake -C ${S} all
 }
+
 do_install() {
     install -d ${D}/usr/lib
     install -d ${D}/usr/include/audio_utils
     install -d ${D}/usr/include/audio_utils/spdif
-    install -d ${D}/usr/include/cutils
-    install -d ${D}/usr/include/android
-    cd ${B}
-    oe_runmake  -C ${S} install
+
+  	install -m 644 -D ${S}/libamaudioutils.so ${D}/usr/lib
+    install -m 644 -D ${S}/libcutils.so ${D}/usr/lib
+	install -m 644 ${S}/include/audio_utils/*.h ${D}/usr/include/audio_utils
+	install -m 644 ${S}/include/audio_utils/spdif/*.h ${D}/usr/include/audio_utils/spdif
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"

@@ -2,8 +2,9 @@ SUMMARY = "amlogic optee video firmware"
 LICENSE = "CLOSED"
 DEPENDS = "bzip2 libxml2"
 RDEPENDS_${PN} = "libbz2 optee-userspace"
+include aml-multimedia.inc
 
-SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia;protocol=${AML_GIT_PROTOCOL};branch=master"
+#SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI += "file://videoFirmwarePreload.service"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

@@ -2,12 +2,10 @@ inherit module
 
 SUMMARY = "Amlogic media driver"
 LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING.GPL;md5=751419260aa954499f7abaabaa882bbe"
+LIC_FILES_CHKSUM = "file://${THISDIR}/../../license/COPYING.GPL;md5=751419260aa954499f7abaabaa882bbe"
 
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-4.9-dev"
-SRC_URI_append = " file://COPYING.GPL"
-SRC_URI_append = " file://0001-v4l2-support-compressed-buffer-for-h265-vp9-dec-git99272.patch "
-SRC_URI_append = " file://0002-v4l2-update-size-parameter-with-double-write-mode-git108213.patch "
+SRC_URI_append = " ${@get_patch_list('${THISDIR}/files')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
