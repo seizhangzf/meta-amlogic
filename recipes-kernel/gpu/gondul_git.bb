@@ -1,19 +1,17 @@
 inherit module
 
-SUMMARY = "Arm G31(dvalin) graphic driver"
+SUMMARY = "Arm G53(gondul) graphic driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a31bb510"
 
-SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/arm/gpu.git;protocol=${AML_GIT_PROTOCOL};branch=mainline"
+include gpu.inc
 
-SRCREV = "${AUTOREV}"
-PV = "git${SRCPV}"
-VER = "r16p0"
+SRCREV = "4cf054626175aa511f9c765205f8b141ae169f70"
 
 PROVIDES += "virtual/gpu"
 RPROVIDES_${PN} += "gpu"
 GPU_ARCH = "bifrost"
-GPU_DRV_SRC = "${S}/${GPU_ARCH}/${VER}/kernel/drivers/gpu/arm/midgard"
+GPU_DRV_SRC = "${S}/${GPU_ARCH}/${PV}/kernel/drivers/gpu/arm/midgard"
 
 do_configure[noexec] = "1"
 

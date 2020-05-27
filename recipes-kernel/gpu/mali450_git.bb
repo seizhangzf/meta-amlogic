@@ -4,7 +4,7 @@ SUMMARY = "Arm Mali450 driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://t83x/kernel/license.txt;md5=13e14ae1bd7ad5bff731bba4a31bb510"
 
-SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/arm/gpu.git;protocol=${AML_GIT_PROTOCOL};nobranch=1"
+include gpu.inc
 
 SRCREV = "1848b13f54bddebd646c35307db669cd0052db48"
 

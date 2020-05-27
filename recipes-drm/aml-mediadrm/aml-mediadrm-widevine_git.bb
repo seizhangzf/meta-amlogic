@@ -11,7 +11,6 @@ PROVIDES = "widevine"
 
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_PROTOCOL};branch=linux-dev"
-SRC_URI_append = " file://0001-add-headers.patch "
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 

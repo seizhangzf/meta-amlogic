@@ -15,12 +15,7 @@ SRC_URI_append = " file://meson.scc \
             file://systemd.cfg \
             file://logcat.cfg \
             file://meson-user-patches.scc "
-SRC_URI_append = " file://0001-fix-uapi-struct-git99273.patch"
-SRC_URI_append = " file://0002-secmem-add-secmem-driver-git98014.patch"
-SRC_URI_append = " file://0003-uvm-fix-uvm-secure-buffer-map-crash-issue-git107274.patch"
-SRC_URI_append = " file://0004-RDK-Customize-DTS-files-git108833.patch"
-
-
+SRC_URI_append = " ${@get_patch_list('${THISDIR}/armv7a')}"
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"

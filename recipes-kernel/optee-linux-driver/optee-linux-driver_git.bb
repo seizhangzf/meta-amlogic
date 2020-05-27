@@ -14,8 +14,8 @@ do_install() {
     MODULE_DIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/amlogic/optee
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${MODULE_DIR}
-    install -m 0666 ${WORKDIR}/git/linuxdriver/optee.ko ${MODULE_DIR}
-    install -m 0666 ${WORKDIR}/git/linuxdriver/optee/optee_armtz.ko ${MODULE_DIR}
+    install -m 0666 ${S}/linuxdriver/optee.ko ${MODULE_DIR}
+    install -m 0666 ${S}/linuxdriver/optee/optee_armtz.ko ${MODULE_DIR}
 }
 
 FILES_${PN} = "optee_armtz.ko optee.ko"
@@ -27,7 +27,7 @@ TARGET_ARGS_armv7a=" KERNEL_A32_SUPPORT=true"
 do_compile() {
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     export ${TARGET_ARGS}
-    oe_runmake  -C ${STAGING_KERNEL_DIR} M="${WORKDIR}/git/linuxdriver" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
+    oe_runmake  -C ${STAGING_KERNEL_DIR} M="${S}/linuxdriver" ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
 }
 KERNEL_MODULE_AUTOLOAD += "optee_armtz"
 KERNEL_MODULE_AUTOLOAD += "optee"

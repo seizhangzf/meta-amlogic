@@ -4,7 +4,6 @@ DEPENDS = "bzip2 libxml2"
 RDEPENDS_${PN} = "libbz2 optee-userspace"
 include aml-multimedia.inc
 
-#SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI += "file://videoFirmwarePreload.service"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
@@ -32,7 +31,8 @@ do_install () {
 }
 
 FILES_${PN} += "/lib/teetz/* /usr/lib/* /usr/bin/*"
-INSANE_SKIP_${PN} = "ldflags"
+INSANE_SKIP_${PN} = "ldflags dev-elf"
+INSANE_SKIP_${PN}-dev = "ldflags dev-elf"
 
 FILES_${PN} += "${systemd_unitdir}/system/videoFirmwarePreload.service"
 SYSTEMD_SERVICE_${PN} = "videoFirmwarePreload.service"
