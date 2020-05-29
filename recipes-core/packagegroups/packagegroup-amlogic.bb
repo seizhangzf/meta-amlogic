@@ -11,7 +11,6 @@ PACKAGES = "\
     "
 
 RDEPENDS_packagegroup-amlogic-common = "\
-                                    ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'optee-userspace-demos', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'optee-userspace', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'optee-video-firmware', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'aml-provision', '', d)} \
