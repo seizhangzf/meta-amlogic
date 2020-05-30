@@ -8,6 +8,9 @@ do_configure[noexec] = "1"
 
 SRC_URI = "git://${AML_GIT_ROOT}/platform/external/libzvbi.git;protocol=${AML_GIT_PROTOCOL};branch=ics-amlogic;name=libzvbi"
 
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/zvbi')}"
+
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
@@ -22,11 +25,11 @@ do_compile() {
     oe_runmake  all
 }
 do_install() {
-   install -d ${D}${libdir} 
-   install -d ${D}${includedir} 
-    install -m 0644 ${S}/libzvbi.so ${D}${libdir} 
-    install -m 0644 ${S}/src/libzvbi.h ${D}${includedir} 
-    install -m 0644 ${S}/src/dtvcc.h ${D}${includedir} 
+   install -d ${D}${libdir}
+   install -d ${D}${includedir}
+    install -m 0644 ${S}/libzvbi.so ${D}${libdir}
+    install -m 0644 ${S}/src/libzvbi.h ${D}${includedir}
+    install -m 0644 ${S}/src/dtvcc.h ${D}${includedir}
 }
 
 FILES_${PN} = "${libdir}/*"

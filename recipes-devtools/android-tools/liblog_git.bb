@@ -11,8 +11,11 @@ SRCREV = "${AUTOREV}"
 PV = "${SRCPV}"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_commonlib;protocol=${AML_GIT_PROTOCOL};branch=master;"
-SRC_URI += "file://liblog.patch"
+#SRC_URI += "file://liblog.patch"
 SRC_URI += "file://LICENSE-2.0"
+
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/aml_commonlib')}"
 
 S = "${WORKDIR}/git/"
 
@@ -27,7 +30,7 @@ do_install(){
     install -d ${D}${includedir}
     install -m 0644 ${S}/liblog/liblog.so ${D}${libdir}
     #install -m 0644 ${S}/liblog/lib/* ${D}${libdir}
-    cp -ra ${S}/liblog/include/* ${D}${includedir} 
+    cp -ra ${S}/liblog/include/* ${D}${includedir}
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"

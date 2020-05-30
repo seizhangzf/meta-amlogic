@@ -9,8 +9,11 @@ do_populate_lic[noexec] = "1"
 
 PROVIDES = "widevine"
 
-
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_PROTOCOL};branch=linux-dev"
+
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm')}"
+
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 

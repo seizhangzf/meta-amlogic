@@ -15,7 +15,10 @@ SRC_URI_append = " file://meson.scc \
             file://systemd.cfg \
             file://logcat.cfg \
             file://meson-user-patches.scc "
-SRC_URI_append = " ${@get_patch_list('${THISDIR}/armv7a')}"
+#SRC_URI_append = " ${@get_patch_list('${THISDIR}/armv7a')}"
+
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/kernel/aml-4.9')}"
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_EXTENSION ?= "-amlogic"

@@ -3,7 +3,10 @@ LICENSE = "CLOSED"
 DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base glib-2.0 zlib aml-audio-service "
 RDEPENDS_${PN} = " aml-audio-service"
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstplugin1.x"
-SRC_URI_append = " file://0001-fix-audio-hal-plugin-compilation.patch;patchdir=../"
+#SRC_URI_append = " file://0001-fix-audio-hal-plugin-compilation.patch;patchdir=../"
+
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-aml-plugins1/', '../')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
@@ -16,4 +19,4 @@ FILES_${PN} += "/usr/lib/gstreamer-1.0/*"
 INSANE_SKIP_${PN} = "ldflags dev-so "
 INHIBIT_PACKAGE_STRIP = "1"
 INHIBIT_SYSROOT_STRIP = "1"
-INHIBIT_PACKAGE_DEBUG_SPLIT = "1" 
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"

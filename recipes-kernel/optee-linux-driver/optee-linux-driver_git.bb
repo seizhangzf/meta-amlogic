@@ -4,6 +4,11 @@ SUMMARY = "Optee tdk kernel driver"
 LICENSE = "CLOSED"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/tdk.git;protocol=${AML_GIT_PROTOCOL};branch=tdk-v2.4"
+
+PATCHTOOL= "git"
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/tdk')}"
+
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 

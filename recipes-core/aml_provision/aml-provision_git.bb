@@ -3,6 +3,9 @@ LICENSE = "CLOSED"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/provision;protocol=${AML_GIT_PROTOCOL};branch=projects/buildroot/tdk-v2.4"
 
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/provision')}"
+
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"

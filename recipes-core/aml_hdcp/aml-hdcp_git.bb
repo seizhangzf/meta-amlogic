@@ -4,6 +4,9 @@ LICENSE = "CLOSED"
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/hdcp;protocol=${AML_GIT_PROTOCOL};branch=projects/buildroot/tdk-v2.4"
 SRC_URI_append = " file://aml_hdcprx.service"
 
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/hdcp')}"
+
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"

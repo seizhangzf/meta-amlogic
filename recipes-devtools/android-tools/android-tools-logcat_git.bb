@@ -12,8 +12,11 @@ SRCREV = "${AUTOREV}"
 PV = "${SRCPV}"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_commonlib;protocol=${AML_GIT_PROTOCOL};branch=master;"
-SRC_URI += "file://logcat.patch"
+#SRC_URI += "file://logcat.patch"
 SRC_URI += "file://LICENSE-2.0"
+
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/aml_commonlib')}"
 
 S = "${WORKDIR}/git/"
 

@@ -6,6 +6,9 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/audio;protocol=${AML_
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/aml_audio_hal')}"
+
 DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils liblog"
 RDEPENDS_${PN} += "liblog aml-amaudioutils"
 

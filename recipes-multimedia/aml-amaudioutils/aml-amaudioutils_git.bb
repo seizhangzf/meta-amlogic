@@ -5,6 +5,9 @@ DEPENDS = "liblog"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/amaudioutils;protocol=${AML_GIT_PROTOCOL};branch=master"
 
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_amaudioutils')}"
+
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
