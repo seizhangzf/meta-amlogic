@@ -1,5 +1,11 @@
 require u-boot-meson.inc
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl33/v2015:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl2/bin:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl30/bin:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl31/bin:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl31_1.3/bin:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/fip:"
 
 LICENSE = "GPLv2+"
 
@@ -12,18 +18,17 @@ SRC_URI = "git://${AML_GIT_ROOT}/firmware/bin/bl2.git;protocol=${AML_GIT_PROTOCO
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl30.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl30/bin;name=bl30"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl31/bin;name=bl31"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-1.3;destsuffix=uboot-repo/bl31_1.3/bin;name=bl31-1.3"
-#SRC_URI_append = " git://${AML_GIT_ROOT}/vendor/amlogic/tdk.git;protocol=${AML_GIT_PROTOCOL};branch=tdk-v2.4;destsuffix=uboot-repo/tdk;name=tdk"
 SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl33/v2015;name=bl33"
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 
+PATCHTOOL="git"
 #patches
-SRC_URI_append = " file://0001-remove-hardcode-path.patch;patchdir=bl33/v2015"
-SRC_URI_append = " file://0001-to-support-absystem-excludes-vendor.patch;patchdir=bl33/v2015"
-SRC_URI_append = " file://0001-remove-werror.patch;patchdir=bl33/v2015"
-SRC_URI_append = " file://0001-Use-host-gcc-to-build-ddr-parse-tool.patch;patchdir=fip"
-SRC_URI_append = " file://root_rsa_pub_key.pem"
-SRC_URI_append = " file://root_aes_key.bin"
-SRC_URI_append = " file://bl32.img"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/bl33/v2015', 'bl33/v2015')}"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/fip', 'fip')}"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/bl31/bin', 'bl31/bin')}"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/bl2/bin', 'bl2/bin')}"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/bl30/bin', 'bl30/bin')}"
+SRC_URI_append = " ${@get_patch_list_with_patchdir('${THISDIR}/files_2015/bl31_1.3', 'bl31_1.3/bin')}"
 
 do_configure[noexec] = "1"
 
@@ -31,12 +36,10 @@ SRCREV_bl2 ?="${AUTOREV}"
 SRCREV_bl30 ?="${AUTOREV}"
 SRCREV_bl31 ?="${AUTOREV}"
 SRCREV_bl31-1.3 ?="${AUTOREV}"
-#SRCREV_tdk ?="${AUTOREV}"
 SRCREV_bl33 ?="${AUTOREV}"
 SRCREV_fip ?="${AUTOREV}"
 
 S = "${WORKDIR}/uboot-repo"
-#SRCREV_FORMAT = "bl2_bl30_bl31_bl31-1.3_tdk_bl33_fip"
 SRCREV_FORMAT = "bl2_bl30_bl31_bl31-1.3_bl33_fip"
 PR = "r1"
 PV = "v2015.01+git${SRCPV}"
@@ -71,11 +74,9 @@ do_compile () {
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
         mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
-        #FIXME: hack to cp special bl32 for u212
-        #cp -rf ${WORKDIR}/bl32.img ${S}/tdk/secureos/g12a/bl32.img 
         ${STAGING_DIR_NATIVE}/tdk/scripts/pack_kpub.py \
-            --rsk=${WORKDIR}/root_rsa_pub_key.pem \
-            --rek=${WORKDIR}/root_aes_key.bin \
+            --rsk=${STAGING_DIR_NATIVE}/tdk/keys/root_rsa_pub_key.pem \
+            --rek=${STAGING_DIR_NATIVE}/tdk/keys/root_aes_key.bin \
             --in=${STAGING_DIR_TARGET}/usr/share/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
             --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 
