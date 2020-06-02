@@ -17,6 +17,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediadrm-widevine', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'gst-aml-drm-plugins', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'wpeframework-ocdm-widevine', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'playready', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'wpeframework-ocdm-playready', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'opencdm', 'wpeframework-ocdm-clearkey', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'alsa-utils', '', d)}\
                                     tinyalsa \
