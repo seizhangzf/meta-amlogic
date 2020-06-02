@@ -1,5 +1,8 @@
 SUMMARY = "aml tvserver"
-LICENSE = "CLOSED"
+
+LICENSE = "AMLOGIC"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/tvserver.git;protocol=${AML_GIT_PROTOCOL};branch=pure-linux-amlogic"
 
 SRCREV ?= "${AUTOREV}"

@@ -1,5 +1,8 @@
 SUMMARY = "amlogic gstreamer plugin"
-LICENSE = "CLOSED"
+
+LICENSE = "AMLOGIC"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+
 DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base glib-2.0 zlib aml-mediadrm-widevine "
 DEPENDS += "gstreamer1.0-plugins-bad"
 

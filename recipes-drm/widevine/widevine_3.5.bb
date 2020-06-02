@@ -1,6 +1,8 @@
 SUMMARY = "Widevine DRM implementation."
 HOMEPAGE = "https://www.widevine.com/"
-LICENSE = "CLOSED"
+
+LICENSE = "AMLOGIC"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 DEPENDS = "gyp openssl python-native protobuf protobuf-native"
 

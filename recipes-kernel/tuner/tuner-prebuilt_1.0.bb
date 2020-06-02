@@ -1,6 +1,9 @@
 inherit module
 SUMMARY = "Tuner prebuilt drivers"
-LICENSE = "CLOSED"
+
+LICENSE = "AMLOGIC"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+
 FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/tuner-64:"
 
 SRC_URI_aarch64 = " \
