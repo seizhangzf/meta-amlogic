@@ -7,8 +7,6 @@ inherit packagegroup
 
 PACKAGES = "\
     packagegroup-amlogic-common \
-    packagegroup-amlogic-tv \
-    packagegroup-amlogic-dvb \
     "
 
 RDEPENDS_packagegroup-amlogic-common = "\
@@ -43,9 +41,4 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-logcat \
                                     liblog \
                                     "
-RDEPENDS_packagegroup-amlogic-tv = "\
-                                    aml-tvserver \
-                                    "
-#RDEPENDS_packagegroup-amlogic-dvb = "\
-#                                    aml-dvb \
-#                                    "
+
