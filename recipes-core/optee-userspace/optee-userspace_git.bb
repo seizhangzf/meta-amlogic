@@ -1,16 +1,13 @@
 DESCRIPTION = "optee "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-include optee.inc
+include ../../recipes-shared/optee.inc
 
-PATCHTOOL= "git"
-
-SRC_URI_append = " ${@get_patch_list('${THISDIR}/${PN}')}"
+#SRC_URI_append = " ${@get_patch_list('${THISDIR}/${PN}')}"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
-S = "${WORKDIR}/git"
 PROVIDES = "optee-userspace-securebl32"
 PACKAGES =+ "\
     ${PN}-securebl32 \
