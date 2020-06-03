@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base glib-2.0 zlib aml-mediadrm-widevine "
 DEPENDS += "gstreamer1.0-plugins-bad"
 
-SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstdrmplugin1.x"
+SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin_drm.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstdrmplugin1.x"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-aml-drm-plugins1', '../')}"
