@@ -27,7 +27,11 @@ SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
 
-PR = "r2"
+SOC_BOARD = "default"
+SOC_BOARD_ab301 = "ab301"
+SOC_BOARD_t962x3 = "ab301"
+
+PR = "r3"
 
 S= "${WORKDIR}"
 do_install () {
@@ -38,12 +42,15 @@ do_install () {
     install -m 0755 ${WORKDIR}/img2simg ${D}${bindir}/aml-img-packer/
     install -m 0755 ${WORKDIR}/res_packer ${D}${bindir}/aml-img-packer/
     cd ${WORKDIR}/${SOC_FAMILY}
-    for file in $(find -type f); do
+    for file in $(find -maxdepth 1 -type f); do
             install -m 0644 -D ${file} ${D}${bindir}/aml-img-packer/${SOC_FAMILY}/${file}
         done
     cd ${WORKDIR}/${SOC_FAMILY}/logo_img_files
-    for file in $(find -type f); do
+    for file in $(find -maxdepth 1 -type f); do
             install -m 0644 -D ${file} ${D}${bindir}/aml-img-packer/${SOC_FAMILY}/logo_img_files/${file}
     done
+    if [ -e ${WORKDIR}/${SOC_FAMILY}/logo_img_files/${SOC_BOARD}/bootup.bmp ] ; then
+        install -m 0644 -D ${WORKDIR}/${SOC_FAMILY}/logo_img_files/${SOC_BOARD}/bootup.bmp ${D}${bindir}/aml-img-packer/${SOC_FAMILY}/logo_img_files/bootup.bmp
+    fi
 }
 FILES_${PN} = "${bindir}/aml-img-packer/*"
