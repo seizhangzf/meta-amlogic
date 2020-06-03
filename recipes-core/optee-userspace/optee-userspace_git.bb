@@ -15,6 +15,7 @@ PROVIDES = "optee-userspace-securebl32"
 PACKAGES =+ "\
     ${PN}-securebl32 \
     "
+PR = "${INC_PR}.1"
 
 do_install() {
     mkdir -p ${D}${bindir}
@@ -29,13 +30,12 @@ do_install() {
     cp -rf ${S}/secureos/* ${D}${datadir}/tdk/secureos
 }
 
-FILES_${PN} += " ${libdir}/libteec.so.1.0 \
-                ${libdir}/libteec.so.1"
+FILES_${PN} += " ${libdir}/* "
 
 FILES_${PN} += "${bindir}/tee-supplicant"
 
-FILES_${PN}-dev += "${libdir}/libteec.so "
+FILES_${PN}-dev = ""
 FILES_${PN}-securebl32 += " /usr/share/tdk/secureos/*"
 
-INSANE_SKIP_${PN} = "ldflags dev-so"
+INSANE_SKIP_${PN} = "ldflags dev-so dev-elf"
 

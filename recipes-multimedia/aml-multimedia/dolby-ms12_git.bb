@@ -7,11 +7,8 @@ include aml-multimedia.inc
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
-do_populate_lic[noexec] = "1"
 
 inherit autotools pkgconfig
-SRCREV ?= "${AUTOREV}"
-PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git/dolby_ms12_release/src"
 

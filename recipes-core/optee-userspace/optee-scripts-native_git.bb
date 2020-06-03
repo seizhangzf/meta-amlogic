@@ -12,7 +12,7 @@ COMPATIBLE_HOST = "(i.86|x86_64).*-linux"
 INHIBIT_SYSROOT_STRIP = "1"
 
 S = "${WORKDIR}/git"
-
+PR = "${INC_PR}.1"
 do_install() {
     install -d ${D}${STAGING_DIR_NATIVE}/tdk/scripts
     cp -r ${S}/ta_export/scripts/. ${D}${STAGING_DIR_NATIVE}/tdk/scripts

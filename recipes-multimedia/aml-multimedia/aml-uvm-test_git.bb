@@ -5,9 +5,6 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 
 include aml-multimedia.inc
 
-SRCREV ?= "${AUTOREV}"
-PV = "${SRCPV}"
-
 DEPENDS += " ffmpeg libdrm zlib"
 
 do_configure[noexec] = "1"
