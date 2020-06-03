@@ -25,6 +25,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     grpc \
                                     aml-audio-hal \
                                     aml-audio-service   \
+                                    aml-audio-service-testapps   \
                                     initramfs-meson-boot \
                                     e2fsprogs \
                                     fbscripts \
