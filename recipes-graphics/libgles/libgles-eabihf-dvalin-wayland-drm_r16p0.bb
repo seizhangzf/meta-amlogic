@@ -17,8 +17,10 @@ DEPENDS += "patchelf-native libdrm wayland"
 # Add wayland
 RPROVIDES_${PN} += "libwayland-egl.so"
 
+SRC_URI = "git://${AML_GIT_ROOT}/linux/amlogic/meson_mali.git;protocol=${AML_GIT_PROTOCOL};branch=master;"
 
-SRC_URI = "git://git@openlinux.amlogic.com/yocto/platform/hardware/arm/mali-linux.git;protocol=ssh;branch=r16p0-RDK"
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/meson_mali')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
@@ -45,21 +47,22 @@ do_install() {
     install -m 0755 ${S}/include/EGL_platform/platform_wayland/*.h ${D}${includedir}/EGL
     # gbm headers
     install -m 0755 ${S}/include/EGL_platform/platform_wayland/gbm/gbm.h ${D}${includedir}
-    install -m 0755 ${S}/include/weston-egl-ext.h ${D}${includedir}
+    install -m 0755 ${S}/include/EGL_platform/platform_wayland/weston-egl-ext.h ${D}${includedir}
 
     # Copy the .pc files
     install -d -m 0755 ${D}${libdir}/pkgconfig
-    install -m 0644 ${S}/lib/pkgconfig/common/*.pc ${D}${libdir}/pkgconfig/
+    install -m 0644 ${S}/lib/pkgconfig/*.pc ${D}${libdir}/pkgconfig/
     # gbm.pc
-    install -m 0644 ${S}/lib/pkgconfig/common/gbm/*.pc ${D}${libdir}/pkgconfig/
+    install -m 0644 ${S}/lib/pkgconfig/gbm/*.pc ${D}${libdir}/pkgconfig/
 
     install -d ${D}${libdir}
     install -d ${D}${includedir}
-    #install -m 0644 ${WORKDIR}/libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so 
+    #install -m 0644 ${WORKDIR}/libMali.so ${S}/lib/eabihf/dvalin/${PV}/wayland/drm/libMali.so
 
-    patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so 
+    #patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so
     # wayland lib
-    install -m 0755 ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so ${D}${libdir}/
+    install -m 0755 ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali_rdk.so ${D}${libdir}/libMali.so
+    patchelf --set-soname libMali.so ${D}${libdir}/libMali.so
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4.0
     ln -s libEGL.so.1.4.0 ${D}${libdir}/libEGL.so.1
