@@ -1,4 +1,4 @@
-DEPENDS += "xz-native bc-native"
+DEPENDS += "xz-native bc-native aml-hosttools-native"
 DEPENDS_append_aarch64 = " libgcc"
 KERNEL_CC_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
 KERNEL_LD_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"

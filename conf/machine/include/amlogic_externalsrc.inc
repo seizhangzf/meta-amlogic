@@ -28,6 +28,8 @@ EXTERNALSRC_pn-aml-tvserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_
 EXTERNALSRC_pn-aml-zvbi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi')) else ''}"
 EXTERNALSRC_pn-libamavutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src')) else ''}"
 EXTERNALSRC_pn-vendor-files = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor')) else ''}"
+EXTERNALSRC_pn-aml-img-packer-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
+EXTERNALSRC_pn-aml-hosttools-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
 EXTERNALSRC_pn-devicesettings-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal')) else ''}"
 EXTERNALSRC_pn-iarmmgrs-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal')) else ''}"
 

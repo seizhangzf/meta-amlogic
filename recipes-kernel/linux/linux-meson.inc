@@ -5,7 +5,7 @@ require recipes-kernel/linux/linux-yocto_amlogic.inc
 do_copy_dtb() {
 	cp -f ${B}/arch/${ARCH}/boot/dts/amlogic/*.dtb ${B}/arch/${ARCH}/boot/
     if [ $(echo "${KERNEL_DEVICETREE}" | wc -w ) -gt 1 ]; then
-        ${THISDIR}/armv7a/dtbTool -o ${B}/arch/${ARCH}/boot/multi.dtb -p ${B}/scripts/dtc/ ${B}/arch/${ARCH}/boot/dts/amlogic/
+        dtbTool -o ${B}/arch/${ARCH}/boot/multi.dtb -p ${B}/scripts/dtc/ ${B}/arch/${ARCH}/boot/dts/amlogic/
     else
         install -m 0644 ${B}/arch/${ARCH}/boot/dts/amlogic/${KERNEL_DEVICETREE} ${B}/arch/${ARCH}/boot/multi.dtb
     fi
