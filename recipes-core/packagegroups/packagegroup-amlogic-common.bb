@@ -20,6 +20,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'opencdm', 'wpeframework-ocdm-clearkey', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'alsa-utils', '', d)}\
                                     tinyalsa \
+                                    libamavutils \
                                     aml-amaudioutils \
                                     grpc \
                                     aml-audio-hal \
