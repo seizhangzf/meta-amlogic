@@ -18,8 +18,11 @@ do_install() {
         for file in $(find -type f); do
             install -m 0644 -D ${file} ${D}/etc/tvconfig/${file}
         done
+        install -d ${D}/lib
+        ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/lib/libdolbyms12.so
 }
 
-FILES_${PN} += " /etc/tvconfig/* "
-
+FILES_${PN} = " /etc/tvconfig/* /lib/*"
+FILES_${PN}-dev = " "
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+INSANE_SKIP_${PN} = "dev-so dev-elf"
