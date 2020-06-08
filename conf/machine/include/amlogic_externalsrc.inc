@@ -26,6 +26,12 @@ EXTERNALSRC_pn-media-modules = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/a
 EXTERNALSRC_pn-aml-tvserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_tvserver' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_tvserver')) else ''}"
 #EXTERNALSRC_pn-aml-dvb = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb')) else ''}"
 EXTERNALSRC_pn-aml-zvbi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi')) else ''}"
+EXTERNALSRC_pn-libamavutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src')) else ''}"
+EXTERNALSRC_pn-vendor-files = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor')) else ''}"
+EXTERNALSRC_pn-tuner-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/target' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/target')) else ''}"
+EXTERNALSRC_pn-pq-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/target' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/target')) else ''}"
+EXTERNALSRC_pn-aml-img-packer-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
+EXTERNALSRC_pn-aml-hosttools-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
 EXTERNALSRC_pn-devicesettings-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal')) else ''}"
 EXTERNALSRC_pn-iarmmgrs-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal')) else ''}"
 

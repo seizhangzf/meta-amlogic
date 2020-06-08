@@ -7,8 +7,6 @@ DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base glib-2.0 zlib aml-mediadrm-wi
 DEPENDS += "gstreamer1.0-plugins-bad"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gstreamer_plugin.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-gstdrmplugin1.x"
-#SRC_URI += " file://0001-rdk-dev.patch;patchdir=../"
-#SRC_URI += " file://0001-gst-aml-drm-disable-parse-1-1.patch;patchdir=../"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-aml-drm-plugins1', '../')}"

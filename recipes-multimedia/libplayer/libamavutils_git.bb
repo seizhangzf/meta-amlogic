@@ -1,14 +1,12 @@
 SUMMARY = "aml utils"
 LICENSE = "LGPL-2.0+"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
+
 DEPENDS = "bzip2 virtual/gettext libxml2"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/packages/amlogic/LibPlayer.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-libplayer"
 
-SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
-            file://0002-PD138385-fix-yocto-alsa-hw-set-issue.patch\
-            file://0003-fix-compilation-on-audioplayer.patch\
-            file://0001-only-compile-utils.patch\
-            "
-LIC_FILES_CHKSUM = "file://LICENSE;md5=2f61b7eacf1021ca36600c8932d215b9"
+#For common patches
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libplayer/src')}"
 
 SRCREV ?="${AUTOREV}"
 PV = "git${SRCPV}"
@@ -26,7 +24,8 @@ do_compile () {
 do_install () {
 
 	install -d ${D}/usr/lib
-	#install -D ${D}/usr/include
+	install -d ${D}${includedir}
+    install -m 0644 ${S}/amavutils/include/*.h ${D}${includedir}
     install -m 0644 -D ${S}/amavutils/libamavutils.so ${D}/usr/lib/libamavutils.so
 }
 

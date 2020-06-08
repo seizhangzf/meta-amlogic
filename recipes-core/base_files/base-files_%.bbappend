@@ -23,6 +23,8 @@ mkdir -p ${D}/vendor
 #mkdir -p ${D}/product
 #mkdir -p ${D}/cache
 mkdir -p ${D}/data
+mkdir -p ${D}/vendor/lib
+ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
 
 
 cat >> ${D}${sysconfdir}/fstab <<EOF
@@ -35,7 +37,7 @@ EOF
 
 }
 
-FILES_${PN}_append_tm2 = " /vendor /data"
+FILES_${PN}_append_tm2 = " /vendor/* /data"
 dirs755_append_tm2 = " /vendor /data"
 
 
