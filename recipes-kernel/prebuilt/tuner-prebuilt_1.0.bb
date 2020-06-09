@@ -1,4 +1,4 @@
-inherit module
+#inherit module
 SUMMARY = "Tuner prebuilt drivers"
 
 LICENSE = "AMLOGIC"
@@ -9,7 +9,7 @@ do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
 S = "${WORKDIR}/git"
-
+KERNEL_VERSION = "4.9.113"
 do_install() {
     KO_DIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/tuner
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
@@ -17,4 +17,4 @@ do_install() {
     install -m 0644 ${S}/kernel-module/tuner/*.ko ${KO_DIR}
 }
 
-
+FILES_${PN} = "/lib/modules/${KERNEL_VERSION}/kernel/tuner" 
