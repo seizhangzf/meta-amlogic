@@ -15,5 +15,6 @@ S= "${WORKDIR}/git"
 do_install () {
     install -d ${D}${bindir}
     install -m 0755 ${S}/kernel/dtbTool ${D}${bindir}
+    install -m 0755 ${S}/kernel/mkbootimg.py ${D}${bindir}
 }
 FILES_${PN} = "${bindir}/*"
