@@ -9,4 +9,5 @@ PACKAGES = "\
     "
 
 RDEPENDS_packagegroup-amlogic-dvb = " aml-dvb \
+                                    tuner-prebuilt \
                                      "
