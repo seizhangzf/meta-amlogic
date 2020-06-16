@@ -22,21 +22,11 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 
 PATCHTOOL="git"
-#patches
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/bl33/v2015', 'bl33/v2015')}"
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/fip', 'fip')}"
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/bl31/bin', 'bl31/bin')}"
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/bl2/bin', 'bl2/bin')}"
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/bl30/bin', 'bl30/bin')}"
-#SRC_URI_append = " ${@get_patch_list('${THISDIR}/files_2015/bl31_1.3', 'bl31_1.3/bin')}"
 
 #For common patch
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl33/v2015', 'bl33/v2015')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/fip', 'fip')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl31/bin', 'bl31/bin')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl2/bin', 'bl2/bin')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/bin', 'bl30/bin')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl31_1.3', 'bl31_1.3/bin')}"
+#can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"
 
@@ -73,6 +63,9 @@ DEPENDS_append_tm2 = " riscv-none-gcc-native "
 DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 
 DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
+#override this in customer layer bbappend for customer specific bootloader binaries
+export BL30_ARG = ""
+export BL2_ARG = ""
 
 do_compile () {
     cd ${S}
@@ -88,9 +81,9 @@ do_compile () {
             --in=${STAGING_DIR_TARGET}/usr/share/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
             --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 
-        ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+        ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
     else
-        ./mk ${UBOOT_TYPE%_config}
+        ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
     fi
     cp -rf build/* fip/
 }
