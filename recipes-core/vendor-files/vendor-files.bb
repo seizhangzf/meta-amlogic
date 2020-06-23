@@ -10,14 +10,26 @@ SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 PR = "r0"
 
+SOC = "Amlogic"
+SOC_u212 = "s905x2"
+SOC_ab301 = "t962x3"
+SOC_ab311 = "t962e2"
+
 S = "${WORKDIR}/git/"
 
 do_install() {
-        install -d ${D}/etc/tvconfig
-        cd ${S}/etc/tvconfig
-        for file in $(find -type f); do
-            install -m 0644 -D ${file} ${D}/etc/tvconfig/${file}
-        done
+        if [ -d ${S}/etc/tvconfig/${SOC} ]; then
+			install -d ${D}/etc/tvconfig/pq
+			cd ${S}/etc/tvconfig/${SOC}/tvconfig
+			for file in $(find -type f); do
+				install -m 0644 -D ${file} ${D}/etc/tvconfig/${file}
+			done
+			install -m 0644 -D ${S}/etc/tvconfig/${SOC}/PQ/pq.db ${D}/etc/tvconfig/pq/pq.db
+			install -m 0644 -D ${S}/etc/tvconfig/${SOC}/PQ/pq_default.ini ${D}/etc/tvconfig/pq/pq_default.ini
+			if [ -e ${S}/etc/tvconfig/${SOC}/PQ/overscan.db ]; then
+				install -m 0644 -D ${S}/etc/tvconfig/${SOC}/PQ/overscan.db ${D}/etc/tvconfig/pq/overscan.db
+			fi
+        fi
         install -d ${D}/lib
         ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/lib/libdolbyms12.so
 }
