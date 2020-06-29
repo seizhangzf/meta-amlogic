@@ -10,7 +10,9 @@ SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
 
-PACK_CONF = "${@bb.utils.contains('DISTRO_FEATURES','absystem','aml_upgrade_package_ab.conf','aml_upgrade_package.conf', d)}"
+ABSYS = "${@bb.utils.contains('DISTRO_FEATURES','absystem','_ab','', d)}"
+SBL33 = "${@bb.utils.contains('DISTRO_FEATURES','separate-bl33','_sbl33','', d)}"
+PACK_CONF = "aml_upgrade_package${ABSYS}${SBL33}.conf"
 
 do_aml_pack_32b() {
        if ${@bb.utils.contains('DISTRO_FEATURES','onepass','false','true',d)}; then
