@@ -34,5 +34,4 @@ EXTERNALSRC_pn-aml-img-packer-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/h
 EXTERNALSRC_pn-aml-hosttools-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
 EXTERNALSRC_pn-devicesettings-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal')) else ''}"
 EXTERNALSRC_pn-iarmmgrs-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal')) else ''}"
-EXTERNALSRC_pn-mfrlib-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib')) else ''}"
 
