@@ -12,8 +12,11 @@ PR = "r0"
 
 SOC = "Amlogic"
 SOC_u212 = "s905x2"
+SOC_s905x2 = "s905x2"
 SOC_ab301 = "t962x3"
+SOC_t962x3 = "t962x3"
 SOC_ab311 = "t962e2"
+SOC_t962e2 = "t962e2"
 
 S = "${WORKDIR}/git/"
 
