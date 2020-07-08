@@ -6,6 +6,7 @@ EXTERNALSRC_pn-aml-amaudioutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_
 EXTERNALSRC_pn-dolby-ms12 = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/dolby_ms12_release/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/dolby_ms12_release/src')) else ''}"
 EXTERNALSRC_pn-optee-video-firmware = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/secfirmload/secloadbin' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/secfirmload/secloadbin')) else ''}"
 EXTERNALSRC_pn-aml-uvm-test = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/v4l2-uvm-test' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/v4l2-uvm-test')) else ''}"
+EXTERNALSRC_pn-aml-avsync = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/avsync-lib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/avsync-lib')) else ''}"
 EXTERNALSRC_pn-android-tools-logcat = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-liblog = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/wifi/qualcomm/drivers/qca6174')) else ''}"
