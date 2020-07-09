@@ -8,7 +8,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;pro
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-4.9/amlogic/media_modules')}"
-
+SRC_URI_append = " file://modules-load.sh"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
@@ -24,10 +24,13 @@ do_install() {
     mkdir -p ${MEDIADIR} ${FIRMWAREDIR}
     find ${S}/drivers/ -name *.ko | xargs -i install -m 0666 {} ${MEDIADIR}
     install -m 0666 ${MEDIA_MODULES_UCODE_BIN} ${FIRMWAREDIR}
+    install -d ${D}/etc
+    install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
 }
 
 FILES_${PN} = " \
         /lib/firmware/video/video_ucode.bin \
+        /etc/modules-load.sh \
         "
 
 # Header file provided by a separate package
@@ -56,7 +59,7 @@ MEDIA_CONFIGS = " \
                  "
 
 S = "${WORKDIR}/git"
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/drivers" ${MEDIA_CONFIGS} modules'
+EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/drivers" ${MEDIA_CONFIGS} modules V=1'
 
 KERNEL_MODULE_AUTOLOAD += "amvdec_avs"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h264"
