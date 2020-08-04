@@ -26,10 +26,9 @@ do_install() {
     install -m 0644 aml_avsync_log.h ${D}${includedir}
     install -m 0644 aml_avsync.h ${D}${includedir}
     install -m 0644 libamlavsync.so ${D}${libdir}
-    install -m 0755 avsync_test ${D}${bindir}
 }
 
  
-FILES_${PN} = "${bindir}/* ${libdir}"
+FILES_${PN} = "${bindir}/* ${libdir}/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "ldflags"
