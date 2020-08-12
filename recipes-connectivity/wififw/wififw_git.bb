@@ -30,6 +30,7 @@ PACKAGES =+ "${PN}-ap6181 \
              ${PN}-ap6234 \
              ${PN}-ap6441 \
              ${PN}-ap6212 \
+             ${PN}-ap6256 \
              ${PN}-bcm4354 \
              ${PN}-bcm4356 \
              ${PN}-bcm43458 \
@@ -66,6 +67,11 @@ do_install() {
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6330/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/Wi-Fi/nvram_ap6330.txt ${D}${sysconfdir}/wifi/6330/nvram.txt
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/BT/bcm40183b2.hcd ${D}${sysconfdir}/bluetooth/
+#ap6256
+	mkdir -p ${D}${sysconfdir}/wifi/6256/
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6256/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6256/
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6256/Wi-Fi/nvram_ap6256.txt ${D}${sysconfdir}/wifi/6256/nvram.txt
+
 #ath10k
 	mkdir -p ${D}/lib/firmware/ath10k/QCA6174/hw3.0/
 	mkdir -p ${D}/lib/firmware/ath10k/QCA9888/hw2.0/
@@ -141,6 +147,9 @@ FILES_${PN}-ap6476 = "\
 
 FILES_${PN}-ap6493 = "\
                 ${sysconfdir}/wifi/6493/*"
+
+FILES_${PN}-ap6256 = "\
+                ${sysconfdir}/wifi/6256/*"
 
 FILES_${PN}-ap6398 = "\
                 ${sysconfdir}/wifi/6398/* \
