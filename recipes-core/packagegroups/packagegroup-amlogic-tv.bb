@@ -9,5 +9,5 @@ PACKAGES = "\
     "
 RDEPENDS_packagegroup-amlogic-tv = "\
                                     aml-tvserver \
-                                    aml-hdcprx \
+                                    aml-hdcp \
                                     "

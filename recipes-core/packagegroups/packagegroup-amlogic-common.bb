@@ -43,5 +43,6 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-adbd \
                                     android-tools-logcat \
                                     liblog \
+                                    aml-hdcp \
                                     "
 
