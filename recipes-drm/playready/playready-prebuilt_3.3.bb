@@ -4,7 +4,9 @@ DEPENDS = "optee-userspace bzip2 libxml2"
 RDEPENDS_${PN} = "libbz2"
 
 SRC_URI = "git://${AML_GIT_ROOT_PR}/vendor/playready.git;protocol=${AML_GIT_PROTOCOL};branch=linux-3.x-amlogic"
-SRCREV="bb62070629f62c580b32cdfe2cfaa3928611d6f3"
+#SRCREV="bb62070629f62c580b32cdfe2cfaa3928611d6f3"
+#use head version, ?= conditonal operator can be control revision in external rdk-next.conf like configuration file
+SRCREV ?= "${AUTOREV}"
 
 S = "${WORKDIR}/git/prebuilt-v3.3"
 
