@@ -1,0 +1,16 @@
+diff -rupN git.ori/include/inc/drmcrt.h git/include/inc/drmcrt.h
+--- git.ori/include/inc/drmcrt.h	2017-11-16 14:59:22.504326131 +0530
++++ git/include/inc/drmcrt.h	2017-11-16 14:59:43.356326243 +0530
+@@ -178,12 +178,5 @@ DRM_API DRM_WCHAR* DRM_CALL DRMCRT_wcsns
+ EXIT_PK_NAMESPACE;
+ 
+ 
+-#if !defined( min )
+-    #define min(a,b)    (((a) < (b)) ? (a) : (b))
+-#endif
+-
+-#if !defined( max )
+-    #define max(a,b)    (((a) > (b)) ? (a) : (b))
+-#endif
+ 
+ #endif /* __DRMCRT_H__ */
