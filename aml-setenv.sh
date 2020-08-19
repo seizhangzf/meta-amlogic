@@ -116,6 +116,7 @@ function lunch()
 AML_GIT_ROOT = "git.myamlogic.com"
 AML_GIT_PROTOCOL = "git"
 AML_GIT_ROOT_YOCTO_SUFFIX = "/yocto"
+AML_GIT_ROOT_PR = "git.myamlogic.com"
 EOF
     fi
         export MACHINE=$TARGET_MACHINE
