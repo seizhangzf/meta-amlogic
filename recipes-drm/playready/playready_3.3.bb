@@ -33,5 +33,8 @@ do_install () {
 
 FILES_${PN} += "/lib/teetz/9a04f079-9840-4286-ab92e65be0885f95.ta"
 FILES_${PN} += "/video/*"
+FILES_${PN} += "${libdir}/*"
+
+FILES_SOLIBSDEV = ""
 
 INSANE_SKIP_${PN} = "ldflags dev-so"
