@@ -42,6 +42,8 @@ FILES_${PN} += "${systemd_unitdir}/system/adbd.service"
 
 do_process_patches_in_srccode_tarball() {
     #re-organize the code directory hierarchy, because some pathes can't apply use the default hierarchy after unpack
+    rm -rf ${S}/core
+    rm -rf ${S}/extras
     mv ${S}/android-tools/* ${S}
     rm -rf ${S}/android-tools
 
