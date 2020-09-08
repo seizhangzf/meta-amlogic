@@ -4,10 +4,14 @@ SUMMARY = "Amlogic media driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${THISDIR}/../../license/COPYING.GPL;md5=751419260aa954499f7abaabaa882bbe"
 
-SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-4.9-dev;"
+MBRANCH = "amlogic-4.9-dev"
+MBRANCH_sc2 = "amlogic-4.9-dev-q"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=${MBRANCH};"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-4.9/amlogic/media_modules')}"
+MDIR = "media_modules"
+MDIR_sc2 = "media_modules-q"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-4.9/amlogic/${MDIR}')}"
 SRC_URI_append = " file://modules-load.sh"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
