@@ -13,7 +13,7 @@ PACKAGE_INSTALL += "\
                    rpm \
                    remotecfg \
                    libplayer \
-                   gst-aml-plugins \
+                   gst-plugin-aml-asink \
                    gst-player \
                    playscripts \
                    ntfsprogs \

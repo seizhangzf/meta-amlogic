@@ -41,7 +41,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     wireless-tools \
                                     tinyalsa-tools \
                                     libdrm-tests \
-                                    gst-aml-plugins \
+                                    gst-plugin-aml-asink \
                                     android-tools-adbd \
                                     android-tools-logcat \
                                     liblog \
