@@ -37,4 +37,4 @@ EXTERNALSRC_pn-devicesettings-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/D
 EXTERNALSRC_pn-iarmmgrs-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Iarmmgrs-hal')) else ''}"
 EXTERNALSRC_pn-mfrbootenvtools-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mfrbootenvtools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mfrbootenvtools')) else ''}"
 EXTERNALSRC_pn-mfrlib-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib')) else ''}"
-
+EXTERNALSRC_pn-aml-rdkcryptoapi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/secapi_ca' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/secapi_ca')) else ''}"
