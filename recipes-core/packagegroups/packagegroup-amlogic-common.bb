@@ -47,5 +47,6 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     liblog \
                                     aml-hdcp \
                                     aml-hdcp-load-txfirmware \
+                                    libbinder \
                                     "
 
