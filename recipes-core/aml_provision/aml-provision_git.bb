@@ -25,7 +25,7 @@ do_install() {
     install -d -m 0644 ${D}/lib/teetz
     install -d -m 0644 ${D}/usr/bin
     install -D -m 0755 ${S}/ca/bin/tee_provision ${D}/usr/bin/
-    install -D -m 0755 ${S}/ta/e92a43ab-b4c8-4450-aa12b1516259613b.ta ${D}/lib/teetz/
+    install -D -m 0755 ${S}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
 }
 
 FILES_${PN} += "/lib/teetz/* /usr/bin/*"

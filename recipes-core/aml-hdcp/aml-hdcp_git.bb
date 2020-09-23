@@ -25,7 +25,7 @@ do_install() {
     install -d -m 0644 ${D}/lib/teetz
     install -d -m 0644 ${D}/usr/bin
     install -D -m 0755 ${S}/ca/bin/tee_hdcp ${D}/usr/bin/
-    install -D -m 0755 ${S}/ta/ff2a4bea-ef6d-11e6-89ccd4ae52a7b3b3.ta ${D}/lib/teetz/
+    install -D -m 0755 ${S}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then
         install -D -m 0644 ${WORKDIR}/aml_hdcp.service ${D}${systemd_unitdir}/system/aml_hdcp.service
     fi
