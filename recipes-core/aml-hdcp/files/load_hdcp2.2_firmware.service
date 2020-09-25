@@ -6,9 +6,7 @@ Requires=wpeframework.service
 [Service]
 Type=forking
 User=root
-ExecStartPre=/bin/usleep 1000000
-ExecStartPre=/bin/sh -c 'echo 2 > /sys/class/amhdmitx/amhdmitx0/hdcp_mode'
-ExecStartPre=/bin/usleep 1000000
+ExecStartPre=/bin/usleep 2000000
 ExecStart=/bin/sh -c '/usr/bin/hdcp_tx22 -f /lib/firmware/hdcp/firmware.le&'
 
 [Install]
