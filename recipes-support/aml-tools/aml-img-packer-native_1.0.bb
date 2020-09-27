@@ -15,6 +15,7 @@ SOC_FAMILY_txlx = "txlx"
 SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
+SOC_FAMILY_sc2 = "sc2"
 
 SOC_BOARD = "default"
 SOC_BOARD_ab301 = "ab301"

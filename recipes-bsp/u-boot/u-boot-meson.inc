@@ -15,6 +15,7 @@ UBOOT_LOCALVERSION ?= ""
 # Some versions of u-boot use .bin and others use .img.  By default use .bin
 # but enable individual recipes to change this value.
 UBOOT_SUFFIX ?= "bin"
+UBOOT_SUFFIX_sc2 ?= "bin.signed"
 UBOOT_IMAGE ?= "u-boot-${MACHINE}-${PV}-${PR}.${UBOOT_SUFFIX}"
 UBOOT_BINARY ?= "u-boot.${UBOOT_SUFFIX}"
 UBOOT_SYMLINK ?= "u-boot-${MACHINE}.${UBOOT_SUFFIX}"
@@ -85,9 +86,19 @@ do_deploy () {
         ln -sf ${SPL_IMAGE} ${DEPLOYDIR}/${SPL_BINARY}
         ln -sf ${SPL_IMAGE} ${DEPLOYDIR}/${SPL_SYMLINK}
     fi
-    install ${S}/fip/u-boot.bin.usb.bl2 ${DEPLOYDIR}/
-    install ${S}/fip/u-boot.bin.usb.tpl ${DEPLOYDIR}/
-    install ${S}/fip/u-boot.bin.sd.bin ${DEPLOYDIR}/
+
+    echo "UBOOT_SUFFIX is ${UBOOT_SUFFIX}"
+    case ${UBOOT_SUFFIX} in
+    "bin.signed")
+        install ${S}/fip/u-boot.bin.signed ${DEPLOYDIR}/
+        install ${S}/fip/u-boot.bin.sd.bin.signed ${DEPLOYDIR}/
+    ;;
+    "bin")
+        install ${S}/fip/u-boot.bin.usb.bl2 ${DEPLOYDIR}/
+        install ${S}/fip/u-boot.bin.usb.tpl ${DEPLOYDIR}/
+        install ${S}/fip/u-boot.bin.sd.bin ${DEPLOYDIR}/
+    ;;
+    esac
 }
 
 addtask deploy before do_build after do_compile
