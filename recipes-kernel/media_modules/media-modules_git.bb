@@ -58,6 +58,7 @@ MEDIA_CONFIGS = " \
                  CONFIG_AMLOGIC_MEDIA_VDEC_AVS2=m \
                  CONFIG_AMLOGIC_MEDIA_VENC_H264=m \
                  CONFIG_AMLOGIC_MEDIA_VENC_H265=m \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
                  CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION=y \
                  CONFIG_AMLOGIC_MEDIA_GE2D=y \
                  "
