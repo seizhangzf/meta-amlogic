@@ -5,6 +5,7 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
         media-modules \
         optee-linux-driver \
         gpu \
+        dma-buf-test-exporter \
         "
 MACHINE_EXTRA_RRECOMMENDS = " kernel-modules kernel-devicetree"
 EXTRA_IMAGEDEPENDS += "u-boot"
@@ -20,6 +21,7 @@ MACHINE_FEATURES = "usbgadget usbhost vfat "
 IMAGE_BOOT_FILES ?= "u-boot.${UBOOT_SUFFIX}"
 INITRAMFS_FSTYPES = "cpio.gz"
 KERNEL_MODULE_AUTOLOAD += "mali"
+KERNEL_MODULE_AUTOLOAD += "dma-buf-test-exporter"
 TDK_VERSION = "v2.4"
 TDK_VERSION_sc2 = "v3.8"
 
