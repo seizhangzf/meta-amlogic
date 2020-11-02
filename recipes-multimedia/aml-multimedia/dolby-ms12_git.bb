@@ -25,6 +25,12 @@ FLOAT_ABI = "${@bb.utils.contains('TARGET_FPU', 'hard', 'hard', 'softfp', d)}"
 ARCH = "${@get_arch("${TUNE_FEATURES}", d).split()[0]}"
 CC_ABI = "${@get_arch("${TUNE_FEATURES}", d).split()[1]}"
 
+python () {
+    if d.getVar('ARCH') == 'aarch64':
+        d.setVar('FLOAT_ABI', '')
+}
+
+
 do_install() {
     install -d -m 0644 ${D}${bindir}
     install -d -m 0644 ${D}${libdir}
