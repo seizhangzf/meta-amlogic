@@ -42,6 +42,8 @@ FILES_${PN} += "${systemd_unitdir}/system/adbd.service"
 
 do_process_patches_in_srccode_tarball() {
     #re-organize the code directory hierarchy, because some pathes can't apply use the default hierarchy after unpack
+    rm -rf ${S}/core
+    rm -rf ${S}/extras
     mv ${S}/android-tools/* ${S}
     rm -rf ${S}/android-tools
 
@@ -68,14 +70,11 @@ do_install(){
     install -m 0644 ${S}/adbd.service ${D}/${systemd_unitdir}/system 
     echo "MACHINE_ARCH is ${MACHINE_ARCH}"
     case ${MACHINE_ARCH} in
-        "mesonc1_ae409")
+        "mesonc1_ae409" | "mesonc1_ae401" | "mesonc1_ae400")
             sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
-        "mesonc1_ae401")
-            sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
-        ;;
-        "mesonc1_ae400")
-            sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
+        "mesonsc2_ah212" | "mesonsc2_ah219")
+            sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
     esac
 }

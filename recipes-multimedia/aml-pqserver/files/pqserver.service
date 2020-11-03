@@ -1,10 +1,10 @@
 [Unit]
-Description=TV Server Startup
+Description=PQ Server Startup
 After=binder.service
 
 [Service]
 User=root
-ExecStart=/usr/bin/tvservice
+ExecStart=/usr/bin/pqservice
 
 [Install]
 WantedBy=multi-user.target

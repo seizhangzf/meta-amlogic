@@ -17,7 +17,6 @@ PR = "${INC_PR}.1"
 do_install() {
     mkdir -p ${D}${bindir}
     mkdir -p ${D}${includedir}
-    mkdir -p ${D}${datadir}/tdk/secureos
     install -m 0755 ${S}/ca_export_arm/bin/tee-supplicant ${D}${bindir}
 
     mkdir -p ${D}${libdir}
@@ -27,7 +26,14 @@ do_install() {
 
     ln -s libteec.so.1 ${D}${libdir}/libteec.so
     ln -s libteec.so.1.0 ${D}${libdir}/libteec.so.1
-    cp -rf ${S}/secureos/* ${D}${datadir}/tdk/secureos
+
+    echo "TDK_VERSION is ${TDK_VERSION}"
+    case ${TDK_VERSION} in
+    "2.4.4")
+        mkdir -p ${D}${datadir}/tdk/secureos
+        cp -rf ${S}/secureos/* ${D}${datadir}/tdk/secureos
+    ;;
+    esac
 }
 
 FILES_${PN} += " ${libdir}/* "

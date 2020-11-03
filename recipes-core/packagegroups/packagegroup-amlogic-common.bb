@@ -46,5 +46,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-logcat \
                                     liblog \
                                     aml-hdcp \
+                                    aml-hdcp-load-txfirmware \
+                                    libbinder \
                                     "
 

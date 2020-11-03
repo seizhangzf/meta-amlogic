@@ -1,0 +1,11 @@
+[Unit]
+Description=binder servicemanager
+
+[Service]
+ExecStart=/usr/bin/servicemanager
+ExecStop=/bin/kill $MAINPID
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+

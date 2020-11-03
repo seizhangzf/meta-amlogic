@@ -15,7 +15,13 @@ PR = "${INC_PR}.1"
 do_install() {
     install -d ${D}${STAGING_DIR_NATIVE}/tdk/scripts
     cp -r ${S}/ta_export/scripts/. ${D}${STAGING_DIR_NATIVE}/tdk/scripts
-    cp -r ${S}/ta_export/keys/. ${D}${STAGING_DIR_NATIVE}/tdk/keys
+
+    echo "TDK_VERSION is ${TDK_VERSION}"
+    case ${TDK_VERSION} in
+    "2.4.4")
+        cp -r ${S}/ta_export/keys/. ${D}${STAGING_DIR_NATIVE}/tdk/keys
+    ;;
+    esac
 }
 
 FILES_${PN} = "${STAGING_DIR_NATIVE}/tdk/scripts/* ${STAGING_DIR_NATIVE}/tdk/keys/*  "
