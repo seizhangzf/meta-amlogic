@@ -58,9 +58,12 @@ MEDIA_CONFIGS = " \
                  CONFIG_AMLOGIC_MEDIA_VDEC_AVS2=m \
                  CONFIG_AMLOGIC_MEDIA_VENC_H264=m \
                  CONFIG_AMLOGIC_MEDIA_VENC_H265=m \
-                 CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
                  CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION=y \
                  CONFIG_AMLOGIC_MEDIA_GE2D=y \
+                 "
+
+MEDIA_CONFIGS_append_tm2 = " \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
                  "
 
 S = "${WORKDIR}/git"
@@ -88,3 +91,4 @@ KERNEL_MODULE_AUTOLOAD += "amvdec_ports"
 #KERNEL_MODULE_AUTOLOAD += "aml_hardware_dmx"
 #KERNEL_MODULE_AUTOLOAD += "vpu"
 KERNEL_MODULE_AUTOLOAD += "encoder"
+KERNEL_MODULE_AUTOLOAD_append_tm2 = " amvdec_av1"

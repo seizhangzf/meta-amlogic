@@ -9,7 +9,7 @@ SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 SRC_URI +="file://tvserver.service"
 
-DEPENDS = " libbinder sqlite3 aml-audio-service "
+DEPENDS = " libbinder sqlite3 aml-audio-service"
 do_configure[noexec] = "1"
 inherit autotools pkgconfig systemd
 S="${WORKDIR}/git"

@@ -27,11 +27,11 @@ do_compile() {
 do_install() {
    install -d ${D}${libdir} 
    install -d ${D}${bindir}
-   #install -d ${D}${includedir}
+   install -d ${D}${includedir}
 
     cd ${S}
     oe_runmake  install
-    #install -m 0644 ${S}/client/include/*.h ${D}${includedir}
+    install -m 0644 ${S}/client/include/*.h ${D}${includedir}
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then
         install -D -m 0644 ${WORKDIR}/pqserver.service ${D}${systemd_unitdir}/system/pqserver.service
     fi

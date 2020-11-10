@@ -26,7 +26,7 @@ ARCH = "${@get_arch("${TUNE_FEATURES}", d).split()[0]}"
 CC_ABI = "${@get_arch("${TUNE_FEATURES}", d).split()[1]}"
 
 python () {
-    if d.getVar('ARCH') == 'aarch64':
+    if d.getVar('ARCH', True) == 'aarch64':
         d.setVar('FLOAT_ABI', '')
 }
 
