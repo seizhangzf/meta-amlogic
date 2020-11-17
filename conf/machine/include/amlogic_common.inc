@@ -25,8 +25,12 @@ TDK_VERSION_sc2 = "v3.8"
 
 AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
 AML_GIT_PROTOCOL ?= "ssh"
+
 AML_GIT_ROOT_YOCTO_SUFFIX ?= ""
 AML_GIT_ROOT_PR ?= "git@openlinux.amlogic.com"
+AML_GIT_ROOT_WV ?= "git@openlinux.amlogic.com/yocto"
+AML_GIT_ROOT_PROTOCOL ?= "ssh"
+
 LINUXLIBCVERSION ?= "4.9%"
 PREFERRED_VERSION_libdrm = "2.4.100"
 PREFERRED_VERSION_u-boot = "v2015.%"
