@@ -35,9 +35,14 @@ do_install() {
         fi
         install -d ${D}/lib
         ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/lib/libdolbyms12.so
+        if [ -d ${S}/logo_files/${SOC} ]; then
+			install -d ${D}/logo_files
+			install -m 0644 -D ${S}/logo_files/${SOC}/bootup.bmp ${D}/logo_files/bootup.bmp
+        fi
+
 }
 
-FILES_${PN} = " /etc/tvconfig/* /lib/*"
+FILES_${PN} = " /etc/tvconfig/* /lib/* logo_files/*"
 FILES_${PN}-dev = " "
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INSANE_SKIP_${PN} = "dev-so dev-elf"

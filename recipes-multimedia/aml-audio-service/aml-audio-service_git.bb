@@ -27,6 +27,9 @@ RDEPENDS_${PN}-testapps += " ${PN}"
 export TARGET_DIR = "${D}"
 export HOST_DIR = "${STAGING_DIR_NATIVE}/usr/"
 
+#To remove --as-needed compile option which is causing issue with linking
+#ASNEEDED = ""
+#PARALLEL_MAKE = ""
 do_compile() {
     oe_runmake  -C ${S} all
 }
@@ -40,6 +43,8 @@ do_install() {
         install -m 755 -D ${S}/audio_client_test -t ${D}/usr/bin/
         install -m 755 -D ${S}/audio_client_test_ac3 ${D}/usr/bin/
         install -m 755 -D ${S}/halplay ${D}/usr/bin/
+        install -m 755 -D ${S}/hal_param ${D}/usr/bin/
+        install -m 755 -D ${S}/master_vol ${D}/usr/bin/
         install -m 755 -D ${S}/dap_setting ${D}/usr/bin/
         install -m 755 -D ${S}/digital_mode ${D}/usr/bin/
         install -m 755 -D ${S}/speaker_delay ${D}/usr/bin/
@@ -66,6 +71,8 @@ FILES_${PN}-testapps = "\
                         ${bindir}/audio_client_test \
                         ${bindir}/audio_client_test_ac3 \
                         ${bindir}/halplay \
+                        ${bindir}/hal_param \
+                        ${bindir}/master_vol \
                         ${bindir}/dap_setting \
                         ${bindir}/digital_mode \
                         ${bindir}/speaker_delay \
