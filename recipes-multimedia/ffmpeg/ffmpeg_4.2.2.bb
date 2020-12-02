@@ -84,7 +84,7 @@ PACKAGECONFIG[zlib] = "--enable-zlib,--disable-zlib,zlib"
 USE_NONFREE = "${@bb.utils.contains_any('PACKAGECONFIG', [ 'openssl' ], 'yes', '', d)}"
 
 def cpu(d):
-    for arg in (d.getVar('TUNE_CCARGS') or '').split():
+    for arg in (d.getVar('TUNE_CCARGS', True) or '').split():
         if arg.startswith('-mcpu='):
             return arg[6:]
     return 'generic'
