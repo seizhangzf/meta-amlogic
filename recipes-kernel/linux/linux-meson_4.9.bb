@@ -3,14 +3,12 @@ require linux-meson.inc
 FILESEXTRAPATHS_prepend := "${THISDIR}/4.9:"
 FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/aarch64:"
 FILESEXTRAPATHS_prepend_armv7a := "${THISDIR}/armv7a:"
+FILESEXTRAPATHS_prepend_sc2 := "${THISDIR}/sc2:"
 
 KBRANCH = "amlogic-4.9-dev"
 KBRANCH_sc2 = "amlogic-4.9-dev-q"
 SRC_URI = "git://${AML_GIT_ROOT}/kernel/common.git;protocol=${AML_GIT_PROTOCOL};branch=${KBRANCH};"
-
-KBUILD_DEFCONFIG = "defconfig"
-KBUILD_DEFCONFIG_sc2 = "defconfig_sc2"
-#SRC_URI_append = " file://${KBUILD_DEFCONFIG}"
+SRC_URI_append = " file://defconfig"
 
 SRC_URI_append = " file://meson.scc \
             file://meson.cfg \
@@ -38,8 +36,3 @@ PV = "${LINUX_VERSION}+git${SRCPV}"
 COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*|mesonsc2_*)"
 
 S = "${WORKDIR}/git"
-
-do_kernel_metadata_prepend() {
-    echo "use ${KBUILD_DEFCONFIG} to compile kernel"
-    cp ${THISDIR}/armv7a/${KBUILD_DEFCONFIG} ${S}/arch/${ARCH}/configs/
-}

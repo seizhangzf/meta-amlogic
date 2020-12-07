@@ -46,3 +46,4 @@ EXTERNALSRC_pn-mfrbootenvtools-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mfrb
 EXTERNALSRC_pn-mfrlib-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Mfrlib')) else ''}"
 EXTERNALSRC_pn-aml-rdkcryptoapi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/secapi_ca' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/secapi_ca')) else ''}"
 EXTERNALSRC_pn-libbinder = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib/libbinder' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib/libbinder')) else ''}"
+EXTERNALSRC_pn-wifi-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
