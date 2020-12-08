@@ -24,7 +24,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendo
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
-VER = "r16p0"
+VER = "r25p0"
 
 S = "${WORKDIR}/git"
 
@@ -61,7 +61,7 @@ do_install() {
 
     #patchelf --set-soname libMali.so ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so
     # wayland lib
-    install -m 0755 ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali_rdk.so ${D}${libdir}/libMali.so
+    install -m 0755 ${S}/lib/eabihf/dvalin/${VER}/wayland/drm/libMali.so ${D}${libdir}/libMali.so
     patchelf --set-soname libMali.so ${D}${libdir}/libMali.so
 
     ln -s libMali.so ${D}${libdir}/libEGL.so.1.4.0
