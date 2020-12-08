@@ -70,6 +70,12 @@ BBLAYERS =+ "\${RDKROOT}/meta-meson"
 EOF
 fi
 
+# Add meta-rdk-amazon only if a machine configuration choosed from different layer
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-rdk-amazon[^-]') -eq 0  ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-rdk-amazon"
+EOF
+fi
 
 # Add meta-openembedded/meta-initramfs only if a machine configuration choosed from different layer
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-initramfs[^-]') -eq 0 ]; then
