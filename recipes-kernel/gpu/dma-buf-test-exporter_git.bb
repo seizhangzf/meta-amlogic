@@ -9,10 +9,11 @@ SRCREV = "${AUTOREV}"
 VER = "r25p0"
 PV = "${VER}git${SRCPV}"
 
-PROVIDES += "virtual/gpu"
-RPROVIDES_${PN} += "gpu"
+PROVIDES += "dma-buf-test-exporter"
+DEPENDS += "virtual/gpu"
+
 GPU_ARCH = "bifrost"
-GPU_DRV_SRC = "${S}/${GPU_ARCH}/${VER}/kernel/drivers/gpu/arm/midgard"
+DMABUF_EXPORTER_DRV_SRC = "${S}/${GPU_ARCH}/${VER}/kernel/drivers/base/dma_buf_test_exporter"
 
 do_configure[noexec] = "1"
 
@@ -20,16 +21,15 @@ do_install() {
     GPUDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/arm/gpu
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${GPUDIR}
-    install -m 0666 ${GPU_DRV_SRC}/mali_kbase.ko ${GPUDIR}/mali.ko
+    install -m 0666 ${DMABUF_EXPORTER_DRV_SRC}/dma-buf-test-exporter.ko ${GPUDIR}/dma-buf-test-exporter.ko
 }
 
-FILES_${PN} = "mali.ko"
+FILES_${PN} = "dma-buf-test-exporter.ko"
 # Header file provided by a separate package
 DEPENDS += ""
 
 S = "${WORKDIR}/git"
-EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M=${GPU_DRV_SRC} \
+EXTRA_OEMAKE='KDIR=${STAGING_KERNEL_DIR} -C ${DMABUF_EXPORTER_DRV_SRC} \
               EXTRA_CFLAGS="-I${S}/${GPU_ARCH}/${VER}/kernel/include \
               -DCONFIG_MALI_PLATFORM_DEVICETREE -DCONFIG_MALI_MIDGARD_DVFS -DCONFIG_MALI_BACKEND=gpu" \
-              CONFIG_MALI_MIDGARD=m CONFIG_MALI_PLATFORM_DEVICETREE=y CONFIG_MALI_MIDGARD_DVFS=y CONFIG_MALI_BACKEND=gpu modules'
-
+              CONFIG_MALI_MIDGARD=m CONFIG_MALI_PLATFORM_DEVICETREE=y CONFIG_MALI_MIDGARD_DVFS=y CONFIG_MALI_BACKEND=gpu'
