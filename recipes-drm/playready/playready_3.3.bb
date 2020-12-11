@@ -16,6 +16,8 @@ SRCREV ?= "${AUTOREV}"
 
 S = "${WORKDIR}/git"
 
+PATCHTOOL="git"
+
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
