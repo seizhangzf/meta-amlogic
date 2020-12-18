@@ -24,6 +24,8 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31_1.3.git;protocol=${AM
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl32.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-3.8.0;destsuffix=uboot-repo/bl32_3.8/bin;name=bl32-3.8"
 SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-2019;destsuffix=uboot-repo/bl33/v2019;name=bl33"
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
+SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl40/dummy.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl40/bin;name=bl40"
+SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/soc/templates;name=soc-templates"
 
 PATCHTOOL="git"
 
@@ -42,8 +44,12 @@ SRCREV_bl31-1.3 ?="${AUTOREV}"
 SRCREV_bl32-3.8 ?="${AUTOREV}"
 SRCREV_bl33 ?="${AUTOREV}"
 SRCREV_fip ?="${AUTOREV}"
+SRCREV_bl40 ?="${AUTOREV}"
+SRCREV_soc-templates ?="${AUTOREV}"
 
 S = "${WORKDIR}/uboot-repo"
+#Below format will cause build failure due to too long filename for mktemp
+#SRCREV_FORMAT = "bl2_bl30_src_ao_bl31_bl31-1.3_bl32-3.8_bl33_fip_bl40_soc-templates"
 SRCREV_FORMAT = "bl2_bl30_src_ao_bl31_bl31-1.3_bl32-3.8_bl33_fip"
 PR = "r1"
 PV = "v2019.01+git${SRCPV}"
