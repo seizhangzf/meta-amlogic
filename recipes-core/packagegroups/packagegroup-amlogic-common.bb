@@ -43,7 +43,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     libdrm-tests \
                                     gst-plugin-aml-asink \
                                     android-tools-adbd \
-                                    wifi-amlogic \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'one-rdk', '', 'wifi-amlogic', d)}\
                                     android-tools-logcat \
                                     liblog \
                                     aml-hdcp \
