@@ -20,6 +20,7 @@ EXTERNALSRC_pn-optee-userspace_sc2 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlog
 EXTERNALSRC_pn-optee-scripts-native_sc2 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8')) else ''}"
 EXTERNALSRC_pn-optee-linux-driver_sc2 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8')) else ''}"
 EXTERNALSRC_pn-aml-mediadrm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
+EXTERNALSRC_pn-aml-mediahal-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/mediahal-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/mediahal-sdk')) else ''}"
 EXTERNALSRC_pn-playready = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/playready-bin' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/playready-bin')) else ''}"
 EXTERNALSRC_pn-gst-plugin-aml-asink = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-aml-asink' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-aml-asink')) else ''}"
 EXTERNALSRC_pn-gst-aml-drm-plugins = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0')) else ''}"
