@@ -1,0 +1,58 @@
+From c59ba2277d23f914c4bee93f2d1997468619c9e0 Mon Sep 17 00:00:00 2001
+From: "jiabin.chen" <jiabin.chen@amlogic.com>
+Date: Fri, 10 Jan 2020 13:59:00 +0800
+Subject: [PATCH] BT: add qca6174 bt support [2/3]
+
+PD#SWPL-18068
+
+Problem:
+Buildroot SM1-AC214 BT Bringup
+
+Solution:
+modified tools/hciattach_rome.h
+
+Verify:
+SM1-AC214
+
+Change-Id: Ie4d841e789309de0de199408a9edb97a9b58d7c6
+Signed-off-by: jiabin.chen <jiabin.chen@amlogic.com>
+---
+ tools/hciattach_rome.h | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/tools/hciattach_rome.h b/tools/hciattach_rome.h
+index 2c0d991cb..3369222b8 100644
+--- a/tools/hciattach_rome.h
++++ b/tools/hciattach_rome.h
+@@ -204,17 +204,17 @@ typedef struct
+ #define EXTRACT_BYTE(val, pos)      (char) (((val) >> (8 * (pos))) & 0xFF)
+ #define CALC_SEG_SIZE(len, max)   ((plen) % (max))?((plen/max)+1) : ((plen) / (max))
+ 
+-#define ROME_FW_PATH        "/lib/firmware/rampatch.img"
+-#define ROME_RAMPATCH_TLV_PATH      "/lib/firmware/rampatch_tlv.img"
+-#define ROME_NVM_TLV_PATH         "/lib/firmware/nvm_tlv.bin"
+-#define ROME_RAMPATCH_TLV_1_0_3_PATH    "/lib/firmware/rampatch_tlv_1.3.tlv"
+-#define ROME_NVM_TLV_1_0_3_PATH         "/lib/firmware/nvm_tlv_1.3.bin"
+-#define ROME_RAMPATCH_TLV_2_0_1_PATH    "/lib/firmware/rampatch_tlv_2.1.tlv"
+-#define ROME_NVM_TLV_2_0_1_PATH         "/lib/firmware/nvm_tlv_2.1.bin"
+-#define ROME_RAMPATCH_TLV_3_0_0_PATH    "/lib/firmware/rampatch_tlv_3.0.tlv"
+-#define ROME_NVM_TLV_3_0_0_PATH         "/lib/firmware/nvm_tlv_3.0.bin"
+-#define ROME_RAMPATCH_TLV_3_0_2_PATH    "/lib/firmware/rampatch_tlv_3.2.tlv"
+-#define ROME_NVM_TLV_3_0_2_PATH         "/lib/firmware/nvm_tlv_3.2.bin"
++#define ROME_FW_PATH        "/lib/firmware/qca_bt/rampatch.img"
++#define ROME_RAMPATCH_TLV_PATH      "/lib/firmware/qca_bt/rampatch_tlv.img"
++#define ROME_NVM_TLV_PATH         "/lib/firmware/qca_bt/nvm_tlv.bin"
++#define ROME_RAMPATCH_TLV_1_0_3_PATH    "/lib/firmware/qca_bt/rampatch_tlv_1.3.tlv"
++#define ROME_NVM_TLV_1_0_3_PATH         "/lib/firmware/qca_bt/nvm_tlv_1.3.bin"
++#define ROME_RAMPATCH_TLV_2_0_1_PATH    "/lib/firmware/qca_bt/rampatch_tlv_2.1.tlv"
++#define ROME_NVM_TLV_2_0_1_PATH         "/lib/firmware/qca_bt/nvm_tlv_2.1.bin"
++#define ROME_RAMPATCH_TLV_3_0_0_PATH    "/lib/firmware/qca_bt/rampatch_tlv_3.0.tlv"
++#define ROME_NVM_TLV_3_0_0_PATH         "/lib/firmware/qca_bt/nvm_tlv_3.0.bin"
++#define ROME_RAMPATCH_TLV_3_0_2_PATH    "/lib/firmware/qca_bt/rampatch_tlv_3.2.tlv"
++#define ROME_NVM_TLV_3_0_2_PATH         "/lib/firmware/qca_bt/nvm_tlv_3.2.bin"
+ #define TF_RAMPATCH_TLV_1_0_0_PATH      "/lib/firmware/qca/rampatch_tlv_tf_1.0.tlv"
+ #define TF_NVM_TLV_1_0_0_PATH           "/lib/firmware/qca/nvm_tlv_tf_1.0.bin"
+ #define TF_RAMPATCH_TLV_1_0_1_PATH      "/lib/firmware/qca/rampatch_tlv_tf_1.1.tlv"
+-- 
+2.29.2
+
