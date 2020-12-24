@@ -52,3 +52,5 @@ EXTERNALSRC_pn-libbinder = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_com
 EXTERNALSRC_pn-wifi-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-netflix-aml = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/netflix' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/netflix')) else ''}"
 EXTERNALSRC_pn-wpeframework-plugin-netflix = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/wpe-plugin-netflix' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/wpe-plugin-netflix')) else ''}"
+EXTERNALSRC_pn-wpeframework-ocdm-playready = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-playready' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-playready')) else ''}"
+EXTERNALSRC_pn-wpeframework-ocdm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine')) else ''}"
