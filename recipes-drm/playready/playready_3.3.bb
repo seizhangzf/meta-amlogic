@@ -1,6 +1,6 @@
 SUMMARY = "amlogic playready"
 LICENSE = "CLOSED"
-DEPENDS = "optee-userspace bzip2 libxml2"
+DEPENDS = "optee-userspace bzip2 libxml2 aml-secmem aml-mediahal-sdk"
 RDEPENDS_${PN} = "libbz2"
 
 FILESEXTRAPATHS_preppend := "${THISDIR}/files/:"

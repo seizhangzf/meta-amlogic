@@ -49,5 +49,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     aml-hdcp \
                                     aml-hdcp-load-txfirmware \
                                     libbinder \
+                                    aml-mediahal-sdk \
+                                    aml-secmem \
                                     "
 
