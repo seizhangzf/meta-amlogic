@@ -26,5 +26,5 @@ do_install() {
     install -D -m 0644 ${S}/libsecmem-bin/prebuilt/${ARM_TARGET}/libsecmem.so ${D}/usr/lib
 }
 
-FILES_${PN} = "${libdir}/* ${bindir}/* ${includedir}/*"
+FILES_${PN} = "${libdir}/* ${bindir}/* ${includedir}/* /lib/teetz/*"
 FILES_${PN}-dev = "${includedir}/* "
