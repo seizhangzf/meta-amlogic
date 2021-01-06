@@ -48,7 +48,7 @@ if [ -z "$OEROOT" ]; then
     OEROOT=$(readlink -f "$OEROOT")
 fi
 unset THIS_SCRIPT
-export TEMPLATECONF=$OEROOT/meta-meson/conf
+export TEMPLATECONF=$OEROOT/meta-amlogic/conf
 export OEROOT
 export BITBAKEDIR=$OEROOT/poky/bitbake
 cp $OEROOT/poky/.templateconf $OEROOT
@@ -58,7 +58,7 @@ cp $OEROOT/poky/.templateconf $OEROOT
     return 1
 }
 
-. $OEROOT/meta-meson/scripts/setup-environment-internal
+. $OEROOT/meta-amlogic/scripts/setup-environment-internal
 
 unset OEROOT
 

@@ -25,8 +25,10 @@ KERNEL_MODULE_AUTOLOAD += "dma-buf-test-exporter"
 TDK_VERSION = "v2.4"
 TDK_VERSION_sc2 = "v3.8"
 
-AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
-AML_GIT_PROTOCOL ?= "ssh"
+#AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
+#AML_GIT_PROTOCOL ?= "ssh"
+AML_GIT_ROOT ?= "code.rdkcentral.com/r/collaboration/soc/amlogic"
+AML_GIT_PROTOCOL ?= "https"
 
 AML_GIT_ROOT_YOCTO_SUFFIX ?= ""
 AML_GIT_ROOT_PR ?= "git@openlinux.amlogic.com"

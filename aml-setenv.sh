@@ -111,13 +111,13 @@ function choose_type()
 function lunch()
 {
 	if [ -n "$TARGET_MACHINE" ]; then
-		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
+		MACHINE=$TARGET_MACHINE source meta-amlogic/setup-environment $BUILD_DIR
     if [ $LOCAL_BUILD == "1" ];then
         cat >> $BUILD_DIR/conf/local.conf <<EOF
 
-AML_GIT_ROOT = "git.myamlogic.com"
-AML_GIT_PROTOCOL = "git"
-AML_GIT_ROOT_YOCTO_SUFFIX = "/yocto"
+#AML_GIT_ROOT = "git.myamlogic.com"
+#AML_GIT_PROTOCOL = "git"
+#AML_GIT_ROOT_YOCTO_SUFFIX = "/yocto"
 AML_GIT_ROOT_PR = "git.myamlogic.com"
 AML_GIT_ROOT_WV = "git.myamlogic.com"
 AML_GIT_ROOT_PROTOCOL = "git"

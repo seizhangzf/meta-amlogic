@@ -1,0 +1,174 @@
+From 98c0926254c51ee259e7e1ad520fce5bfcd0f821 Mon Sep 17 00:00:00 2001
+From: johnny lee <johnny.lee@amlogic.com>
+Date: Tue, 8 Sep 2020 13:15:24 +0800
+Subject: [PATCH 09/10] Revert "tvconfig: move config file from vendor
+ partition to ODM partition. [1/1]"
+
+This reverts commit 48b87ac64309cdf885d843b3ff249e059be123c2.
+
+Change-Id: I54dcd9e31dac8e4030b0d367b0c104c62a032d84
+Signed-off-by: johnny lee <johnny.lee@amlogic.com>
+---
+ board/amlogic/configs/tl1_skt_v1.h          | 4 ++--
+ board/amlogic/configs/tl1_t309_v1.h         | 4 ++--
+ board/amlogic/configs/tl1_x301_v1.h         | 4 ++--
+ board/amlogic/configs/tm2_t962e2_ab311_v1.h | 4 ++--
+ board/amlogic/configs/tm2_t962e2_ab319_v1.h | 4 ++--
+ board/amlogic/configs/tm2_t962x3_ab301_v1.h | 4 ++--
+ board/amlogic/configs/tm2_t962x3_ab309_v1.h | 4 ++--
+ board/amlogic/configs/tm2_t962x3_t312_v1.h  | 4 ++--
+ board/amlogic/configs/tm2_v901d_t501_v1.h   | 4 ++--
+ common/ini/model.c                          | 2 +-
+ 10 files changed, 19 insertions(+), 19 deletions(-)
+
+diff --git a/board/amlogic/configs/tl1_skt_v1.h b/board/amlogic/configs/tl1_skt_v1.h
+index 17e3013e79..a46097c790 100644
+--- a/board/amlogic/configs/tl1_skt_v1.h
++++ b/board/amlogic/configs/tl1_skt_v1.h
+@@ -122,8 +122,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tl1_t309_v1.h b/board/amlogic/configs/tl1_t309_v1.h
+index f48dfc6355..9cbaa1bcad 100644
+--- a/board/amlogic/configs/tl1_t309_v1.h
++++ b/board/amlogic/configs/tl1_t309_v1.h
+@@ -124,8 +124,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tl1_x301_v1.h b/board/amlogic/configs/tl1_x301_v1.h
+index a1b45ac723..4c645dcdcc 100644
+--- a/board/amlogic/configs/tl1_x301_v1.h
++++ b/board/amlogic/configs/tl1_x301_v1.h
+@@ -127,8 +127,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_t962e2_ab311_v1.h b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
+index 05e9f546cd..cd0758f834 100644
+--- a/board/amlogic/configs/tm2_t962e2_ab311_v1.h
++++ b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
+@@ -137,8 +137,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_t962e2_ab319_v1.h b/board/amlogic/configs/tm2_t962e2_ab319_v1.h
+index 9607e6a735..510d4af063 100644
+--- a/board/amlogic/configs/tm2_t962e2_ab319_v1.h
++++ b/board/amlogic/configs/tm2_t962e2_ab319_v1.h
+@@ -132,8 +132,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_t962x3_ab301_v1.h b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
+index 776477d749..190309e039 100644
+--- a/board/amlogic/configs/tm2_t962x3_ab301_v1.h
++++ b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
+@@ -128,8 +128,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_t962x3_ab309_v1.h b/board/amlogic/configs/tm2_t962x3_ab309_v1.h
+index 1b96f0f587..c1a98a4993 100644
+--- a/board/amlogic/configs/tm2_t962x3_ab309_v1.h
++++ b/board/amlogic/configs/tm2_t962x3_ab309_v1.h
+@@ -126,8 +126,8 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_t962x3_t312_v1.h b/board/amlogic/configs/tm2_t962x3_t312_v1.h
+index 722cea831e..0a3fa787a7 100644
+--- a/board/amlogic/configs/tm2_t962x3_t312_v1.h
++++ b/board/amlogic/configs/tm2_t962x3_t312_v1.h
+@@ -128,8 +128,8 @@
+         "powermode=standby\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/board/amlogic/configs/tm2_v901d_t501_v1.h b/board/amlogic/configs/tm2_v901d_t501_v1.h
+index 0e85f3bc8b..acc2209ade 100644
+--- a/board/amlogic/configs/tm2_v901d_t501_v1.h
++++ b/board/amlogic/configs/tm2_v901d_t501_v1.h
+@@ -127,8 +127,8 @@
+         "powermode=standby\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
++        "edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++        "edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
+         "edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+diff --git a/common/ini/model.c b/common/ini/model.c
+index eac1440166..28c6831a46 100644
+--- a/common/ini/model.c
++++ b/common/ini/model.c
+@@ -32,7 +32,7 @@ Description:
+ #include "ini_io.h"
+ #include "model.h"
+ 
+-#define DEFAULT_MODEL_SUM_PATH "/odm/etc/tvconfig/model/model_sum.ini"
++#define DEFAULT_MODEL_SUM_PATH "/vendor/etc/tvconfig/model/model_sum.ini"
+ #define AML_START		"amlogic_start"
+ #define AML_END			"amlogic_end"
+ 
+-- 
+2.29.0
+

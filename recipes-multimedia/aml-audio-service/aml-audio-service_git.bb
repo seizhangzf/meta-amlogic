@@ -1,7 +1,7 @@
 SUMMARY = "aml audio service"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/audio_server;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI_append = " file://audioserver.service"
@@ -68,7 +68,7 @@ do_install() {
 
 SYSTEMD_SERVICE_${PN} = "audioserver.service "
 FILES_${PN} = "${libdir}/* ${bindir}/audio_server"
-FILES_${PN}-testapps = "\ 
+FILES_${PN}-testapps = "\
                         ${bindir}/audio_client_test \
                         ${bindir}/audio_client_test_ac3 \
                         ${bindir}/halplay \

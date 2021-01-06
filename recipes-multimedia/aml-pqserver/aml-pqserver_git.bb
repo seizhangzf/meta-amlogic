@@ -1,7 +1,7 @@
 SUMMARY = "aml pqserver"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_pqserver.git;protocol=${AML_GIT_PROTOCOL};branch=master"
 
@@ -19,13 +19,13 @@ IPC_TYPE = "TV_BINDER"
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
               TV_IPC_TYPE=${IPC_TYPE} \
               TARGET_DIR=${D} \
-             " 
+             "
 do_compile() {
     cd ${S}
     oe_runmake  all
 }
 do_install() {
-   install -d ${D}${libdir} 
+   install -d ${D}${libdir}
    install -d ${D}${bindir}
    install -d ${D}${includedir}
 

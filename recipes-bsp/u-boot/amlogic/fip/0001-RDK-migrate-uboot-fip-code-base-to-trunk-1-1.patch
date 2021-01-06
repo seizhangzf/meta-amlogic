@@ -1,0 +1,38 @@
+From 19f00b8840bb5b005f45f619db93160440db1412 Mon Sep 17 00:00:00 2001
+From: Matthew Shyu <matthew.shyu@amlogic.com>
+Date: Fri, 20 Mar 2020 03:00:39 -0700
+Subject: [PATCH] RDK: migrate uboot fip code base to trunk [1/1]
+
+PD#SWPL-24384
+
+Problem:
+  compile error for ddr parse tool
+
+Solution:
+ use host gcc
+
+Verify:
+  Local
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I948b867fc662e8e64716791b151d40386e0e4d8d
+---
+ lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib.sh b/lib.sh
+index 6ca8b2c..3cfbe4d 100755
+--- a/lib.sh
++++ b/lib.sh
+@@ -281,7 +281,7 @@ function prepare_tools() {
+ 	if [ "${CONFIG_DDR_PARSE}" == "1" ]; then
+ 		if [ -d ${FIP_DDR_PARSE} ]; then
+ 			cd ${FIP_DDR_PARSE}
+-			make clean; make
++			CC=gcc make clean; CC=gcc make
+ 			cd ${MAIN_FOLDER}
+ 
+ 			mv -f ${FIP_DDR_PARSE}/parse ${FIP_BUILD_FOLDER}
+-- 
+2.29.0
+

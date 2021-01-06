@@ -11,7 +11,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;pro
 #For common patches
 MDIR = "media_modules"
 MDIR_sc2 = "media_modules-q"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-4.9/amlogic/${MDIR}')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${MDIR}')}"
 SRC_URI_append = " file://modules-load.sh"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

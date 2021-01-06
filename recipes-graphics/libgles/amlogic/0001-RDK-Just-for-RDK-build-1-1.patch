@@ -1,0 +1,85 @@
+From b903d2017dbdaa3f01d26e11127f63ba86cac69d Mon Sep 17 00:00:00 2001
+From: Blance Tang <guofeng.tang@amlogic.com>
+Date: Wed, 10 Jun 2020 14:02:59 +0800
+Subject: [PATCH] RDK: Just for RDK build  [1/1]
+
+PD#SWPL-
+
+Problem:
+
+Solution:
+
+Verify:
+  Local
+
+Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
+Change-Id: I7fc2e4348a7af4ea99700c05bddf0227e64ab0bc
+---
+ .../platform_wayland/wayland_window.h         | 42 ++++++++++++++++++-
+ include/GLES2/gl2ext.h                        |  3 +-
+ 2 files changed, 43 insertions(+), 2 deletions(-)
+
+diff --git a/include/EGL_platform/platform_wayland/wayland_window.h b/include/EGL_platform/platform_wayland/wayland_window.h
+index 5c83bb5..dd00cce 100644
+--- a/include/EGL_platform/platform_wayland/wayland_window.h
++++ b/include/EGL_platform/platform_wayland/wayland_window.h
+@@ -1 +1,41 @@
+-#error "Please don't include this file, wl_egl_window should be opaque for user. the definition should under libMali.so"
++/*
++ * This confidential and proprietary software may be used only as
++ * authorised by a licensing agreement from ARM Limited
++ * (C) COPYRIGHT 2014-2016 ARM Limited
++ * ALL RIGHTS RESERVED
++ * The entire notice above must be reproduced on all authorised
++ * copies and copies may only be made to the extent permitted
++ * by a licensing agreement from ARM Limited.
++ */
++
++/**
++ * @file wayland_window.h
++ * @brief A window type for the wayland platform (used by egl and tests)
++ */
++
++#ifndef _WAYLAND_WINDOW_H_
++#define _WAYLAND_WINDOW_H_
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++struct wl_surface;
++
++typedef struct wl_egl_window
++{
++	struct wl_surface *surface;
++	void *egl_surface_list;
++	int dx;
++	int dy;
++	int width;
++	int height;
++	int refcnt;
++} wl_egl_window;
++
++#ifdef __cplusplus
++}
++#endif
++
++
++#endif
+diff --git a/include/GLES2/gl2ext.h b/include/GLES2/gl2ext.h
+index 492f9d8..62a5b72 100644
+--- a/include/GLES2/gl2ext.h
++++ b/include/GLES2/gl2ext.h
+@@ -2972,7 +2972,8 @@ GL_APICALL void GL_APIENTRY glUniformMatrix4x3fvNV (GLint location, GLsizei coun
+ 
+ #ifndef GL_NV_path_rendering
+ #define GL_NV_path_rendering 1
+-typedef double GLdouble;
++#define GLdouble double
++//typedef double GLdouble;
+ #define GL_PATH_FORMAT_SVG_NV             0x9070
+ #define GL_PATH_FORMAT_PS_NV              0x9071
+ #define GL_STANDARD_FONT_NAME_NV          0x9072
+-- 
+2.29.0
+

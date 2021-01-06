@@ -1,0 +1,129 @@
+From 0099568a6951d6e17c98b42376f89c4449f083f3 Mon Sep 17 00:00:00 2001
+From: Terrence Pu <terrence.pu@amlogic.com>
+Date: Sun, 7 Jun 2020 22:06:45 -0700
+Subject: [PATCH 04/10] u-boot: Enable IRTrigger to enter RDK Recovery (DRI)
+
+PD#SWPL-26832
+
+Problem:
+Add IRTrigger feature to u-boot that allow entering Recovery by special IR key
+
+Solution:
+Enable cmd_irkey feature
+
+Verify:
+u212/HP40A
+
+Change-Id: I600e23aec5a9b602cd5c98c378be70b21bd5a29d
+Signed-off-by: Terrence Pu <terrence.pug@amlogic.com>
+---
+ board/amlogic/configs/g12a_u212_v1.h | 40 +++++++++-------------------
+ common/cmd_irkey.c                   | 14 +++-------
+ 2 files changed, 15 insertions(+), 39 deletions(-)
+
+diff --git a/board/amlogic/configs/g12a_u212_v1.h b/board/amlogic/configs/g12a_u212_v1.h
+index aae641a7f5..1d128da3a8 100644
+--- a/board/amlogic/configs/g12a_u212_v1.h
++++ b/board/amlogic/configs/g12a_u212_v1.h
+@@ -94,6 +94,8 @@
+ #define CONFIG_AML_MESON_SERIAL   1
+ #define CONFIG_SERIAL_MULTI		1
+ 
++#define CONFIG_IR_REMOTE 1
++
+ //Enable ir remote wake up for bl30
+ #define CONFIG_IR_REMOTE_POWER_UP_KEY_VAL1 0xef10fe01 //amlogic tv ir --- power
+ #define CONFIG_IR_REMOTE_POWER_UP_KEY_VAL2 0xFFFFFFFF
+@@ -290,29 +292,10 @@
+                 "bootm ${loadaddr};fi;"\
+             "\0"\
+         "recovery_from_flash="\
+-            "get_valid_slot;"\
+-            "echo active_slot: ${active_slot};"\
+-            "if test ${active_slot} = normal; then "\
+-                "setenv bootargs ${bootargs} ${fs_type} aml_dt=${aml_dt} recovery_part=${recovery_part} recovery_offset=${recovery_offset};"\
+-                "if itest ${upgrade_step} == 3; then "\
+-                    "if ext4load mmc 1:2 ${dtb_mem_addr} /recovery/dtb.img; then echo cache dtb.img loaded; fi;"\
+-                    "if ext4load mmc 1:2 ${loadaddr} /recovery/recovery.img; then echo cache recovery.img loaded; wipeisb; bootm ${loadaddr}; fi;"\
+-                "else fi;"\
+-                "if imgread kernel ${recovery_part} ${loadaddr} ${recovery_offset}; then wipeisb; bootm ${loadaddr}; fi;"\
+-            "else "\
+-                "if test ${partiton_mode} = normal; then "\
+-                    "setenv bootargs ${bootargs} ${fs_type} aml_dt=${aml_dt} recovery_part=${boot_part} recovery_offset=${recovery_offset};"\
+-                    "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+-                "else "\
+-                    "if test ${vendor_boot_mode} = true; then "\
+-                        "setenv bootargs ${bootargs} ${fs_type} aml_dt=${aml_dt} recovery_part=${boot_part} recovery_offset=${recovery_offset};"\
+-                        "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+-                    "else "\
+-                        "setenv bootargs ${bootargs} ${fs_type} aml_dt=${aml_dt} recovery_part=${recovery_part} recovery_offset=${recovery_offset} androidboot.slot_suffix=${active_slot};"\
+-                        "if imgread kernel ${recovery_part} ${loadaddr} ${recovery_offset}; then wipeisb; bootm ${loadaddr}; fi;"\
+-                    "fi;"\
+-                "fi;"\
+-            "fi;"\
++            "echo recovery-from-flash;"\
++            "imgread dtb recovery ${dtb_mem_addr};"\
++            "imgread kernel recovery ${loadaddr};"\
++            "bootm ${loadaddr};"\
+             "\0"\
+         "init_display="\
+             "get_rebootmode;"\
+@@ -372,12 +355,12 @@
+             "fi;"\
+             "\0"\
+ 	"irremote_update="\
+-		"if irkey 2500000 0xe31cfb04 0xb748fb04; then "\
++		"if irkey 2500000 0x3ac5fd01 0xae51bd02; then "\
+ 			"echo read irkey ok!; " \
+-		"if itest ${irkey_value} == 0xe31cfb04; then " \
+-			"run update;" \
+-		"else if itest ${irkey_value} == 0xb748fb04; then " \
+-			"run update;\n" \
++		"if itest ${irkey_value} == 0x3ac5fd01; then " \
++			"run recovery_from_flash;" \
++		"else if itest ${irkey_value} == 0xae51bd02; then " \
++			"run recovery_from_flash;\n" \
+ 			"fi;fi;" \
+ 		"fi;\0" \
+ 
+@@ -389,6 +372,7 @@
+             "run init_display;"\
+             "run storeargs;"\
+             "run upgrade_key;" \
++            "run irremote_update;"\
+             "bcb uboot-command;"\
+             "run switch_bootmode;"
+ 
+diff --git a/common/cmd_irkey.c b/common/cmd_irkey.c
+index 654019948c..5616b29fc5 100644
+--- a/common/cmd_irkey.c
++++ b/common/cmd_irkey.c
+@@ -31,22 +31,14 @@ extern uint32_t get_time(void);
+ 
+ void init_custom_trigger(void)
+ {
+-	if (get_cpu_id().family_id == MESON_CPU_MAJOR_ID_GXTVBB) {
+-		setbits_le32(P_AO_RTI_PIN_MUX_REG, 1 << 12); // SET IR_DEC_INPUT
+-	} else {
+-		setbits_le32(P_AO_RTI_PIN_MUX_REG, 1 << 0);  // SET IR_DEC_INPUT
+-		clrbits_le32(P_AO_RTI_PIN_MUX_REG, 1 << 21); //CLEAR IR_REMOTE_OUTPUT
+-	}
++	writel(readl(P_AO_RTI_PINMUX_REG0) & (~ (0xf << 20)), P_AO_RTI_PINMUX_REG0);
++	writel(readl(P_AO_RTI_PINMUX_REG0) | (0x1 << 20), P_AO_RTI_PINMUX_REG0);
+ 	writel((readl(P_AO_MF_IR_DEC_REG1) | (1 << 15)), P_AO_MF_IR_DEC_REG1);
+ }
+ 
+ void ir_release(void)
+ {
+-	if (get_cpu_id().family_id == MESON_CPU_MAJOR_ID_GXTVBB) {
+-		clrbits_le32(P_AO_RTI_PIN_MUX_REG, 1 << 12);
+-	} else {
+-	    clrbits_le32(P_AO_RTI_PIN_MUX_REG, 1 << 0);
+-	}
++	writel(readl(P_AO_RTI_PINMUX_REG0) & (~ (0xf << 20)), P_AO_RTI_PINMUX_REG0);
+ }
+ 
+ uint32_t read_key(void)
+-- 
+2.29.0
+

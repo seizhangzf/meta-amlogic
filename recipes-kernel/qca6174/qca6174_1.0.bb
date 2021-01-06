@@ -9,7 +9,7 @@ SRC_URI += "file://nvm_tlv_3.2.bin"
 SRC_URI += "file://rampatch_tlv_3.2.tlv"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-4.9/wifi/qualcomm/drivers/qca6174')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

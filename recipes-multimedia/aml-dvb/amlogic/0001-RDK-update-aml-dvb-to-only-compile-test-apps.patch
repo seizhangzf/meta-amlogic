@@ -1,0 +1,346 @@
+From e164d3ad21130be4976b16abfebf8545a311ca0d Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Fri, 18 Oct 2019 14:55:57 -0700
+Subject: [PATCH] RDK: update aml-dvb to only compile test apps
+
+PD#SWPL-24384
+
+Problem:
+  aml-dvb depends on libplayer
+
+Solution:
+  remove libplayer depends
+
+Verify:
+  Local
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: Ie70e765fe2a7cba644b397a093af130b008e8a4e
+---
+ Makefile                             | 14 +++++++-------
+ am_adp/Makefile                      |  8 +++-----
+ am_adp/am_dmx/linux_dvb/linux_dvb.c  |  3 ++-
+ am_adp/am_dvr/linux_dvb/linux_dvb.c  |  4 +++-
+ am_adp/am_fend/linux_dvb/linux_dvb.c |  3 ++-
+ test/Makefile                        |  2 +-
+ test/am_av_test/Makefile             |  2 +-
+ test/am_ci_test/Makefile             |  2 +-
+ test/am_db_test/Makefile             |  0
+ test/am_dmx_test/Makefile            |  2 +-
+ test/am_dmx_test/am_dmx_test.c       | 24 ++++++++++--------------
+ test/am_dsc_test/Makefile            |  2 +-
+ test/am_dvr_test/Makefile            |  2 +-
+ test/am_dvr_test/am_dvr_test.c       |  2 +-
+ test/am_epg_test/Makefile            |  2 +-
+ test/am_fend_test/Makefile           |  2 +-
+ test/am_scan_test/Makefile           |  2 +-
+ test/am_smc_test/Makefile            |  3 +--
+ test/am_userdata_test/Makefile       |  2 +-
+ 19 files changed, 39 insertions(+), 42 deletions(-)
+ mode change 100755 => 100644 test/am_db_test/Makefile
+
+diff --git a/Makefile b/Makefile
+index 72a97fde..db37852a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -4,16 +4,16 @@ export ROOT_DIR
+ 
+ all:
+ 	make -C am_adp all
+-	make -C am_adp install
+-	make -C am_mw all
+-	make -C am_mw install
++	#make -C am_adp install
++	#make -C am_mw all
++	#make -C am_mw install
+ 	make -C test all
+ install:
+-	make -C am_adp install
+-	make -C am_mw install
+-	make -C test install
++	#make -C am_adp install
++	#make -C am_mw install
++	#make -C test install
+ #include "am_debug.h"
+ clean:
+ 	make -C am_adp clean
+-	make -C am_mw clean
++	#make -C am_mw clean
+ 	make -C test clean
+diff --git a/am_adp/Makefile b/am_adp/Makefile
+index aa36b6e4..f1d94a8f 100644
+--- a/am_adp/Makefile
++++ b/am_adp/Makefile
+@@ -13,15 +13,13 @@ LOCAL_C_INCLUDES := -I $(LOCAL_PATH)/../include/am_adp\
+ 		    -I$(LOCAL_PATH)/am_open_lib/am_ci\
+ 		    -I$(LOCAL_PATH)/../include/am_mw\
+ 		    -I$(LOCAL_PATH)/../android/ndk/include\
++		    -I$(LOCAL_PATH)/../android/ndk/include/linux\
+ 			-I$(LOCAL_PATH)/am_fend
+ 
+ SRC_FILES = $(wildcard am_dmx/*.c am_dmx/linux_dvb/*.c \
+ 			am_fend/*.c am_fend/linux_dvb/*.c am_fend/linux_v4l2/*.c\
+-			am_av/*.c am_av/aml/*.c\
+ 	        am_dvr/*.c am_dvr/linux_dvb/*.c\
+ 	        am_dmx/dvr/*.c\
+-	        am_aout/*.c\
+-	        am_vout/*.c am_vout/aml/*.c\
+ 	        am_misc/am_adplock.c am_misc/am_misc.c am_misc/am_sig_handler.c\
+ 	        am_time/*.c\
+ 	        am_evt/*.c\
+@@ -43,10 +41,10 @@ SRC_FILES = $(wildcard am_dmx/*.c am_dmx/linux_dvb/*.c \
+ 		    am_open_lib/am_freesat/freesat.c \
+ 		    am_tfile/am_tfile.c)
+ 
+-CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions -DUSE_ADEC_IN_DVB -DCHIP_8226M
++CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions -DCHIP_8226M
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -shared -fPIC -L$(TARGET_DIR)/usr/lib -lamadec
++LDFLAGS  := -shared -fPIC -L$(TARGET_DIR)/usr/lib
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/am_adp/am_dmx/linux_dvb/linux_dvb.c b/am_adp/am_dmx/linux_dvb/linux_dvb.c
+index 5c29a3fa..4a66fdce 100644
+--- a/am_adp/am_dmx/linux_dvb/linux_dvb.c
++++ b/am_adp/am_dmx/linux_dvb/linux_dvb.c
+@@ -107,7 +107,8 @@ static AM_ErrorCode_t dvb_open(AM_DMX_Device_t *dev, const AM_DMX_OpenPara_t *pa
+ 		return AM_DMX_ERR_NO_MEM;
+ 	}
+ 	
+-	snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb0.demux%d", dev->dev_no);
++	//snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb0.demux%d", dev->dev_no);
++	snprintf(dmx->dev_name, sizeof(dmx->dev_name), "/dev/dvb/adapter0/demux%d", dev->dev_no);
+ 	
+ 	for(i=0; i<DMX_FILTER_COUNT; i++)
+ 		dmx->fd[i] = -1;
+diff --git a/am_adp/am_dvr/linux_dvb/linux_dvb.c b/am_adp/am_dvr/linux_dvb/linux_dvb.c
+index 468269cd..c46d8a40 100644
+--- a/am_adp/am_dvr/linux_dvb/linux_dvb.c
++++ b/am_adp/am_dvr/linux_dvb/linux_dvb.c
+@@ -72,7 +72,9 @@ static AM_ErrorCode_t dvb_open(AM_DVR_Device_t *dev, const AM_DVR_OpenPara_t *pa
+ 	
+ 	UNUSED(para);
+ 
+-	snprintf(dev_name, sizeof(dev_name), "/dev/dvb0.dvr%d", dev->dev_no);
++	//snprintf(dev_name, sizeof(dev_name), "/dev/dvb0.dvr%d", dev->dev_no);
++	AM_DEBUG(1, "device no %d ", dev->dev_no);
++	snprintf(dev_name, sizeof(dev_name), "/dev/dvb/adapter0/dvr%d", dev->dev_no);
+ 	fd = open(dev_name, O_RDONLY);
+ 	if (fd == -1)
+ 	{
+diff --git a/am_adp/am_fend/linux_dvb/linux_dvb.c b/am_adp/am_fend/linux_dvb/linux_dvb.c
+index bc5f3caa..9377e1b0 100644
+--- a/am_adp/am_fend/linux_dvb/linux_dvb.c
++++ b/am_adp/am_fend/linux_dvb/linux_dvb.c
+@@ -117,7 +117,8 @@ static AM_ErrorCode_t dvb_open (AM_FEND_Device_t *dev, const AM_FEND_OpenPara_t
+ 	char name[PATH_MAX];
+ 	int fd, ret;
+ 
+-	snprintf(name, sizeof(name), "/dev/dvb0.frontend%d", dev->dev_no);
++	//snprintf(name, sizeof(name), "/dev/dvb0.frontend%d", dev->dev_no);
++	snprintf(name, sizeof(name), "/dev/dvb/adapter0/frontend%d", dev->dev_no);
+ 
+ 	fd = open(name, O_RDWR);
+ 	if(fd==-1)
+diff --git a/test/Makefile b/test/Makefile
+index 9313d13b..eb241785 100755
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -1,6 +1,6 @@
+ LOCAL_PATH = $(ROOT_DIR)/test
+ 
+-SUB_DIRS = am_fend_test am_smc_test am_dsc_test am_dvr_test am_ci_test am_userdata_test am_epg_test am_av_test am_dmx_test am_scan_test
++SUB_DIRS = am_fend_test am_dvr_test am_dmx_test
+ 
+ all :
+ 	@for dir in $(SUB_DIRS); do \
+diff --git a/test/am_av_test/Makefile b/test/am_av_test/Makefile
+index f2c6fcc3..a8d4559e 100755
+--- a/test/am_av_test/Makefile
++++ b/test/am_av_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_av_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_ci_test/Makefile b/test/am_ci_test/Makefile
+index db0f013a..4aad4785 100644
+--- a/test/am_ci_test/Makefile
++++ b/test/am_ci_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_ci_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_db_test/Makefile b/test/am_db_test/Makefile
+old mode 100755
+new mode 100644
+diff --git a/test/am_dmx_test/Makefile b/test/am_dmx_test/Makefile
+index 8a1b8c63..f73a73cb 100755
+--- a/test/am_dmx_test/Makefile
++++ b/test/am_dmx_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_dmx_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamavutils
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_dmx_test/am_dmx_test.c b/test/am_dmx_test/am_dmx_test.c
+index c66dc0c4..46a1d7a5 100644
+--- a/test/am_dmx_test/am_dmx_test.c
++++ b/test/am_dmx_test/am_dmx_test.c
+@@ -555,23 +555,19 @@ int main(int argc, char **argv)
+ #if 1
+ 	if(freq>0)
+ 	{
++		printf("Opening tuner in ATSC mode.\n");
++		fpara.mode = FE_ATSC;
++
++		printf("opening frontend %d\n");
+ 		AM_TRY(AM_FEND_Open(FEND_DEV_NO, &fpara));
+ 
++		AM_FEND_SetMode(FEND_DEV_NO, FE_ATSC );
++
+ 		p.frequency = freq;
+-#if 0
+-		p.inversion = INVERSION_AUTO;
+-		p.u.ofdm.bandwidth = BANDWIDTH_8_MHZ;
+-		p.u.ofdm.code_rate_HP = FEC_AUTO;
+-		p.u.ofdm.code_rate_LP = FEC_AUTO;
+-		p.u.ofdm.constellation = QAM_AUTO;
+-		p.u.ofdm.guard_interval = GUARD_INTERVAL_AUTO;
+-		p.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
+-		p.u.ofdm.transmission_mode = TRANSMISSION_MODE_AUTO;
+-#else		
+-		p.u.qam.symbol_rate = 6875000;
+-		p.u.qam.fec_inner = FEC_AUTO;
+-		p.u.qam.modulation = QAM_64;
+-#endif		
++
++		p.u.vsb.modulation = VSB_8;
++
++		printf("freq is %d and modulation is %d\n", freq, p.u.vsb.modulation);
+ 	
+ 		AM_TRY(AM_FEND_Lock(FEND_DEV_NO, &p, &status));
+ 		
+diff --git a/test/am_dsc_test/Makefile b/test/am_dsc_test/Makefile
+index 303b992d..fd3f6250 100755
+--- a/test/am_dsc_test/Makefile
++++ b/test/am_dsc_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_dsc_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_dvr_test/Makefile b/test/am_dvr_test/Makefile
+index a073833e..eb376a6d 100644
+--- a/test/am_dvr_test/Makefile
++++ b/test/am_dvr_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_dvr_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils -lpthread
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_dvr_test/am_dvr_test.c b/test/am_dvr_test/am_dvr_test.c
+index 9414733e..cb5f8700 100644
+--- a/test/am_dvr_test/am_dvr_test.c
++++ b/test/am_dvr_test/am_dvr_test.c
+@@ -27,7 +27,7 @@
+ #include <sys/ioctl.h>
+ #include <am_debug.h>
+ #include <am_dmx.h>
+-#include <am_av.h>
++//#include <am_av.h>
+ #include <am_fend.h>
+ #include <am_dvr.h>
+ #include <errno.h>
+diff --git a/test/am_epg_test/Makefile b/test/am_epg_test/Makefile
+index ca20f453..f13a7bc5 100755
+--- a/test/am_epg_test/Makefile
++++ b/test/am_epg_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_epg_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_fend_test/Makefile b/test/am_fend_test/Makefile
+index 95cd79c3..b06ee24c 100755
+--- a/test/am_fend_test/Makefile
++++ b/test/am_fend_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_fend_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_scan_test/Makefile b/test/am_scan_test/Makefile
+index 97257b6c..db8673f1 100755
+--- a/test/am_scan_test/Makefile
++++ b/test/am_scan_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_scan_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+diff --git a/test/am_smc_test/Makefile b/test/am_smc_test/Makefile
+index 5426c333..733cfa36 100755
+--- a/test/am_smc_test/Makefile
++++ b/test/am_smc_test/Makefile
+@@ -20,8 +20,7 @@ SRC_FILES = am_smc_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
+-
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils 
+ all : $(OBJS) $(OUTPUT)
+ 
+ $(OBJS) : %.o : %.c
+diff --git a/test/am_userdata_test/Makefile b/test/am_userdata_test/Makefile
+index 81d60c0e..85f9df1d 100755
+--- a/test/am_userdata_test/Makefile
++++ b/test/am_userdata_test/Makefile
+@@ -20,7 +20,7 @@ SRC_FILES = am_userdata_test.c
+ CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
+ 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
+ 
+ all : $(OBJS) $(OUTPUT)
+ 
+-- 
+2.29.0
+

@@ -1,0 +1,140 @@
+From 50719afbbc6628c50c7777475c61221b9fefb66e Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 4 Jun 2020 17:00:24 -0700
+Subject: [PATCH] RDK: only compile amavutils. Others not needed for RDK
+
+PD#SWPL-24384
+
+Problem:
+ libplayer is too heavy with many deps
+
+Solution:
+ only compile utils
+
+Verify:
+ Local
+
+Change-Id: If7987b94de1bc3a780007a62886038947fa91770
+---
+ Makefile           | 88 +++++++++++++++++++++++-----------------------
+ amavutils/Makefile |  2 +-
+ 2 files changed, 45 insertions(+), 45 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 5e9b10281da..debb2ad6008 100755
+--- a/Makefile
++++ b/Makefile
+@@ -1,53 +1,53 @@
+ all:
+-	$(MAKE) -C amadec all
+-	$(MAKE) -C amadec install
++	#$(MAKE) -C amadec all
++	#$(MAKE) -C amadec install
+ 	$(MAKE) -C amavutils all
+ 	$(MAKE) -C amavutils install
+-	if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
+-		$(MAKE) -C amffmpeg all; \
+-		$(MAKE) -C amffmpeg install; \
+-	fi
+-	$(MAKE) -C amcodec all
+-	$(MAKE) -C amcodec install
+-	$(MAKE) -C amvdec all
+-	$(MAKE) -C amvdec install
+-	$(MAKE) -C audio_codec all
+-	$(MAKE) -C audio_codec install
+-	if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
+-		$(MAKE) -C amplayer all; \
+-		$(MAKE) -C amplayer install; \
+-		$(MAKE) -C streamsource all; \
+-		$(MAKE) -C streamsource install; \
+-		$(MAKE) -C examples all; \
+-		$(MAKE) -C third_parts/libcurl-ffmpeg all; \
+-		$(MAKE) -C third_parts/libdash all; \
+-		$(MAKE) -C third_parts/libvhls all; \
+-		$(MAKE) -C bootplayer all; \
+-		$(MAKE) -C bootplayer install; \
+-		$(MAKE) -C audioplayer all; \
+-		$(MAKE) -C audioplayer install; \
+-	fi
++	#if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
++	#	$(MAKE) -C amffmpeg all; \
++	#	$(MAKE) -C amffmpeg install; \
++	#fi
++	#$(MAKE) -C amcodec all
++	#$(MAKE) -C amcodec install
++	#$(MAKE) -C amvdec all
++	#$(MAKE) -C amvdec install
++	#$(MAKE) -C audio_codec all
++	#$(MAKE) -C audio_codec install
++	#if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
++	#	$(MAKE) -C amplayer all; \
++	#	$(MAKE) -C amplayer install; \
++	#	$(MAKE) -C streamsource all; \
++	#	$(MAKE) -C streamsource install; \
++	#	$(MAKE) -C examples all; \
++	#	$(MAKE) -C third_parts/libcurl-ffmpeg all; \
++	#	$(MAKE) -C third_parts/libdash all; \
++	#	$(MAKE) -C third_parts/libvhls all; \
++	#	$(MAKE) -C bootplayer all; \
++	#	$(MAKE) -C bootplayer install; \
++	#	$(MAKE) -C audioplayer all; \
++	#	$(MAKE) -C audioplayer install; \
++	#fi
+ 
+ install:
+-	$(MAKE) -C amadec install
++	#$(MAKE) -C amadec install
+ 	$(MAKE) -C amavutils install
+-	if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
+-		$(MAKE) -C amffmpeg install; \
+-	fi
+-	$(MAKE) -C amcodec install
+-	$(MAKE) -C amvdec install
+-	$(MAKE) -C audio_codec install
+-	if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
+-		$(MAKE) -C amplayer install; \
+-		$(MAKE) -C streamsource install; \
+-		$(MAKE) -C examples install; \
+-		$(MAKE) -C third_parts/libcurl-ffmpeg install; \
+-		$(MAKE) -C third_parts/libdash install; \
+-		$(MAKE) -C third_parts/libvhls install; \
+-		$(MAKE) -C bootplayer install; \
+-		$(MAKE) -C audioplayer install; \
+-	fi
+-	cp -rf $(LIBPLAYER_STAGING_DIR)/usr/lib/libplayer/*.so* $(LIBPLAYER_TARGET_DIR)/usr/lib
++	$(MAKE) -C examples install
++	#if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
++	#	$(MAKE) -C amffmpeg install; \
++	#fi
++	#$(MAKE) -C amcodec install
++	#$(MAKE) -C amvdec install
++	#$(MAKE) -C audio_codec install
++	#if [ ! "$(BR2_PACKAGE_LIBPLAYER_BASE_LIBS)" = "y" ] ; then \
++	#	$(MAKE) -C amplayer install; \
++	#	$(MAKE) -C streamsource install; \
++	#	$(MAKE) -C third_parts/libcurl-ffmpeg install; \
++	#	$(MAKE) -C third_parts/libdash install; \
++	#	$(MAKE) -C third_parts/libvhls install; \
++	#	$(MAKE) -C bootplayer install; \
++	#	$(MAKE) -C audioplayer install; \
++	#fi
++	#cp -rf $(LIBPLAYER_STAGING_DIR)/usr/lib/libplayer/*.so* $(LIBPLAYER_TARGET_DIR)/usr/lib
+ 
+ export CC BUILD_DIR STAGING_DIR TARGET_DIR BR2_PACKAGE_LIBPLAYER_BASE_LIBS
+ 
+diff --git a/amavutils/Makefile b/amavutils/Makefile
+index 5254dcfe114..e1451a28bc0 100755
+--- a/amavutils/Makefile
++++ b/amavutils/Makefile
+@@ -8,7 +8,7 @@ TARGET=libamavutils.so
+ 
+ INSTALL_DIR=${LIB_DIR}
+ 
+-LDFLAGS += -shared -lpthread -lm -lrt
++CFLAGS += -shared -lpthread -lm -lrt
+ 
+ TOPDIR=$(shell pwd)
+ SRC?=$(TOPDIR)
+-- 
+2.29.0
+

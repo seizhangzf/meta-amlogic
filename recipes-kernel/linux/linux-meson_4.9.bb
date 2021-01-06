@@ -21,7 +21,7 @@ SRC_URI_append = " file://meson.scc \
 #For common patches
 KDIR = "aml-4.9"
 KDIR_sc2 = "aml-4.9-q"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/kernel/${KDIR}')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${KDIR}')}"
 
 LINUX_VERSION ?= "4.9.113"
 LINUX_VERSION_sc2 = "4.9.180"

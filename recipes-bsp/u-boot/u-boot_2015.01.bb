@@ -24,8 +24,8 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GI
 PATCHTOOL="git"
 
 #For common patch
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl33/v2015', 'bl33/v2015')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/fip', 'fip')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/v2015', 'bl33/v2015')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/fip', 'fip')}"
 #can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"

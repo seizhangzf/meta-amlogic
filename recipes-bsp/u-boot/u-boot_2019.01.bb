@@ -30,8 +30,8 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${A
 PATCHTOOL="git"
 
 #For common patch
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl33/v2019', 'bl33/v2019')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/fip', 'fip')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/v2019', 'bl33/v2019')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/fip', 'fip')}"
 #can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"

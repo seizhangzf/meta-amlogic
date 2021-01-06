@@ -1,0 +1,67 @@
+From 1c7e63d140321b412dfa5b27a46c4f17dbeb67d5 Mon Sep 17 00:00:00 2001
+From: Blance Tang <guofeng.tang@amlogic.com>
+Date: Wed, 27 May 2020 22:26:48 +0800
+Subject: [PATCH] RDK: Skip redudant kernel env check [1/1]
+
+PD#SWPL-
+
+Problem:
+  qulcom qca6174 wifi module's firmware path is
+a relative path corresponding to /lib/firmware
+
+Solution:
+  change the firmware loading path in code
+
+Verify:
+  Local
+
+Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
+Change-Id: I2222f372321f10dba3aca40651b7c77f6a4fdefd
+---
+ AIO/build/Makefile                             | 14 +++++++-------
+ AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c |  2 +-
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/AIO/build/Makefile b/AIO/build/Makefile
+index 7c04b5e..8fcb2d5 100755
+--- a/AIO/build/Makefile
++++ b/AIO/build/Makefile
+@@ -31,15 +31,15 @@ export INSTALL_ROOT=$(TOP)/rootfs-x86-android.build
+ 
+ export IF_TYPE ?= SDIO
+ 
+-ifneq ($(KERNELPATH)/.config, $(wildcard $(KERNELPATH)/.config))
+-$(error Please set environment variable KERNELPATH, e.g export KERNELPATH="path/to/kernel/dir" or make KERNELPATH="path/to/kernel/dir")
+-endif
++#ifneq ($(KERNELPATH)/.config, $(wildcard $(KERNELPATH)/.config))
++#$(error Please set environment variable KERNELPATH, e.g export KERNELPATH="path/to/kernel/dir" or make KERNELPATH="path/to/kernel/dir")
++#endif
+ 
+-CROSS_COMPILE ?= $(subst -ld,-,$(shell cat $(KERNELPATH)/.vmlinux.cmd | awk '{print $$5}'))
++#CROSS_COMPILE ?= $(subst -ld,-,$(shell cat $(KERNELPATH)/.vmlinux.cmd | awk '{print $$5}'))
+ 
+-ifneq ($(CROSS_COMPILE)gcc, $(wildcard $(CROSS_COMPILE)gcc))
+-$(error Please set environment variable CROSS_COMPILE, e.g export CROSS_COMPILE=$(CROSS_COMPILE) or make CROSS_COMPILE=$(CROSS_COMPILE))
+-endif
++#ifneq ($(CROSS_COMPILE)gcc, $(wildcard $(CROSS_COMPILE)gcc))
++#$(error Please set environment variable CROSS_COMPILE, e.g export CROSS_COMPILE=$(CROSS_COMPILE) or make CROSS_COMPILE=$(CROSS_COMPILE))
++#endif
+ 
+ ARCH ?= $(shell ls $(KERNELPATH)/arch)
+ 
+diff --git a/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c b/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
+index 4de6f93..4f96ce6 100644
+--- a/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
++++ b/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
+@@ -3598,7 +3598,7 @@ int qca_request_firmware(const struct firmware **firmware_p,
+ #ifdef CONFIG_BUILDROOT
+ 	sprintf(final_name,"qca6174/%s",name);
+ #else
+-	sprintf(final_name,"../../../vendor/etc/wifi/qca6174/%s",name);
++	sprintf(final_name,"../../etc/wifi/qca6174/%s",name);
+ #endif
+ 	return request_firmware(firmware_p, final_name, device);
+ #endif
+-- 
+2.29.0
+
