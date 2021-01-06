@@ -15,12 +15,14 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'optee-video-firmware', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'aml-provision', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediadrm-widevine', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediahal-sdk', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'gst-aml-drm-plugins', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'wpeframework-ocdm-widevine', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'playready', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'wpeframework-ocdm-playready', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'opencdm', 'wpeframework-ocdm-clearkey', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'alsa-utils', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'bluez5', 'bluez5', '', d)}\
                                     tinyalsa \
                                     dolby-ms12 \
                                     libamavutils \
@@ -43,11 +45,13 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     libdrm-tests \
                                     gst-plugin-aml-asink \
                                     android-tools-adbd \
-                                    wifi-amlogic \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'one-rdk', '', 'wifi-amlogic', d)}\
                                     android-tools-logcat \
                                     liblog \
                                     aml-hdcp \
                                     aml-hdcp-load-txfirmware \
                                     libbinder \
+                                    aml-mediahal-sdk \
+                                    aml-secmem \
                                     "
 
