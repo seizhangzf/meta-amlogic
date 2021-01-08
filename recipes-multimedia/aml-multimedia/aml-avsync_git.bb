@@ -5,11 +5,13 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c701
 
 include aml-multimedia.inc
 
+SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/libavsync;protocol=${AML_GIT_PROTOCOL};branch=master;"
+
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
 
-S="${WORKDIR}/git/avsync-lib"
+S="${WORKDIR}/git/"
 
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
                 TARGET_DIR=${D} \

@@ -1,0 +1,12 @@
+[Unit]
+Description=start bluez related tools
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+ExecStart=/usr/bin/bluez_tool.sh start
+ExecStop=/usr/bin/bluez_tool.sh stop
+
+[Install]
+WantedBy=multi-user.target

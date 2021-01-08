@@ -31,6 +31,12 @@ do_install() {
     install -d ${D}/etc
     install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
 }
+do_install_append_ab301() {
+cat >> ${D}/etc/modules-load.sh <<EOF
+/sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/tuner/mxl661_fe.ko
+/sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
+EOF
+}
 
 FILES_${PN} = " \
         /lib/firmware/video/video_ucode.bin \
@@ -69,7 +75,7 @@ MEDIA_CONFIGS_append_tm2 = " \
 S = "${WORKDIR}/git"
 EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/drivers" ${MEDIA_CONFIGS} modules V=1'
 
-KERNEL_MODULE_AUTOLOAD += "amvdec_avs"
+#KERNEL_MODULE_AUTOLOAD += "amvdec_avs"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h264"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h264mvc"
 KERNEL_MODULE_AUTOLOAD += "amvdec_h265"
@@ -79,9 +85,9 @@ KERNEL_MODULE_AUTOLOAD += "amvdec_mmjpeg"
 KERNEL_MODULE_AUTOLOAD += "amvdec_mmpeg4"
 KERNEL_MODULE_AUTOLOAD += "amvdec_mpeg12"
 KERNEL_MODULE_AUTOLOAD += "amvdec_mmpeg12"
-KERNEL_MODULE_AUTOLOAD += "amvdec_mpeg4"
-KERNEL_MODULE_AUTOLOAD += "amvdec_real"
-KERNEL_MODULE_AUTOLOAD += "amvdec_vc1"
+#KERNEL_MODULE_AUTOLOAD += "amvdec_mpeg4"
+#KERNEL_MODULE_AUTOLOAD += "amvdec_real"
+#KERNEL_MODULE_AUTOLOAD += "amvdec_vc1"
 KERNEL_MODULE_AUTOLOAD += "amvdec_vp9"
 KERNEL_MODULE_AUTOLOAD += "decoder_common"
 KERNEL_MODULE_AUTOLOAD += "firmware"
@@ -90,7 +96,7 @@ KERNEL_MODULE_AUTOLOAD += "stream_input"
 KERNEL_MODULE_AUTOLOAD += "amvdec_ports"
 #KERNEL_MODULE_AUTOLOAD += "aml_hardware_dmx"
 #KERNEL_MODULE_AUTOLOAD += "vpu"
-KERNEL_MODULE_AUTOLOAD += "encoder"
+#KERNEL_MODULE_AUTOLOAD += "encoder"
 KERNEL_MODULE_AUTOLOAD_append_tm2 = " amvdec_av1"
 KERNEL_MODULE_PROBECONF += "amvdec_ports amvdec_mh264"
 module_conf_amvdec_ports = "options amvdec_ports multiplanar=1 vp9_need_prefix=1 av1_need_prefix=1"

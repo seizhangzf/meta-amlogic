@@ -19,7 +19,7 @@ SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"
-DEPENDS = "optee-userspace"
+DEPENDS = "optee-userspace aml-secmem aml-mediahal-sdk"
 RDEPENDS_${PN} = "libamavutils"
 inherit autotools pkgconfig
 ARM_TARGET="arm.aapcs-linux.hard"
@@ -31,11 +31,6 @@ do_install() {
     install -d -m 0644 ${D}/usr/lib
     install -d -m 0644 ${D}/usr/bin
     install -d -m 0644 ${D}/usr/include
-
-    install -D -m 0755 ${S}/libsecmem-bin/prebuilt/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
-    install -D -m 0644 ${S}/libsecmem-bin/prebuilt/${TA_TARGET}/include/*.h ${D}/usr/include
-    install -D -m 0755 ${S}/libsecmem-bin/prebuilt/${ARM_TARGET}/secmem_test ${D}/usr/bin
-    install -D -m 0644 ${S}/libsecmem-bin/prebuilt/${ARM_TARGET}/libsecmem.so ${D}/usr/lib
 
     install -D -m 0755 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     install -D -m 0644 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/include/*.h ${D}${includedir}/

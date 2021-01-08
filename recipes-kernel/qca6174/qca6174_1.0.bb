@@ -23,8 +23,8 @@ do_install() {
     mkdir -p ${WIFIDIR}
     install ${S}/AIO/rootfs-x86-android.build/lib/modules/wlan.ko ${WIFIDIR}
     install -d ${D}/lib/firmware/
-    install -D -m 0644 ${WORKDIR}/nvm_tlv_3.2.bin ${D}/lib/firmware/
-    install -D -m 0644 ${WORKDIR}/rampatch_tlv_3.2.tlv ${D}/lib/firmware/
+#install -D -m 0644 ${WORKDIR}/nvm_tlv_3.2.bin ${D}/lib/firmware/
+#    install -D -m 0644 ${WORKDIR}/rampatch_tlv_3.2.tlv ${D}/lib/firmware/
 }
 
 FILES_${PN} = "wlan.ko"

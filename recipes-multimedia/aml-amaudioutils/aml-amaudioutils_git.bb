@@ -3,7 +3,7 @@ SUMMARY = "aml audio utils"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
-DEPENDS = "liblog"
+DEPENDS = "liblog boost"
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/amaudioutils;protocol=${AML_GIT_PROTOCOL};branch=master"
 
@@ -36,11 +36,13 @@ do_install() {
     install -d ${D}/usr/lib
     install -d ${D}/usr/include/audio_utils
     install -d ${D}/usr/include/audio_utils/spdif
+    install -d ${D}/usr/include/IpcBuffer
 
   	install -m 644 -D ${S}/libamaudioutils.so ${D}/usr/lib
     install -m 644 -D ${S}/libcutils.so ${D}/usr/lib
 	install -m 644 ${S}/include/audio_utils/*.h ${D}/usr/include/audio_utils
 	install -m 644 ${S}/include/audio_utils/spdif/*.h ${D}/usr/include/audio_utils/spdif
+	install -m 644 ${S}/include/IpcBuffer/*.h ${D}/usr/include/IpcBuffer/
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"
