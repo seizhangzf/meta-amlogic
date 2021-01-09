@@ -35,6 +35,13 @@ do_install_append_ab301() {
 cat >> ${D}/etc/modules-load.sh <<EOF
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/tuner/mxl661_fe.ko
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
+if [ -f /lib/modules/${KERNEL_VERSION}/kernel/media/dovi_tm2_tv_16.ko ]
+then
+    /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/dovi_tm2_tv_16.ko
+    /bin/echo Y > /sys/module/amdolby_vision/parameters/dolby_vision_enable
+    /bin/echo 0x100 > /sys/module/amdolby_vision/parameters/debug_dolby
+fi
+
 EOF
 }
 
