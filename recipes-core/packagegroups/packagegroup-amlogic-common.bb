@@ -53,5 +53,6 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     libbinder \
                                     aml-mediahal-sdk \
                                     aml-secmem \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     "
 

@@ -54,3 +54,4 @@ EXTERNALSRC_pn-netflix-aml = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/netflix' 
 EXTERNALSRC_pn-wpeframework-plugin-netflix = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/wpe-plugin-netflix' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/wpe-plugin-netflix')) else ''}"
 EXTERNALSRC_pn-wpeframework-ocdm-playready = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-playready' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-playready')) else ''}"
 EXTERNALSRC_pn-wpeframework-ocdm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine')) else ''}"
+EXTERNALSRC_pn-aml-cobalt-starboard = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/cobalt/rdkcobalt-21' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/cobalt/rdkcobalt-21')) else ''}"
