@@ -17,6 +17,7 @@ DEFCONFIG_ARRAY=("mesong12a_u212"
 				 "mesontm2_ab311"
 				 "mesontm2_t962e2_llama"
 				 "mesontm2_t962x3_llama"
+				 "mesontm2_t962x3_a6gp"
 				 )
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
