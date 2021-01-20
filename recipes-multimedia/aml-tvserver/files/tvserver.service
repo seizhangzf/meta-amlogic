@@ -4,6 +4,8 @@ After=binder.service
 
 [Service]
 User=root
+ExecStartPre=/bin/sh -c '/bin/echo 0x222 > /sys/class/hdmirx/hdmirx0/edid_select'
+ExecStartPre=/bin/sh -c '/bin/echo reset0 > /sys/class/hdmirx/hdmirx0/debug'
 ExecStart=/usr/bin/tvservice
 
 [Install]

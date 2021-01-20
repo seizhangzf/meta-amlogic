@@ -23,6 +23,7 @@ S = "${WORKDIR}/git/"
 do_install() {
         if [ -d ${S}/etc/tvconfig/${SOC} ]; then
 			install -d ${D}/etc/tvconfig/pq
+			install -d ${D}/lib/modules
 			cd ${S}/etc/tvconfig/${SOC}/tvconfig
 			for file in $(find -type f); do
 				install -m 0644 -D ${file} ${D}/etc/tvconfig/${file}
@@ -45,4 +46,4 @@ do_install() {
 FILES_${PN} = " /etc/tvconfig/* /lib/* logo_files/*"
 FILES_${PN}-dev = " "
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-INSANE_SKIP_${PN} = "dev-so dev-elf"
+INSANE_SKIP_${PN} = "dev-so dev-elf already-stripped"
