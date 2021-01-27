@@ -1,0 +1,38 @@
+From b6d1728f8efeeffe8a40e68f19e6f68565d013b9 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Tue, 5 Nov 2019 22:20:46 -0800
+Subject: [PATCH] RDK: migrate bootloader code base to trunk [1/3]
+
+PD#SWPL-24384
+
+Problem:
+  gcc path is hardcoded
+
+Solution:
+  Remove hardcoded path
+
+Verify:
+  Local
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: Idfe7c3052ad5d4c46f82b233f95ae9062f684c06
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index e94ba6f1d0..40d00b47c7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -249,7 +249,7 @@ ifeq ($(HOSTARCH),$(ARCH))
+ CROSS_COMPILE ?=
+ endif
+ 
+-CROSS_COMPILE ?=/opt/gcc-linaro-7.3.1-2018.05-i686_aarch64-elf/bin/aarch64-elf-
++CROSS_COMPILE ?=aarch64-elf-
+ export CROSS_COMPILE
+ 
+ KCONFIG_CONFIG	?= .config
+-- 
+2.17.1
+
