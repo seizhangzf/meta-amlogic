@@ -1,4 +1,4 @@
-SUMMARY = "aml audio utils"
+SUMMARY = "aml dvb audio utils"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
@@ -9,26 +9,25 @@ PV = "${SRCPV}"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/aml_audio_hal')}"
+EXTRA_OEMAKE = "TARGET_DIR=${D} STAGING_DIR=${D}"
 
-DEPENDS += "aml-amaudioutils aml-dvbaudioutils expat tinyalsa libamavutils liblog"
-DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb', '', d)}"
-RDEPENDS_${PN} += "liblog aml-amaudioutils aml-dvbaudioutils"
+DEPENDS += "liblog libbinder"
+RDEPENDS_${PN} += "liblog"
+do_compile () {
+    cd ${S}/dtv_audio_utils
+    oe_runmake -j1 ${EXTRA_OEMAKE} all
+}
 
-inherit cmake pkgconfig
+do_install () {
+    install -d ${D}/usr/lib
+    install -d ${D}/usr/include/
+    install -m 0644 -D ${S}/dtv_audio_utils/libdvbaudioutils.so ${D}/usr/lib/libdvbaudioutils.so
+    install -m 0644 ${S}/dtv_audio_utils/sync/*.h ${D}/usr/include
+    install -m 0644 ${S}/dtv_audio_utils/audio_read_api/*.h ${D}/usr/include
+}
 
 S="${WORKDIR}/git"
 TARGET_CFLAGS += "-fPIC"
-
-PACKAGECONFIG = "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'dtv', '', d)}"
-
-PACKAGECONFIG[dtv] = "-DUSE_DTV=ON,-DUSE_DTV=OFF,"
-
-PACKAGECONFIG += "eqdrc"
-
-PACKAGECONFIG[eqdrc] = "-DUSE_EQ_DRC=ON,-DUSE_EQ_DRC=OFF,"
-
-PACKAGECONFIG_append_sc2 += "sc2-dvb"
-PACKAGECONFIG[sc2-dvb] = "-DUSE_SC2=ON,-DUSE_SC2=OFF,"
 
 FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
 FILES_${PN}-dev = "${includedir}/* "
