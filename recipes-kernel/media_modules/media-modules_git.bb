@@ -41,7 +41,7 @@ then
     /bin/echo Y > /sys/module/amdolby_vision/parameters/dolby_vision_enable
     /bin/echo 0x100 > /sys/module/amdolby_vision/parameters/debug_dolby
 fi
-
+echo 1 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
 EOF
 }
 
