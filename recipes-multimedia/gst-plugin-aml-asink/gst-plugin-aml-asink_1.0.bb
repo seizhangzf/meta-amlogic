@@ -15,6 +15,8 @@ PV = "${SRCPV}"
 
 S = "${WORKDIR}/git/"
 
+EXTRA_OECONF += "--enable-xrun-detection=yes"
+EXTRA_OECONF += "--enable-ms12=yes"
 EXTRA_OEMAKE = "CROSS=${TARGET_PREFIX} TARGET_DIR=${STAGING_DIR_TARGET} STAGING_DIR=${D} DESTDIR=${D}"
 inherit autotools pkgconfig distro_features_check
 FILES_${PN} += "/usr/lib/gstreamer-1.0/*"

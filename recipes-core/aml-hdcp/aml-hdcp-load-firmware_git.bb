@@ -2,37 +2,30 @@ SUMMARY = "aml hdcp firmware loading service"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
-SRC_URI = "file://firmware.le \
-           file://hdcp_tx22 \
-           file://load_hdcp2.2_firmware.service \
-           "
+FILESEXTRAPATHS_prepend_tm2 := "${THISDIR}/files/tm2:"
+
+SRC_URI = "file://load_hdcp2.2_firmware.service"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
 
-#SRCREV ?= "${AUTOREV}"
-#PV = "${SRCPV}"
-
 S = "${WORKDIR}"
 
-SYSTEMD_AUTO_ENABLE = "disable"
+SYSTEMD_AUTO_ENABLE = "enable"
 
 inherit systemd
 
 do_install() {
-    # install headers
     install -d -m 0644 ${D}/lib/firmware/hdcp/
-    install -d -m 0644 ${D}/usr/bin
     install -d ${D}/${systemd_unitdir}/system
-    install -D -m 0755 ${S}/hdcp_tx22 ${D}/usr/bin/
-    install -D -m 0644 ${S}/firmware.le ${D}/lib/firmware/hdcp/
+    touch ${D}/lib/firmware/hdcp/firmware.le
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then
         install -D -m 0644 ${S}/load_hdcp2.2_firmware.service ${D}${systemd_unitdir}/system/load_hdcp2.2_firmware.service
     fi
 }
 
 SYSTEMD_SERVICE_${PN} = "load_hdcp2.2_firmware.service "
-FILES_${PN} += "/lib/firmware/hdcp/* /usr/bin/*"
+FILES_${PN} += "/lib/firmware/hdcp/* "
 INSANE_SKIP_${PN} = "ldflags dev-so dev-elf"
 INSANE_SKIP_${PN}-dev = "ldflags dev-so dev-elf"

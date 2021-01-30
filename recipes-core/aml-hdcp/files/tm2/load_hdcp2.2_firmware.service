@@ -7,7 +7,7 @@ Requires=tee-supplicant.service aml_hdcp.service
 Type=forking
 User=root
 #ExecStartPre=/bin/usleep 2000000
-ExecStart=/bin/sh -c '/usr/bin/hdcp_tx22 -f /lib/firmware/hdcp/firmware.le&'
+ExecStart=/bin/sh -c '/usr/bin/hdcp_rx22 &'
 
 [Install]
 WantedBy=multi-user.target

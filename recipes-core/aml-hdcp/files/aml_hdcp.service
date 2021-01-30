@@ -1,5 +1,5 @@
 [Unit]
-Description=hdcprx Startup
+Description=hdcp Startup
 After=tee-supplicant.service
 
 [Service]

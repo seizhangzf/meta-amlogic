@@ -16,6 +16,15 @@ PV = "${SRCPV}"
 
 S = "${WORKDIR}/git/gst-aml-drm-plugins-1.0"
 
+do_install_append() {
+
+    install -d -m 0644 ${D}/usr/include
+    install -D -m 0644 ${S}/src/secmem/gstsecmemallocator.h   ${D}/usr/include/
+
+}
+
+FILES_${PN}-dev = "${includedir}/* "
+
 EXTRA_OEMAKE = "CROSS=${TARGET_PREFIX} TARGET_DIR=${STAGING_DIR_TARGET} STAGING_DIR=${D} DESTDIR=${D}"
 inherit autotools pkgconfig distro_features_check
 FILES_${PN} += "/usr/lib/gstreamer-1.0/*"
