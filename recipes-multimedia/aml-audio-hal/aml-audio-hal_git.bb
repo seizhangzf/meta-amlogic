@@ -22,6 +22,10 @@ TARGET_CFLAGS += "-fPIC"
 
 PACKAGECONFIG[dtv] = "-DUSE_DTV=ON,-DUSE_DTV=OFF,"
 
+PACKAGECONFIG = "eqdrc"
+
+PACKAGECONFIG[eqdrc] = "-DUSE_EQ_DRC=ON,-DUSE_EQ_DRC=OFF,"
+
 FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"
