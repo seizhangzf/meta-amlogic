@@ -31,7 +31,12 @@ do_install() {
     install -d ${D}/etc
     install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
 }
-do_install_append_ab301() {
+
+do_install_append() {
+
+IS_TV=${@bb.utils.contains('DISTRO_FEATURES','amlogic-tv','ztv','z',d)}
+
+if [ ${IS_TV} == 'ztv' ]; then
 cat >> ${D}/etc/modules-load.sh <<EOF
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/tuner/mxl661_fe.ko
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
@@ -43,6 +48,12 @@ then
 fi
 echo 1 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
 EOF
+else
+cat >> ${D}/etc/modules-load.sh <<EOF
+echo 0 > /sys/module/amvdec_ports/parameters/enable_nr
+echo 0 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
+EOF
+fi
 }
 
 FILES_${PN} = " \
