@@ -1,6 +1,6 @@
 [Unit]
 Description=hdcp Startup
-After=tee-supplicant.service
+After=aml_key_inject.service
 
 [Service]
 User=root
