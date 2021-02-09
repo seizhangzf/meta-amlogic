@@ -8,7 +8,10 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/mediahal-sdk')}"
 
-do_compile[noexec] = "1"
+DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-audio-hal libevent', '', d)}"
+RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libevent', '', d)}"
+
+#do_compile[noexec] = "1"
 
 SRCREV ?= "${AUTOREV}"
 
@@ -18,13 +21,36 @@ S = "${WORKDIR}/git"
 
 ARM_TARGET="arm.aapcs-linux.hard"
 TA_TARGET="noarch"
+
+EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
+                 TARGET_DIR=${D} \
+                 EXTRA_CFLAGS=-I${S}/prebuilt/${TA_TARGET}/include/ \
+                 EXTRA_LDFLAGS=-L${S}/prebuilt/${ARM_TARGET}/ \
+                               "
+do_compile(){
+    if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
+        cd ${S}/example/AmTsPlayerExample
+        oe_runmake
+    fi
+}
+
 do_install() {
     install -d -m 0644 ${D}/usr/lib
     install -d -m 0644 ${D}/usr/include
 
     install -D -m 0644 ${S}/prebuilt/${TA_TARGET}/include/*.h ${D}/usr/include
     install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_resman.so ${D}/usr/lib
+
+    if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
+        install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_tsplayer.so ${D}/usr/lib
+        install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_videodec.so ${D}/usr/lib
+        install -d -m 0644 ${D}/usr/bin
+        install -D -m 0755 ${S}/example/AmTsPlayerExample/AmTsPlayerExample ${D}/usr/bin
+    fi
+
 }
 
-FILES_${PN} = "${libdir}/* ${includedir}/*"
+FILES_${PN} = "${libdir}/* ${includedir}/* /usr/bin/*"
 FILES_${PN}-dev = "${includedir}/* "
+INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"
+INSANE_SKIP_${PN}-dev = "dev-so ldflags dev-elf"
