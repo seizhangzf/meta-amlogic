@@ -12,7 +12,8 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multi
 
 DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils liblog"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb libamadec', '', d)}"
-RDEPENDS_${PN} += "liblog aml-amaudioutils aml-dvbaudioutils"
+RDEPENDS_${PN} += "liblog aml-amaudioutils"
+RDDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)}"
 
 inherit cmake pkgconfig
 
