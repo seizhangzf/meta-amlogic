@@ -1,6 +1,6 @@
 SUMMARY = "aml libplayer code"
 LICENSE = "LGPL-2.0+"
-DEPENDS = "curl bzip2 alsa-lib virtual/gettext libxml2"
+DEPENDS = "curl bzip2 alsa-lib virtual/gettext libxml2 aml-dvbaudioutils"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/packages/amlogic/LibPlayer.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-libplayer"
 
 SRC_URI += "file://0001-fix-libplayer-compilation-on-yocto.patch\
