@@ -41,6 +41,7 @@ EXTERNALSRC_pn-aml-pqserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_
 EXTERNALSRC_pn-aml-dvb = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb')) else ''}"
 EXTERNALSRC_pn-aml-zvbi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi')) else ''}"
 EXTERNALSRC_pn-libamavutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src')) else ''}"
+EXTERNALSRC_pn-libamadec = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src')) else ''}"
 EXTERNALSRC_pn-libdvr-release = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libdvr_release' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libdvr_release')) else ''}"
 EXTERNALSRC_pn-vendor-files = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor')) else ''}"
 EXTERNALSRC_pn-tuner-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/target' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/target')) else ''}"
