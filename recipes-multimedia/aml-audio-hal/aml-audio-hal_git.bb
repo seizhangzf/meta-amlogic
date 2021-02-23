@@ -10,9 +10,9 @@ PV = "${SRCPV}"
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/aml_audio_hal')}"
 
-DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils liblog"
+DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils liblog aml-avsync"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb libamadec', '', d)}"
-RDEPENDS_${PN} += "liblog aml-amaudioutils"
+RDEPENDS_${PN} += "liblog aml-amaudioutils aml-avsync"
 RDDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)}"
 
 inherit cmake pkgconfig
@@ -30,6 +30,9 @@ PACKAGECONFIG[eqdrc] = "-DUSE_EQ_DRC=ON,-DUSE_EQ_DRC=OFF,"
 
 PACKAGECONFIG_append_sc2 += "sc2-dvb"
 PACKAGECONFIG[sc2-dvb] = "-DUSE_SC2=ON,-DUSE_SC2=OFF,"
+
+PACKAGECONFIG += "msync"
+PACKAGECONFIG[msync] = "-DUSE_MSYNC=ON,-DUSE_MSYNC=OFF,"
 
 FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
 FILES_${PN}-dev = "${includedir}/* "
