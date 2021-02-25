@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index f07cc70..e9d8aa5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -22,7 +22,7 @@ PROGRAM = procrank
+ LOCAL_CFLAGS := -Wall
+ 
+ $(PROGRAM): $(PROGRAM).c libpagemap/libpagemap.a
+-	$(CROSS_COMPILE)gcc $(LOCAL_CFLAGS) $(PROGRAM).c -Ilibpagemap/include -Llibpagemap -lpagemap -o procrank
++	$(CC) $(LOCAL_CFLAGS) $(PROGRAM).c -Ilibpagemap/include -Llibpagemap -lpagemap -o procrank
+ 
+ libpagemap/libpagemap.a:
+ 	make -C libpagemap

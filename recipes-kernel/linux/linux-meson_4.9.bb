@@ -4,6 +4,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/4.9:"
 FILESEXTRAPATHS_prepend_aarch64 := "${THISDIR}/aarch64:"
 FILESEXTRAPATHS_prepend_armv7a := "${THISDIR}/armv7a:"
 FILESEXTRAPATHS_prepend_sc2 := "${THISDIR}/sc2:"
+FILESEXTRAPATHS_prepend_t5d := "${THISDIR}/t5d:"
 
 KBRANCH = "amlogic-4.9-dev"
 KBRANCH_sc2 = "amlogic-4.9-dev-q"
@@ -33,6 +34,6 @@ SRCREV ?="${AUTOREV}"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
-COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*|mesonsc2_*)"
+COMPATIBLE_MACHINE = "(mesong12b_*|mesong12a_*|mesongxl_*|mesontxlx_*|mesontm2_*|mesonsc2_*|mesont5d_*)"
 
 S = "${WORKDIR}/git"

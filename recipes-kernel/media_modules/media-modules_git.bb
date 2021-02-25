@@ -31,7 +31,12 @@ do_install() {
     install -d ${D}/etc
     install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
 }
-do_install_append_ab301() {
+
+do_install_append() {
+
+IS_TV=${@bb.utils.contains('DISTRO_FEATURES','amlogic-tv','ztv','z',d)}
+
+if [ ${IS_TV} == 'ztv' ]; then
 cat >> ${D}/etc/modules-load.sh <<EOF
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/tuner/mxl661_fe.ko
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
@@ -43,6 +48,12 @@ then
 fi
 echo 1 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
 EOF
+else
+cat >> ${D}/etc/modules-load.sh <<EOF
+echo 0 > /sys/module/amvdec_ports/parameters/enable_nr
+echo 0 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
+EOF
+fi
 }
 
 FILES_${PN} = " \
@@ -78,6 +89,12 @@ MEDIA_CONFIGS = " \
 MEDIA_CONFIGS_append_tm2 = " \
                  CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
                  "
+MEDIA_CONFIGS_append_sc2 = " \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
+                 "
+MEDIA_CONFIGS_append_t5d = " \
+                 CONFIG_AMLOGIC_MEDIA_VDEC_AV1=m \
+                 "
 
 S = "${WORKDIR}/git"
 EXTRA_OEMAKE='-C ${STAGING_KERNEL_DIR} M="${S}/drivers" ${MEDIA_CONFIGS} modules V=1'
@@ -105,6 +122,8 @@ KERNEL_MODULE_AUTOLOAD += "amvdec_ports"
 #KERNEL_MODULE_AUTOLOAD += "vpu"
 #KERNEL_MODULE_AUTOLOAD += "encoder"
 KERNEL_MODULE_AUTOLOAD_append_tm2 = " amvdec_av1"
+KERNEL_MODULE_AUTOLOAD_append_sc2 = " amvdec_av1"
+KERNEL_MODULE_AUTOLOAD_append_t5d = " amvdec_av1"
 KERNEL_MODULE_PROBECONF += "amvdec_ports amvdec_mh264"
 module_conf_amvdec_ports = "options amvdec_ports multiplanar=1 vp9_need_prefix=1 av1_need_prefix=1"
 module_conf_amvdec_mh264 = "options amvdec_mh264 error_proc_policy=4181938"
