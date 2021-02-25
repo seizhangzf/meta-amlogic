@@ -57,8 +57,10 @@ do_install () {
 
 	install -d ${D}/usr/lib
 	install -d ${D}${includedir}
+	install -d ${D}${includedir}/amports
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
         install -m 0644 ${S}/amadec/include/*.h ${D}${includedir}
+	install -m 0644 ${S}/amcodec/include/amports/*.h ${D}${includedir}/amports
         install -m 0644 -D ${S}/amadec/libamadec_hal.so ${D}/usr/lib/
         install -m 0644 -D ${S}/audio_codec/libmad/libammad-aml.so ${D}/usr/lib/
         install -m 0644 -D ${S}/audio_codec/libadpcm/libadpcm-aml.so ${D}/usr/lib/
