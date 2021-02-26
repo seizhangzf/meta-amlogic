@@ -4,9 +4,10 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
-DEPENDS += "aml-amaudioutils liblog libdvr-release"
+DEPENDS += "aml-amaudioutils liblog libdvr-release libamadec"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/common/aml_mp_sdk;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot;"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_mp_sdk')}"
 SRCREV = "${AUTOREV}"
 S="${WORKDIR}/git/"
 RDEPENDS_${PN} += " aml-amaudioutils liblog libdvr-release"
