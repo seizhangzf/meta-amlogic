@@ -1,4 +1,4 @@
-From c1fe0cb8a5458f87863b6af7a7f512d90c295116 Mon Sep 17 00:00:00 2001
+From 103ce1e62c989d6e6b7972d9e897e3688dbbb061 Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Mon, 1 Jun 2020 11:22:21 +0800
 Subject: [PATCH] playready: add headers for build [1/1]
@@ -16,6 +16,7 @@ U212 + RDK
 
 Signed-off-by: Tao Guo <tao.guo@amlogic.com>
 Change-Id: I83973f2482017924df216380b4b5101981335038
+Signed-off-by: Tao Guo <tao.guo@amlogic.com>
 ---
  prebuilt-v3.3/noarch/include/drmbuild_linux.h |   35 +
  prebuilt-v3.3/noarch/include/drmtee.h         |  246 +
@@ -506,12 +507,13 @@ Change-Id: I83973f2482017924df216380b4b5101981335038
  .../oem/linux/inc/oemplatform.h               |   71 +
  .../oem/linux/trace/oemtrace.h                |   73 +
  .../oem/linux/trace/oemtraceimpl.h            |  100 +
+ .../playready3.3_sw/playready_secure_api.h    |   39 +
  .../noarch/include/playready3.3_sw/sources    |   17 +
  .../noarch/include/playready_secure_api.h     |   39 +
  .../noarch/include/results/drmerror.h         |   44 +
  .../noarch/include/results/drmresults.h       | 6712 +++++++++++++++++
  prebuilt-v3.3/noarch/pkgconfig/playready.pc   |   10 +
- 494 files changed, 86066 insertions(+)
+ 495 files changed, 86105 insertions(+)
  create mode 100644 prebuilt-v3.3/noarch/include/drmbuild_linux.h
  create mode 100644 prebuilt-v3.3/noarch/include/drmtee.h
  create mode 100755 prebuilt-v3.3/noarch/include/inc/byteorder.h
@@ -1001,6 +1003,7 @@ Change-Id: I83973f2482017924df216380b4b5101981335038
  create mode 100644 prebuilt-v3.3/noarch/include/playready3.3_sw/oem/linux/inc/oemplatform.h
  create mode 100644 prebuilt-v3.3/noarch/include/playready3.3_sw/oem/linux/trace/oemtrace.h
  create mode 100644 prebuilt-v3.3/noarch/include/playready3.3_sw/oem/linux/trace/oemtraceimpl.h
+ create mode 100755 prebuilt-v3.3/noarch/include/playready3.3_sw/playready_secure_api.h
  create mode 100644 prebuilt-v3.3/noarch/include/playready3.3_sw/sources
  create mode 100755 prebuilt-v3.3/noarch/include/playready_secure_api.h
  create mode 100755 prebuilt-v3.3/noarch/include/results/drmerror.h
@@ -1009,7 +1012,7 @@ Change-Id: I83973f2482017924df216380b4b5101981335038
 
 diff --git a/prebuilt-v3.3/noarch/include/drmbuild_linux.h b/prebuilt-v3.3/noarch/include/drmbuild_linux.h
 new file mode 100644
-index 0000000..bb72f20
+index 0000000..e6b4d30
 --- /dev/null
 +++ b/prebuilt-v3.3/noarch/include/drmbuild_linux.h
 @@ -0,0 +1,35 @@
@@ -1042,7 +1045,7 @@ index 0000000..bb72f20
 +#define DRM_COMPILE_FOR_SECURE_WORLD               (0)
 +
 +#define DRM_64BIT_TARGET                           (0)
-+#define DRM_DBG                                    (1)
++#define DRM_DBG                                    (0)
 +
 +/* also force some internal settings */
 +#define TARGET_LITTLE_ENDIAN                       (1)
@@ -38077,7 +38080,7 @@ index 0000000..bb46002
 +
 diff --git a/prebuilt-v3.3/noarch/include/playready3.3_sw/drmbuild_linux.h b/prebuilt-v3.3/noarch/include/playready3.3_sw/drmbuild_linux.h
 new file mode 100644
-index 0000000..bb72f20
+index 0000000..e6b4d30
 --- /dev/null
 +++ b/prebuilt-v3.3/noarch/include/playready3.3_sw/drmbuild_linux.h
 @@ -0,0 +1,35 @@
@@ -38110,7 +38113,7 @@ index 0000000..bb72f20
 +#define DRM_COMPILE_FOR_SECURE_WORLD               (0)
 +
 +#define DRM_64BIT_TARGET                           (0)
-+#define DRM_DBG                                    (1)
++#define DRM_DBG                                    (0)
 +
 +/* also force some internal settings */
 +#define TARGET_LITTLE_ENDIAN                       (1)
@@ -83220,6 +83223,51 @@ index 0000000..78dbc42
 +EXIT_PK_NAMESPACE;
 +
 +#endif  /* __OEMTRACEIMPL_H__ */
+diff --git a/prebuilt-v3.3/noarch/include/playready3.3_sw/playready_secure_api.h b/prebuilt-v3.3/noarch/include/playready3.3_sw/playready_secure_api.h
+new file mode 100755
+index 0000000..6f54557
+--- /dev/null
++++ b/prebuilt-v3.3/noarch/include/playready3.3_sw/playready_secure_api.h
+@@ -0,0 +1,39 @@
++#ifndef __PLAYREAD_SECURE_API_H__
++#define __PLAYREAD_SECURE_API_H__
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++#include  "drmtypes.h"
++#include  "drmresults.h"
++#include  <stdint.h>
++
++typedef enum PLAYREADYResult {
++  PLAYREADY_SUCCESS = 0,
++  PLAYREADY_ERROR_INIT_FAILED,
++  PLAYREADY_ERROR_TERMINATE_FAILED,
++  PLAYREADY_FAILURE = -1
++} PLAYREADYResult;
++
++typedef struct
++{
++    DRM_UINT64  qwInitializationVector;
++    DRM_UINT64  qwBlockOffset;
++    DRM_BYTE    bByteOffset;
++} SEC_AES_COUNTER_MODE_CONTEXT;
++
++DRM_RESULT PRSecure_Initialize(void);
++DRM_RESULT PRSecure_Terminate(void);
++DRM_RESULT PRSecure_OEM_TEE_PROXY_Transport( const DRM_BYTE*RequestMessage, DRM_DWORD cbRequestMessage, DRM_BYTE   *ResponseMessage,DRM_DWORD    *cbResponseMessage );
++DRM_RESULT PRSecure_getSecureMem(unsigned int length,unsigned int flags);
++DRM_RESULT PRSecure_set_HWID( DRM_BYTE*  hwid, DRM_DWORD hwid_cb );
++DRM_RESULT PRSecure_freeHWOperation( void );
++DRM_RESULT PRSecure_getHDCPStatus(int32_t *  mode,  int32_t *auth );
++DRM_RESULT PRSecure_input_SecureMemAddr( DRM_DWORD* outAddr,DRM_DWORD  offset ,DRM_DWORD  blockOffset, DRM_DWORD  byteOffset, DRM_DWORD  frameSize);
++DRM_RESULT PRSecure_video_csd( const DRM_BYTE* input, const DRM_DWORD csdsize,DRM_DWORD outputHandle, DRM_DWORD outputOffset);
++DRM_RESULT PRSecure_query(unsigned int type);
++#ifdef __cplusplus
++}
++#endif
++#endif
++
 diff --git a/prebuilt-v3.3/noarch/include/playready3.3_sw/sources b/prebuilt-v3.3/noarch/include/playready3.3_sw/sources
 new file mode 100644
 index 0000000..3997b1b
@@ -90073,5 +90121,5 @@ index 0000000..8f8f632
 +Libs: -L${libdir} -lplayready -lteec
 +Cflags: -I${includedir} -I${includedir}/inc -I${includedir}/results -I${includedir}/oem/common/inc -I${includedir}/oem/ansi/inc
 -- 
-2.29.0
+2.17.1
 

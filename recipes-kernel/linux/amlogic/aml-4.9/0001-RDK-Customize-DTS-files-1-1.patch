@@ -1,7 +1,7 @@
-From 6833e76aed6ac8329562cb1d8606d8317bbf9ac2 Mon Sep 17 00:00:00 2001
+From d49e0e4082bac83982eddeb201b7eef73d486fcd Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 6 May 2020 21:50:31 -0700
-Subject: [PATCH 1/3] RDK: Customize DTS files [1/1]
+Subject: [PATCH 1/2] RDK: Customize DTS files [1/1]
 
 PD#SWPL-25661
 
@@ -22,19 +22,20 @@ Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
 ---
  .../arm/boot/dts/amlogic/g12a_s905x2_u212.dts |  32 ++++-
  .../amlogic/g12a_s905x2_u212_buildroot.dts    |   2 +-
- .../g12a_s905x2_u212_drm_buildroot.dts        | 130 +++++-------------
- .../amlogic/partition_mbox_normal_P_rdk.dtsi  | 122 ++++++++++++++++
- .../boot/dts/amlogic/partition_tv_ab_rdk.dtsi | 112 +++++++++++++++
+ .../g12a_s905x2_u212_drm_buildroot.dts        | 132 +++++-------------
+ arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi  |   4 +-
+ .../amlogic/partition_mbox_normal_P_rdk.dtsi  | 128 +++++++++++++++++
+ .../boot/dts/amlogic/partition_tv_ab_rdk.dtsi | 118 ++++++++++++++++
  .../tm2_revb_t962e2_ab311_drm_buildroot.dts   |  42 ++++--
- .../tm2_revb_t962x3_ab301_drm_buildroot.dts   |  40 +++++-
+ .../tm2_revb_t962x3_ab301_drm_buildroot.dts   |  47 ++++++-
  .../tm2_t962e2_ab311_drm_buildroot.dts        |  40 +++++-
  .../tm2_t962x3_ab301_drm_buildroot.dts        |  40 +++++-
- 9 files changed, 432 insertions(+), 128 deletions(-)
+ 10 files changed, 453 insertions(+), 132 deletions(-)
  create mode 100644 arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
  create mode 100644 arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
 
 diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212.dts
-index 434e9a8813e8..7fd2584fa6fa 100644
+index 6cb5b327f649..dc331953a666 100644
 --- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212.dts
 +++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212.dts
 @@ -109,7 +109,8 @@
@@ -103,7 +104,7 @@ index 1fbb34d7e394..9a5fecea2b04 100644
  		clocks = <&clkaudio CLKID_AUDIO_MCLK_B
  				&clkc CLKID_MPLL1
 diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
-index 50012ae3702a..c7f815f5eaf0 100644
+index 50012ae3702a..65898816dc7b 100644
 --- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 @@ -19,6 +19,7 @@
@@ -186,15 +187,14 @@ index 50012ae3702a..c7f815f5eaf0 100644
  		interrupts = <0 46 1
  				0 40 1>;
  		interrupt-names = "pre_irq", "post_irq";
-@@ -272,98 +300,10 @@
+@@ -272,97 +300,7 @@
  	ionvideo {
  		compatible = "amlogic, ionvideo";
  		dev_name = "ionvideo";
 -		status = "okay";
-+		status = "disable";
- 	};
- 
- 
+-	};
+-
+-
 -	partitions: partitions{
 -		parts = <14>;
 -		part-0 = <&logo>;
@@ -282,11 +282,11 @@ index 50012ae3702a..c7f815f5eaf0 100644
 -			size = <0xffffffff 0xffffffff>;
 -			mask = <4>;
 -		};
--	};
++		status = "disable";
+ 	};
  	unifykey{
  		compatible = "amlogic, unifykey";
- 		status = "ok";
-@@ -886,7 +826,7 @@
+@@ -886,7 +824,7 @@
  		compatible = "amlogic, g12a-snd-tdmb";
  		#sound-dai-cells = <0>;
  		dai-tdm-lane-slot-mask-in = <0 1 0 0>;
@@ -295,12 +295,34 @@ index 50012ae3702a..c7f815f5eaf0 100644
  		dai-tdm-clk-sel = <1>;
  		clocks = <&clkaudio CLKID_AUDIO_MCLK_B
  				&clkc CLKID_MPLL1
+diff --git a/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi b/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
+index afce9c5e7e6d..e733b3609c3f 100644
+--- a/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
++++ b/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
+@@ -568,7 +568,7 @@
+ 	dolby_fw: dolby_fw {
+ 		compatible = "amlogic, dolby_fw";
+ 		mem_size = <0x100000>;
+-		status = "disabled";
++		status = "okay";
+ 	};
+ 
+ 	wdt: watchdog@0xffd0f0d0 {
+@@ -1114,7 +1114,7 @@
+ 		ion_dev {
+ 			compatible = "amlogic, ion_dev";
+ 			status = "okay";
+-			memory-region = <&ion_cma_reserved>;
++			memory-region = <&ion_cma_reserved &ion_secure_reserved>;
+ 		};/* end of ion_dev*/
+ 	}; /* end of soc*/
+ 
 diff --git a/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
 new file mode 100644
-index 000000000000..0a2daae77346
+index 000000000000..c5330e34d77f
 --- /dev/null
 +++ b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,128 @@
 +﻿ /*
 +  * Amlogic partition set for normal
 +  *
@@ -312,7 +334,7 @@ index 000000000000..0a2daae77346
 +
 +/ {
 +	partitions: partitions{
-+				parts = <18>;
++				parts = <19>;
 +				part-0 = <&dtbbak>;
 +				part-1 = <&bootloaderbak>;
 +				part-2 = <&recovery>;
@@ -322,15 +344,16 @@ index 000000000000..0a2daae77346
 +				part-6 = <&rsv>;
 +				part-7 = <&param>;
 +				part-8 = <&tee>;
-+				part-9 = <&oem>;
-+				part-10 = <&vbmeta_a>;
-+				part-11 = <&boot_a>;
-+				part-12 = <&system_a>;
-+				part-13 = <&vbmeta_b>;
-+				part-14 = <&boot_b>;
-+				part-15 = <&system_b>;
-+				part-16 = <&cache>;
-+				part-17 = <&data>;
++				part-9 = <&factory>;
++				part-10 = <&oem>;
++				part-11 = <&vbmeta_a>;
++				part-12 = <&boot_a>;
++				part-13 = <&system_a>;
++				part-14 = <&vbmeta_b>;
++				part-15 = <&boot_b>;
++				part-16 = <&system_b>;
++				part-17 = <&cache>;
++				part-18 = <&data>;
 +		dtbbak:dtbbak{
 +				   pname = "dtbbak";
 +				   size = <0x0 0x100000>;
@@ -376,6 +399,11 @@ index 000000000000..0a2daae77346
 +				size = <0x0 0x2000000>;
 +				mask = <1>;
 +			};
++		factory:factory{
++				pname = "factory";
++				size = <0x0 0x800000>;
++				mask = <0x11>;
++		};
 +		oem:oem{
 +				pname = "oem";
 +				size = <0x0 0x800000>;
@@ -425,22 +453,22 @@ index 000000000000..0a2daae77346
 +};/* end of / */
 diff --git a/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
 new file mode 100644
-index 000000000000..6e2f8b7622f7
+index 000000000000..ca5c5d65b1c8
 --- /dev/null
 +++ b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
-@@ -0,0 +1,112 @@
-+﻿ /*
-+  * Amlogic partition set for normal
-+  *
-+  * Copyright (c) 2017-2017 Amlogic Ltd
-+  *
-+  * This file is licensed under a dual GPLv2 or BSD license.
-+  *
-+  */
+@@ -0,0 +1,118 @@
++﻿/*
++ * Amlogic partition set for normal
++ *
++ * Copyright (c) 2017-2017 Amlogic Ltd
++ *
++ * This file is licensed under a dual GPLv2 or BSD license.
++ *
++ */
 +
 +/ {
 +	partitions: partitions{
-+				parts = <16>;
++				parts = <17>;
 +				part-0 = <&recovery>;
 +				part-1 = <&logo>;
 +				part-2 = <&misc>;
@@ -448,15 +476,16 @@ index 000000000000..6e2f8b7622f7
 +				part-4 = <&rsv>;
 +				part-5 = <&param>;
 +				part-6 = <&tee>;
-+				part-7 = <&vendor>;
-+				part-8 = <&vbmeta_a>;
-+				part-9 = <&boot_a>;
-+				part-10 = <&system_a>;
-+				part-11 = <&vbmeta_b>;
-+				part-12 = <&boot_b>;
-+				part-13 = <&system_b>;
-+				part-14 = <&user_apps>;
-+				part-15 = <&data>;
++				part-7 = <&factory>;
++				part-8 = <&vendor>;
++				part-9 = <&vbmeta_a>;
++				part-10 = <&boot_a>;
++				part-11 = <&system_a>;
++				part-12 = <&vbmeta_b>;
++				part-13 = <&boot_b>;
++				part-14 = <&system_b>;
++				part-15 = <&user_apps>;
++				part-16 = <&data>;
 +		recovery:recovery{
 +					 pname = "recovery";
 +					 size = <0x0 0x4000000>;
@@ -492,6 +521,11 @@ index 000000000000..6e2f8b7622f7
 +				size = <0x0 0x2000000>;
 +				mask = <1>;
 +			};
++		factory:factory{
++				pname = "factory";
++				size = <0x0 0x800000>;
++				 mask = <0x11>;
++		};
 +		vendor:vendor
 +		{
 +			pname = "vendor";
@@ -542,7 +576,7 @@ index 000000000000..6e2f8b7622f7
 +			};
 +};/* end of / */
 diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
-index 4bcc7426c787..20770a74681a 100644
+index dfb454753355..11f05c1689ac 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
 @@ -19,7 +19,7 @@
@@ -629,7 +663,7 @@ index 4bcc7426c787..20770a74681a 100644
  		buffer-size = <4074560>;/*yuv422 fullpack*/
  		/* reserve-iomap = "true"; */
  		/* if enable nr10bit, set nr10bit-support to 1 */
-@@ -1823,7 +1849,7 @@
+@@ -1824,7 +1850,7 @@
  	//pinctrl-names = "internal_eth_pins", "internal_gpio_pins";
  	//pinctrl-0 = <&internal_eth_pins>;
  	//pinctrl-1 = <&internal_gpio_pins>;
@@ -639,7 +673,7 @@ index 4bcc7426c787..20770a74681a 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
-index 3a2a51cfb0f5..76e258ca9530 100644
+index f5752bb93e7e..f2de21d8214d 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
 @@ -19,7 +19,7 @@
@@ -664,36 +698,43 @@ index 3a2a51cfb0f5..76e258ca9530 100644
  		};
  
  		/* codec shared reserved */
-@@ -108,7 +108,7 @@
+@@ -108,7 +108,14 @@
  		ion_cma_reserved:linux,ion-dev {
  			compatible = "shared-dma-pool";
  			reusable;
 -			size = <0x2000000>;
 +			size = <0xC800000>;
++			alignment = <0x400000>;
++			no-kernel-map;
++		};
++		ion_secure_reserved:linux,ion-secure {
++			compatible = "amlogic, ion-secure-mem";
++			reusable;
++			size = <0x10000000>;
  			alignment = <0x400000>;
  			no-kernel-map;
  		};
-@@ -159,7 +159,8 @@
+@@ -159,7 +166,8 @@
  			 * 10x4736064=45.2M(0x2e) support 12bit
  			 * 10x4074560=40M(0x28) support 10bit
  			 */
 -			size = <0x02800000>;
 +			//size = <0x02800000>;
-+			size = <0x08800000>;//2ch
++			size = <0x0>;//2ch
  			alignment = <0x400000>;
  		};
  
-@@ -216,9 +217,34 @@
+@@ -216,9 +224,34 @@
  		status = "okay";
  	};
  
 +	di_multi_v3 {
-+		compatible = "amlogic, dimv3-g12a";
++		compatible = "amlogic, dimv3-tm2vb";
 +		status = "okay";
 +		/* 0:use reserved; 1:use cma; 2:use cma as reserved */
-+		flag_cma = <1>;
++		flag_cma = <4>;
 +		//memory-region = <&di_reserved>;
-+		memory-region = <&di_cma_reserved>;
++		//memory-region = <&di_cma_reserved>;
 +		interrupts = <0 46 1
 +				0 40 1>;
 +		interrupt-names = "pre_irq", "post_irq";
@@ -719,7 +760,7 @@ index 3a2a51cfb0f5..76e258ca9530 100644
  		/* 0:use reserved; 1:use cma; 2:use cma as reserved */
  		flag_cma = <1>;
  		//memory-region = <&di_reserved>;
-@@ -1864,7 +1890,7 @@
+@@ -1865,7 +1898,7 @@
  	pinctrl-names = "internal_eth_pins", "internal_gpio_pins";
  	pinctrl-0 = <&internal_eth_pins>;
  	pinctrl-1 = <&internal_gpio_pins>;
@@ -729,7 +770,7 @@ index 3a2a51cfb0f5..76e258ca9530 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
-index bb6b0476f880..3f89b5b9e692 100644
+index af60d79146f7..7e2582455495 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
 @@ -19,7 +19,7 @@
@@ -809,7 +850,7 @@ index bb6b0476f880..3f89b5b9e692 100644
  		/* 0:use reserved; 1:use cma; 2:use cma as reserved */
  		flag_cma = <1>;
  		//memory-region = <&di_reserved>;
-@@ -1799,7 +1825,7 @@
+@@ -1800,7 +1826,7 @@
  	//pinctrl-names = "internal_eth_pins", "internal_gpio_pins";
  	//pinctrl-0 = <&internal_eth_pins>;
  	//pinctrl-1 = <&internal_gpio_pins>;
@@ -819,7 +860,7 @@ index bb6b0476f880..3f89b5b9e692 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
-index e886aeba34eb..50023990e57a 100644
+index a892daf6d3ad..196dc7cca2a9 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
 @@ -19,7 +19,7 @@
@@ -899,7 +940,7 @@ index e886aeba34eb..50023990e57a 100644
  		/* 0:use reserved; 1:use cma; 2:use cma as reserved */
  		flag_cma = <1>;
  		//memory-region = <&di_reserved>;
-@@ -1849,7 +1875,7 @@
+@@ -1850,7 +1876,7 @@
  	pinctrl-names = "internal_eth_pins", "internal_gpio_pins";
  	pinctrl-0 = <&internal_eth_pins>;
  	pinctrl-1 = <&internal_gpio_pins>;
@@ -909,5 +950,5 @@ index e886aeba34eb..50023990e57a 100644
  	internal_phy=<1>;
  };
 -- 
-2.29.0
+2.17.1
 

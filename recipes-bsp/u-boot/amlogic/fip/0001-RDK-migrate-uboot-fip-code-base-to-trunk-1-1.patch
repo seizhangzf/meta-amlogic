@@ -1,4 +1,4 @@
-From f4a926154924038a8d600474022be98e886f30db Mon Sep 17 00:00:00 2001
+From 19fb5c744714effba0f45423f7e7585e725f06b6 Mon Sep 17 00:00:00 2001
 From: Matthew Shyu <matthew.shyu@amlogic.com>
 Date: Fri, 20 Mar 2020 03:00:39 -0700
 Subject: [PATCH] RDK: migrate uboot fip code base to trunk [1/1]
@@ -16,15 +16,12 @@ Verify:
 
 Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Change-Id: I948b867fc662e8e64716791b151d40386e0e4d8d
-
-%% original patch: 0001-RDK-migrate-uboot-fip-code-base-to-trunk-1-1.patch
 ---
- lib.sh       | 2 +-
- variables.sh | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/lib.sh b/lib.sh
-index 6ca8b2c..3cfbe4d 100755
+index e824f71..55e31f9 100755
 --- a/lib.sh
 +++ b/lib.sh
 @@ -281,7 +281,7 @@ function prepare_tools() {
@@ -36,19 +33,6 @@ index 6ca8b2c..3cfbe4d 100755
  			cd ${MAIN_FOLDER}
  
  			mv -f ${FIP_DDR_PARSE}/parse ${FIP_BUILD_FOLDER}
-diff --git a/variables.sh b/variables.sh
-index 4be862d..4567304 100755
---- a/variables.sh
-+++ b/variables.sh
-@@ -33,7 +33,7 @@ declare BL33_PATH1="bl33/v2015"
- declare BL33_PATH2="bl33/v2019"
- 
- declare BL33_TOOLCHAIN1="aarch64-none-elf-"
--declare BL33_TOOLCHAIN2="/opt/gcc-linaro-7.3.1-2018.05-i686_aarch64-elf/bin/aarch64-elf-"
-+declare BL33_TOOLCHAIN2="aarch64-elf-"
- 
- declare BL33_DEFCFG1="${UBOOT_FOLDER}/${UBOOT_VERSION1}/${DEFCFG_FOLDER}"
- declare BL33_DEFCFG2="${UBOOT_FOLDER}/${UBOOT_VERSION2}/${DEFCFG_FOLDER}"
 -- 
 2.17.1
 

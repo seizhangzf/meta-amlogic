@@ -1,0 +1,66 @@
+From ca6ff47fa02713bdd3de6f1faf5b147c06c07490 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Fri, 12 Feb 2021 15:31:50 -0800
+Subject: [PATCH] vp9: use signal_type from application [1/1]
+
+PD#SWPL-43042
+
+Problem:
+VP9 driver fixes the singla_type.
+
+Solution:
+Use signal_type from application.
+
+Verify:
+U212 + gst-play-1.0
+
+Change-Id: Ic78ce748ddd4355c5edb9bc04824f4390deab932
+Signed-off-by: Song Zhao <song.zhao@amlogic.com>
+---
+ drivers/amvdec_ports/decoder/vdec_vp9_if.c | 2 ++
+ drivers/frame_provider/decoder/vp9/vvp9.c  | 9 ++-------
+ 2 files changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/amvdec_ports/decoder/vdec_vp9_if.c b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+index c1ac8ff4..27494d11 100644
+--- a/drivers/amvdec_ports/decoder/vdec_vp9_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+@@ -222,6 +222,8 @@ static void vdec_parser_parms(struct vdec_vp9_inst *inst)
+ 		u8 *pbuf = ctx->config.buf + ctx->config.length;
+ 
+ 		pbuf += sprintf(pbuf, "HDRStaticInfo:%d;", 1);
++		pbuf += sprintf(pbuf, "signal_type:%d;",
++			ctx->config.parm.dec.hdr.signal_type);
+ 		pbuf += sprintf(pbuf, "mG.x:%d;",
+ 			ctx->config.parm.dec.hdr.color_parms.primaries[0][0]);
+ 		pbuf += sprintf(pbuf, "mG.y:%d;",
+diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
+index 25028e61..c2790dab 100644
+--- a/drivers/frame_provider/decoder/vp9/vvp9.c
++++ b/drivers/frame_provider/decoder/vp9/vvp9.c
+@@ -11583,6 +11583,8 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
+ 		if (get_config_int(pdata->config, "HDRStaticInfo",
+ 				&vf_dp.present_flag) == 0
+ 				&& vf_dp.present_flag == 1) {
++			get_config_int(pdata->config, "signal_type",
++					&pbi->video_signal_type);
+ 			get_config_int(pdata->config, "mG.x",
+ 					&vf_dp.primaries[0][0]);
+ 			get_config_int(pdata->config, "mG.y",
+@@ -11618,13 +11620,6 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
+ 			vp9_print(pbi, 0, "transfer_val=%d\n",transfer_val);
+ 
+ 			vf_dp.content_light_level = content_light_level;
+-			pbi->video_signal_type = (1 << 29)
+-					| (5 << 26)	/* unspecified */
+-					| (0 << 25)	/* limit */
+-					| (1 << 24)	/* color available */
+-					| (9 << 16)	/* 2020 */
+-					| (transfer_val << 8)	/* 2084 */
+-					| (9 << 0);	/* 2020 */
+ 		}
+ 		pbi->vf_dp = vf_dp;
+ 	} else {
+-- 
+2.17.1
+

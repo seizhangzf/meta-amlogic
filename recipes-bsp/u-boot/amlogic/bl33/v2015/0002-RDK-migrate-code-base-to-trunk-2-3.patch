@@ -1,0 +1,103 @@
+From b684a24eb4f903148e22708e6d41cf05e4c4d74d Mon Sep 17 00:00:00 2001
+From: Johnny Lee - TW <johnny.lee@noodle.amlogic.com>
+Date: Tue, 10 Mar 2020 11:08:30 -0700
+Subject: [PATCH 2/9] RDK: migrate code base to trunk [2/3]
+
+PD#SWPL-24384
+
+Problem:
+ support AB partition
+
+Solution:
+  Add boot logic
+
+Verify: Local
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I17222f221b13e13d450eed08fa1722344d9d3784
+---
+ board/amlogic/configs/g12a_u212_v1.h        | 8 +++++---
+ board/amlogic/configs/tm2_t962e2_ab311_v1.h | 8 +++++---
+ board/amlogic/configs/tm2_t962x3_ab301_v1.h | 8 +++++---
+ common/ini/ini_platform.c                   | 6 +++++-
+ 4 files changed, 20 insertions(+), 10 deletions(-)
+
+diff --git a/board/amlogic/configs/g12a_u212_v1.h b/board/amlogic/configs/g12a_u212_v1.h
+index 538a4b2e30..bcff6b0f58 100644
+--- a/board/amlogic/configs/g12a_u212_v1.h
++++ b/board/amlogic/configs/g12a_u212_v1.h
+@@ -216,10 +216,12 @@
+             "fi;"\
+             "if test ${avb2} = 0; then "\
+                 "if test ${active_slot} = _a; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p23;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_a;"\
+                 "else if test ${active_slot} = _b; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p24;"\
+-                "fi;fi;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                "else if test ${active_slot} = normal; then "\
++                    "setenv bootargs ${bootargs} root=/dev/system;"\
++                "fi;fi;fi;"\
+             "fi;"\
+             "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+             "run storeargs; run update;"\
+diff --git a/board/amlogic/configs/tm2_t962e2_ab311_v1.h b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
+index afb3f89328..267a9b0593 100644
+--- a/board/amlogic/configs/tm2_t962e2_ab311_v1.h
++++ b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
+@@ -270,10 +270,12 @@
+             "fi;"\
+             "if test ${avb2} = 0; then "\
+                 "if test ${active_slot} = _a; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p23;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_a rootfstype=ext4;"\
+                 "else if test ${active_slot} = _b; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p24;"\
+-                "fi;fi;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_b rootfstype=ext4;"\
++                "else if test ${active_slot} = normal; then "\
++                    "setenv bootargs ${bootargs} root=/dev/system;"\
++                "fi;fi;fi;"\
+             "fi;"\
+             "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+             "run update;"\
+diff --git a/board/amlogic/configs/tm2_t962x3_ab301_v1.h b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
+index 6b3446bf62..a73277829a 100644
+--- a/board/amlogic/configs/tm2_t962x3_ab301_v1.h
++++ b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
+@@ -255,10 +255,12 @@
+             "fi;"\
+             "if test ${avb2} = 0; then "\
+                 "if test ${active_slot} = _a; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p23;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_a;"\
+                 "else if test ${active_slot} = _b; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p24;"\
+-                "fi;fi;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                "else if test ${active_slot} = normal; then "\
++                    "setenv bootargs ${bootargs} root=/dev/system;"\
++                "fi;fi;fi;"\
+             "fi;"\
+             "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+             "run update;"\
+diff --git a/common/ini/ini_platform.c b/common/ini/ini_platform.c
+index a7551c0e1b..ccdb1a9058 100644
+--- a/common/ini/ini_platform.c
++++ b/common/ini/ini_platform.c
+@@ -55,7 +55,11 @@ static int splitFilePath(const char *file_path, char part_name[], char file_name
+     part_name[tmp_end_ptr - tmp_start_ptr - 1] = '\0';
+     //ALOGD("%s, partition name is %s\n", __FUNCTION__, part_name);
+ 
+-    if (has_boot_slot == 1) {
++    if (part_name[0] == 'v' && part_name[1] == 'e' &&
++            part_name[2] == 'n' && part_name[3] == 'd' &&
++            part_name[4] == 'o' && part_name[5] == 'r') {
++        // Don't touch "vendor". It should be pure "vendor" without suffix.
++    } else if (has_boot_slot == 1) {
+         slot_name = getenv("slot-suffixes");
+         if (slot_name == NULL) {
+             run_command("get_valid_slot", 0);
+-- 
+2.17.1
+

@@ -54,12 +54,15 @@ BL32_SOC_FAMILY_txl = "gx"
 BL32_SOC_FAMILY_txlx = "txlx"
 BL32_SOC_FAMILY_sm2 = "g12a"
 BL32_SOC_FAMILY_tm2 = "tm2"
+BL32_SOC_FAMILY_t5d = "t5d"
 
 PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-none-elf/bin"
 PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+PATH_append_t5d = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-elf/bin"
 DEPENDS_append = "gcc-linaro-aarch64-none-elf-native optee-scripts-native optee-userspace-securebl32"
 DEPENDS_append_tm2 = " riscv-none-gcc-native "
+DEPENDS_append_t5d = " riscv-none-gcc-native "
 DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 
 DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
@@ -81,9 +84,9 @@ do_compile () {
             --in=${STAGING_DIR_TARGET}/usr/share/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
             --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 
-        ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
+        LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
     else
-        ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
+        LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
     fi
     cp -rf build/* fip/
 }

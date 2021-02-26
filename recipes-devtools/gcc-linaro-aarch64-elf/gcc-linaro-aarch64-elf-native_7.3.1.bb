@@ -1,7 +1,7 @@
 DESCRIPTION = "Baremetal GCC for AARCH64"
 LICENSE = "MIT"
 
-LIC_FILES_CHKSUM = "file://share/doc/gcc-linaro-aarch64-elf/html/binutils.html/GNU-Free-Documentation-License.html;md5=d50d69c5437545d207a4a3bbb7af5711"
+LIC_FILES_CHKSUM = "file://share/doc/binutils.html/GNU-Free-Documentation-License.html;md5=c03da3e7ebbe44843e96b24182bb0f60"
 inherit native
 export GCC_LINARO_AARCH64_TOOLCHAIN      = "/gcc-linaro-aarch64-elf"
 COMPATIBLE_HOST = "(i.86|x86_64).*-linux"

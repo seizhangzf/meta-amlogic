@@ -1,0 +1,38 @@
+From 7226fe1fa739d4ef5260a4045e7adf0f08ca4004 Mon Sep 17 00:00:00 2001
+From: Terrence Pu <terrence.pu@amlogic.com>
+Date: Sun, 7 Jun 2020 22:24:58 -0700
+Subject: [PATCH 5/9] u-boot: Enable Ethernet Wakeup by MAC address
+
+PD#SWPL-27480
+
+Problem:
+Need to support Ethernet WOL by MAC address
+
+Solution:
+Enable the Ethernet WOL by MAC address feature
+
+Verify:
+u212/HP40A
+
+Change-Id: Ia9e30f15383dc60ed8146da60e27f1693b56b64c
+Signed-off-by: Terrence Pu <terrence.pug@amlogic.com>
+---
+ board/amlogic/g12a_u212_v1/firmware/scp_task/pwr_ctrl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/amlogic/g12a_u212_v1/firmware/scp_task/pwr_ctrl.c b/board/amlogic/g12a_u212_v1/firmware/scp_task/pwr_ctrl.c
+index 9b832adc95..1dd8ea56c9 100644
+--- a/board/amlogic/g12a_u212_v1/firmware/scp_task/pwr_ctrl.c
++++ b/board/amlogic/g12a_u212_v1/firmware/scp_task/pwr_ctrl.c
+@@ -110,7 +110,7 @@ void get_wakeup_source(void *response, unsigned int suspend_from)
+ 
+ 	p->status = RESPONSE_OK;
+ 	val = (POWER_KEY_WAKEUP_SRC | AUTO_WAKEUP_SRC | REMOTE_WAKEUP_SRC |
+-	       BT_WAKEUP_SRC | CEC_WAKEUP_SRC | CECB_WAKEUP_SRC);
++	       BT_WAKEUP_SRC | CEC_WAKEUP_SRC | CECB_WAKEUP_SRC | ETH_PMT_WAKEUP_SRC);
+ 
+ 	p->sources = val;
+ 	p->gpio_info_count = i;
+-- 
+2.17.1
+

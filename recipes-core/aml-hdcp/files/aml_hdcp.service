@@ -1,6 +1,6 @@
 [Unit]
-Description=hdcprx Startup
-After=tee-supplicant.service
+Description=hdcp Startup
+After=aml_key_inject.service
 
 [Service]
 User=root

@@ -1,12 +1,12 @@
 [Unit]
-Description=Skyworth HDCP Startup
-After=wpeframework.service
-Requires=wpeframework.service
+Description=HDCP firmware load
+After=tee-supplicant.service aml_hdcp.service pwrmgr.service 
+Requires=tee-supplicant.service aml_hdcp.service 
 
 [Service]
 Type=forking
 User=root
-ExecStartPre=/bin/usleep 2000000
+#ExecStartPre=/bin/usleep 2000000
 ExecStart=/bin/sh -c '/usr/bin/hdcp_tx22 -f /lib/firmware/hdcp/firmware.le&'
 
 [Install]
