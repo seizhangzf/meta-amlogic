@@ -18,7 +18,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 SRC_URI = "git://${AML_GIT_ROOT}/firmware/bin/bl2.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl2/bin;name=bl2"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl30.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl30/bin;name=bl30"
-SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/aocpu.git;protocol=${AML_GIT_PROTOCOL};branch=projects/amlogic-dev;destsuffix=uboot-repo/bl30/src_ao;name=src_ao"
+SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/aocpu.git;protocol=${AML_GIT_PROTOCOL};branch=projects/amlogic-dev;destsuffix=uboot-repo/bl30/src_ao;name=src-ao"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl31/bin;name=bl31"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-1.3;destsuffix=uboot-repo/bl31_1.3/bin;name=bl31-1.3"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl32.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-3.8.0;destsuffix=uboot-repo/bl32_3.8/bin;name=bl32-3.8"
@@ -38,7 +38,7 @@ do_configure[noexec] = "1"
 
 SRCREV_bl2 ?="${AUTOREV}"
 SRCREV_bl30 ?="${AUTOREV}"
-SRCREV_src_ao ?="${AUTOREV}"
+SRCREV_src-ao ?="${AUTOREV}"
 SRCREV_bl31 ?="${AUTOREV}"
 SRCREV_bl31-1.3 ?="${AUTOREV}"
 SRCREV_bl32-3.8 ?="${AUTOREV}"
@@ -49,8 +49,8 @@ SRCREV_soc-templates ?="${AUTOREV}"
 
 S = "${WORKDIR}/uboot-repo"
 #Below format will cause build failure due to too long filename for mktemp
-#SRCREV_FORMAT = "bl2_bl30_src_ao_bl31_bl31-1.3_bl32-3.8_bl33_fip_bl40_soc-templates"
-SRCREV_FORMAT = "bl2_bl30_src_ao_bl31_bl31-1.3_bl32-3.8_bl33_fip"
+#SRCREV_FORMAT = "bl2_bl30_src-ao_bl31_bl31-1.3_bl32-3.8_bl33_fip_bl40_soc-templates"
+SRCREV_FORMAT = "bl2_bl30_src-ao_bl31_bl31-1.3_bl32-3.8_bl33_fip"
 PR = "r1"
 PV = "v2019.01+git${SRCPV}"
 
