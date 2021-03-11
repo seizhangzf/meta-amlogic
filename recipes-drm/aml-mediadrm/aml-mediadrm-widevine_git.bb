@@ -23,7 +23,14 @@ RDEPENDS_${PN} = "libamavutils"
 inherit autotools pkgconfig
 ARM_TARGET="arm.aapcs-linux.hard"
 TA_TARGET="noarch"
-WIDEVINE_VER="prebuilt-v15"
+
+def get_widevine_version(datastore):
+    if datastore.getVar("WIDEVINE_VERSION", True) == "16":
+        return "prebuilt-v16"
+    else:
+        return "prebuilt-v15"
+
+WIDEVINE_VER = "${@get_widevine_version(d)}"
 do_install() {
 
     install -d -m 0644 ${D}/lib/teetz
