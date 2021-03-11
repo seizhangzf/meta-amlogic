@@ -10,12 +10,14 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/vendor/amlogic/tdk_keys.git;protocol=${
 PATCHTOOL= "git"
 #For common patches
 TDIR = "tdk"
+TDIR_g12a = "tdk"
 TDIR_sc2 = "tdk-3.8"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/${TDIR}', '${TDIR}')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/tdk/linuxdriver', 'tdk/linuxdriver')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/tdk/ta_export/keys', 'tdk/ta_export/keys')}"
 
 TDK_VERSION = "2.4.4"
+TDK_VERSION_g12a = "3.8.0"
 TDK_VERSION_sc2 = "3.8.0"
 
 SRCREV ?= "${AUTOREV}"

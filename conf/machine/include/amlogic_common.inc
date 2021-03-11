@@ -24,6 +24,7 @@ INITRAMFS_FSTYPES = "cpio.gz"
 KERNEL_MODULE_AUTOLOAD += "mali"
 KERNEL_MODULE_AUTOLOAD += "dma-buf-test-exporter"
 TDK_VERSION = "v2.4"
+TDK_VERSION_g12a = "v3.8"
 TDK_VERSION_sc2 = "v3.8"
 
 AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
