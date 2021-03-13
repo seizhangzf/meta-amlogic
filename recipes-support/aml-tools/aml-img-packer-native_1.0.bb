@@ -16,6 +16,7 @@ SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
 SOC_FAMILY_sc2 = "sc2"
+SOC_FAMILY_sc2-5.4 = "sc2"
 SOC_FAMILY_t5d = "t5d"
 
 SOC_BOARD = "default"

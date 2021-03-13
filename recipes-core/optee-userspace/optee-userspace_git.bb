@@ -14,15 +14,18 @@ PACKAGES =+ "\
     "
 #PR = "${INC_PR}.1"
 
+CA_PATH_SUFFIX="arm"
+CA_PATH_SUFFIX_aarch64="arm64"
+
 do_install() {
     mkdir -p ${D}${bindir}
     mkdir -p ${D}${includedir}
-    install -m 0755 ${S}/ca_export_arm/bin/tee-supplicant ${D}${bindir}
+    install -m 0755 ${S}/ca_export_${CA_PATH_SUFFIX}/bin/tee-supplicant ${D}${bindir}
 
     mkdir -p ${D}${libdir}
-    install -m 0755 ${S}/ca_export_arm/lib/libteec.so ${D}${libdir}/libteec.so.1.0
+    install -m 0755 ${S}/ca_export_${CA_PATH_SUFFIX}/lib/libteec.so ${D}${libdir}/libteec.so.1.0
 
-    install -m 0755 ${S}/ca_export_arm/include/*.h ${D}${includedir}/
+    install -m 0755 ${S}/ca_export_${CA_PATH_SUFFIX}/include/*.h ${D}${includedir}/
 
     ln -s libteec.so.1 ${D}${libdir}/libteec.so
     ln -s libteec.so.1.0 ${D}${libdir}/libteec.so.1

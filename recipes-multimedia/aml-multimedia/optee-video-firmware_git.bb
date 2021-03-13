@@ -12,7 +12,9 @@ SRC_URI += "file://videoFirmwarePreload.service"
 
 S = "${WORKDIR}/git/secfirmload/secloadbin"
 TA_ARCH = "noarch"
+
 TAR_ARCH = "arm.aapcs-linux.hard"
+TAR_ARCH_aarch64 = "aarch64.lp64."
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"

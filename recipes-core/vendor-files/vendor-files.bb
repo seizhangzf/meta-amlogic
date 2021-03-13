@@ -34,8 +34,8 @@ do_install() {
 				install -m 0644 -D ${S}/etc/tvconfig/${SOC}/PQ/overscan.db ${D}/etc/tvconfig/pq/overscan.db
 			fi
         fi
-        install -d ${D}/lib
-        ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/lib/libdolbyms12.so
+        ###install -d ${D}/lib
+        ###ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/lib/libdolbyms12.so
         if [ -d ${S}/logo_files/${SOC} ]; then
 			install -d ${D}/logo_files
 			install -m 0644 -D ${S}/logo_files/${SOC}/bootup.bmp ${D}/logo_files/bootup.bmp

@@ -16,6 +16,7 @@ UBOOT_LOCALVERSION ?= ""
 # but enable individual recipes to change this value.
 UBOOT_SUFFIX ?= "bin"
 UBOOT_SUFFIX_sc2 ?= "bin.signed"
+UBOOT_SUFFIX_sc2-5.4 ?= "bin.signed"
 UBOOT_IMAGE ?= "u-boot-${MACHINE}-${PV}-${PR}.${UBOOT_SUFFIX}"
 UBOOT_BINARY ?= "u-boot.${UBOOT_SUFFIX}"
 UBOOT_SYMLINK ?= "u-boot-${MACHINE}.${UBOOT_SUFFIX}"

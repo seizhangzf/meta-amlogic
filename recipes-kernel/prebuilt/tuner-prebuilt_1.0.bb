@@ -17,4 +17,7 @@ do_install() {
     install -m 0644 ${S}/kernel-module/tuner/*.ko ${KO_DIR}
 }
 
+do_install_aarch64 () {
+}
+
 FILES_${PN} = "/lib/modules/${KERNEL_VERSION}/kernel/tuner" 
