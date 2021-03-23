@@ -34,6 +34,10 @@ AML_GIT_ROOT_PR ?= "git@openlinux.amlogic.com"
 AML_GIT_ROOT_WV ?= "git@openlinux.amlogic.com/yocto"
 AML_GIT_ROOT_PROTOCOL ?= "ssh"
 
+#check connectivity using bing
+CONNECTIVITY_CHECK_URIS = "https://www.bing.com/"
+
 LINUXLIBCVERSION ?= "4.9%"
 PREFERRED_VERSION_libdrm = "2.4.100"
 PREFERRED_VERSION_u-boot = "v2015.%"
+WIDEVINE_VERSION = "16"
