@@ -25,6 +25,7 @@ EXTERNALSRC_pn-optee-scripts-native_sc2 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/
 EXTERNALSRC_pn-optee-linux-driver_g12a = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8')) else ''}"
 EXTERNALSRC_pn-optee-linux-driver_sc2 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8')) else ''}"
 EXTERNALSRC_pn-aml-mediadrm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
+EXTERNALSRC_pn-aml-netflix-esn = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
 EXTERNALSRC_pn-aml-mediahal-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/mediahal-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/mediahal-sdk')) else ''}"
 EXTERNALSRC_pn-aml-secmem = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
 EXTERNALSRC_pn-aml-youtubesign-bin = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/')) else ''}"
