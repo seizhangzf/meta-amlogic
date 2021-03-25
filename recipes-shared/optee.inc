@@ -16,12 +16,8 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendo
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/tdk/linuxdriver', 'tdk/linuxdriver')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/tdk/ta_export/keys', 'tdk/ta_export/keys')}"
 
-TDK_VERSION = "2.4.4"
-TDK_VERSION_g12a = "3.8.0"
-TDK_VERSION_sc2 = "3.8.0"
-
 SRCREV ?= "${AUTOREV}"
 SRCREV_FORMAT = "tdk_tdk-linuxdriver_tdk-keys"
-INC_PR = "${TDK_VERSION}"
+#INC_PR = "${TDK_VERSION}"
 PV = "git${SRCPV}"
 S = "${WORKDIR}/tdk"
