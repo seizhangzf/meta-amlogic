@@ -22,7 +22,7 @@ do_install_append() {
     install -d -m 0644 ${D}/usr/bin
     install -d -m 0644 ${D}/lib/teetz
     install -D -m 0755 ${S}/netflix_ta-bin/prebuilt/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
-    install -D -m 0644 ${S}/netflix_ta-bin/prebuilt/${ARM_TARGET}/esn_provision ${D}/usr/bin/
+    install -D -m 0755 ${S}/netflix_ta-bin/prebuilt/${ARM_TARGET}/esn_provision ${D}/usr/bin/
 }
 
 FILES_${PN} += "${bindir}/* /lib/teetz/* ${includedir}/*"
