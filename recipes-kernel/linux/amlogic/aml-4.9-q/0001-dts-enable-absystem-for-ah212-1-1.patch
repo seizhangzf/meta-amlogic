@@ -1,4 +1,4 @@
-From 0d22b7e8c692ba4aebcd0b2f4634e8dface48f87 Mon Sep 17 00:00:00 2001
+From 179579cd1a74d119f56414c8eff066d4e3155859 Mon Sep 17 00:00:00 2001
 From: Bing Jiang <bing.jiang@amlogic.com>
 Date: Sat, 31 Oct 2020 13:05:48 +0800
 Subject: [PATCH] dts: enable absystem for ah212 [1/1]
@@ -158,7 +158,7 @@ index 000000000000..bde4e68354ec
 +			};
 +};/* end of / */
 diff --git a/arch/arm/boot/dts/amlogic/sc2_s905x4_ah212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/sc2_s905x4_ah212_drm_buildroot.dts
-index 6d05d4b2db3b..50c71bd74868 100644
+index 91c20f9ef98b..c70a47c7ba59 100644
 --- a/arch/arm/boot/dts/amlogic/sc2_s905x4_ah212_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/sc2_s905x4_ah212_drm_buildroot.dts
 @@ -19,7 +19,7 @@
@@ -282,5 +282,5 @@ index 6d05d4b2db3b..50c71bd74868 100644
  		compatible = "amlogic, ppmgr";
  		memory-region = <&ppmgr_reserved>;
 -- 
-2.17.1
+2.31.0
 

@@ -15,8 +15,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'optee-video-firmware', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'optee', 'aml-provision', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediadrm-widevine', '', d)} \
-                                    ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediahal-sdk aml-secmem', '', d)} \
-                                    ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'gst-aml-drm-plugins', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-mediahal-sdk', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'gst-aml-drm-plugins aml-mediadrm-cleartvp-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'wpeframework-ocdm-widevine', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'playready', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'wpeframework-ocdm-playready', '', d)} \
@@ -60,5 +60,6 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libdvr-release', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-mp-sdk', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-cobalt-starboard', '', d)} \
                                     "
 

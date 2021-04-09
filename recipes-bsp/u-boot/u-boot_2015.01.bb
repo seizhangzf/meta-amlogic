@@ -91,3 +91,17 @@ do_compile () {
     cp -rf build/* fip/
 }
 
+do_compile_g12a () {
+    cd ${S}
+    cp fip/mk .
+    export BUILD_FOLDER=${S}/build/
+    export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
+    UBOOT_TYPE="${UBOOT_MACHINE}"
+    if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
+        LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32_3.8/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
+    else
+        LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
+    fi
+    cp -rf build/* fip/
+}
+

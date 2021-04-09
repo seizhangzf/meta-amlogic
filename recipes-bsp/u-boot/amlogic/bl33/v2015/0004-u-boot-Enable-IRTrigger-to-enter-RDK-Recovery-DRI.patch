@@ -1,4 +1,4 @@
-From 70c59e50bd575561725f3eaa2388d61548699d4b Mon Sep 17 00:00:00 2001
+From 22cf5ac809938df4e7c363645941d9bc7d69ccfd Mon Sep 17 00:00:00 2001
 From: Terrence Pu <terrence.pu@amlogic.com>
 Date: Sun, 7 Jun 2020 22:06:45 -0700
 Subject: [PATCH 4/9] u-boot: Enable IRTrigger to enter RDK Recovery (DRI)
@@ -22,7 +22,7 @@ Signed-off-by: Terrence Pu <terrence.pug@amlogic.com>
  2 files changed, 15 insertions(+), 39 deletions(-)
 
 diff --git a/board/amlogic/configs/g12a_u212_v1.h b/board/amlogic/configs/g12a_u212_v1.h
-index bcff6b0f58..01c4d8eedf 100644
+index c642902666..68d19acb15 100644
 --- a/board/amlogic/configs/g12a_u212_v1.h
 +++ b/board/amlogic/configs/g12a_u212_v1.h
 @@ -81,6 +81,8 @@
@@ -34,7 +34,7 @@ index bcff6b0f58..01c4d8eedf 100644
  //Enable ir remote wake up for bl30
  #define CONFIG_IR_REMOTE_POWER_UP_KEY_VAL1 0xef10fe01 //amlogic tv ir --- power
  #define CONFIG_IR_REMOTE_POWER_UP_KEY_VAL2 0xFFFFFFFF
-@@ -277,29 +279,10 @@
+@@ -272,29 +274,10 @@
                  "bootm ${loadaddr};fi;"\
              "\0"\
          "recovery_from_flash="\
@@ -68,7 +68,7 @@ index bcff6b0f58..01c4d8eedf 100644
              "\0"\
          "init_display="\
              "get_rebootmode;"\
-@@ -359,12 +342,12 @@
+@@ -354,12 +337,12 @@
              "fi;"\
              "\0"\
  	"irremote_update="\
@@ -86,7 +86,7 @@ index bcff6b0f58..01c4d8eedf 100644
  			"fi;fi;" \
  		"fi;\0" \
  
-@@ -376,6 +359,7 @@
+@@ -371,6 +354,7 @@
              "run init_display;"\
              "run storeargs;"\
              "run upgrade_key;" \
@@ -125,5 +125,5 @@ index ea549d7186..3d256dea96 100644
  
  uint32_t read_key(void)
 -- 
-2.17.1
+2.31.0
 

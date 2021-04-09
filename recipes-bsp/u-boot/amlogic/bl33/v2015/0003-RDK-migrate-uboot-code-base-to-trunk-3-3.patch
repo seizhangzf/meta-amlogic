@@ -1,4 +1,4 @@
-From 43aedaccb528b1f551838ec553c84a5ba47a6bdc Mon Sep 17 00:00:00 2001
+From 0b51117748dc834818fa6c6368aa825d88e28d57 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Thu, 30 Apr 2020 13:00:49 -0700
 Subject: [PATCH 3/9] RDK: migrate uboot code base to trunk [3/3]
@@ -34,5 +34,5 @@ index 7917e2042e..873b8e6600 100644
              -Werror-implicit-function-declaration -Wno-format-security    \
              -fno-delete-null-pointer-checks -Wdeclaration-after-statement \
 -- 
-2.17.1
+2.31.0
 

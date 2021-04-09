@@ -1,4 +1,4 @@
-From df4d1eb2f5cf0a9436a270c403d3f0f9e6b39098 Mon Sep 17 00:00:00 2001
+From ffb6a703ca6d35ce9e78e419886c94da65e4dc5d Mon Sep 17 00:00:00 2001
 From: Bing Jiang <bing.jiang@amlogic.com>
 Date: Mon, 2 Nov 2020 16:02:04 +0800
 Subject: [PATCH 1/2] uboot: add set root system [1/1]
@@ -18,14 +18,14 @@ Change-Id: I71d09b8a425f151aba55ea83b46a19540104dfbd
 Signed-off-by: Bing Jiang <bing.jiang@amlogic.com>
 ---
  board/amlogic/configs/sc2_ah212.h            | 9 +++++++++
- board/amlogic/defconfigs/sc2_ah212_defconfig | 4 ++--
- 2 files changed, 11 insertions(+), 2 deletions(-)
+ board/amlogic/defconfigs/sc2_ah212_defconfig | 3 ++-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
-index b0dfebe08a..f08db91be1 100644
+index 76346f38f2..16056bac1f 100644
 --- a/board/amlogic/configs/sc2_ah212.h
 +++ b/board/amlogic/configs/sc2_ah212.h
-@@ -188,6 +188,15 @@
+@@ -183,6 +183,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
@@ -42,20 +42,19 @@ index b0dfebe08a..f08db91be1 100644
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
 diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
-index 4f8f7edc1e..843097a4b6 100644
+index 9d4f323448..4e74d583af 100644
 --- a/board/amlogic/defconfigs/sc2_ah212_defconfig
 +++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
-@@ -37,8 +37,8 @@ CONFIG_CMD_IR=y
+@@ -35,7 +35,8 @@ CONFIG_CMD_IR=y
  CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
 -CONFIG_CMD_BOOTCTOL_AVB=y
--CONFIG_CMD_RSVMEM=y
 +# CONFIG_CMD_BOOTCTOL_AVB=y
 +# CONFIG_CMD_RSVMEM is not set
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_AML_PARTITION=y
 -- 
-2.17.1
+2.31.0
 

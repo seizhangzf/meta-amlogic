@@ -28,7 +28,7 @@ if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" 
         sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-thunder-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
     fi
 fi
-
+export RDK_ROOT_PATH=$(pwd -P)
 source meta-cmf/setup-environment $1
 if [ $? -ne 0 ]; then
     return 1

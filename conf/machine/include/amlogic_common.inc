@@ -24,7 +24,8 @@ INITRAMFS_FSTYPES = "cpio.gz"
 KERNEL_MODULE_AUTOLOAD += "mali"
 KERNEL_MODULE_AUTOLOAD += "dma-buf-test-exporter"
 TDK_VERSION = "v2.4"
-TDK_VERSION_sc2 = "v3.8"
+TDK_VERSION_g12a = "v3.8"
+TDK_VERSION_sc2 = "v3.8/dev/S905X4"
 
 #AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
 #AML_GIT_PROTOCOL ?= "ssh"
@@ -36,6 +37,10 @@ AML_GIT_ROOT_PR ?= "git@openlinux.amlogic.com"
 AML_GIT_ROOT_WV ?= "git@openlinux.amlogic.com/yocto"
 AML_GIT_ROOT_PROTOCOL ?= "ssh"
 
+#check connectivity using bing
+CONNECTIVITY_CHECK_URIS = "https://www.bing.com/"
+
 LINUXLIBCVERSION ?= "4.9%"
 PREFERRED_VERSION_libdrm = "2.4.100"
 PREFERRED_VERSION_u-boot = "v2015.%"
+WIDEVINE_VERSION = "16"

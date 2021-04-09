@@ -1,4 +1,4 @@
-From 38f10d8313357198bf64e9750f85c4b0df1f459c Mon Sep 17 00:00:00 2001
+From 108e14bf06ae69756d9bdaa12a7f460d26692663 Mon Sep 17 00:00:00 2001
 From: Terrence Pu <terrence.pu@amlogic.com>
 Date: Mon, 8 Jun 2020 12:13:38 -0700
 Subject: [PATCH 7/9] u-boot: Work around the regression block accessing
@@ -37,5 +37,5 @@ index 8f378bffb3..d4a9839a23 100644
  
  KBUILD_CFLAGS	+= -g
 -- 
-2.17.1
+2.31.0
 

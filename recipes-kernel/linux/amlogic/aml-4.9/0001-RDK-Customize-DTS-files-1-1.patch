@@ -1,7 +1,7 @@
-From d49e0e4082bac83982eddeb201b7eef73d486fcd Mon Sep 17 00:00:00 2001
+From fd33633a101fc5bc1f876d8e440d2316fc19c37c Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 6 May 2020 21:50:31 -0700
-Subject: [PATCH 1/2] RDK: Customize DTS files [1/1]
+Subject: [PATCH 1/3] RDK: Customize DTS files [1/1]
 
 PD#SWPL-25661
 
@@ -13,6 +13,7 @@ Solution:
   AB311
   AB301
   U212
+  AM301
 
 Verify:
   u212
@@ -20,17 +21,21 @@ Verify:
 Change-Id: I7b18402ba2a55ee80cb704fb791e5b03791e74ca
 Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
 ---
- .../arm/boot/dts/amlogic/g12a_s905x2_u212.dts |  32 ++++-
+ .../arm/boot/dts/amlogic/g12a_s905x2_u212.dts |  32 +++-
  .../amlogic/g12a_s905x2_u212_buildroot.dts    |   2 +-
- .../g12a_s905x2_u212_drm_buildroot.dts        | 132 +++++-------------
+ .../g12a_s905x2_u212_drm_buildroot.dts        |  44 ++++--
  arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi  |   4 +-
- .../amlogic/partition_mbox_normal_P_rdk.dtsi  | 128 +++++++++++++++++
- .../boot/dts/amlogic/partition_tv_ab_rdk.dtsi | 118 ++++++++++++++++
- .../tm2_revb_t962e2_ab311_drm_buildroot.dts   |  42 ++++--
- .../tm2_revb_t962x3_ab301_drm_buildroot.dts   |  47 ++++++-
- .../tm2_t962e2_ab311_drm_buildroot.dts        |  40 +++++-
- .../tm2_t962x3_ab301_drm_buildroot.dts        |  40 +++++-
- 10 files changed, 453 insertions(+), 132 deletions(-)
+ .../amlogic/partition_mbox_normal_P_rdk.dtsi  | 139 ++++++++++++++++++
+ .../boot/dts/amlogic/partition_tv_ab_rdk.dtsi | 128 ++++++++++++++++
+ .../t5d_reva_t950d4_am301_drm_1.5g.dts        |   2 +-
+ .../amlogic/t5d_reva_t950d4_am301_drm_1g.dts  |   2 +-
+ .../dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts |   2 +-
+ .../dts/amlogic/t5d_t950d4_am301_drm_1g.dts   |   2 +-
+ .../tm2_revb_t962e2_ab311_drm_buildroot.dts   |  42 +++++-
+ .../tm2_revb_t962x3_ab301_drm_buildroot.dts   |  47 +++++-
+ .../tm2_t962e2_ab311_drm_buildroot.dts        |  40 ++++-
+ .../tm2_t962x3_ab301_drm_buildroot.dts        |  40 ++++-
+ 14 files changed, 478 insertions(+), 48 deletions(-)
  create mode 100644 arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
  create mode 100644 arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
 
@@ -91,10 +96,10 @@ index 6cb5b327f649..dc331953a666 100644
  				0 40 1>;
  		interrupt-names = "pre_irq", "post_irq";
 diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
-index 1fbb34d7e394..9a5fecea2b04 100644
+index 9cd6b526efaa..a676729358a7 100644
 --- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_buildroot.dts
-@@ -899,7 +899,7 @@
+@@ -811,7 +811,7 @@
  		compatible = "amlogic, g12a-snd-tdmb";
  		#sound-dai-cells = <0>;
  		dai-tdm-lane-slot-mask-in = <0 1 0 0>;
@@ -104,18 +109,19 @@ index 1fbb34d7e394..9a5fecea2b04 100644
  		clocks = <&clkaudio CLKID_AUDIO_MCLK_B
  				&clkc CLKID_MPLL1
 diff --git a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
-index 50012ae3702a..65898816dc7b 100644
+index 8763db492fb0..65898816dc7b 100644
 --- a/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/g12a_s905x2_u212_drm_buildroot.dts
-@@ -19,6 +19,7 @@
+@@ -19,7 +19,7 @@
  
  #include "mesong12a.dtsi"
  #include "mesong12a_drm.dtsi"
+-#include "partition_normal_linux.dtsi"
 +#include "partition_mbox_normal_P_rdk.dtsi"
  
  / {
  	model = "Amlogic";
-@@ -76,7 +77,7 @@
+@@ -77,7 +77,7 @@
  		ion_cma_reserved:linux,ion-dev {
  			compatible = "shared-dma-pool";
  			reusable;
@@ -124,7 +130,7 @@ index 50012ae3702a..65898816dc7b 100644
  			alignment = <0x400000>;
  			no-kernel-map;
  		};
-@@ -101,7 +102,8 @@
+@@ -102,7 +102,8 @@
  			 * 10x4736064=45.2M(0x2e) support 12bit
  			 * 10x4074560=40M(0x28) support 10bit
  			 */
@@ -134,7 +140,7 @@ index 50012ae3702a..65898816dc7b 100644
  			alignment = <0x400000>;
  		};
  		/*  POST PROCESS MANAGER */
-@@ -114,8 +116,9 @@
+@@ -115,8 +116,9 @@
  			compatible = "shared-dma-pool";
  			reusable;
  			/* ion_codec_mm max can alloc size 80M*/
@@ -145,7 +151,7 @@ index 50012ae3702a..65898816dc7b 100644
  			linux,contiguous-region;
  		};
  		/* codec shared reserved */
-@@ -244,14 +247,39 @@
+@@ -245,14 +247,39 @@
  		dev_name = "ppmgr";
  		status = "okay";
  	};
@@ -187,106 +193,18 @@ index 50012ae3702a..65898816dc7b 100644
  		interrupts = <0 46 1
  				0 40 1>;
  		interrupt-names = "pre_irq", "post_irq";
-@@ -272,97 +300,7 @@
+@@ -273,9 +300,8 @@
  	ionvideo {
  		compatible = "amlogic, ionvideo";
  		dev_name = "ionvideo";
 -		status = "okay";
--	};
--
--
--	partitions: partitions{
--		parts = <14>;
--		part-0 = <&logo>;
--		part-1 = <&recovery>;
--		part-2 = <&misc>;
--		part-3 = <&dto>;
--		part-4 = <&cri_data>;
--		part-5 = <&param>;
--		part-6 = <&boot>;
--		part-7 = <&rsv>;
--		part-8 = <&tee>;
--		part-9 = <&vendor>;
--		part-10 = <&odm>;
--		part-11 = <&system>;
--		part-12 = <&cache>;
--		part-13 = <&data>;
--
--		logo:logo{
--			pname = "logo";
--			size = <0x0 0x800000>;
--			mask = <1>;
--		};
--		recovery:recovery{
--			pname = "recovery";
--			size = <0x0 0x1800000>;
--			mask = <1>;
--		};
--		misc:misc{
--			pname = "misc";
--			size = <0x0 0x800000>;
--			mask = <1>;
--		};
--		dto:dto{
--			pname = "dto";
--			size = <0x0 0x800000>;
--			mask = <1>;
--		};
--		cri_data:cri_data{
--			pname = "cri_data";
--			size = <0x0 0x800000>;
--			mask = <2>;
--		};
--		rsv:rsv{
--			pname = "rsv";
--			size = <0x0 0x1000000>;
--			mask = <1>;
--		};
--		param:param{
--			pname = "param";
--			size = <0x0 0x1000000>;
--			mask = <2>;
--		};
--		boot:boot{
--			pname = "boot";
--			size = <0x0 0x1000000>;
--			mask = <1>;
--		};
--		tee:tee{
--			pname = "tee";
--			size = <0x0 0x2000000>;
--			mask = <1>;
--		};
--		vendor:vendor{
--			pname = "vendor";
--			size = <0x0 0x10000000>;
--			mask = <1>;
--		};
--		odm:odm{
--			pname = "odm";
--			size = <0x0 0x10000000>;
--			mask = <1>;
--		};
--		system:system{
--			pname = "system";
--			size = <0x0 0x80000000>;
--			mask = <1>;
--		};
--		cache:cache{
--			pname = "cache";
--			size = <0x0 0x46000000>;
--			mask = <2>;
--		};
--		data:data{
--			pname = "data";
--			size = <0xffffffff 0xffffffff>;
--			mask = <4>;
--		};
 +		status = "disable";
  	};
+-
  	unifykey{
  		compatible = "amlogic, unifykey";
-@@ -886,7 +824,7 @@
+ 		status = "ok";
+@@ -798,7 +824,7 @@
  		compatible = "amlogic, g12a-snd-tdmb";
  		#sound-dai-cells = <0>;
  		dai-tdm-lane-slot-mask-in = <0 1 0 0>;
@@ -296,7 +214,7 @@ index 50012ae3702a..65898816dc7b 100644
  		clocks = <&clkaudio CLKID_AUDIO_MCLK_B
  				&clkc CLKID_MPLL1
 diff --git a/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi b/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
-index afce9c5e7e6d..e733b3609c3f 100644
+index 5a052ddf1efe..6ff49f9eb10a 100644
 --- a/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
 +++ b/arch/arm/boot/dts/amlogic/mesontm2_revb.dtsi
 @@ -568,7 +568,7 @@
@@ -319,11 +237,11 @@ index afce9c5e7e6d..e733b3609c3f 100644
  
 diff --git a/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
 new file mode 100644
-index 000000000000..c5330e34d77f
+index 000000000000..e71ee0baf5c4
 --- /dev/null
 +++ b/arch/arm/boot/dts/amlogic/partition_mbox_normal_P_rdk.dtsi
-@@ -0,0 +1,128 @@
-+﻿ /*
+@@ -0,0 +1,139 @@
++ /*
 +  * Amlogic partition set for normal
 +  *
 +  * Copyright (c) 2017-2017 Amlogic Ltd
@@ -334,130 +252,141 @@ index 000000000000..c5330e34d77f
 +
 +/ {
 +	partitions: partitions{
-+				parts = <19>;
-+				part-0 = <&dtbbak>;
-+				part-1 = <&bootloaderbak>;
-+				part-2 = <&recovery>;
-+				part-3 = <&logo>;
-+				part-4 = <&misc>;
-+				part-5 = <&cri_data>;
-+				part-6 = <&rsv>;
-+				part-7 = <&param>;
-+				part-8 = <&tee>;
-+				part-9 = <&factory>;
-+				part-10 = <&oem>;
-+				part-11 = <&vbmeta_a>;
-+				part-12 = <&boot_a>;
-+				part-13 = <&system_a>;
-+				part-14 = <&vbmeta_b>;
-+				part-15 = <&boot_b>;
-+				part-16 = <&system_b>;
-+				part-17 = <&cache>;
-+				part-18 = <&data>;
++		parts = <19>;
++		part-0 = <&dtbbak>;
++		part-1 = <&bootloaderbak>;
++		part-2 = <&recovery>;
++		part-3 = <&logo>;
++		part-4 = <&misc>;
++		part-5 = <&cri_data>;
++		part-6 = <&rsv>;
++		part-7 = <&param>;
++		part-8 = <&tee>;
++		part-9 = <&factory>;
++		part-10 = <&oem>;
++		part-11 = <&vbmeta_a>;
++		part-12 = <&boot_a>;
++		part-13 = <&system_a>;
++		part-14 = <&vbmeta_b>;
++		part-15 = <&boot_b>;
++		part-16 = <&system_b>;
++		part-17 = <&cache>;
++		part-18 = <&data>;
++
 +		dtbbak:dtbbak{
-+				   pname = "dtbbak";
-+				   size = <0x0 0x100000>;
-+				   mask = <1>;
-+			   };
++		   pname = "dtbbak";
++		   size = <0x0 0x100000>;
++		   mask = <1>;
++		};
 +		bootloaderbak:bootloaderbak{
-+						  pname = "bootloaderbak";
-+						  size = <0x0 0x200000>;
-+						  mask = <1>;
-+					  };
++			pname = "bootloaderbak";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		recovery:recovery{
-+					 pname = "recovery";
-+					 size = <0x0 0x4000000>;
-+					 mask = <1>;
-+				 };
++			pname = "recovery";
++			size = <0x0 0x4000000>;
++			mask = <1>;
++		};
 +		logo:logo{
-+				 pname = "logo";
-+				 size = <0x0 0x800000>;
-+				 mask = <1>;
-+			 };
++			pname = "logo";
++			size = <0x0 0x800000>;
++			mask = <1>;
++		};
 +		misc:misc{
-+				 pname = "misc";
-+				 size = <0x0 0x200000>;
-+				 mask = <1>;
-+			 };
++			pname = "misc";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		cri_data:cri_data {
-+					 pname = "cri_data";
-+					 size = <0x0 0x400000>;
-+					 mask = <2>;
-+				 };
++			pname = "cri_data";
++			size = <0x0 0x400000>;
++			mask = <2>;
++		};
 +		rsv:rsv{
-+				pname = "rsv";
-+				size = <0x0 0x1000000>;
-+				mask = <1>;
-+			};
++			pname = "rsv";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		param:param{
-+				  pname = "param";
-+				  size = <0x0 0x1000000>;
-+				  mask = <2>;
-+			  };
++			pname = "param";
++			size = <0x0 0x1000000>;
++			mask = <2>;
++		};
 +		tee:tee{
-+				pname = "tee";
-+				size = <0x0 0x2000000>;
-+				mask = <1>;
-+			};
++			pname = "tee";
++			size = <0x0 0x2000000>;
++			mask = <1>;
++		};
 +		factory:factory{
-+				pname = "factory";
-+				size = <0x0 0x800000>;
-+				mask = <0x11>;
++			pname = "factory";
++			size = <0x0 0x800000>;
++			mask = <0x11>;
 +		};
 +		oem:oem{
-+				pname = "oem";
-+				size = <0x0 0x800000>;
-+				mask = <1>;
-+			};
++			pname = "oem";
++			size = <0x0 0x800000>;
++			mask = <1>;
++		};
 +		vbmeta_a:vbmeta_a{
-+					 pname = "vbmeta_a";
-+					 size = <0x0 0x200000>;
-+					 mask = <1>;
-+				 };
++			pname = "vbmeta_a";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		boot_a:boot_a {
-+				   pname = "boot_a";
-+				   size = <0x0 0x1000000>;
-+				   mask = <1>;
-+			   };
++			pname = "boot_a";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		system_a:system_a {
-+					 pname = "system_a";
-+					 size = <0x0 0x96000000>;
-+					 mask = <1>;
-+				 };
++			pname = "system_a";
++			size = <0x0 0x96000000>;
++			mask = <1>;
++		};
 +		vbmeta_b:vbmeta_b {
-+					 pname = "vbmeta_b";
-+					 size = <0x0 0x200000>;
-+					 mask = <1>;
-+				 };
++			pname = "vbmeta_b";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		boot_b:boot_b {
-+				   pname = "boot_b";
-+				   size = <0x0 0x1000000>;
-+				   mask = <1>;
-+			   };
++			pname = "boot_b";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		system_b:system_b {
-+					 pname = "system_b";
-+					 size = <0x0 0x96000000>;
-+					 mask = <1>;
-+				 };
++			pname = "system_b";
++			size = <0x0 0x96000000>;
++			mask = <1>;
++		};
 +		cache:cache {
-+				  pname = "cache";
-+				  size = <0x0 0xC800000>;
-+				  mask = <2>;
-+			  };
++			pname = "cache";
++			size = <0x0 0xC800000>;
++			mask = <2>;
++		};
 +		data:data {
-+		 pname = "data";
-+		 size = <0xffffffff 0xffffffff>;
-+		 mask = <4>;
-+	 };
-+			};
++			pname = "data";
++			size = <0xffffffff 0xffffffff>;
++			mask = <4>;
++		};
++	};
++
++	provisionkey {
++		compatible = "amlogic, provisionkey";
++		status = "okay";
++		key-permit-default = "write";
++		//new key not need add dts if started with KEY_PROVISION_
++		KEY_PROVISION_XXX { };
++		//test_my_added_keyname { };
++	};//End provisionkey
++
 +};/* end of / */
 diff --git a/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
 new file mode 100644
-index 000000000000..ca5c5d65b1c8
+index 000000000000..0b73671d9164
 --- /dev/null
 +++ b/arch/arm/boot/dts/amlogic/partition_tv_ab_rdk.dtsi
-@@ -0,0 +1,118 @@
-+﻿/*
+@@ -0,0 +1,128 @@
++/*
 + * Amlogic partition set for normal
 + *
 + * Copyright (c) 2017-2017 Amlogic Ltd
@@ -468,63 +397,64 @@ index 000000000000..ca5c5d65b1c8
 +
 +/ {
 +	partitions: partitions{
-+				parts = <17>;
-+				part-0 = <&recovery>;
-+				part-1 = <&logo>;
-+				part-2 = <&misc>;
-+				part-3 = <&cri_data>;
-+				part-4 = <&rsv>;
-+				part-5 = <&param>;
-+				part-6 = <&tee>;
-+				part-7 = <&factory>;
-+				part-8 = <&vendor>;
-+				part-9 = <&vbmeta_a>;
-+				part-10 = <&boot_a>;
-+				part-11 = <&system_a>;
-+				part-12 = <&vbmeta_b>;
-+				part-13 = <&boot_b>;
-+				part-14 = <&system_b>;
-+				part-15 = <&user_apps>;
-+				part-16 = <&data>;
++		parts = <17>;
++		part-0 = <&recovery>;
++		part-1 = <&logo>;
++		part-2 = <&misc>;
++		part-3 = <&cri_data>;
++		part-4 = <&rsv>;
++		part-5 = <&param>;
++		part-6 = <&tee>;
++		part-7 = <&factory>;
++		part-8 = <&vendor>;
++		part-9 = <&vbmeta_a>;
++		part-10 = <&boot_a>;
++		part-11 = <&system_a>;
++		part-12 = <&vbmeta_b>;
++		part-13 = <&boot_b>;
++		part-14 = <&system_b>;
++		part-15 = <&user_apps>;
++		part-16 = <&data>;
++
 +		recovery:recovery{
-+					 pname = "recovery";
-+					 size = <0x0 0x4000000>;
-+					 mask = <1>;
-+				 };
++			pname = "recovery";
++			size = <0x0 0x4000000>;
++			mask = <1>;
++		};
 +		logo:logo{
-+				 pname = "logo";
-+				 size = <0x0 0x800000>;
-+				 mask = <1>;
-+			 };
++			pname = "logo";
++			size = <0x0 0x800000>;
++			mask = <1>;
++		};
 +		misc:misc{
-+				 pname = "misc";
-+				 size = <0x0 0x200000>;
-+				 mask = <1>;
-+			 };
++			pname = "misc";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		cri_data:cri_data {
-+					 pname = "cri_data";
-+					 size = <0x0 0x400000>;
-+					 mask = <2>;
-+				 };
++			pname = "cri_data";
++			size = <0x0 0x400000>;
++			mask = <2>;
++		};
 +		rsv:rsv{
-+				pname = "rsv";
-+				size = <0x0 0x1000000>;
-+				mask = <1>;
-+			};
++			pname = "rsv";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		param:param{
-+				  pname = "param";
-+				  size = <0x0 0x1000000>;
-+				  mask = <2>;
-+			  };
++			pname = "param";
++			size = <0x0 0x1000000>;
++			mask = <2>;
++		};
 +		tee:tee{
-+				pname = "tee";
-+				size = <0x0 0x2000000>;
-+				mask = <1>;
-+			};
++			pname = "tee";
++			size = <0x0 0x2000000>;
++			mask = <1>;
++		};
 +		factory:factory{
-+				pname = "factory";
-+				size = <0x0 0x800000>;
-+				 mask = <0x11>;
++			pname = "factory";
++			size = <0x0 0x800000>;
++			mask = <0x11>;
 +		};
 +		vendor:vendor
 +		{
@@ -532,58 +462,119 @@ index 000000000000..ca5c5d65b1c8
 +			size = <0x0 0x14000000>;
 +			mask = <1>;
 +		};
-+
 +		vbmeta_a:vbmeta_a{
-+					 pname = "vbmeta_a";
-+					 size = <0x0 0x200000>;
-+					 mask = <1>;
-+				 };
++			pname = "vbmeta_a";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		boot_a:boot_a {
-+				   pname = "boot_a";
-+				   size = <0x0 0x1000000>;
-+				   mask = <1>;
-+			   };
++			pname = "boot_a";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		system_a:system_a {
-+					 pname = "system_a";
-+					 size = <0x0 0x96000000>;
-+					 mask = <1>;
-+				 };
++			pname = "system_a";
++			size = <0x0 0x96000000>;
++			mask = <1>;
++		};
 +		vbmeta_b:vbmeta_b {
-+					 pname = "vbmeta_b";
-+					 size = <0x0 0x200000>;
-+					 mask = <1>;
-+				 };
++			pname = "vbmeta_b";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
 +		boot_b:boot_b {
-+				   pname = "boot_b";
-+				   size = <0x0 0x1000000>;
-+				   mask = <1>;
-+			   };
++			pname = "boot_b";
++			size = <0x0 0x1000000>;
++			mask = <1>;
++		};
 +		system_b:system_b {
-+					 pname = "system_b";
-+					 size = <0x0 0x96000000>;
-+					 mask = <1>;
-+				 };
++			pname = "system_b";
++			size = <0x0 0x96000000>;
++			mask = <1>;
++		};
 +		user_apps:user_apps{
-+					pname = "user_apps";
-+					size = <0x0 0x80000000>;
-+					mask = <1>;
-+				};
++			pname = "user_apps";
++			size = <0x0 0x80000000>;
++			mask = <1>;
++		};
 +		data:data {
-+		 pname = "data";
-+		 size = <0xffffffff 0xffffffff>;
-+		 mask = <4>;
-+	 };
-+			};
++			pname = "data";
++			size = <0xffffffff 0xffffffff>;
++			mask = <4>;
++		};
++	};
++
++	provisionkey {
++		compatible = "amlogic, provisionkey";
++		status = "okay";
++		key-permit-default = "write";
++		//new key not need add dts if started with KEY_PROVISION_
++		KEY_PROVISION_XXX { };
++		//test_my_added_keyname { };
++	};//End provisionkey
++
 +};/* end of / */
+diff --git a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
+index c24bd10a32d9..0132284b3a20 100644
+--- a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
++++ b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesont5d_reva.dtsi"
+ #include "mesont5_drm.dtsi"
+-#include "partition_normal_linux.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ #include "mesont5d_reva_am301-panel.dtsi"
+ 
+ / {
+diff --git a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
+index bb831ee409ff..66e1bfb20d4b 100644
+--- a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
++++ b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesont5d_reva.dtsi"
+ #include "mesont5_drm.dtsi"
+-#include "partition_normal_linux.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ #include "mesont5d_reva_am301-panel.dtsi"
+ 
+ / {
+diff --git a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
+index 4256c8f95610..15a89d48c12d 100644
+--- a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
++++ b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesont5d.dtsi"
+ #include "mesont5_drm.dtsi"
+-#include "partition_normal_linux.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ #include "mesont5d_am301-panel.dtsi"
+ 
+ / {
+diff --git a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
+index 807bd8892e15..39d2b1960886 100644
+--- a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
++++ b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
+@@ -19,7 +19,7 @@
+ 
+ #include "mesont5d.dtsi"
+ #include "mesont5_drm.dtsi"
+-#include "partition_normal_linux.dtsi"
++#include "partition_tv_ab_rdk.dtsi"
+ #include "mesont5d_am301-panel.dtsi"
+ 
+ / {
 diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
-index dfb454753355..11f05c1689ac 100644
+index 4aff54dfa0d9..11f05c1689ac 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962e2_ab311_drm_buildroot.dts
 @@ -19,7 +19,7 @@
  
  #include "mesontm2_revb.dtsi"
  #include "mesontm2_drm.dtsi"
--#include "partition_mbox_normal_P_32.dtsi"
+-#include "partition_normal_linux.dtsi"
 +#include "partition_tv_ab_rdk.dtsi"
  
  / {
@@ -673,14 +664,14 @@ index dfb454753355..11f05c1689ac 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
-index f5752bb93e7e..f2de21d8214d 100644
+index 5dd68e4f2772..f2de21d8214d 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_revb_t962x3_ab301_drm_buildroot.dts
 @@ -19,7 +19,7 @@
  
  #include "mesontm2_revb.dtsi"
  #include "mesontm2_drm.dtsi"
--#include "partition_mbox_normal_P_32.dtsi"
+-#include "partition_normal_linux.dtsi"
 +#include "partition_tv_ab_rdk.dtsi"
  #include "mesontm2_revb_t962x3_ab301-panel.dtsi"
  
@@ -770,14 +761,14 @@ index f5752bb93e7e..f2de21d8214d 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
-index af60d79146f7..7e2582455495 100644
+index 7cb91e728599..7e2582455495 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_t962e2_ab311_drm_buildroot.dts
 @@ -19,7 +19,7 @@
  
  #include "mesontm2.dtsi"
  #include "mesontm2_drm.dtsi"
--#include "partition_mbox_normal_P_32.dtsi"
+-#include "partition_normal_linux.dtsi"
 +#include "partition_tv_ab_rdk.dtsi"
  
  / {
@@ -860,14 +851,14 @@ index af60d79146f7..7e2582455495 100644
  	internal_phy=<1>;
  };
 diff --git a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
-index a892daf6d3ad..196dc7cca2a9 100644
+index 9fb1aacd1387..196dc7cca2a9 100644
 --- a/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
 +++ b/arch/arm/boot/dts/amlogic/tm2_t962x3_ab301_drm_buildroot.dts
 @@ -19,7 +19,7 @@
  
  #include "mesontm2.dtsi"
  #include "mesontm2_drm.dtsi"
--#include "partition_mbox_normal_P_32.dtsi"
+-#include "partition_normal_linux.dtsi"
 +#include "partition_tv_ab_rdk.dtsi"
  #include "mesontm2_t962x3_ab301-panel.dtsi"
  
@@ -950,5 +941,5 @@ index a892daf6d3ad..196dc7cca2a9 100644
  	internal_phy=<1>;
  };
 -- 
-2.17.1
+2.31.0
 

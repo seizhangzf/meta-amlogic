@@ -1,4 +1,4 @@
-From b684a24eb4f903148e22708e6d41cf05e4c4d74d Mon Sep 17 00:00:00 2001
+From dc5cd08374dcb9c2b05a5ed34796e3681786c794 Mon Sep 17 00:00:00 2001
 From: Johnny Lee - TW <johnny.lee@noodle.amlogic.com>
 Date: Tue, 10 Mar 2020 11:08:30 -0700
 Subject: [PATCH 2/9] RDK: migrate code base to trunk [2/3]
@@ -15,17 +15,18 @@ Verify: Local
 Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Change-Id: I17222f221b13e13d450eed08fa1722344d9d3784
 ---
- board/amlogic/configs/g12a_u212_v1.h        | 8 +++++---
- board/amlogic/configs/tm2_t962e2_ab311_v1.h | 8 +++++---
- board/amlogic/configs/tm2_t962x3_ab301_v1.h | 8 +++++---
- common/ini/ini_platform.c                   | 6 +++++-
- 4 files changed, 20 insertions(+), 10 deletions(-)
+ board/amlogic/configs/g12a_u212_v1.h        |  8 +++++---
+ board/amlogic/configs/t5d_am301_v1.h        | 10 ++++++----
+ board/amlogic/configs/tm2_t962e2_ab311_v1.h |  8 +++++---
+ board/amlogic/configs/tm2_t962x3_ab301_v1.h |  8 +++++---
+ common/ini/ini_platform.c                   |  6 +++++-
+ 5 files changed, 26 insertions(+), 14 deletions(-)
 
 diff --git a/board/amlogic/configs/g12a_u212_v1.h b/board/amlogic/configs/g12a_u212_v1.h
-index 538a4b2e30..bcff6b0f58 100644
+index 38897ab3e2..c642902666 100644
 --- a/board/amlogic/configs/g12a_u212_v1.h
 +++ b/board/amlogic/configs/g12a_u212_v1.h
-@@ -216,10 +216,12 @@
+@@ -211,10 +211,12 @@
              "fi;"\
              "if test ${avb2} = 0; then "\
                  "if test ${active_slot} = _a; then "\
@@ -41,11 +42,40 @@ index 538a4b2e30..bcff6b0f58 100644
              "fi;"\
              "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
              "run storeargs; run update;"\
+diff --git a/board/amlogic/configs/t5d_am301_v1.h b/board/amlogic/configs/t5d_am301_v1.h
+index f5998d0c12..de812682de 100644
+--- a/board/amlogic/configs/t5d_am301_v1.h
++++ b/board/amlogic/configs/t5d_am301_v1.h
+@@ -51,7 +51,7 @@
+ #define CONFIG_BOOTLOADER_CONTROL_BLOCK
+ 
+ /*a/b update */
+-#define CONFIG_CMD_BOOTCTOL_AVB
++//#define CONFIG_CMD_BOOTCTOL_AVB
+ 
+ /* Serial config */
+ #define CONFIG_CONS_INDEX 2
+@@ -261,10 +261,12 @@
+             "fi;"\
+             "if test ${avb2} = 0; then "\
+                 "if test ${active_slot} = _a; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p23;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_a;"\
+                 "else if test ${active_slot} = _b; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p24;"\
+-                "fi;fi;"\
++                    "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                "else if test ${active_slot} = normal; then "\
++                    "setenv bootargs ${bootargs} root=/dev/system;"\
++                "fi;fi;fi;"\
+             "fi;"\
+             "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+             "run update;"\
 diff --git a/board/amlogic/configs/tm2_t962e2_ab311_v1.h b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
-index afb3f89328..267a9b0593 100644
+index 35b9552e10..39b30dfb75 100644
 --- a/board/amlogic/configs/tm2_t962e2_ab311_v1.h
 +++ b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
-@@ -270,10 +270,12 @@
+@@ -265,10 +265,12 @@
              "fi;"\
              "if test ${avb2} = 0; then "\
                  "if test ${active_slot} = _a; then "\
@@ -62,7 +92,7 @@ index afb3f89328..267a9b0593 100644
              "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
              "run update;"\
 diff --git a/board/amlogic/configs/tm2_t962x3_ab301_v1.h b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
-index 6b3446bf62..a73277829a 100644
+index 593fd2898a..c8f42062be 100644
 --- a/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 +++ b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 @@ -255,10 +255,12 @@
@@ -99,5 +129,5 @@ index a7551c0e1b..ccdb1a9058 100644
          if (slot_name == NULL) {
              run_command("get_valid_slot", 0);
 -- 
-2.17.1
+2.31.0
 
