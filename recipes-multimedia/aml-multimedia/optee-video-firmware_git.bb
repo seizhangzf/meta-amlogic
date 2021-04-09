@@ -8,7 +8,7 @@ RDEPENDS_${PN} = "libbz2 optee-userspace"
 include aml-multimedia.inc
 
 SRC_URI += "file://videoFirmwarePreload.service"
-PR = "${INC_PR}.${TDK_VERSION}"
+#PR = "${INC_PR}.${TDK_VERSION}"
 
 S = "${WORKDIR}/git/secfirmload/secloadbin"
 TA_ARCH = "noarch"

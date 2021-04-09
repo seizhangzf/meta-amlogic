@@ -11,14 +11,14 @@ do_compile[noexec] = "1"
 COMPATIBLE_HOST = "(i.86|x86_64).*-linux"
 INHIBIT_SYSROOT_STRIP = "1"
 
-PR = "${INC_PR}.1"
+#PR = "${INC_PR}.1"
 do_install() {
     install -d ${D}${STAGING_DIR_NATIVE}/tdk/scripts
     cp -r ${S}/ta_export/scripts/. ${D}${STAGING_DIR_NATIVE}/tdk/scripts
 
     echo "TDK_VERSION is ${TDK_VERSION}"
-    case ${TDK_VERSION} in
-    "2.4.4")
+    case "${TDK_VERSION}" in
+    "v2.4")
         cp -r ${S}/ta_export/keys/. ${D}${STAGING_DIR_NATIVE}/tdk/keys
     ;;
     esac
