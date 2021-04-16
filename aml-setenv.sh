@@ -12,10 +12,9 @@ fi
 
 DEFCONFIG_ARRAY=("mesong12a_u212"
                  "mesonsc2_ah212"
-                 "mesonsc2_ah219"
+                 "mesonsc2_5.4_lib32_ah212"
 				 "mesont5d_am301"
 				 "mesontm2_ab301"
-				 "mesontm2_ab311"
 				 "mesontm2_t962e2_llama"
 				 "mesontm2_t962x3_llama"
 				 "mesontm2_t962x3_a6gp"

@@ -83,9 +83,19 @@ if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-ini
 BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-initramfs"
 EOF
 fi
+
 cat >> conf/local.conf <<EOF
 LICENSE_FLAGS_WHITELIST="commercial"
 EOF
+
+if [ -n "$(echo $MACHINE | grep -- lib32)" ]; then
+cat >> conf/local.conf <<EOF
+#Added for A6432 support
+require conf/multilib.conf
+MULTTILIBS = "multilib:lib32"
+DEFAULTTUNE_virtclass-multilib-lib32 = "armv7athf-neon"
+EOF
+fi
 
 . $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
 

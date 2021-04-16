@@ -17,7 +17,7 @@ PV = "git${SRCPV}"
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"
 
-COMPATIBLE_MACHINE="(mesonsc2_ah212*)"
+COMPATIBLE_MACHINE="(mesonsc2_5.4*)"
 
 do_install() {
     WIFIDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/qca/wifi
@@ -35,4 +35,4 @@ FILES_${PN} += "/lib/firmware"
 
 S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE='-C ${S}/AIO/build KERNELPATH=${STAGING_KERNEL_DIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}'
+EXTRA_OEMAKE='-C ${S}/AIO/build M=${S}/AIO/build KERNEL_SRC=${STAGING_KERNEL_DIR} KERNELPATH=${STAGING_KERNEL_DIR} ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}'

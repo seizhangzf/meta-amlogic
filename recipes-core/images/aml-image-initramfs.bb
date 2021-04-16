@@ -17,9 +17,11 @@ inherit core-image
 IMAGE_ROOTFS_SIZE = "8192"
 IMAGE_ROOTFS_EXTRA_SPACE = "0"
 KERNEL_BOOTARGS = "root=/dev/system rootfstype=ext4"
+KERNEL_OFFSET = "0x1080000"
+KERNEL_OFFSET_sc2-5.4 = "0x3080000"
 
 do_bundle_boot_img() {
-	${STAGING_BINDIR_NATIVE}/python-native/python ${STAGING_BINDIR_NATIVE}/mkbootimg.py --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset 0x1080000 --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --header_version 1 --output ${DEPLOY_DIR_IMAGE}/boot.img
+	${STAGING_BINDIR_NATIVE}/python-native/python ${STAGING_BINDIR_NATIVE}/mkbootimg.py --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset ${KERNEL_OFFSET} --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --header_version 1 --output ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 do_rootfs[depends] += "aml-hosttools-native:do_install"

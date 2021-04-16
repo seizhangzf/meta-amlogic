@@ -12,6 +12,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multi
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
+EXTRA_CFLAGS_aarch64 = "TOOLCHAIN_NEON_SUPPORT=n"
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
@@ -25,6 +26,7 @@ export TARGET_DIR = "${D}"
 
 EXTRA_OEMAKE="STAGING_DIR=${D} \
                   TARGET_DIR=${D} \
+                  ${EXTRA_CFLAGS} \
                                 "
 
 do_compile() {
