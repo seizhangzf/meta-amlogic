@@ -12,6 +12,7 @@ SOC_FAMILY_tm2 = "tm2"
 SOC_FAMILY_sc2 = "sc2"
 SOC_FAMILY_sc2-5.4 = "sc2"
 SOC_FAMILY_t5d = "t5d"
+SOC_FAMILY_s4 = "s4"
 
 ABSYS = "${@bb.utils.contains('DISTRO_FEATURES','absystem','_ab','', d)}"
 SBL33 = "${@bb.utils.contains('DISTRO_FEATURES','separate-bl33','_sbl33','', d)}"
