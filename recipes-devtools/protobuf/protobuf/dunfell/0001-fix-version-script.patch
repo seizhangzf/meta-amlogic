@@ -1,0 +1,14 @@
+Index: git/src/libprotobuf.map
+===================================================================
+--- git.orig/src/libprotobuf.map
++++ git/src/libprotobuf.map
+@@ -1,8 +1,6 @@
+ {
+   global:
+-    extern "C++" {
+-      *google*;
+-    };
++    *google*;
+ 
+   local:
+     *;

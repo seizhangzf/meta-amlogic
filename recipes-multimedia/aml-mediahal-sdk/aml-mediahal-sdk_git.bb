@@ -10,6 +10,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multi
 
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-audio-hal libevent aml-audio-service', '', d)}"
 RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libevent', '', d)}"
+RDEPENDS_${PN} += "aml-audio-service"
 
 #do_compile[noexec] = "1"
 

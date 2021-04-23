@@ -20,9 +20,9 @@ PACKAGES =+ "\
 do_configure[noexec] = "1"
 inherit autotools pkgconfig systemd
 S="${WORKDIR}/git"
-DEPENDS += " grpc boost aml-amaudioutils protobuf-native liblog dolby-ms12"
+DEPENDS += " grpc grpc-native boost aml-amaudioutils protobuf-native liblog dolby-ms12"
 RDEPENDS_${PN} += " aml-amaudioutils liblog"
-RDEPENDS_${PN}-testapps += " ${PN}"
+RDEPENDS_${PN}-testapps += " ${PN} liblog"
 
 export TARGET_DIR = "${D}"
 export HOST_DIR = "${STAGING_DIR_NATIVE}/usr/"
@@ -50,7 +50,6 @@ do_install() {
         install -m 755 -D ${S}/speaker_delay ${D}/usr/bin/
         install -m 755 -D ${S}/start_arc ${D}/usr/bin/
         install -m 755 -D ${S}/test_arc ${D}/usr/bin/
-        install -m 755 -D ${S}/hal_dump ${D}/usr/bin/
         install -m 644 -D ${S}/libaudio_client.so -t ${D}/usr/lib/
         install -m 644 -D ${S}/include/audio_if_client.h -t ${D}/usr/include
         install -m 644 -D ${S}/include/audio_if.h -t ${D}/usr/include
@@ -68,12 +67,11 @@ do_install() {
 
 SYSTEMD_SERVICE_${PN} = "audioserver.service "
 FILES_${PN} = "${libdir}/* ${bindir}/audio_server"
-FILES_${PN}-testapps = "\ 
+FILES_${PN}-testapps = "\
                         ${bindir}/audio_client_test \
                         ${bindir}/audio_client_test_ac3 \
                         ${bindir}/halplay \
                         ${bindir}/hal_param \
-                        ${bindir}/hal_dump \
                         ${bindir}/master_vol \
                         ${bindir}/dap_setting \
                         ${bindir}/digital_mode \

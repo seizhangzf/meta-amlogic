@@ -1,0 +1,26 @@
+Index: git/server/CMakeLists.txt
+===================================================================
+--- git.orig/server/CMakeLists.txt
++++ git/server/CMakeLists.txt
+@@ -26,7 +26,7 @@ set (GDIAL_VERSION_MINOR 0)
+ find_package (PkgConfig REQUIRED)
+ pkg_search_module (GLIB REQUIRED glib-2.0)
+ pkg_search_module (GIO REQUIRED gio-2.0)
+-pkg_search_module (GSSDP REQUIRED gssdp-1.0)
++pkg_search_module (GSSDP REQUIRED gssdp-1.2)
+ pkg_search_module (SOUP REQUIRED libsoup-2.4)
+ pkg_search_module (XML2 REQUIRED libxml-2.0)
+ 
+Index: git/server/gdial-ssdp.c
+===================================================================
+--- git.orig/server/gdial-ssdp.c
++++ git/server/gdial-ssdp.c
+@@ -125,7 +125,7 @@ int gdial_ssdp_init(SoupServer *ssdp_htt
+     return EXIT_FAILURE;
+   }
+ 
+-  GSSDPClient *ssdp_client = gssdp_client_new(NULL, gdial_options_->iface_name, &error);
++  GSSDPClient *ssdp_client = gssdp_client_new(gdial_options_->iface_name, &error);
+   if (!ssdp_client || error) {
+       g_printerr("%s\r\n", error->message);
+       g_error_free(error);

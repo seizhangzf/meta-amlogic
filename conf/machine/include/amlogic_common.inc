@@ -1,4 +1,4 @@
-require conf/machine/include/arm/arch-armv8.inc
+require conf/machine/include/arm/arch-armv8a.inc
 include conf/machine/include/amlogic_externalsrc.inc
 include conf/machine/include/amlogic_patches.inc
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
@@ -46,3 +46,14 @@ LINUXLIBCVERSION ?= "4.9%"
 PREFERRED_VERSION_libdrm = "2.4.100"
 PREFERRED_VERSION_u-boot = "v2015.%"
 WIDEVINE_VERSION = "16"
+
+WARN_QA_append = "ldflags installed-vs-shipped already-stripped pkgvarcheck file-rdeps"
+ERROR_QA_remove = "ldflags installed-vs-shipped already-stripped pkgvarcheck file-rdeps"
+
+HOSTTOOLS_NONFATAL += "bc cc c++ bison cmake python"
+
+#glib-mkenums"
+
+VIRTUAL-RUNTIME_dtcpmgr = ""
+
+PREFERRED_VERSION_gmp_dunfell = "6.2.%"

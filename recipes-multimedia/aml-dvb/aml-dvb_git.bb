@@ -11,6 +11,8 @@ PV = "${SRCPV}"
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/dvb')}"
 DEPENDS = " aml-zvbi sqlite libamavutils"
+RDEPENDS_${PN} = "libamavutils"
+PROVIDES = "libam_adp"
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
