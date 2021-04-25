@@ -20,11 +20,21 @@ do_deploy_append () {
 }
 
 do_install_append () {
-    oe_runmake -C ${B} CC="${KERNEL_CC}" headers_install INSTALL_HDR_PATH=${D}/usr/include/linux-meson-4.9/
+    oe_runmake -C ${B} CC="${KERNEL_CC}" headers_install INSTALL_HDR_PATH=${D}/usr/include/linux-meson/
 }
 
 sysroot_stage_all_append() {
-    sysroot_stage_dir ${D}/usr/include/linux-meson-4.9 ${SYSROOT_DESTDIR}/usr/include/linux-meson-4.9
+    sysroot_stage_dir ${D}/usr/include/linux-meson ${SYSROOT_DESTDIR}/usr/include/linux-meson
 
 }
-${PN}-dev += " /usr/include/linux-meson-4.9/* "
+
+do_create_lib32_symlink() {
+    if [ -d ${STAGING_DIR}/lib32-${MACHINE} ]; then
+      rm -rf ${STAGING_DIR}/lib32-${MACHINE}/usr/include/linux-meson
+      ln -sf ${STAGING_INCDIR}/linux-meson ${STAGING_DIR}/lib32-${MACHINE}/usr/include/linux-meson
+    fi
+}
+
+addtask create_lib32_symlink after do_populate_sysroot before do_package
+
+FILES_${PN}-dev += " /usr/include/linux-meson/* "
