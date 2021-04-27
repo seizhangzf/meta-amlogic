@@ -4,6 +4,10 @@ unset _RDK_FLAVOR
 export RDK_BSP_LAYER=meta-rdk-bsp-amlogic
 TOP_DIR=$(pwd)
 
+if [ -n "$(echo $MACHINE | grep -- lib32)" ]; then
+  NEED_A6432_SUPPORT=y
+fi
+
 if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" ]; then
     # add RDK WPE targets to conf file
     # this step has to be added before calling meta-cmf/setup-environment
@@ -88,7 +92,7 @@ cat >> conf/local.conf <<EOF
 LICENSE_FLAGS_WHITELIST="commercial"
 EOF
 
-if [ -n "$(echo $MACHINE | grep -- lib32)" ]; then
+if [ "${NEED_A6432_SUPPORT+set}" = "set" ]; then
 cat >> conf/local.conf <<EOF
 #Added for A6432 support
 require conf/multilib.conf

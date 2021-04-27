@@ -9,6 +9,17 @@ EOF
 FILES_${PN}_append_tm2 = " /vendor/* "
 dirs755_append_tm2 = " /vendor "
 
+#/*-----------------------T5D TV--------------------------------------*/
+do_install_append_t5d () {
+    mkdir -p ${D}/vendor
+    mkdir -p ${D}/data
+    cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/vendor            /vendor                    auto       defaults              0  0
+EOF
+}
+FILES_${PN}_append_t5d = " /vendor/* "
+dirs755_append_t5d = " /vendor "
+
 #/*-----------------------G12A STB--------------------------------------*/
 do_install_append_g12a () {
     mkdir -p ${D}/vendor/lib
@@ -41,4 +52,3 @@ FILES_${PN}_append_sc2-5.4 = " /vendor/* /data /opt "
 dirs755_append_sc2-5.4 = " /vendor /data /opt"
 
 INSANE_SKIP_${PN} = "dev-so"
-
