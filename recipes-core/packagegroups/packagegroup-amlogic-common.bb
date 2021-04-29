@@ -47,6 +47,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-adbd \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'one-rdk', '', 'wifi-amlogic', d)}\
                                     android-tools-logcat \
+                                    wifi-amlogic \
                                     liblog \
                                     aml-hdcp \
                                     aml-hdcp-load-firmware \
