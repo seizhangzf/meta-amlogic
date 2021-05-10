@@ -23,8 +23,6 @@ inherit systemd
 
 EXTRA_OEMAKE = "'STAGING_DIR=${STAGING_DIR_TARGET}'"
 
-TARGET_CFLAGS += "-I${STAGING_DIR}/mesong12a_u212/usr/include/linux-meson-4.9/include/"
-
 do_compile(){
     cd ${S}
     oe_runmake all

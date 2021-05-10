@@ -1,7 +1,7 @@
 SUMMARY = "amlogic gstreamer plugin for pcr sink"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 DEPENDS = " gstreamer1.0 gstreamer1.0-plugins-base aml-avsync"
 RDEPENDS_${PN} = " aml-avsync"

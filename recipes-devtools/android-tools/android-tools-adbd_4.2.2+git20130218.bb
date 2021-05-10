@@ -73,7 +73,7 @@ do_install(){
         "mesonc1_ae409" | "mesonc1_ae401" | "mesonc1_ae400")
             sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
-        "mesonsc2_ah212" | "mesonsc2_ah219")
+        "mesonsc2_ah212" | "mesonsc2_ah219" | "mesons4_"*)
             sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
     esac
