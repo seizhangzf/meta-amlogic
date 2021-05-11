@@ -33,7 +33,7 @@ PR = "r2"
 SRCREV ?="${AUTOREV}"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
-COMPATIBLE_MACHINE = "(mesontm2_5.4*|mesonsc2_5.4*|mesont7_*|mesons4_*)"
+COMPATIBLE_MACHINE = "(mesontm2_5.4*|mesonsc2_5.4*|mesont5d_5.4*|mesont7_*|mesons4_*)"
 
 KERNEL_IMAGETYPE = "Image"
 KCONFIG_MODE = "alldefconfig"
@@ -42,6 +42,7 @@ S = "${WORKDIR}/git"
 KBUILD_DEFCONFIG_t7 = "meson64_a64_P_defconfig"
 KBUILD_DEFCONFIG_sc2-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_tm2-5.4 = "meson64_a64_R_defconfig"
+KBUILD_DEFCONFIG_t5d-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_s4 = "meson64_a64_R_defconfig"
 
 GKI_DEFCONFIG = "meson64_gki_module_config"
