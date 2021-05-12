@@ -1,4 +1,4 @@
-From c05c31ccee567181f135c066cc03b780f8137868 Mon Sep 17 00:00:00 2001
+From a33cb8895168cb959c00dfbafa12cf7cb2f396d4 Mon Sep 17 00:00:00 2001
 From: johnny lee <johnny.lee@amlogic.com>
 Date: Tue, 8 Sep 2020 13:15:24 +0800
 Subject: [PATCH 8/9] Revert "tvconfig: move config file from vendor partition
@@ -22,7 +22,7 @@ Signed-off-by: johnny lee <johnny.lee@amlogic.com>
  10 files changed, 19 insertions(+), 19 deletions(-)
 
 diff --git a/board/amlogic/configs/tl1_skt_v1.h b/board/amlogic/configs/tl1_skt_v1.h
-index 5d952f954f..05d7fffb14 100644
+index 5d952f954fd..05d7fffb143 100644
 --- a/board/amlogic/configs/tl1_skt_v1.h
 +++ b/board/amlogic/configs/tl1_skt_v1.h
 @@ -110,8 +110,8 @@
@@ -37,7 +37,7 @@ index 5d952f954f..05d7fffb14 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tl1_t309_v1.h b/board/amlogic/configs/tl1_t309_v1.h
-index 470ecc4b75..958b8b03c5 100644
+index 470ecc4b75e..958b8b03c55 100644
 --- a/board/amlogic/configs/tl1_t309_v1.h
 +++ b/board/amlogic/configs/tl1_t309_v1.h
 @@ -112,8 +112,8 @@
@@ -52,7 +52,7 @@ index 470ecc4b75..958b8b03c5 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tl1_x301_v1.h b/board/amlogic/configs/tl1_x301_v1.h
-index d3d5dfa4b5..b4c20a084e 100644
+index d3d5dfa4b55..b4c20a084ea 100644
 --- a/board/amlogic/configs/tl1_x301_v1.h
 +++ b/board/amlogic/configs/tl1_x301_v1.h
 @@ -115,8 +115,8 @@
@@ -67,7 +67,7 @@ index d3d5dfa4b5..b4c20a084e 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_t962e2_ab311_v1.h b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
-index 39b30dfb75..ce732ce257 100644
+index e4729e6361c..fcbfd8dbf37 100644
 --- a/board/amlogic/configs/tm2_t962e2_ab311_v1.h
 +++ b/board/amlogic/configs/tm2_t962e2_ab311_v1.h
 @@ -130,8 +130,8 @@
@@ -82,7 +82,7 @@ index 39b30dfb75..ce732ce257 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_t962e2_ab319_v1.h b/board/amlogic/configs/tm2_t962e2_ab319_v1.h
-index c143778781..8412b223a5 100644
+index c143778781f..8412b223a57 100644
 --- a/board/amlogic/configs/tm2_t962e2_ab319_v1.h
 +++ b/board/amlogic/configs/tm2_t962e2_ab319_v1.h
 @@ -120,8 +120,8 @@
@@ -97,7 +97,7 @@ index c143778781..8412b223a5 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_t962x3_ab301_v1.h b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
-index c8f42062be..0ff3ca2013 100644
+index c8f42062be6..0ff3ca20132 100644
 --- a/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 +++ b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 @@ -121,8 +121,8 @@
@@ -112,7 +112,7 @@ index c8f42062be..0ff3ca2013 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_t962x3_ab309_v1.h b/board/amlogic/configs/tm2_t962x3_ab309_v1.h
-index 89e2f8bd18..a8169dd6cf 100644
+index 89e2f8bd18f..a8169dd6cfd 100644
 --- a/board/amlogic/configs/tm2_t962x3_ab309_v1.h
 +++ b/board/amlogic/configs/tm2_t962x3_ab309_v1.h
 @@ -114,8 +114,8 @@
@@ -127,7 +127,7 @@ index 89e2f8bd18..a8169dd6cf 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_t962x3_t312_v1.h b/board/amlogic/configs/tm2_t962x3_t312_v1.h
-index 97c4f078af..10c8ebc3cf 100644
+index 97c4f078af3..10c8ebc3cfb 100644
 --- a/board/amlogic/configs/tm2_t962x3_t312_v1.h
 +++ b/board/amlogic/configs/tm2_t962x3_t312_v1.h
 @@ -118,8 +118,8 @@
@@ -142,7 +142,7 @@ index 97c4f078af..10c8ebc3cf 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/board/amlogic/configs/tm2_v901d_t501_v1.h b/board/amlogic/configs/tm2_v901d_t501_v1.h
-index 695f01063f..e7b9f64463 100644
+index 695f01063fa..e7b9f644633 100644
 --- a/board/amlogic/configs/tm2_v901d_t501_v1.h
 +++ b/board/amlogic/configs/tm2_v901d_t501_v1.h
 @@ -117,8 +117,8 @@
@@ -157,7 +157,7 @@ index 695f01063f..e7b9f64463 100644
          "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
          "edid_select=0\0" \
 diff --git a/common/ini/model.c b/common/ini/model.c
-index f36d74312f..84934b25cb 100644
+index f36d74312fd..84934b25cb9 100644
 --- a/common/ini/model.c
 +++ b/common/ini/model.c
 @@ -20,7 +20,7 @@
@@ -170,5 +170,5 @@ index f36d74312f..84934b25cb 100644
  #define AML_START		"amlogic_start"
  #define AML_END			"amlogic_end"
 -- 
-2.31.0
+2.31.1
 

@@ -1,7 +1,7 @@
-From fd33633a101fc5bc1f876d8e440d2316fc19c37c Mon Sep 17 00:00:00 2001
+From 4d1f1041450776a6adf1051975291dbed3fec326 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 6 May 2020 21:50:31 -0700
-Subject: [PATCH 1/3] RDK: Customize DTS files [1/1]
+Subject: [PATCH 1/2] RDK: Customize DTS files [1/1]
 
 PD#SWPL-25661
 
@@ -515,7 +515,7 @@ index 000000000000..0b73671d9164
 +
 +};/* end of / */
 diff --git a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
-index c24bd10a32d9..0132284b3a20 100644
+index eb822ba79f76..ca5b1b86bcaa 100644
 --- a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
 +++ b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1.5g.dts
 @@ -19,7 +19,7 @@
@@ -528,7 +528,7 @@ index c24bd10a32d9..0132284b3a20 100644
  
  / {
 diff --git a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
-index bb831ee409ff..66e1bfb20d4b 100644
+index 69ed2eda55a8..c2494d25a43a 100644
 --- a/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
 +++ b/arch/arm/boot/dts/amlogic/t5d_reva_t950d4_am301_drm_1g.dts
 @@ -19,7 +19,7 @@
@@ -541,7 +541,7 @@ index bb831ee409ff..66e1bfb20d4b 100644
  
  / {
 diff --git a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
-index 4256c8f95610..15a89d48c12d 100644
+index 4c4e39e04bcc..69a528711e59 100644
 --- a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
 +++ b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1.5g.dts
 @@ -19,7 +19,7 @@
@@ -554,7 +554,7 @@ index 4256c8f95610..15a89d48c12d 100644
  
  / {
 diff --git a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
-index 807bd8892e15..39d2b1960886 100644
+index ca9977e47b60..2ea945fcb735 100644
 --- a/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
 +++ b/arch/arm/boot/dts/amlogic/t5d_t950d4_am301_drm_1g.dts
 @@ -19,7 +19,7 @@
@@ -941,5 +941,5 @@ index 9fb1aacd1387..196dc7cca2a9 100644
  	internal_phy=<1>;
  };
 -- 
-2.31.0
+2.31.1
 

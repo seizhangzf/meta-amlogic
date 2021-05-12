@@ -1,4 +1,4 @@
-From 13c385b0f3c614156576dc79627d4683079b1c16 Mon Sep 17 00:00:00 2001
+From e8a2f0cddaca7d597375e0eb9eb69a424cc667c1 Mon Sep 17 00:00:00 2001
 From: Matthew Shyu <matthew.shyu@amlogic.com>
 Date: Fri, 20 Mar 2020 03:00:39 -0700
 Subject: [PATCH] RDK: migrate uboot fip code base to trunk [1/1]
@@ -48,5 +48,5 @@ index 579ecbf..31e5967 100755
  declare BL33_DEFCFG1="${UBOOT_FOLDER}/${UBOOT_VERSION1}/${DEFCFG_FOLDER}"
  declare BL33_DEFCFG2="${UBOOT_FOLDER}/${UBOOT_VERSION2}/${DEFCFG_FOLDER}"
 -- 
-2.31.0
+2.31.1
 

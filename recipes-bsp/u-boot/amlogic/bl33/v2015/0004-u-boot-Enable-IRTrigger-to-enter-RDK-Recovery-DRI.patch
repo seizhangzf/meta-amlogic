@@ -1,4 +1,4 @@
-From 22cf5ac809938df4e7c363645941d9bc7d69ccfd Mon Sep 17 00:00:00 2001
+From 6f047ccd2693cc29de9111ee6fea025315d62278 Mon Sep 17 00:00:00 2001
 From: Terrence Pu <terrence.pu@amlogic.com>
 Date: Sun, 7 Jun 2020 22:06:45 -0700
 Subject: [PATCH 4/9] u-boot: Enable IRTrigger to enter RDK Recovery (DRI)
@@ -22,7 +22,7 @@ Signed-off-by: Terrence Pu <terrence.pug@amlogic.com>
  2 files changed, 15 insertions(+), 39 deletions(-)
 
 diff --git a/board/amlogic/configs/g12a_u212_v1.h b/board/amlogic/configs/g12a_u212_v1.h
-index c642902666..68d19acb15 100644
+index c6429026667..68d19acb15d 100644
 --- a/board/amlogic/configs/g12a_u212_v1.h
 +++ b/board/amlogic/configs/g12a_u212_v1.h
 @@ -81,6 +81,8 @@
@@ -95,7 +95,7 @@ index c642902666..68d19acb15 100644
              "run switch_bootmode;"
  
 diff --git a/common/cmd_irkey.c b/common/cmd_irkey.c
-index ea549d7186..3d256dea96 100644
+index ea549d71864..3d256dea963 100644
 --- a/common/cmd_irkey.c
 +++ b/common/cmd_irkey.c
 @@ -19,22 +19,14 @@ extern uint32_t get_time(void);
@@ -125,5 +125,5 @@ index ea549d7186..3d256dea96 100644
  
  uint32_t read_key(void)
 -- 
-2.31.0
+2.31.1
 

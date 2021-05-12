@@ -1,0 +1,27 @@
+From 2cc0a51d5488f4e2e9275bd5fc5ce527a3ec03cb Mon Sep 17 00:00:00 2001
+From: Blance Tang <guofeng.tang@amlogic.com>
+Date: Tue, 5 Jan 2021 06:04:09 +0000
+Subject: [PATCH 1/8] RDK: Disable Kernel -Werror flag which broken
+ media-module build.
+
+Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
+Change-Id: Ie2029e17dd0ad15bdb1ef4f6a8ab682d973d12b8
+---
+ Makefile | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 41ba5762774c..d4ac96202c7b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -483,7 +483,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs \
+ 		   -Wno-format-security \
+ 		   -std=gnu89
+ ifndef CONFIG_KASAN
+-KBUILD_CFLAGS	+= -Werror
+ endif
+ 
+ KBUILD_CPPFLAGS := -D__KERNEL__
+-- 
+2.31.1
+

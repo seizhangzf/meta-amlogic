@@ -1,7 +1,7 @@
-From 294c1fdb2f5d0063d74feedf5d4782e17f46ff9f Mon Sep 17 00:00:00 2001
+From 92f3128418b3b034a2f84ee68b5215987231b0e0 Mon Sep 17 00:00:00 2001
 From: Nanxin Qin <nanxin.qin@amlogic.com>
 Date: Mon, 12 Oct 2020 21:23:14 +0800
-Subject: [PATCH 1/2] v4l: supports uvm on android Q. [2/2]
+Subject: [PATCH] v4l: supports uvm on android Q. [2/2]
 
 PD#SWPL-34978
 
@@ -79,7 +79,7 @@ index b86cbffa..da6f4b5e 100644
  	struct file *filp;
  	struct vdec_s *vdec;
 diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
-index 790c7181..dfb1f4d6 100644
+index afebb7a1..93a78d15 100644
 --- a/drivers/amvdec_ports/aml_vcodec_dec.c
 +++ b/drivers/amvdec_ports/aml_vcodec_dec.c
 @@ -31,16 +31,19 @@
@@ -477,7 +477,7 @@ index 790c7181..dfb1f4d6 100644
 -						vb->planes[1].bytesused, 0);
 +						vb->planes[1].length, 0);
  			pr_info("dump idx: %d %dx%d\n", dump_capture_frame, vf->width, vf->height);
- 			dump_capture_frame--;
+ 			dump_capture_frame = false;
  			filp_close(fp, NULL);
  		}
 -	}
@@ -926,7 +926,7 @@ index 790c7181..dfb1f4d6 100644
  			f->pixelformat = fmt->fourcc;
  			return 0;
  		}
-@@ -1897,23 +2030,7 @@ static int vidioc_vdec_g_fmt(struct file *file, void *priv,
+@@ -1913,23 +2046,7 @@ static int vidioc_vdec_g_fmt(struct file *file, void *priv,
  
  	if ((!V4L2_TYPE_IS_OUTPUT(f->type)) &&
  	    (ctx->state >= AML_STATE_PROBE)) {
@@ -951,7 +951,7 @@ index 790c7181..dfb1f4d6 100644
  		copy_v4l2_format_dimention(pix_mp, q_data, f->type);
  	} else if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
  		/*
-@@ -1933,7 +2050,7 @@ static int vidioc_vdec_g_fmt(struct file *file, void *priv,
+@@ -1949,7 +2066,7 @@ static int vidioc_vdec_g_fmt(struct file *file, void *priv,
  	}
  
  	v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT,
@@ -960,7 +960,7 @@ index 790c7181..dfb1f4d6 100644
  		__func__, f->type, f->fmt.pix_mp.num_planes,
  		f->fmt.pix_mp.pixelformat);
  
-@@ -1995,11 +2112,18 @@ static int vb2ops_vdec_queue_setup(struct vb2_queue *vq,
+@@ -2011,11 +2128,18 @@ static int vb2ops_vdec_queue_setup(struct vb2_queue *vq,
  			alloc_devs[i] = v4l_get_dev_from_codec_mm();//alloc mm from the codec mm
  		}
  	} else {
@@ -979,7 +979,7 @@ index 790c7181..dfb1f4d6 100644
  		for (i = 0; i < *nplanes; i++) {
  			sizes[i] = q_data->sizeimage[i];
  			if (V4L2_TYPE_IS_OUTPUT(vq->type) && ctx->output_dma_mode)
-@@ -2044,6 +2168,222 @@ static int vb2ops_vdec_buf_prepare(struct vb2_buffer *vb)
+@@ -2060,6 +2184,222 @@ static int vb2ops_vdec_buf_prepare(struct vb2_buffer *vb)
  	return 0;
  }
  
@@ -1202,7 +1202,7 @@ index 790c7181..dfb1f4d6 100644
  static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
  {
  	struct aml_vcodec_ctx *ctx = vb2_get_drv_priv(vb->vb2_queue);
-@@ -2051,6 +2391,7 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+@@ -2067,6 +2407,7 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
  	struct aml_video_dec_buf *buf = NULL;
  	struct aml_vcodec_mem src_mem;
  	unsigned int dpb = 0;
@@ -1210,7 +1210,7 @@ index 790c7181..dfb1f4d6 100644
  
  	vb2_v4l2 = to_vb2_v4l2_buffer(vb);
  	buf = container_of(vb2_v4l2, struct aml_video_dec_buf, vb);
-@@ -2063,10 +2404,17 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+@@ -2079,10 +2420,17 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
  	 * check if this buffer is ready to be used after decode
  	 */
  	if (!V4L2_TYPE_IS_OUTPUT(vb->vb2_queue->type)) {
@@ -1230,7 +1230,7 @@ index 790c7181..dfb1f4d6 100644
  			return;
  		}
  
-@@ -2081,24 +2429,34 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+@@ -2097,24 +2445,34 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
  				"enque capture buf idx %d, vf: %lx\n",
  				vb->index, (ulong) v4l_get_vf_handle(vb2_v4l2->private));
  
@@ -1273,7 +1273,7 @@ index 790c7181..dfb1f4d6 100644
  		}
  		return;
  	}
-@@ -2161,6 +2519,13 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
+@@ -2177,6 +2535,13 @@ static void vb2ops_vdec_buf_queue(struct vb2_buffer *vb)
  	if (!dpb)
  		return;
  
@@ -1287,7 +1287,7 @@ index 790c7181..dfb1f4d6 100644
  	ctx->dpb_size = dpb;
  	ctx->last_decoded_picinfo = ctx->picinfo;
  	aml_vdec_dispatch_event(ctx, V4L2_EVENT_SRC_CH_RESOLUTION);
-@@ -2180,22 +2545,15 @@ static void vb2ops_vdec_buf_finish(struct vb2_buffer *vb)
+@@ -2196,22 +2561,15 @@ static void vb2ops_vdec_buf_finish(struct vb2_buffer *vb)
  	struct aml_vcodec_ctx *ctx = vb2_get_drv_priv(vb->vb2_queue);
  	struct vb2_v4l2_buffer *vb2_v4l2 = NULL;
  	struct aml_video_dec_buf *buf = NULL;
@@ -1312,7 +1312,7 @@ index 790c7181..dfb1f4d6 100644
  		v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR,
  			"Unrecoverable error on buffer.\n");
  		ctx->state = AML_STATE_ABORT;
-@@ -2213,15 +2571,12 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+@@ -2229,15 +2587,12 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
  	struct aml_video_dec_buf *buf = container_of(vb2_v4l2,
  					struct aml_video_dec_buf, vb);
  	unsigned int size, phy_addr = 0;
@@ -1328,7 +1328,7 @@ index 790c7181..dfb1f4d6 100644
  		buf->frame_buffer.status = FB_ST_NORMAL;
  	} else {
  		buf->lastframe = false;
-@@ -2230,11 +2585,14 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+@@ -2246,11 +2601,14 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
  	/* codec_mm buffers count */
  	if (V4L2_TYPE_IS_OUTPUT(vb->type)) {
  		if (vb->memory == VB2_MEMORY_MMAP) {
@@ -1343,7 +1343,7 @@ index 790c7181..dfb1f4d6 100644
  
  			buf->mem[0] = v4l_reqbufs_from_codec_mm(buf->mem_onwer,
  					phy_addr, size, vb->index);
-@@ -2243,39 +2601,49 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
+@@ -2259,39 +2617,49 @@ static int vb2ops_vdec_buf_init(struct vb2_buffer *vb)
  				phy_addr, size, vb->index);
  		}
  	} else {
@@ -1422,7 +1422,7 @@ index 790c7181..dfb1f4d6 100644
  	return 0;
  }
  
-@@ -2303,17 +2671,16 @@ static void codec_mm_bufs_cnt_clean(struct vb2_queue *q)
+@@ -2319,17 +2687,16 @@ static void codec_mm_bufs_cnt_clean(struct vb2_queue *q)
  		}
  
  		if (q->memory == VB2_MEMORY_MMAP) {
@@ -1450,7 +1450,7 @@ index 790c7181..dfb1f4d6 100644
  		}
  	}
  }
-@@ -2432,7 +2799,7 @@ static int aml_vdec_g_v_ctrl(struct v4l2_ctrl *ctrl)
+@@ -2448,7 +2815,7 @@ static int aml_vdec_g_v_ctrl(struct v4l2_ctrl *ctrl)
  	switch (ctrl->id) {
  	case V4L2_CID_MIN_BUFFERS_FOR_CAPTURE:
  		if (ctx->state >= AML_STATE_PROBE) {
@@ -1459,7 +1459,7 @@ index 790c7181..dfb1f4d6 100644
  		} else {
  			v4l_dbg(ctx, V4L_DEBUG_CODEC_ERROR,
  				"Seqinfo not ready.\n");
-@@ -2546,6 +2913,26 @@ static int vidioc_vdec_g_parm(struct file *file, void *fh,
+@@ -2562,6 +2929,26 @@ static int vidioc_vdec_g_parm(struct file *file, void *fh,
  	return 0;
  }
  
@@ -1486,7 +1486,7 @@ index 790c7181..dfb1f4d6 100644
  static int vidioc_vdec_s_parm(struct file *file, void *fh,
  	struct v4l2_streamparm *a)
  {
-@@ -2553,15 +2940,19 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+@@ -2569,15 +2956,19 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
  
  	v4l_dbg(ctx, V4L_DEBUG_CODEC_PROT, "%s\n", __func__);
  
@@ -1508,7 +1508,7 @@ index 790c7181..dfb1f4d6 100644
  		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_PSINFO)
  			dec->ps = in->ps;
  		if (in->parms_status & V4L2_CONFIG_PARM_DECODE_HDRINFO)
-@@ -2570,6 +2961,8 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
+@@ -2586,6 +2977,8 @@ static int vidioc_vdec_s_parm(struct file *file, void *fh,
  			dec->cnt = in->cnt;
  
  		dec->parms_status |= in->parms_status;
@@ -1663,7 +1663,7 @@ index 1ed0b976..4c389944 100644
  MODULE_DESCRIPTION("AML video codec V4L2 decoder driver");
  
 diff --git a/drivers/amvdec_ports/aml_vcodec_drv.h b/drivers/amvdec_ports/aml_vcodec_drv.h
-index e9195dcf..23e1b889 100644
+index 2e9e576d..17b4d880 100644
 --- a/drivers/amvdec_ports/aml_vcodec_drv.h
 +++ b/drivers/amvdec_ports/aml_vcodec_drv.h
 @@ -20,6 +20,7 @@
@@ -1774,8 +1774,8 @@ index e9195dcf..23e1b889 100644
  };
  
  /**
-@@ -268,18 +249,30 @@ struct aml_vcodec_pm {
-  *      buffer size will be aligned to 176x160.
+@@ -269,19 +250,31 @@ struct aml_vcodec_pm {
+  * @field: frame/field information.
   */
  struct vdec_pic_info {
 -	unsigned int visible_width;
@@ -1796,6 +1796,7 @@ index e9195dcf..23e1b889 100644
 +	u32 c_len_sz;
  	int profile_idc;
  	int ref_frame_count;
+ 	enum v4l2_field field;
  };
  
 +/**
@@ -1813,7 +1814,7 @@ index e9195dcf..23e1b889 100644
  struct aml_vdec_cfg_infos {
  	u32 double_write_mode;
  	u32 init_width;
-@@ -288,6 +281,7 @@ struct aml_vdec_cfg_infos {
+@@ -290,6 +283,7 @@ struct aml_vdec_cfg_infos {
  	u32 canvas_mem_mode;
  	u32 canvas_mem_endian;
  	u32 low_latency_mode;
@@ -1821,7 +1822,7 @@ index e9195dcf..23e1b889 100644
  };
  
  struct aml_vdec_hdr_infos {
-@@ -369,25 +363,49 @@ enum aml_thread_type {
+@@ -372,25 +366,49 @@ enum aml_thread_type {
  typedef void (*aml_thread_func)(struct aml_vcodec_ctx *ctx);
  
  struct aml_vdec_thread {
@@ -1881,7 +1882,7 @@ index e9195dcf..23e1b889 100644
   * @dec_if: hooked decoder driver interface.
   * @drv_handle: driver handle for specific decode instance
   * @fh: struct v4l2_fh.
-@@ -405,6 +423,7 @@ struct aml_vdec_thread {
+@@ -408,6 +426,7 @@ struct aml_vdec_thread {
   * @cap_pool: capture buffers are remark in the pool.
   * @vdec_thread_list: vdec thread be used to capture.
   * @dpb_size: store dpb count after header parsing
@@ -1889,7 +1890,7 @@ index e9195dcf..23e1b889 100644
   * @param_change: indicate encode parameter type
   * @param_sets_from_ucode: if true indicate ps from ucode.
   * @v4l_codec_dpb_ready: queue buffer number greater than dpb.
-@@ -427,13 +446,21 @@ struct aml_vdec_thread {
+@@ -430,13 +449,21 @@ struct aml_vdec_thread {
   * @reset_flag: reset mode includes lightly and normal mode.
   * @decoded_frame_cnt: the capture buffer deque number to be count.
   * @buf_used_count: means that decode allocate how many buffs from v4l.
@@ -1911,7 +1912,7 @@ index e9195dcf..23e1b889 100644
  	const struct vdec_common_if	*dec_if;
  	ulong				drv_handle;
  	struct v4l2_fh			fh;
-@@ -452,6 +479,7 @@ struct aml_vcodec_ctx {
+@@ -455,6 +482,7 @@ struct aml_vcodec_ctx {
  	struct list_head		vdec_thread_list;
  
  	int				dpb_size;
@@ -1919,7 +1920,7 @@ index e9195dcf..23e1b889 100644
  	bool				param_sets_from_ucode;
  	bool				v4l_codec_dpb_ready;
  	bool				v4l_resolution_change;
-@@ -464,6 +492,7 @@ struct aml_vcodec_ctx {
+@@ -467,6 +495,7 @@ struct aml_vcodec_ctx {
  	enum v4l2_quantization		quantization;
  	enum v4l2_xfer_func		xfer_func;
  	u32				cap_pix_fmt;
@@ -1927,7 +1928,7 @@ index e9195dcf..23e1b889 100644
  
  	bool				has_receive_eos;
  	bool				is_drm_mode;
-@@ -474,81 +503,47 @@ struct aml_vcodec_ctx {
+@@ -477,81 +506,47 @@ struct aml_vcodec_ctx {
  	int				reset_flag;
  	int				decoded_frame_cnt;
  	int				buf_used_count;
@@ -3035,7 +3036,7 @@ index e8693d40..acf2cf42 100644
  		set_param_hdr_info(inst, in);
  		break;
 diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
-index d7c4f437..67825121 100644
+index d13fc341..e6513236 100644
 --- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
 @@ -304,7 +304,6 @@ static int vdec_h264_init(struct aml_vcodec_ctx *ctx, unsigned long *h_vdec)
@@ -3078,7 +3079,7 @@ index d7c4f437..67825121 100644
  		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
  			"invalid get parameter type=%d\n", type);
 diff --git a/drivers/amvdec_ports/decoder/vdec_hevc_if.c b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
-index 569806d3..3a5b0e0b 100644
+index 2a41276f..fcc94490 100644
 --- a/drivers/amvdec_ports/decoder/vdec_hevc_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
 @@ -115,6 +115,7 @@ struct vdec_hevc_inst {
@@ -3164,8 +3165,8 @@ index 569806d3..3a5b0e0b 100644
  	pic->c_len_sz		= pic->y_len_sz >> 1;
  
  	dec->dpb_sz		= ps->dpb_size;
-@@ -803,6 +824,12 @@ static void set_param_ps_info(struct vdec_hevc_inst *inst,
- 		dec->dpb_sz);
+@@ -805,6 +826,12 @@ static void set_param_ps_info(struct vdec_hevc_inst *inst,
+ 		pic->field == V4L2_FIELD_NONE ? "P" : "I");
  }
  
 +static void set_param_comp_buf_info(struct vdec_hevc_inst *inst,
@@ -3177,7 +3178,7 @@ index 569806d3..3a5b0e0b 100644
  static void set_param_hdr_info(struct vdec_hevc_inst *inst,
  	struct aml_vdec_hdr_infos *hdr)
  {
-@@ -846,6 +873,10 @@ static int vdec_hevc_set_param(unsigned long h_vdec,
+@@ -848,6 +875,10 @@ static int vdec_hevc_set_param(unsigned long h_vdec,
  		set_param_ps_info(inst, in);
  		break;
  
@@ -3249,7 +3250,7 @@ index f9816cc3..c71f8917 100644
  	dec->dpb_sz		= ps->dpb_size;
  
 diff --git a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
-index fa272841..b1139481 100644
+index 9a38e711..089fe70b 100644
 --- a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
 @@ -194,7 +194,6 @@ static int vdec_mpeg12_init(struct aml_vcodec_ctx *ctx, unsigned long *h_vdec)
@@ -3291,7 +3292,7 @@ index fa272841..b1139481 100644
  		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_ERROR,
  			"invalid get parameter type=%d\n", type);
 diff --git a/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c b/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
-index e067e156..a3bc1d34 100644
+index c47bafc0..70e726ab 100644
 --- a/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
 @@ -196,7 +196,6 @@ static int vdec_mpeg4_init(struct aml_vcodec_ctx *ctx, unsigned long *h_vdec)
@@ -3559,10 +3560,10 @@ index f1528d4b..5f9b782e 100644
  			vf->width = (force_w_h >> 16) & 0xffff;
  			vf->height = force_w_h & 0xffff;
 diff --git a/drivers/frame_provider/decoder/h264_multi/vmh264.c b/drivers/frame_provider/decoder/h264_multi/vmh264.c
-index a0451722..ddd97b60 100644
+index a7d27712..40c92cc0 100644
 --- a/drivers/frame_provider/decoder/h264_multi/vmh264.c
 +++ b/drivers/frame_provider/decoder/h264_multi/vmh264.c
-@@ -1088,19 +1088,6 @@ static int  compute_losless_comp_header_size(int width, int height)
+@@ -1093,19 +1093,6 @@ static int  compute_losless_comp_header_size(int width, int height)
  	return  hsize;
  }
  
@@ -3582,7 +3583,7 @@ index a0451722..ddd97b60 100644
  static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
  {
  	int pic_width, pic_height;
-@@ -1115,9 +1102,9 @@ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
+@@ -1120,9 +1107,9 @@ static int get_dw_size(struct vdec_h264_hw_s *hw, u32 *pdw_buffer_size_u_v_h)
  
  	if (dw_mode) {
  		int pic_width_dw = pic_width /
@@ -3594,7 +3595,7 @@ index a0451722..ddd97b60 100644
  
  		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
  			pic_width_dw / lcu_size + 1 :
-@@ -1200,9 +1187,9 @@ static void hevc_mcr_config_canv2axitbl(struct vdec_h264_hw_s *hw, int restore)
+@@ -1205,9 +1192,9 @@ static void hevc_mcr_config_canv2axitbl(struct vdec_h264_hw_s *hw, int restore)
  			int canvas_h;
  
  			canvas_w = hw->frame_width /
@@ -3606,7 +3607,7 @@ index a0451722..ddd97b60 100644
  
  			if (hw->canvas_mode == 0)
  				canvas_w = ALIGN(canvas_w, 32);
-@@ -2135,9 +2122,9 @@ static void config_decode_canvas_ex(struct vdec_h264_hw_s *hw, int i)
+@@ -2140,9 +2127,9 @@ static void config_decode_canvas_ex(struct vdec_h264_hw_s *hw, int i)
  	int canvas_h;
  
  	canvas_w = hw->frame_width /
@@ -3618,7 +3619,7 @@ index a0451722..ddd97b60 100644
  
  	if (hw->canvas_mode == 0)
  		canvas_w = ALIGN(canvas_w, 32);
-@@ -3025,9 +3012,9 @@ static int post_video_frame(struct vdec_s *vdec, struct FrameStore *frame)
+@@ -3030,9 +3017,9 @@ static int post_video_frame(struct vdec_s *vdec, struct FrameStore *frame)
  
  		if (hw->mmu_enable && hw->double_write_mode) {
  			vf->width = hw->frame_width /
@@ -3630,7 +3631,7 @@ index a0451722..ddd97b60 100644
  		}
  
  		vf->flag = 0;
-@@ -4262,9 +4249,9 @@ static struct vframe_s *vh264_vf_get(void *op_arg)
+@@ -4267,9 +4254,9 @@ static struct vframe_s *vh264_vf_get(void *op_arg)
  
  			if (hw->double_write_mode) {
  				vf->width = hw->frame_width /
@@ -3642,7 +3643,7 @@ index a0451722..ddd97b60 100644
  			}
  		} else {
  			vf->type = VIDTYPE_PROGRESSIVE | VIDTYPE_VIU_FIELD |
-@@ -8826,6 +8813,7 @@ static int vmh264_get_ps_info(struct vdec_h264_hw_s *hw,
+@@ -8833,6 +8820,7 @@ static int vmh264_get_ps_info(struct vdec_h264_hw_s *hw,
  	 * bit 15: frame_mbs_only_flag
  	 * bit 13-14: chroma_format_idc
  	 */
@@ -3651,10 +3652,10 @@ index a0451722..ddd97b60 100644
  	if (hw->dpb.mSPS.profile_idc != 100 &&
  		hw->dpb.mSPS.profile_idc != 110 &&
 diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
-index e9d69d7d..2eee7362 100644
+index 1e2aed4c..41d7fc2a 100644
 --- a/drivers/frame_provider/decoder/h265/vh265.c
 +++ b/drivers/frame_provider/decoder/h265/vh265.c
-@@ -1425,6 +1425,9 @@ struct PIC_s {
+@@ -1427,6 +1427,9 @@ struct PIC_s {
  	unsigned int dw_y_adr;
  	unsigned int dw_u_v_adr;
  #endif
@@ -3664,15 +3665,15 @@ index e9d69d7d..2eee7362 100644
  	int mc_canvas_y;
  	int mc_canvas_u_v;
  	int width;
-@@ -1475,7 +1478,6 @@ struct PIC_s {
+@@ -1477,7 +1480,6 @@ struct PIC_s {
  
  	u32 hw_decode_time;
  	u32 frame_size; // For frame base mode
 -	bool vframe_bound;
  	bool ip_mode;
- 	u32 stream_frame_size;  //for stream base
  	u32 hdr10p_data_size;
-@@ -2067,30 +2069,15 @@ static int get_double_write_mode(struct hevc_state_s *hevc)
+ 	char *hdr10p_data_buf;
+@@ -2063,30 +2065,15 @@ static int get_double_write_mode(struct hevc_state_s *hevc)
  	int w = hevc->pic_w;
  	int h = hevc->pic_h;
  	u32 dw = 0x1; /*1:1*/
@@ -3710,7 +3711,7 @@ index e9d69d7d..2eee7362 100644
  	switch (valid_dw_mode) {
  	case 0x100:
  		if (w > 1920 && h > 1088)
-@@ -2119,19 +2106,6 @@ static int v4l_parser_get_double_write_mode(struct hevc_state_s *hevc, int w, in
+@@ -2115,19 +2102,6 @@ static int v4l_parser_get_double_write_mode(struct hevc_state_s *hevc, int w, in
  	return dw;
  }
  
@@ -3730,7 +3731,7 @@ index e9d69d7d..2eee7362 100644
  #ifdef CONFIG_AMLOGIC_MEDIA_MULTI_DEC
  static unsigned char get_idx(struct hevc_state_s *hevc)
  {
-@@ -2881,68 +2855,33 @@ static unsigned int log2i(unsigned int val)
+@@ -2877,68 +2851,33 @@ static unsigned int log2i(unsigned int val)
  
  static int init_buf_spec(struct hevc_state_s *hevc);
  
@@ -3816,7 +3817,7 @@ index e9d69d7d..2eee7362 100644
  }
  
  static int init_mmu_box(struct hevc_state_s *hevc)
-@@ -2984,12 +2923,8 @@ static int init_mmu_buffers(struct hevc_state_s *hevc)
+@@ -2980,12 +2919,8 @@ static int init_mmu_buffers(struct hevc_state_s *hevc)
  {
  	int tvp_flag = vdec_secure(hw_to_vdec(hevc)) ?
  		CODEC_MM_FLAGS_TVP : 0;
@@ -3831,7 +3832,7 @@ index e9d69d7d..2eee7362 100644
  
  	if (get_dbg_flag(hevc)) {
  		hevc_print(hevc, 0, "%s max_w %d max_h %d\n",
-@@ -2998,8 +2933,7 @@ static int init_mmu_buffers(struct hevc_state_s *hevc)
+@@ -2994,8 +2929,7 @@ static int init_mmu_buffers(struct hevc_state_s *hevc)
  
  	hevc->need_cache_size = buf_size * SZ_1M;
  	hevc->sc_start_time = get_jiffies_64();
@@ -3841,7 +3842,7 @@ index e9d69d7d..2eee7362 100644
  		hevc->mmu_box = decoder_mmu_box_alloc_box(DRIVER_NAME,
  			hevc->index,
  			MAX_REF_PIC_NUM,
-@@ -3246,9 +3180,9 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
+@@ -3242,9 +3176,9 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
  
  	if (dw_mode) {
  		int pic_width_dw = pic_width /
@@ -3853,7 +3854,7 @@ index e9d69d7d..2eee7362 100644
  
  		int pic_width_lcu_dw = (pic_width_dw % lcu_size) ?
  			pic_width_dw / lcu_size + 1 :
-@@ -3289,15 +3223,45 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
+@@ -3285,15 +3219,45 @@ static int cal_current_buf_size(struct hevc_state_s *hevc,
  	return buf_size;
  }
  
@@ -3902,7 +3903,7 @@ index e9d69d7d..2eee7362 100644
  	ret = vdec_v4l_get_buffer(hevc->v4l2_ctx, &fb);
  	if (ret < 0) {
  		hevc_print(hevc, 0, "[%d] H265 get buffer fail.\n",
-@@ -3306,23 +3270,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -3302,23 +3266,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
  	}
  
  	if (hevc->mmu_enable) {
@@ -3928,7 +3929,7 @@ index e9d69d7d..2eee7362 100644
  	}
  
  	hevc->m_BUF[i].used_flag	= 0;
-@@ -3335,6 +3284,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -3331,6 +3280,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
  		fb->m.mem[0].bytes_used = fb->m.mem[0].size;
  		pic->dw_y_adr = hevc->m_BUF[i].start_adr;
  		pic->dw_u_v_adr = pic->dw_y_adr + hevc->m_BUF[i].luma_size;
@@ -3937,7 +3938,7 @@ index e9d69d7d..2eee7362 100644
  	} else if (fb->num_planes == 2) {
  		hevc->m_BUF[i].start_adr = fb->m.mem[0].addr;
  		hevc->m_BUF[i].luma_size = fb->m.mem[0].size;
-@@ -3345,6 +3296,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -3341,6 +3292,8 @@ static int v4l_alloc_buf(struct hevc_state_s *hevc, struct PIC_s *pic)
  		fb->m.mem[1].bytes_used = fb->m.mem[1].size;
  		pic->dw_y_adr = hevc->m_BUF[i].start_adr;
  		pic->dw_u_v_adr = hevc->m_BUF[i].chroma_addr;
@@ -3946,7 +3947,7 @@ index e9d69d7d..2eee7362 100644
  	}
  
  	return ret;
-@@ -3455,6 +3408,7 @@ static void dealloc_unused_buf(struct hevc_state_s *hevc)
+@@ -3451,6 +3404,7 @@ static void dealloc_unused_buf(struct hevc_state_s *hevc)
  					hevc->bmmu_box,
  					VF_BUFFER_IDX(i));
  			hevc->m_BUF[i].start_adr = 0;
@@ -3954,7 +3955,7 @@ index e9d69d7d..2eee7362 100644
  			hevc->m_BUF[i].size = 0;
  		}
  	}
-@@ -3481,6 +3435,7 @@ static void dealloc_pic_buf(struct hevc_state_s *hevc,
+@@ -3477,6 +3431,7 @@ static void dealloc_pic_buf(struct hevc_state_s *hevc,
  				VF_BUFFER_IDX(i));
  		hevc->m_BUF[i].used_flag = 0;
  		hevc->m_BUF[i].start_adr = 0;
@@ -3962,7 +3963,7 @@ index e9d69d7d..2eee7362 100644
  		hevc->m_BUF[i].size = 0;
  	}
  }
-@@ -5554,6 +5509,17 @@ static void config_sao_hw(struct hevc_state_s *hevc, union param_u *params)
+@@ -5550,6 +5505,17 @@ static void config_sao_hw(struct hevc_state_s *hevc, union param_u *params)
  	data32 = (mc_buffer_size_u_v_h << 16);
  	WRITE_VREG(HEVC_SAO_C_LENGTH, data32);
  
@@ -3980,7 +3981,7 @@ index e9d69d7d..2eee7362 100644
  #ifdef LOSLESS_COMPRESS_MODE
  /*SUPPORT_10BIT*/
  	if (get_double_write_mode(hevc)) {
-@@ -6064,7 +6030,6 @@ static struct PIC_s *v4l_get_new_pic(struct hevc_state_s *hevc,
+@@ -6060,7 +6026,6 @@ static struct PIC_s *v4l_get_new_pic(struct hevc_state_s *hevc,
  			}
  			break;
  		default:
@@ -3988,7 +3989,7 @@ index e9d69d7d..2eee7362 100644
  			break;
  		}
  
-@@ -6098,7 +6063,6 @@ static struct PIC_s *v4l_get_new_pic(struct hevc_state_s *hevc,
+@@ -6094,7 +6059,6 @@ static struct PIC_s *v4l_get_new_pic(struct hevc_state_s *hevc,
  	new_pic->referenced = 1;
  	new_pic->decode_idx = hevc->decode_idx;
  	new_pic->slice_idx = 0;
@@ -3996,7 +3997,7 @@ index e9d69d7d..2eee7362 100644
  	new_pic->output_mark = 0;
  	new_pic->recon_mark = 0;
  	new_pic->error_mark = 0;
-@@ -6438,6 +6402,39 @@ static void release_aux_data(struct hevc_state_s *hevc,
+@@ -6434,6 +6398,39 @@ static void release_aux_data(struct hevc_state_s *hevc,
  	pic->aux_data_size = 0;
  }
  
@@ -4036,7 +4037,7 @@ index e9d69d7d..2eee7362 100644
  static inline void hevc_pre_pic(struct hevc_state_s *hevc,
  			struct PIC_s *pic)
  {
-@@ -6485,23 +6482,8 @@ static inline void hevc_pre_pic(struct hevc_state_s *hevc,
+@@ -6481,23 +6478,8 @@ static inline void hevc_pre_pic(struct hevc_state_s *hevc,
  					if ((!is_skip_decoding(hevc, pic)) &&
  						(hevc->used_4k_num >= 0) &&
  						(hevc->cur_pic->scatter_alloc
@@ -4062,7 +4063,7 @@ index e9d69d7d..2eee7362 100644
  				}
  			}
  			if (!pic->ip_mode)
-@@ -7844,46 +7826,67 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
+@@ -7840,46 +7822,67 @@ static int hevc_slice_segment_header_process(struct hevc_state_s *hevc,
  	return 0;
  }
  
@@ -4154,7 +4155,7 @@ index e9d69d7d..2eee7362 100644
  		cur_mmu_4k_number, ret);
  	return ret;
  }
-@@ -7898,9 +7901,16 @@ static void release_pic_mmu_buf(struct hevc_state_s *hevc,
+@@ -7894,9 +7897,16 @@ static void release_pic_mmu_buf(struct hevc_state_s *hevc,
  	pic->scatter_alloc);
  
  	if (hevc->mmu_enable
@@ -4174,7 +4175,7 @@ index e9d69d7d..2eee7362 100644
  	pic->scatter_alloc = 0;
  }
  
-@@ -8079,9 +8089,9 @@ static void set_canvas(struct hevc_state_s *hevc, struct PIC_s *pic)
+@@ -8075,9 +8085,9 @@ static void set_canvas(struct hevc_state_s *hevc, struct PIC_s *pic)
  #ifdef SUPPORT_10BIT
  	if	(pic->double_write_mode) {
  		canvas_w = pic->width /
@@ -4186,7 +4187,7 @@ index e9d69d7d..2eee7362 100644
  
  		if (hevc->mem_map_mode == 0)
  			canvas_w = ALIGN(canvas_w, 32);
-@@ -8422,9 +8432,9 @@ static void set_frame_info(struct hevc_state_s *hevc, struct vframe_s *vf,
+@@ -8418,9 +8428,9 @@ static void set_frame_info(struct hevc_state_s *hevc, struct vframe_s *vf,
  		= &vf->prop.master_display_colour;
  
  	vf->width = pic->width /
@@ -4198,7 +4199,7 @@ index e9d69d7d..2eee7362 100644
  
  	vf->duration = hevc->frame_dur;
  	vf->duration_pulldown = 0;
-@@ -8696,9 +8706,9 @@ static struct vframe_s *vh265_vf_get(void *op_arg)
+@@ -8692,9 +8702,9 @@ static struct vframe_s *vh265_vf_get(void *op_arg)
  		set_frame_info(hevc, vf);
  
  		vf->width = pic->width /
@@ -4210,7 +4211,7 @@ index e9d69d7d..2eee7362 100644
  
  		force_disp_pic_index |= 0x200;
  		return vf;
-@@ -8833,8 +8843,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
+@@ -8829,8 +8839,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
  	if (index_top != 0xff
  		&& index_top < MAX_REF_PIC_NUM
  		&& hevc->m_PIC[index_top]) {
@@ -4219,7 +4220,7 @@ index e9d69d7d..2eee7362 100644
  		if (hevc->m_PIC[index_top]->vf_ref > 0) {
  			hevc->m_PIC[index_top]->vf_ref--;
  
-@@ -8852,8 +8860,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
+@@ -8848,8 +8856,6 @@ static void vh265_vf_put(struct vframe_s *vf, void *op_arg)
  	if (index_bot != 0xff
  		&& index_bot < MAX_REF_PIC_NUM
  		&& hevc->m_PIC[index_bot]) {
@@ -4228,16 +4229,16 @@ index e9d69d7d..2eee7362 100644
  		if (hevc->m_PIC[index_bot]->vf_ref > 0) {
  			hevc->m_PIC[index_bot]->vf_ref--;
  
-@@ -8995,6 +9001,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+@@ -8991,6 +8997,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
  					if (hevc->mmu_enable)
  						vf->type |= VIDTYPE_SCATTER;
  		}
 +		if (hevc->is_used_v4l && hevc->double_write_mode != 16)
 +			vf->type |= VIDTYPE_COMPRESS | VIDTYPE_SCATTER;
  		hevc->vf_pre_count++;
- 		kfifo_put(&hevc->newframe_q, (const struct vframe_s *)vf);
  		spin_lock_irqsave(&lock, flags);
-@@ -9035,6 +9043,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+ 		kfifo_put(&hevc->newframe_q, (const struct vframe_s *)vf);
+@@ -9031,6 +9039,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
  					if (hevc->mmu_enable)
  						vf->type |= VIDTYPE_SCATTER;
  				}
@@ -4246,7 +4247,7 @@ index e9d69d7d..2eee7362 100644
  				hevc->vf_pre_count++;
  				vdec_vframe_ready(hw_to_vdec(hevc), vf);
  				kfifo_put(&hevc->display_q,
-@@ -9055,6 +9065,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+@@ -9051,6 +9061,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
  					if (hevc->mmu_enable)
  						vf->type |= VIDTYPE_SCATTER;
  				}
@@ -4255,7 +4256,7 @@ index e9d69d7d..2eee7362 100644
  				vf->index &= 0xff;
  				vf->index |= (pair_pic->index << 8);
  				pair_pic->vf_ref++;
-@@ -9082,6 +9094,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+@@ -9078,6 +9090,8 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
  					if (hevc->mmu_enable)
  						vf->type |= VIDTYPE_SCATTER;
  				}
@@ -4264,7 +4265,7 @@ index e9d69d7d..2eee7362 100644
  				vf->index &= 0xff00;
  				vf->index |= pair_pic->index;
  				pair_pic->vf_ref++;
-@@ -9103,10 +9117,14 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
+@@ -9099,10 +9113,14 @@ static int process_pending_vframe(struct hevc_state_s *hevc,
  static void update_vf_memhandle(struct hevc_state_s *hevc,
  	struct vframe_s *vf, struct PIC_s *pic)
  {
@@ -4283,7 +4284,7 @@ index e9d69d7d..2eee7362 100644
  		vf->mem_handle =
  			decoder_mmu_box_get_mem_handle(
  				hevc->mmu_box, pic->index);
-@@ -9416,6 +9434,8 @@ static int post_video_frame(struct vdec_s *vdec, struct PIC_s *pic)
+@@ -9386,6 +9404,8 @@ static int post_video_frame(struct vdec_s *vdec, struct PIC_s *pic)
  				if (hevc->mmu_enable)
  					vf->type |= VIDTYPE_SCATTER;
  			}
@@ -4292,9 +4293,9 @@ index e9d69d7d..2eee7362 100644
  #ifdef MULTI_INSTANCE_SUPPORT
  			if (hevc->m_ins_flag &&
  				(get_dbg_flag(hevc)
-@@ -9561,9 +9581,9 @@ static int post_video_frame(struct vdec_s *vdec, struct PIC_s *pic)
- 		vf->sar_height = hevc->cur_pic->sar_height;
- 
+@@ -9532,9 +9552,9 @@ static int post_video_frame(struct vdec_s *vdec, struct PIC_s *pic)
+ 			vf->sar_height = hevc->cur_pic->sar_height;
+ 		}
  		vf->width = vf->width /
 -			get_double_write_ratio(hevc, pic->double_write_mode);
 +			get_double_write_ratio(pic->double_write_mode);
@@ -4304,7 +4305,7 @@ index e9d69d7d..2eee7362 100644
  #ifdef HEVC_PIC_STRUCT_SUPPORT
  		if (pic->pic_struct == 3 || pic->pic_struct == 4) {
  			struct vframe_s *vf2;
-@@ -10280,17 +10300,34 @@ static void read_decode_info(struct hevc_state_s *hevc)
+@@ -10251,18 +10271,35 @@ static void read_decode_info(struct hevc_state_s *hevc)
  
  static int vh265_get_ps_info(struct hevc_state_s *hevc, int width, int height, struct aml_vdec_ps_infos *ps)
  {
@@ -4319,6 +4320,7 @@ index e9d69d7d..2eee7362 100644
 +	ps->coded_width 	= ALIGN(width, 32);
 +	ps->coded_height 	= ALIGN(height, 32);
  	ps->dpb_size 		= v4l_parser_work_pic_num(hevc);
+ 	ps->field 		= hevc->interlace_flag ? V4L2_FIELD_INTERLACED : V4L2_FIELD_NONE;
  
  	return 0;
  }
@@ -4345,7 +4347,7 @@ index e9d69d7d..2eee7362 100644
  static int v4l_res_change(struct hevc_state_s *hevc, union param_u *rpm_param)
  {
  	struct aml_vcodec_ctx *ctx =
-@@ -10313,6 +10350,13 @@ static int v4l_res_change(struct hevc_state_s *hevc, union param_u *rpm_param)
+@@ -10285,6 +10322,13 @@ static int v4l_res_change(struct hevc_state_s *hevc, union param_u *rpm_param)
  				height,
  				hevc->interlace_flag);
  
@@ -4359,7 +4361,7 @@ index e9d69d7d..2eee7362 100644
  			vh265_get_ps_info(hevc, width, height, &ps);
  			vdec_v4l_set_ps_infos(ctx, &ps);
  			vdec_v4l_res_ch_event(ctx);
-@@ -10747,22 +10791,8 @@ pic_done:
+@@ -10719,22 +10763,8 @@ pic_done:
  							if ((!is_skip_decoding(hevc, pic)) &&
  								(hevc->used_4k_num >= 0) &&
  								(hevc->cur_pic->scatter_alloc
@@ -4384,7 +4386,7 @@ index e9d69d7d..2eee7362 100644
  						}
  					}
  
-@@ -11221,8 +11251,21 @@ force_output:
+@@ -11193,8 +11223,21 @@ force_output:
  						struct aml_vdec_ps_infos ps;
  						int width = hevc->param.p.pic_width_in_luma_samples;
  						int height = hevc->param.p.pic_height_in_luma_samples;
@@ -4406,7 +4408,7 @@ index e9d69d7d..2eee7362 100644
  						vh265_get_ps_info(hevc, width, height, &ps);
  						/*notice the v4l2 codec.*/
  						vdec_v4l_set_ps_infos(ctx, &ps);
-@@ -11242,7 +11285,6 @@ force_output:
+@@ -11214,7 +11257,6 @@ force_output:
  					reset_process_time(hevc);
  					vdec_schedule_work(&hevc->work);
  					return IRQ_HANDLED;
@@ -4414,7 +4416,7 @@ index e9d69d7d..2eee7362 100644
  				}
  			}
  
-@@ -12744,6 +12786,28 @@ static int get_used_buf_count(struct hevc_state_s *hevc)
+@@ -12733,6 +12775,28 @@ static int get_used_buf_count(struct hevc_state_s *hevc)
  }
  #endif
  
@@ -4443,7 +4445,7 @@ index e9d69d7d..2eee7362 100644
  
  static unsigned char is_new_pic_available(struct hevc_state_s *hevc)
  {
-@@ -12985,6 +13049,14 @@ static unsigned char get_data_check_sum
+@@ -12977,6 +13041,14 @@ static unsigned char get_data_check_sum
  	for (jj = 0; jj < size; jj++)
  		sum += data[jj];
  
@@ -4458,7 +4460,7 @@ index e9d69d7d..2eee7362 100644
  	if (!hevc->chunk->block->is_mapped)
  		codec_mm_unmap_phyaddr(data);
  	return sum;
-@@ -13214,21 +13286,8 @@ static void vh265_work_implement(struct hevc_state_s *hevc,
+@@ -13207,21 +13279,8 @@ static void vh265_work_implement(struct hevc_state_s *hevc,
  			if (hevc->used_4k_num >= 0 &&
  				hevc->cur_pic &&
  				hevc->cur_pic->scatter_alloc
@@ -4482,7 +4484,7 @@ index e9d69d7d..2eee7362 100644
  		}
  		hevc->pic_decoded_lcu_idx =
  			READ_VREG(HEVC_PARSER_LCU_START)
-@@ -13588,7 +13647,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+@@ -13551,7 +13610,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
  	}
  	hevc->timeout_processing = 0;
  	if (!hevc->first_sc_checked && hevc->mmu_enable) {
@@ -4501,7 +4503,7 @@ index e9d69d7d..2eee7362 100644
  		hevc->first_sc_checked =1;
  		hevc_print(hevc, 0,
  			"vh265 cached=%d  need_size=%d speed= %d ms\n",
-@@ -13676,10 +13745,14 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+@@ -13639,10 +13708,14 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
  
  		if (ctx->param_sets_from_ucode) {
  			if (hevc->v4l_params_parsed) {
@@ -4520,7 +4522,7 @@ index e9d69d7d..2eee7362 100644
  			} else {
  				if (ctx->v4l_resolution_change)
  					ret = 0;
-@@ -14229,9 +14302,10 @@ static void vh265_dump_state(struct vdec_s *vdec)
+@@ -14192,9 +14265,10 @@ static void vh265_dump_state(struct vdec_s *vdec)
  
  	for (i = 0; i < BUF_POOL_SIZE; i++) {
  		hevc_print(hevc, 0,
@@ -4546,7 +4548,7 @@ index 8fe1dbb6..633ac247 100644
  		decbuf_v_size	= decbuf_u_size;
  		canvas_width	= ALIGN(hw->frame_width, 64);
 diff --git a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
-index 61f96bba..c7cfa92f 100644
+index 2adea2f8..9657f407 100644
 --- a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
 +++ b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
 @@ -217,6 +217,7 @@ struct pic_info_t {
@@ -4557,7 +4559,7 @@ index 61f96bba..c7cfa92f 100644
  };
  
  struct vdec_mpeg12_hw_s {
-@@ -513,6 +514,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+@@ -514,6 +515,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
  		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
  	canvas_config_config(canvas_y(canvas), &hw->canvas_config[i][0]);
  
@@ -4568,7 +4570,7 @@ index 61f96bba..c7cfa92f 100644
  	hw->canvas_config[i][1].phy_addr	= decbuf_uv_start;
  	hw->canvas_config[i][1].width		= canvas_width;
  	hw->canvas_config[i][1].height		= canvas_height / 2;
-@@ -521,6 +526,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+@@ -522,6 +527,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
  		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
  	canvas_config_config(canvas_u(canvas), &hw->canvas_config[i][1]);
  
@@ -4579,7 +4581,7 @@ index 61f96bba..c7cfa92f 100644
  	debug_print(DECODE_ID(hw), PRINT_FLAG_BUFFER_DETAIL,
  		"[%d] %s(), canvas: 0x%x mode: %d y: %lx uv: %lx w: %d h: %d\n",
  		ctx->id, __func__, canvas, hw->canvas_mode,
-@@ -1612,9 +1621,6 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1613,9 +1622,6 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  	ulong nv_order = VIDTYPE_VIU_NV21;
  	bool pb_skip = false;
  
@@ -4589,7 +4591,7 @@ index 61f96bba..c7cfa92f 100644
  	/* swap uv */
  	if (hw->is_used_v4l) {
  		if ((v4l2_ctx->cap_pix_fmt == V4L2_PIX_FMT_NV12) ||
-@@ -1622,6 +1628,9 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1623,6 +1629,9 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  			nv_order = VIDTYPE_VIU_NV12;
  	}
  
@@ -4599,7 +4601,7 @@ index 61f96bba..c7cfa92f 100644
  	if (hw->i_only) {
  		pb_skip = 1;
  	}
-@@ -1699,9 +1708,11 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1700,9 +1709,11 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  		if (i > 0) {
  			vf->pts = 0;
  			vf->pts_us64 = 0;
@@ -4611,7 +4613,7 @@ index 61f96bba..c7cfa92f 100644
  		}
  		vf->type_original = vf->type;
  
-@@ -2132,6 +2143,7 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2141,6 +2152,7 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  				new_pic->pts_valid = hw->chunk->pts_valid;
  				new_pic->pts = hw->chunk->pts;
  				new_pic->pts64 = hw->chunk->pts64;
@@ -4619,7 +4621,7 @@ index 61f96bba..c7cfa92f 100644
  				if (hw->last_chunk_pts == hw->chunk->pts) {
  					new_pic->pts_valid = 0;
  					debug_print(DECODE_ID(hw), PRINT_FLAG_TIMEINFO,
-@@ -2149,8 +2161,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2158,8 +2170,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  				}
  			}
  		} else {
@@ -4631,7 +4633,7 @@ index 61f96bba..c7cfa92f 100644
  			new_pic->pts_valid = false;
  		}
  
-@@ -2209,9 +2223,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2218,9 +2232,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  		}
  
  		debug_print(DECODE_ID(hw), PRINT_FLAG_RUN_FLOW,
@@ -4645,10 +4647,10 @@ index 61f96bba..c7cfa92f 100644
  		prepare_display_buf(hw, disp_pic);
  		vdec_schedule_work(&hw->work);
 diff --git a/drivers/frame_provider/decoder/utils/vdec.c b/drivers/frame_provider/decoder/utils/vdec.c
-index 5e5b5319..03ab08d3 100644
+index 69ec60c1..b25ae519 100644
 --- a/drivers/frame_provider/decoder/utils/vdec.c
 +++ b/drivers/frame_provider/decoder/utils/vdec.c
-@@ -5975,6 +5975,19 @@ void vdec_config_vld_reg(struct vdec_s *vdec, u32 addr, u32 size)
+@@ -6010,6 +6010,19 @@ void vdec_config_vld_reg(struct vdec_s *vdec, u32 addr, u32 size)
  }
  EXPORT_SYMBOL(vdec_config_vld_reg);
  
@@ -4669,10 +4671,10 @@ index 5e5b5319..03ab08d3 100644
  /*
  uint force_hevc_clock_cntl;
 diff --git a/drivers/frame_provider/decoder/utils/vdec.h b/drivers/frame_provider/decoder/utils/vdec.h
-index 95a93507..4c0ce1eb 100644
+index 302bfade..79041af0 100644
 --- a/drivers/frame_provider/decoder/utils/vdec.h
 +++ b/drivers/frame_provider/decoder/utils/vdec.h
-@@ -520,6 +520,8 @@ int vdec_get_frame_num(struct vdec_s *vdec);
+@@ -523,6 +523,8 @@ int vdec_get_frame_num(struct vdec_s *vdec);
  int show_stream_buffer_status(char *buf,
  	int (*callback) (struct stream_buf_s *, char *));
  
@@ -4777,7 +4779,7 @@ index 1494f106..ddb46cb9 100644
 +	unsigned int *dw_mode);
  #endif
 diff --git a/drivers/frame_provider/decoder/vav1/vav1.c b/drivers/frame_provider/decoder/vav1/vav1.c
-index 0297a893..3ff46e41 100644
+index d9bdcf1c..be706211 100644
 --- a/drivers/frame_provider/decoder/vav1/vav1.c
 +++ b/drivers/frame_provider/decoder/vav1/vav1.c
 @@ -295,7 +295,7 @@ static u32 double_write_mode;
@@ -5218,7 +5220,7 @@ index 0297a893..3ff46e41 100644
  			vav1_get_ps_info(hw, &ps);
  			vdec_v4l_set_ps_infos(ctx, &ps);
  			vdec_v4l_res_ch_event(ctx);
-@@ -7970,8 +7966,19 @@ static irqreturn_t vav1_isr_thread_fn(int irq, void *data)
+@@ -7971,8 +7967,19 @@ static irqreturn_t vav1_isr_thread_fn(int irq, void *data)
  
  					av1_print(hw, AOM_DEBUG_HW_MORE, "mmu free tail, index %d used_num 0x%lx\n",
  						cm->cur_frame->buf.index, used_4k_num);
@@ -5240,7 +5242,7 @@ index 0297a893..3ff46e41 100644
  #ifdef AOM_AV1_MMU_DW
  					if (hw->dw_mmu_enable) {
  						used_4k_num =
-@@ -8227,8 +8234,14 @@ static irqreturn_t vav1_isr_thread_fn(int irq, void *data)
+@@ -8228,8 +8235,14 @@ static irqreturn_t vav1_isr_thread_fn(int irq, void *data)
  		if (!v4l_res_change(hw)) {
  			if (ctx->param_sets_from_ucode && !hw->v4l_params_parsed) {
  				struct aml_vdec_ps_infos ps;
@@ -5255,7 +5257,7 @@ index 0297a893..3ff46e41 100644
  				vav1_get_ps_info(hw, &ps);
  				/*notice the v4l2 codec.*/
  				vdec_v4l_set_ps_infos(ctx, &ps);
-@@ -9039,7 +9052,7 @@ static int amvdec_av1_mmu_init(struct AV1HW_s *hw)
+@@ -9046,7 +9059,7 @@ static int amvdec_av1_mmu_init(struct AV1HW_s *hw)
  	}
  	hw->need_cache_size = buf_size * SZ_1M;
  	hw->sc_start_time = get_jiffies_64();
@@ -5264,7 +5266,7 @@ index 0297a893..3ff46e41 100644
  		int count = FRAME_BUFFERS;
  		hw->mmu_box = decoder_mmu_box_alloc_box(DRIVER_NAME,
  			hw->index /* * 2*/, count,
-@@ -9560,8 +9573,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+@@ -9567,8 +9580,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
  		return ret;
  
  	if (!hw->first_sc_checked && hw->mmu_enable) {
@@ -5283,7 +5285,7 @@ index 0297a893..3ff46e41 100644
  		hw->first_sc_checked = 1;
  		av1_print(hw, 0, "av1 cached=%d  need_size=%d speed= %d ms\n",
  			size, (hw->need_cache_size >> PAGE_SHIFT),
-@@ -9624,10 +9646,15 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
+@@ -9631,10 +9653,15 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
  	/* no return when first pts is 0 */
  	if (hw->first_pts_index) {
  		/* filtration pts 0 and continuous same pts */
@@ -5303,7 +5305,7 @@ index 0297a893..3ff46e41 100644
  		/* fps change, frame dur change to lower or higher,
  		 * can't find closed pts in saved pool */
  		if ((hw->dur_recalc_flag) ||
-@@ -9698,7 +9725,7 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
+@@ -9705,7 +9732,7 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
  		return;
  	}
  
@@ -5312,7 +5314,7 @@ index 0297a893..3ff46e41 100644
  	if ((!close_to(calc_dur, hw->frame_dur, 10)) &&
  		(calc_dur < 9601) && (calc_dur > 800)) {
  		av1_print(hw, 0, "change to calc dur %lld, old dur %d\n", calc_dur, hw->frame_dur);
-@@ -9711,7 +9738,7 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
+@@ -9718,7 +9745,7 @@ static void av1_frame_mode_pts_save(struct AV1HW_s *hw)
  
  	if (hw->is_used_v4l) {
  		hw->timestamp_duration =
@@ -5322,7 +5324,7 @@ index 0297a893..3ff46e41 100644
  }
  
 diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
-index feabc6c4..2f664acd 100644
+index f08ceb13..cc2b64da 100644
 --- a/drivers/frame_provider/decoder/vp9/vvp9.c
 +++ b/drivers/frame_provider/decoder/vp9/vvp9.c
 @@ -542,6 +542,8 @@ struct PIC_BUFFER_CONFIG_s {
@@ -5991,7 +5993,7 @@ index feabc6c4..2f664acd 100644
  			vvp9_get_ps_info(pbi, &ps);
  			vdec_v4l_set_ps_infos(ctx, &ps);
  			vdec_v4l_res_ch_event(ctx);
-@@ -8694,8 +8763,14 @@ static irqreturn_t vvp9_isr_thread_fn(int irq, void *data)
+@@ -8703,8 +8772,14 @@ static irqreturn_t vvp9_isr_thread_fn(int irq, void *data)
  		if (!v4l_res_change(pbi)) {
  			if (ctx->param_sets_from_ucode && !pbi->v4l_params_parsed) {
  				struct aml_vdec_ps_infos ps;
@@ -6006,7 +6008,7 @@ index feabc6c4..2f664acd 100644
  				vvp9_get_ps_info(pbi, &ps);
  				/*notice the v4l2 codec.*/
  				vdec_v4l_set_ps_infos(ctx, &ps);
-@@ -9590,18 +9665,11 @@ static int amvdec_vp9_mmu_init(struct VP9Decoder_s *pbi)
+@@ -9599,18 +9674,11 @@ static int amvdec_vp9_mmu_init(struct VP9Decoder_s *pbi)
  {
  	int tvp_flag = vdec_secure(hw_to_vdec(pbi)) ?
  		CODEC_MM_FLAGS_TVP : 0;
@@ -6027,7 +6029,7 @@ index feabc6c4..2f664acd 100644
  		pbi->mmu_box = decoder_mmu_box_alloc_box(DRIVER_NAME,
  			pbi->index, FRAME_BUFFERS,
  			pbi->need_cache_size,
-@@ -9877,6 +9945,20 @@ static unsigned char get_data_check_sum
+@@ -9886,6 +9954,20 @@ static unsigned char get_data_check_sum
  	for (jj = 0; jj < size; jj++)
  		sum += data[jj];
  
@@ -6048,7 +6050,7 @@ index feabc6c4..2f664acd 100644
  	if (!pbi->chunk->block->is_mapped)
  		codec_mm_unmap_phyaddr(data);
  	return sum;
-@@ -10175,7 +10257,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
+@@ -10184,7 +10266,17 @@ static unsigned long run_ready(struct vdec_s *vdec, unsigned long mask)
  	if (!(pbi->pic_list_init_done && pbi->pic_list_init_done2) || pbi->eos)
  		return ret;
  	if (!pbi->first_sc_checked && pbi->mmu_enable) {
@@ -6067,7 +6069,7 @@ index feabc6c4..2f664acd 100644
  		pbi->first_sc_checked = 1;
  		vp9_print(pbi, 0, "vp9 cached=%d  need_size=%d speed= %d ms\n",
  			size, (pbi->need_cache_size >> PAGE_SHIFT),
-@@ -10587,20 +10679,29 @@ static void run(struct vdec_s *vdec, unsigned long mask,
+@@ -10596,20 +10688,29 @@ static void run(struct vdec_s *vdec, unsigned long mask,
  
  }
  
@@ -6104,7 +6106,7 @@ index feabc6c4..2f664acd 100644
  	}
  
  	if (vdec->parallel_dec == 1) {
-@@ -10613,6 +10714,12 @@ static void  init_frame_bufs(struct VP9Decoder_s *pbi)
+@@ -10622,6 +10723,12 @@ static void  init_frame_bufs(struct VP9Decoder_s *pbi)
  				vdec->id);
  		}
  	}
@@ -6117,7 +6119,7 @@ index feabc6c4..2f664acd 100644
  }
  
  static void reset(struct vdec_s *vdec)
-@@ -10620,6 +10727,7 @@ static void reset(struct vdec_s *vdec)
+@@ -10629,6 +10736,7 @@ static void reset(struct vdec_s *vdec)
  	struct VP9Decoder_s *pbi =
  		(struct VP9Decoder_s *)vdec->private;
  
@@ -6125,7 +6127,7 @@ index feabc6c4..2f664acd 100644
  	cancel_work_sync(&pbi->work);
  	if (pbi->stat & STAT_VDEC_RUN) {
  		amhevc_stop();
-@@ -10630,14 +10738,12 @@ static void reset(struct vdec_s *vdec)
+@@ -10639,14 +10747,12 @@ static void reset(struct vdec_s *vdec)
  		del_timer_sync(&pbi->timer);
  		pbi->stat &= ~STAT_TIMER_ARM;
  	}
@@ -6141,7 +6143,7 @@ index feabc6c4..2f664acd 100644
  
  	vp9_print(pbi, PRINT_FLAG_VDEC_DETAIL, "%s\r\n", __func__);
  }
-@@ -11061,7 +11167,12 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
+@@ -11070,7 +11176,12 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
  	if (pbi->enable_fence)
  		pdata->sync.usage = pbi->fence_usage;
  
@@ -6156,5 +6158,5 @@ index feabc6c4..2f664acd 100644
  
  	if (pdata->sys_info) {
 -- 
-2.31.0
+2.31.1
 

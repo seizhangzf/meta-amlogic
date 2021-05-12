@@ -1,7 +1,7 @@
 DESCRIPTION = "aml secury memory allocator"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 SRC_URI = " git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot"
 
@@ -12,8 +12,10 @@ SRCREV ?= "${AUTOREV}"
 
 S = "${WORKDIR}/git"
 
-ARM_TARGET="arm.aapcs-linux.hard"
+ARM_TARGET = "arm.aapcs-linux.hard"
+ARM_TARGET_aarch64 ="aarch64.lp64."
 TA_TARGET="noarch"
+
 do_install() {
     install -d -m 0644 ${D}/usr/lib
     install -d -m 0644 ${D}/usr/include

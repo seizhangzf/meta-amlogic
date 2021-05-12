@@ -3,7 +3,7 @@ inherit module
 SUMMARY = "Realtek 8723bu driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/wifi/realtek/drivers/8723bu.git;protocol=${AML_GIT_PROTOCOL};nobranch=1"
+SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/wifi/realtek/drivers/8723bu.git;protocol=${AML_GIT_PROTOCOL};branch=m-amlogic;nobranch=1"
 
 SRCREV = "48364a70b65daff53ca5600e5b1ffdf90a3d9aad"
 

@@ -19,6 +19,7 @@ inherit pkgconfig
 EXTRA_OEMAKE = "LIBPLAYER_STAGING_DIR=${STAGING_DIR_TARGET} CROSS=${TARGET_PREFIX} GCC='${CC}' G++='${CXX}' LD='${CCLD}' TARGET_DIR=${D} STAGING_DIR=${D} DESTDIR=${D}"
 LD_FLAGS = "TARGET_LDFLAGS=''"
 LD_FLAGS_sc2 = "TARGET_LDFLAGS='-DDVB_AUDIO_SC2'"
+LD_FLAGS_sc2-5.4 = "TARGET_LDFLAGS='-DDVB_AUDIO_SC2'"
 
 do_compile () {
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then

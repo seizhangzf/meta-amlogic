@@ -1,6 +1,6 @@
 SUMMARY = "aml media hal"
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig

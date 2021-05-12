@@ -3,9 +3,11 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl33/v2015:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl2/bin:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl30/bin:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2019/bl30/src_ao:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl31/bin:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/bl31_1.3/bin:"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files_2015/fip:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files_2019/bl32_3.8/bin:"
 
 LICENSE = "GPLv2+"
 
@@ -16,10 +18,12 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 SRC_URI = "git://${AML_GIT_ROOT}/firmware/bin/bl2.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl2/bin;name=bl2"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl30.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl30/bin;name=bl30"
+SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/aocpu.git;protocol=${AML_GIT_PROTOCOL};branch=projects/amlogic-dev;destsuffix=uboot-repo/bl30/src_ao;name=src-ao"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl31/bin;name=bl31"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl31_1.3.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-1.3;destsuffix=uboot-repo/bl31_1.3/bin;name=bl31-1.3"
 SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl33/v2015;name=bl33"
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
+SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl32.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-3.8.0;destsuffix=uboot-repo/bl32_3.8/bin;name=bl32-3.8"
 
 PATCHTOOL="git"
 
@@ -32,13 +36,15 @@ do_configure[noexec] = "1"
 
 SRCREV_bl2 ?="${AUTOREV}"
 SRCREV_bl30 ?="${AUTOREV}"
+SRCREV_src-ao ?="${AUTOREV}"
 SRCREV_bl31 ?="${AUTOREV}"
 SRCREV_bl31-1.3 ?="${AUTOREV}"
 SRCREV_bl33 ?="${AUTOREV}"
 SRCREV_fip ?="${AUTOREV}"
+SRCREV_bl32-3.8 ?="${AUTOREV}"
 
 S = "${WORKDIR}/uboot-repo"
-SRCREV_FORMAT = "bl2_bl30_bl31_bl31-1.3_bl33_fip"
+SRCREV_FORMAT = "bl2_bl30_src-ao_bl31_bl31-1.3_bl33_fip_bl32-3.8"
 PR = "r1"
 PV = "v2015.01+git${SRCPV}"
 

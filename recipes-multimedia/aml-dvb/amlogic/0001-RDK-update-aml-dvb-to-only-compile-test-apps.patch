@@ -1,4 +1,4 @@
-From f4f4fbd9dd9902478e8f72cd075a01ecc6b90b5a Mon Sep 17 00:00:00 2001
+From 1ff017c21c18f8ed88453b53aac1ce2058d3e612 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Fri, 18 Oct 2019 14:55:57 -0700
 Subject: [PATCH] RDK: update aml-dvb to only compile test apps
@@ -342,5 +342,5 @@ index 81d60c0e..85f9df1d 100755
  all : $(OBJS) $(OUTPUT)
  
 -- 
-2.31.0
+2.31.1
 

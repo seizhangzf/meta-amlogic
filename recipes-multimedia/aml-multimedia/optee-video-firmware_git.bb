@@ -1,7 +1,7 @@
 SUMMARY = "amlogic optee video firmware"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 DEPENDS = "bzip2 libxml2"
 RDEPENDS_${PN} = "libbz2 optee-userspace"
@@ -12,7 +12,9 @@ SRC_URI += "file://videoFirmwarePreload.service"
 
 S = "${WORKDIR}/git/secfirmload/secloadbin"
 TA_ARCH = "noarch"
+
 TAR_ARCH = "arm.aapcs-linux.hard"
+TAR_ARCH_aarch64 = "aarch64.lp64."
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"

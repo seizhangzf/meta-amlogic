@@ -1,0 +1,192 @@
+From dbcccd5d2c4db642f0e16d5a74db8e9457f9990c Mon Sep 17 00:00:00 2001
+From: "qiang.liu" <qiang.liu@amlogic.com>
+Date: Fri, 23 Apr 2021 11:28:50 +0800
+Subject: [PATCH 5/8] vdin: ott not support v4l [1/1]
+
+PD#SWPL-47003
+
+Problem:
+ott will crash when add v4l function
+
+Solution:
+ott not support v4l function
+
+Verify:
+s905x4-ah212
+
+Signed-off-by: qiang.liu <qiang.liu@amlogic.com>
+Change-Id: I365fe37555c06d53aa4ec8f953fad49788044593
+---
+ arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1.5g.dts | 1 +
+ arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1g.dts   | 1 +
+ arch/arm64/boot/dts/amlogic/t5d_reva_t950x4_am311_1g.dts   | 1 +
+ arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1.5g.dts      | 1 +
+ arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1g.dts        | 1 +
+ arch/arm64/boot/dts/amlogic/t5d_t950x4_am311_1g.dts        | 1 +
+ arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts           | 1 +
+ arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts       | 1 +
+ arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_linux.dts     | 1 +
+ drivers/amlogic/media/vin/tvin/vdin/vdin_drv.c             | 6 +++++-
+ drivers/amlogic/media/vin/tvin/vdin/vdin_drv.h             | 1 +
+ drivers/amlogic/media/vin/tvin/vdin/vdin_v4l2_dbg.c        | 1 +
+ 12 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1.5g.dts b/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1.5g.dts
+index 40c589d482f6..182aacc1ae66 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1.5g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1.5g.dts
+@@ -601,6 +601,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1g.dts b/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1g.dts
+index 90807411b3b6..5b6f671e0284 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_reva_t950d4_am301_1g.dts
+@@ -595,6 +595,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_reva_t950x4_am311_1g.dts b/arch/arm64/boot/dts/amlogic/t5d_reva_t950x4_am311_1g.dts
+index 5a18848e86bf..02fef6ee320f 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_reva_t950x4_am311_1g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_reva_t950x4_am311_1g.dts
+@@ -575,6 +575,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1.5g.dts b/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1.5g.dts
+index e60de0c8e161..f7e58492148b 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1.5g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1.5g.dts
+@@ -599,6 +599,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1g.dts b/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1g.dts
+index 8fef64af635a..844f635e0f96 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_t950d4_am301_1g.dts
+@@ -593,6 +593,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/t5d_t950x4_am311_1g.dts b/arch/arm64/boot/dts/amlogic/t5d_t950x4_am311_1g.dts
+index 9fe01a12489d..b3e93daa4c8b 100644
+--- a/arch/arm64/boot/dts/amlogic/t5d_t950x4_am311_1g.dts
++++ b/arch/arm64/boot/dts/amlogic/t5d_t950x4_am311_1g.dts
+@@ -573,6 +573,7 @@
+ 		/*urgent_en*/
+ 		double_write_en;
+ 		/* secure_en; */
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
+index fffed15ef1d1..96fe82a2db07 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311.dts
+@@ -598,6 +598,7 @@
+ 		afbce_bit_mode = <0x11>;
+ 		/* urgent_en; */
+ 		double_write_en;
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+index abac6d13cda2..f868978ff2b9 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_drm.dts
+@@ -531,6 +531,7 @@
+ 		afbce_bit_mode = <0x11>;
+ 		/* urgent_en; */
+ 		double_write_en;
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_linux.dts b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_linux.dts
+index 60305d7645cb..68a74090e539 100644
+--- a/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_linux.dts
++++ b/arch/arm64/boot/dts/amlogic/tm2_t962e2_ab311_linux.dts
+@@ -597,6 +597,7 @@
+ 		afbce_bit_mode = <0x11>;
+ 		/* urgent_en; */
+ 		double_write_en;
++		v4l_support_en;
+ 	};
+ 
+ 	vdin@1 {
+diff --git a/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.c b/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.c
+index f388b68c53f7..2ef39af63410 100644
+--- a/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.c
++++ b/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.c
+@@ -4532,6 +4532,9 @@ static int vdin_drv_probe(struct platform_device *pdev)
+ 	vdevp->urgent_en = of_property_read_bool(pdev->dev.of_node,
+ 		"urgent_en");
+ 
++	vdevp->v4l_support_en = of_property_read_bool(pdev->dev.of_node,
++						"v4l_support_en");
++
+ 	if (cpu_after_eq(MESON_CPU_MAJOR_ID_TM2)) {
+ 		vdevp->double_wr_cfg = of_property_read_bool(pdev->dev.of_node,
+ 							     "double_write_en");
+@@ -4614,7 +4617,8 @@ static int vdin_drv_probe(struct platform_device *pdev)
+ 	vdin_set_config(vdevp);
+ 
+ 	/*probe v4l interface*/
+-	vdin_v4l2_probe(pdev, vdevp);
++	if (vdevp->v4l_support_en)
++		vdin_v4l2_probe(pdev, vdevp);
+ 
+ 	/* vdin measure clock */
+ 	if (is_meson_gxbb_cpu()) {
+diff --git a/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.h b/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.h
+index 493b2adbefe8..7db9a9ca0d38 100644
+--- a/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.h
++++ b/drivers/amlogic/media/vin/tvin/vdin/vdin_drv.h
+@@ -682,6 +682,7 @@ struct vdin_dev_s {
+ 	spinlock_t qlock; /*v4l qlock*/
+ 	struct list_head buf_list;	/* buffer list head */
+ 	struct vdin_vb_buff *cur_buff;	/* vdin video frame buffer */
++	bool v4l_support_en;
+ 
+ 	/*struct v4l2_fh fh;*/
+ 	unsigned int dbg_v4l_pause;
+diff --git a/drivers/amlogic/media/vin/tvin/vdin/vdin_v4l2_dbg.c b/drivers/amlogic/media/vin/tvin/vdin/vdin_v4l2_dbg.c
+index addfacbe5fe6..f1df2a92d73f 100644
+--- a/drivers/amlogic/media/vin/tvin/vdin/vdin_v4l2_dbg.c
++++ b/drivers/amlogic/media/vin/tvin/vdin/vdin_v4l2_dbg.c
+@@ -42,6 +42,7 @@ static void vdin_v4l2_status(struct vdin_dev_s *devp)
+ 	pr_info("streaming:%d\n", devp->vbqueue.streaming);
+ 	pr_info("buf_struct_size:%d\n", devp->vbqueue.buf_struct_size);
+ 	pr_info("min_buffers_needed:%d\n", devp->vbqueue.min_buffers_needed);
++	pr_info("v4l_support_en:%d\n", devp->v4l_support_en);
+ 	pr_info("dbg_v4l_done_cnt:%d\n", devp->dbg_v4l_done_cnt);
+ 	pr_info("dbg_v4l_que_cnt:%d\n", devp->dbg_v4l_que_cnt);
+ 	pr_info("dbg_v4l_dque_cnt:%d\n", devp->dbg_v4l_dque_cnt);
+-- 
+2.31.1
+

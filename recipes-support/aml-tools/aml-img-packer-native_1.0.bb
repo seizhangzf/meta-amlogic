@@ -1,6 +1,6 @@
 SUMMARY = "aml image packing utility"
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 inherit native
 include hosttools.inc
@@ -16,7 +16,9 @@ SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
 SOC_FAMILY_sc2 = "sc2"
+SOC_FAMILY_sc2-5.4 = "sc2"
 SOC_FAMILY_t5d = "t5d"
+SOC_FAMILY_s4 = "s4"
 
 SOC_BOARD = "default"
 SOC_BOARD_ab301 = "ab301"

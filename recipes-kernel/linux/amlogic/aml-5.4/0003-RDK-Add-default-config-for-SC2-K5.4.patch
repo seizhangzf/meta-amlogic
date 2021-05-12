@@ -1,0 +1,35 @@
+From 58bf24f7c7744f7125950b39370ebd772c008907 Mon Sep 17 00:00:00 2001
+From: Blance Tang <guofeng.tang@amlogic.com>
+Date: Wed, 7 Apr 2021 18:16:12 +0800
+Subject: [PATCH 3/8] RDK: Add default config for SC2-K5.4
+
+Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
+Change-Id: I6f04f946120d82f9d06a24cac2f0f5ed093bea96
+---
+ arch/arm64/configs/meson64_a64_R_defconfig | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/arch/arm64/configs/meson64_a64_R_defconfig b/arch/arm64/configs/meson64_a64_R_defconfig
+index 53c7306280a7..44d3726ec72c 100644
+--- a/arch/arm64/configs/meson64_a64_R_defconfig
++++ b/arch/arm64/configs/meson64_a64_R_defconfig
+@@ -717,3 +717,16 @@ CONFIG_FUNCTION_TRACER=y
+ CONFIG_FTRACE_SYSCALLS=y
+ CONFIG_BUG_ON_DATA_CORRUPTION=y
+ CONFIG_AMLOGIC_USER_FAULT=y
++CONFIG_AUTOFS4_FS=y
++CONFIG_VT=y
++CONFIG_CONSOLE_TRANSLATIONS=y
++CONFIG_HW_CONSOLE=y
++CONFIG_FHANDLE=y
++CONFIG_ANDROID_LOGGER=y
++CONFIG_BT_HCIUART=m
++CONFIG_BT_HCIUART_QCA=y
++CONFIG_BT_QCA=m
++CONFIG_BT_HCIUART_SERDEV=y
++CONFIG_SERIAL_DEV_BUS=y
++CONFIG_SERIAL_DEV_CTRL_TTYPORT=y
++
+-- 
+2.31.1
+

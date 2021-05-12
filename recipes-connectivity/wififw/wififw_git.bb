@@ -129,7 +129,7 @@ do_install() {
 #qca6174
 	mkdir -p ${D}${sysconfdir}/wifi/qca6174/wlan/
 	mkdir -p ${D}${sysconfdir}/bluetooth/qca6174/
-    mkdir -p ${D}/lib/firmware/qca_bt/
+	mkdir -p ${D}${base_libdir}/firmware/qca_bt/
 	install -D -m 0644 ${S}/qcom/config/qca6174/wifi/*.bin ${D}${sysconfdir}/wifi/qca6174/
 	install -D -m 0644 ${S}/qcom/config/qca6174/wifi/wlan/* ${D}${sysconfdir}/wifi/qca6174/wlan/
 	install -D -m 0644 ${S}/qcom/config/qca6174/bt_bluez/* ${D}${sysconfdir}/bluetooth/qca6174/

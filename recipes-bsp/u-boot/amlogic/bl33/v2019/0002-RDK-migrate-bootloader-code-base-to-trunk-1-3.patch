@@ -1,4 +1,4 @@
-From 55093c70b022f573c3e792cc867653ac8acc74db Mon Sep 17 00:00:00 2001
+From 9400a0e12913933e95ad906b8941edbed977644f Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Tue, 5 Nov 2019 22:20:46 -0800
 Subject: [PATCH 2/2] RDK: migrate bootloader code base to trunk [1/3]
@@ -22,7 +22,7 @@ Change-Id: Idfe7c3052ad5d4c46f82b233f95ae9062f684c06
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 6087d06134..86a72a7040 100644
+index 936fcaf3002..3b0b020ee82 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -249,7 +249,7 @@ ifeq ($(HOSTARCH),$(ARCH))
@@ -35,7 +35,7 @@ index 6087d06134..86a72a7040 100644
  
  KCONFIG_CONFIG	?= .config
 diff --git a/arch/arm/mach-meson/sc2/firmware/acs/Makefile b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
-index 01d869a755..0245fa71a1 100644
+index 01d869a7557..0245fa71a19 100644
 --- a/arch/arm/mach-meson/sc2/firmware/acs/Makefile
 +++ b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
 @@ -32,7 +32,7 @@
@@ -48,5 +48,5 @@ index 01d869a755..0245fa71a1 100644
  include $(buildsrc)/config.mk
  include $(buildtree)/include/autoconf.mk
 -- 
-2.31.0
+2.31.1
 

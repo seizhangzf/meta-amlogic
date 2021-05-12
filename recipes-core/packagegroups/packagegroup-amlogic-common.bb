@@ -1,7 +1,7 @@
 SUMMARY = "Package Group For AMLOGIC Components"
 
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 inherit packagegroup
 
@@ -47,12 +47,14 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-adbd \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'one-rdk', '', 'wifi-amlogic', d)}\
                                     android-tools-logcat \
+                                    wifi-amlogic \
                                     liblog \
                                     aml-hdcp \
                                     aml-hdcp-load-firmware \
                                     libbinder \
                                     aml-mediahal-sdk \
                                     procrank \
+                                    aml-secmem \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \

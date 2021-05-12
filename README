@@ -1,4 +1,4 @@
-This README file contains information on building the meta-meson
+This README file contains information on building the meta-amlogic
 BSP layer, and booting the images contained in the /binary directory.
 Please see the corresponding sections below for details.
 
@@ -34,11 +34,11 @@ Please see the meta-xxxx/MAINTAINERS file for more details.
 Table of Contents
 =================
 
-  I. Building the meta-meson BSP layer
+  I. Building the meta-amlogic BSP layer
  II. Booting the images in /binary
 
 
-I. Building the meta-meson BSP layer
+I. Building the meta-amlogic BSP layer
 ========================================
 
 --- replace with specific instructions for your layer ---
@@ -49,12 +49,12 @@ Package (BSP) Downloads' page of the Yocto Project website.
 
 Having done that, and assuming you extracted the BSP tarball contents
 at the top-level of your yocto build tree, you can build a
-meson image by adding the location of the meta-meson
+meson image by adding the location of the meta-amlogic
 layer to bblayers.conf, along with any other layers needed (to access
 common metadata shared between BSPs) e.g.:
 
   yocto/meta-xxxx \
-  yocto/meta-xxxx/meta-meson \
+  yocto/meta-xxxx/meta-amlogic \
 
 To enable the meson layer, add the meson MACHINE to local.conf:
 

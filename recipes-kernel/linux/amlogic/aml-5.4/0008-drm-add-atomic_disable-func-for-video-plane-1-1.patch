@@ -1,0 +1,64 @@
+From 06dbeb73653466f6fb65f1310294077d107ae7c9 Mon Sep 17 00:00:00 2001
+From: Ao Xu <ao.xu@amlogic.com>
+Date: Wed, 28 Apr 2021 21:37:41 +0800
+Subject: [PATCH 8/8] drm: add atomic_disable func for video plane [1/1]
+
+PD#SWPL-48742
+
+Problem:
+commit fb8835112189f9788885828d466023bf30c8aa77 define the
+video plane update in plane, not crtc
+when video playback exit, it will not disable video plane
+
+Solution:
+add atomic_disable func for video plane
+
+Verify:
+ah212
+
+Change-Id: Ifa70b4f413d5b5b20011eadcf2c952c05e58f0ee
+Signed-off-by: Ao Xu <ao.xu@amlogic.com>
+---
+ drivers/amlogic/drm/meson_plane.c | 4 ++++
+ drivers/amlogic/drm/meson_plane.h | 1 +
+ 2 files changed, 5 insertions(+)
+
+diff --git a/drivers/amlogic/drm/meson_plane.c b/drivers/amlogic/drm/meson_plane.c
+index ce39cf453808..c626930013d1 100644
+--- a/drivers/amlogic/drm/meson_plane.c
++++ b/drivers/amlogic/drm/meson_plane.c
+@@ -825,8 +825,11 @@ static void meson_video_plane_atomic_disable(struct drm_plane *plane,
+ 					     struct drm_plane_state *old_state)
+ {
+ 	struct am_video_plane *video_plane = to_am_video_plane(plane);
++	struct meson_vpu_pipeline *pipeline = video_plane->pipeline;
++	struct drm_atomic_state *old_atomic_state = old_state->state;
+ 
+ 	DRM_DEBUG("%s video %d.\n", __func__, video_plane->plane_index);
++	vpu_video_plane_update(pipeline, old_atomic_state, video_plane->plane_index);
+ }
+ 
+ /*add async check & atomic funs*/
+@@ -1016,6 +1019,7 @@ static struct am_video_plane *am_video_plane_create(struct meson_drm *priv,
+ 	video_plane->plane_index = i;
+ 
+ 	video_plane->plane_type = VIDEO_PLANE;
++	video_plane->pipeline = priv->pipeline;
+ 	zpos = video_plane->plane_index + min_zpos;
+ 
+ 	plane = &video_plane->base;
+diff --git a/drivers/amlogic/drm/meson_plane.h b/drivers/amlogic/drm/meson_plane.h
+index 92314ccd1c2a..3661c00b91b6 100644
+--- a/drivers/amlogic/drm/meson_plane.h
++++ b/drivers/amlogic/drm/meson_plane.h
+@@ -48,6 +48,7 @@ struct am_video_plane {
+ 	struct dentry *plane_debugfs_dir;
+ 	int plane_index;
+ 	int plane_type;
++	struct meson_vpu_pipeline *pipeline;
+ 
+ 	/*video exted*/
+ };
+-- 
+2.31.1
+

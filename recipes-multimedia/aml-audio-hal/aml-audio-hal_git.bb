@@ -1,6 +1,6 @@
 SUMMARY = "aml audio utils"
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/audio;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot"
 
@@ -29,6 +29,7 @@ PACKAGECONFIG += "eqdrc"
 PACKAGECONFIG[eqdrc] = "-DUSE_EQ_DRC=ON,-DUSE_EQ_DRC=OFF,"
 
 PACKAGECONFIG_append_sc2 += "sc2-dvb"
+PACKAGECONFIG_append_sc2-5.4 += "sc2-dvb"
 PACKAGECONFIG[sc2-dvb] = "-DUSE_SC2=ON,-DUSE_SC2=OFF,"
 
 PACKAGECONFIG += "msync"

@@ -1,4 +1,4 @@
-From 360ee7989369dce649514c43f7958e084cb24bbb Mon Sep 17 00:00:00 2001
+From 35876d7907bb29aea3fd3ed96fabf91abc05aa8c Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Tue, 10 Nov 2020 16:20:01 -0800
 Subject: [PATCH 9/9] RDK: splash logo path fix
@@ -18,7 +18,7 @@ Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/board/amlogic/configs/tm2_t962x3_ab301_v1.h b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
-index 0ff3ca2013..cfac676b2e 100644
+index 0ff3ca20132..cfac676b2ef 100644
 --- a/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 +++ b/board/amlogic/configs/tm2_t962x3_ab301_v1.h
 @@ -98,7 +98,7 @@
@@ -31,5 +31,5 @@ index 0ff3ca2013..cfac676b2e 100644
          "usb_burning=update 1000\0" \
          "otg_device=1\0"\
 -- 
-2.31.0
+2.31.1
 

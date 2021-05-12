@@ -1,7 +1,7 @@
-From d08cdc5b806095fe07ab5da5797a5ce1e9f00a30 Mon Sep 17 00:00:00 2001
+From 121a8c494ade88e401849107596a9b6852cf8533 Mon Sep 17 00:00:00 2001
 From: Brian Zhu <brian.zhu@amlogic.com>
 Date: Thu, 28 Jan 2021 00:26:24 +0800
-Subject: [PATCH 2/3] di: temp fix for di interface [3/3]
+Subject: [PATCH 2/2] di: temp fix for di interface [3/3]
 
 PD#SWPL-37346
 
@@ -34,5 +34,5 @@ index b2d5afd4b4c4..a84b17fed5a5 100644
  	kfifo_in_spinlocked(&tsk->fifo_cmd2[ch], &cmd, sizeof(unsigned int),
  			    &tsk->lock_cmd2[ch]);
 -- 
-2.31.0
+2.31.1
 

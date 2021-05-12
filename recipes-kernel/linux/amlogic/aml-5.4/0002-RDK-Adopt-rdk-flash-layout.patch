@@ -1,0 +1,92 @@
+From 2c2d70c74afeb91f906136203c713cea890d2839 Mon Sep 17 00:00:00 2001
+From: Blance Tang <guofeng.tang@amlogic.com>
+Date: Wed, 7 Apr 2021 12:25:49 +0800
+Subject: [PATCH 2/8] RDK: Adopt rdk flash layout
+
+Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
+Change-Id: I8eb307c932801fc138c97538eb2b596d0c89fe96
+---
+ .../dts/amlogic/partition_normal_linux.dtsi   | 46 ++++++++++++-------
+ 1 file changed, 30 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
+index 03bea1b99b2a..7bcbe0fc0ab7 100644
+--- a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
++++ b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
+@@ -12,22 +12,24 @@
+ 
+ / {
+     partitions: partitions{
+-		parts = <15>;
++		parts = <17>;
+ 		part-0 = <&logo>;
+ 		part-1 = <&recovery>;
+ 		part-2 = <&misc>;
+ 		part-3 = <&cri_data>;
+ 		part-4 = <&param>;
+-		part-5 = <&boot>;
+-		part-6 = <&rsv>;
+-		part-7 = <&tee>;
+-		part-8 = <&factory>;
+-		part-9 = <&vendor>;
+-		part-10 = <&odm>;
+-		part-11 = <&system>;
+-		part-12 = <&product>;
+-		part-13 = <&cache>;
+-		part-14 = <&data>;
++		part-5 = <&boot_a>;
++		part-6 = <&boot_b>;
++		part-7 = <&rsv>;
++		part-8 = <&tee>;
++		part-9 = <&factory>;
++		part-10 = <&vendor>;
++		part-11 = <&odm>;
++		part-12 = <&system_a>;
++		part-13 = <&system_b>;
++		part-14 = <&product>;
++		part-15 = <&cache>;
++		part-16 = <&data>;
+ 
+ 		logo:logo{
+ 			pname = "logo";
+@@ -60,9 +62,15 @@
+ 			size = <0x0 0x1000000>;
+ 			mask = <2>;
+ 		};
+-		boot:boot
++		boot_a:boot_a
+ 		{
+-			pname = "boot";
++			pname = "boot_a";
++			size = <0x0 0x4000000>;
++			mask = <1>;
++		};
++		boot_b:boot_b
++		{
++			pname = "boot_b";
+ 			size = <0x0 0x4000000>;
+ 			mask = <1>;
+ 		};
+@@ -88,10 +96,16 @@
+ 			size = <0x0 0x8000000>;
+ 			mask = <1>;
+ 		};
+-		system:system
++		system_a:system_a
++		{
++			pname = "system_a";
++			size = <0x0 0x96000000>;
++			mask = <1>;
++		};
++		system_b:system_b
+ 		{
+-			pname = "system";
+-			size = <0x0 0x40000000>;
++			pname = "system_b";
++			size = <0x0 0x96000000>;
+ 			mask = <1>;
+ 		};
+ 		product:product{
+-- 
+2.31.1
+
