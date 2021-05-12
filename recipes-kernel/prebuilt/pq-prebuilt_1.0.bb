@@ -8,14 +8,15 @@ include prebuilt.inc
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
-
+ARM_TARGET = "4.9"
+ARM_TARGET_aarch64 = "5.4"
 
 S = "${WORKDIR}/git"
 do_install() {
     KO_DIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/pq
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${KO_DIR}
-    install -m 0644 ${S}/kernel-module/pq/*.ko ${KO_DIR}
+    if $(ls ${S}/kernel-module/pq/${ARM_TARGET}/*.ko 2>&1 > /dev/null); then
+        install -m 0644 ${S}/kernel-module/pq/${ARM_TARGET}/*.ko ${KO_DIR}
+    fi
 }
-
-

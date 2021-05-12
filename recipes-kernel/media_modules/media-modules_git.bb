@@ -38,7 +38,6 @@ IS_TV=${@bb.utils.contains('DISTRO_FEATURES','amlogic-tv','ztv','z',d)}
 
 if [ ${IS_TV} == 'ztv' ]; then
 cat >> ${D}/etc/modules-load.sh <<EOF
-/sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/tuner/mxl661_fe.ko
 /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
 if [ -f /lib/modules/${KERNEL_VERSION}/kernel/media/dovi_tm2_tv_16.ko ]
 then
