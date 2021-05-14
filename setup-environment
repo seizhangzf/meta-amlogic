@@ -93,6 +93,21 @@ BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-initramfs"
 EOF
 fi
 
+# Add meta-security only if not already present.
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-security[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-security"
+EOF
+fi
+
+# Add meta-perl only if not already present.
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-perl[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-perl"
+EOF
+fi
+
+
 cat >> conf/local.conf <<EOF
 LICENSE_FLAGS_WHITELIST="commercial"
 EOF

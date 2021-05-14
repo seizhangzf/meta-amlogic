@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 inherit native
 include hosttools.inc
 
+SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES_NATIVE', 'dm-verity', 'file://0001-dm-verity-DM-Verity-support-on-RDK-4-4.patch', '', d)}"
+
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
