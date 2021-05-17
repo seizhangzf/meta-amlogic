@@ -13,11 +13,17 @@ do_change_conf(){
     install -m 644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
     sed -i '/Debug=0/a Device=qca' ${D}${sysconfdir}/bluetooth/main.conf
 
-    install -m 0644 ${WORKDIR}/bluez.service ${D}/${systemd_unitdir}/system
     install -m 0755 ${WORKDIR}/bluez_tool.sh ${D}/${bindir}
 }
 
+do_install_append(){
+    install -d ${D}${systemd_unitdir}/system
+    install -m 0644 ${WORKDIR}/bluez.service ${D}/${systemd_unitdir}/system
+}
+
+
 FILES_${PN} += "${bindir}/*"
+FILES_${PN} += "${systemd_unitdir}/system/*"
 
 addtask change_conf after do_install before do_populate_sysroot
 
