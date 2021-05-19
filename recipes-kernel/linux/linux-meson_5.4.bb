@@ -44,6 +44,7 @@ KBUILD_DEFCONFIG_sc2-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_tm2-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_s4 = "meson64_a64_R_defconfig"
 
+
 GKI_DEFCONFIG = "meson64_gki_module_config"
 #T7 did not use GKI yet.
 GKI_DEFCONFIG_t7 = ""
@@ -54,6 +55,11 @@ gki_module_compile () {
 
 gki_module_install () {
   cd ${B}; rsync -R $(find ${1} -name *.ko | xargs) ${D}${nonarch_base_libdir}/modules/${KERNEL_VERSION}/kernel/; cd -
+}
+
+do_kernel_configme_append(){
+    rm ${WORKDIR}/linux-mesonsc2_5.4_lib32_ah212-standard-build/.config -f
+    cp ${WORKDIR}/git/arch/arm64/configs/meson64_a64_R_defconfig ${WORKDIR}/defconfig
 }
 
 do_compile_append () {
