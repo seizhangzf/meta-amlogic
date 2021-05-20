@@ -1,4 +1,4 @@
-From 92f3128418b3b034a2f84ee68b5215987231b0e0 Mon Sep 17 00:00:00 2001
+From d740ab26f1fc0713bdfbaafb32bb75ffb3312234 Mon Sep 17 00:00:00 2001
 From: Nanxin Qin <nanxin.qin@amlogic.com>
 Date: Mon, 12 Oct 2020 21:23:14 +0800
 Subject: [PATCH] v4l: supports uvm on android Q. [2/2]
@@ -3560,7 +3560,7 @@ index f1528d4b..5f9b782e 100644
  			vf->width = (force_w_h >> 16) & 0xffff;
  			vf->height = force_w_h & 0xffff;
 diff --git a/drivers/frame_provider/decoder/h264_multi/vmh264.c b/drivers/frame_provider/decoder/h264_multi/vmh264.c
-index a7d27712..40c92cc0 100644
+index 368f9f7a..849fb1bf 100644
 --- a/drivers/frame_provider/decoder/h264_multi/vmh264.c
 +++ b/drivers/frame_provider/decoder/h264_multi/vmh264.c
 @@ -1093,19 +1093,6 @@ static int  compute_losless_comp_header_size(int width, int height)
@@ -3652,7 +3652,7 @@ index a7d27712..40c92cc0 100644
  	if (hw->dpb.mSPS.profile_idc != 100 &&
  		hw->dpb.mSPS.profile_idc != 110 &&
 diff --git a/drivers/frame_provider/decoder/h265/vh265.c b/drivers/frame_provider/decoder/h265/vh265.c
-index 1e2aed4c..41d7fc2a 100644
+index baca5d31..ec2ff421 100644
 --- a/drivers/frame_provider/decoder/h265/vh265.c
 +++ b/drivers/frame_provider/decoder/h265/vh265.c
 @@ -1427,6 +1427,9 @@ struct PIC_s {
@@ -4522,7 +4522,7 @@ index 1e2aed4c..41d7fc2a 100644
  			} else {
  				if (ctx->v4l_resolution_change)
  					ret = 0;
-@@ -14192,9 +14265,10 @@ static void vh265_dump_state(struct vdec_s *vdec)
+@@ -14193,9 +14266,10 @@ static void vh265_dump_state(struct vdec_s *vdec)
  
  	for (i = 0; i < BUF_POOL_SIZE; i++) {
  		hevc_print(hevc, 0,
@@ -4548,7 +4548,7 @@ index 8fe1dbb6..633ac247 100644
  		decbuf_v_size	= decbuf_u_size;
  		canvas_width	= ALIGN(hw->frame_width, 64);
 diff --git a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
-index 2adea2f8..9657f407 100644
+index f2e274af..3cfa2e06 100644
 --- a/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
 +++ b/drivers/frame_provider/decoder/mpeg12/vmpeg12_multi.c
 @@ -217,6 +217,7 @@ struct pic_info_t {
@@ -4559,7 +4559,7 @@ index 2adea2f8..9657f407 100644
  };
  
  struct vdec_mpeg12_hw_s {
-@@ -514,6 +515,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+@@ -515,6 +516,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
  		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
  	canvas_config_config(canvas_y(canvas), &hw->canvas_config[i][0]);
  
@@ -4570,7 +4570,7 @@ index 2adea2f8..9657f407 100644
  	hw->canvas_config[i][1].phy_addr	= decbuf_uv_start;
  	hw->canvas_config[i][1].width		= canvas_width;
  	hw->canvas_config[i][1].height		= canvas_height / 2;
-@@ -522,6 +527,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
+@@ -523,6 +528,10 @@ static int vmpeg12_v4l_alloc_buff_config_canvas(struct vdec_mpeg12_hw_s *hw, int
  		(hw->canvas_mode == CANVAS_BLKMODE_LINEAR) ? 7 : 0;
  	canvas_config_config(canvas_u(canvas), &hw->canvas_config[i][1]);
  
@@ -4581,7 +4581,7 @@ index 2adea2f8..9657f407 100644
  	debug_print(DECODE_ID(hw), PRINT_FLAG_BUFFER_DETAIL,
  		"[%d] %s(), canvas: 0x%x mode: %d y: %lx uv: %lx w: %d h: %d\n",
  		ctx->id, __func__, canvas, hw->canvas_mode,
-@@ -1613,9 +1622,6 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1614,9 +1623,6 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  	ulong nv_order = VIDTYPE_VIU_NV21;
  	bool pb_skip = false;
  
@@ -4591,7 +4591,7 @@ index 2adea2f8..9657f407 100644
  	/* swap uv */
  	if (hw->is_used_v4l) {
  		if ((v4l2_ctx->cap_pix_fmt == V4L2_PIX_FMT_NV12) ||
-@@ -1623,6 +1629,9 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1624,6 +1630,9 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  			nv_order = VIDTYPE_VIU_NV12;
  	}
  
@@ -4601,7 +4601,7 @@ index 2adea2f8..9657f407 100644
  	if (hw->i_only) {
  		pb_skip = 1;
  	}
-@@ -1700,9 +1709,11 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
+@@ -1701,9 +1710,11 @@ static int prepare_display_buf(struct vdec_mpeg12_hw_s *hw,
  		if (i > 0) {
  			vf->pts = 0;
  			vf->pts_us64 = 0;
@@ -4613,7 +4613,7 @@ index 2adea2f8..9657f407 100644
  		}
  		vf->type_original = vf->type;
  
-@@ -2141,6 +2152,7 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2142,6 +2153,7 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  				new_pic->pts_valid = hw->chunk->pts_valid;
  				new_pic->pts = hw->chunk->pts;
  				new_pic->pts64 = hw->chunk->pts64;
@@ -4621,7 +4621,7 @@ index 2adea2f8..9657f407 100644
  				if (hw->last_chunk_pts == hw->chunk->pts) {
  					new_pic->pts_valid = 0;
  					debug_print(DECODE_ID(hw), PRINT_FLAG_TIMEINFO,
-@@ -2158,8 +2170,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2159,8 +2171,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  				}
  			}
  		} else {
@@ -4633,7 +4633,7 @@ index 2adea2f8..9657f407 100644
  			new_pic->pts_valid = false;
  		}
  
-@@ -2218,9 +2232,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
+@@ -2219,9 +2233,10 @@ static irqreturn_t vmpeg12_isr_thread_fn(struct vdec_s *vdec, int irq)
  		}
  
  		debug_print(DECODE_ID(hw), PRINT_FLAG_RUN_FLOW,
@@ -4779,7 +4779,7 @@ index 1494f106..ddb46cb9 100644
 +	unsigned int *dw_mode);
  #endif
 diff --git a/drivers/frame_provider/decoder/vav1/vav1.c b/drivers/frame_provider/decoder/vav1/vav1.c
-index d9bdcf1c..be706211 100644
+index 13ba6aec..4e6c7245 100644
 --- a/drivers/frame_provider/decoder/vav1/vav1.c
 +++ b/drivers/frame_provider/decoder/vav1/vav1.c
 @@ -295,7 +295,7 @@ static u32 double_write_mode;
@@ -5324,7 +5324,7 @@ index d9bdcf1c..be706211 100644
  }
  
 diff --git a/drivers/frame_provider/decoder/vp9/vvp9.c b/drivers/frame_provider/decoder/vp9/vvp9.c
-index f08ceb13..cc2b64da 100644
+index 745884e7..8b3522b9 100644
 --- a/drivers/frame_provider/decoder/vp9/vvp9.c
 +++ b/drivers/frame_provider/decoder/vp9/vvp9.c
 @@ -542,6 +542,8 @@ struct PIC_BUFFER_CONFIG_s {

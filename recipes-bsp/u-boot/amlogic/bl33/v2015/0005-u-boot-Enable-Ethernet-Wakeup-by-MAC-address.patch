@@ -1,4 +1,4 @@
-From ad18168f1570850cd2ebf8ef91ce0cac53e005e2 Mon Sep 17 00:00:00 2001
+From 9e9df9c449a2f63eb0e7068aff94d585c1b1a60b Mon Sep 17 00:00:00 2001
 From: Terrence Pu <terrence.pu@amlogic.com>
 Date: Sun, 7 Jun 2020 22:24:58 -0700
 Subject: [PATCH 5/9] u-boot: Enable Ethernet Wakeup by MAC address

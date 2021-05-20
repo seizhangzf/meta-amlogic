@@ -1,0 +1,39 @@
+From 079ada48613bb387febd9ac776318886fa00ffbf Mon Sep 17 00:00:00 2001
+From: Xueling Li <xueling.li@amlogic.com>
+Date: Thu, 29 Apr 2021 06:17:03 +0000
+Subject: [PATCH] RDK: correct wifi firmware path on RDK [1/1]
+
+PD#SWPL-
+
+Problem:
+  qulcom qca6174 wifi module's firmware path is
+  a relative path corresponding to /lib/firmware
+
+Solution:
+  change the firmware loading path in code
+
+Verify:
+  wifi driver insmod normally
+
+Signed-off-by: Xueling Li <xueling.li@amlogic.com>
+Change-Id: Ifbc0349887fb1a54e151f8506a7a6bfa484a0c0c
+---
+ AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c b/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
+index 08bd19c..6535588 100755
+--- a/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
++++ b/AIO/drivers/qcacld-new/CORE/VOSS/src/vos_api.c
+@@ -3609,7 +3609,7 @@ int qca_request_firmware(const struct firmware **firmware_p,
+ #ifdef CONFIG_BUILDROOT
+ 	sprintf(final_name,"qca6174/%s",name);
+ #else
+-	sprintf(final_name,"../../../vendor/etc/wifi/qca6174/%s",name);
++	sprintf(final_name,"../../etc/wifi/qca6174/%s",name);
+ #endif
+ 	return request_firmware(firmware_p, final_name, device);
+ #endif
+-- 
+2.31.1
+

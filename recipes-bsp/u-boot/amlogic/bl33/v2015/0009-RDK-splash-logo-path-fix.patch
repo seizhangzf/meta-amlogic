@@ -1,4 +1,4 @@
-From 35876d7907bb29aea3fd3ed96fabf91abc05aa8c Mon Sep 17 00:00:00 2001
+From 269b15f7d0ccebea45a40e0eb906925dca5bc3ed Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Tue, 10 Nov 2020 16:20:01 -0800
 Subject: [PATCH 9/9] RDK: splash logo path fix

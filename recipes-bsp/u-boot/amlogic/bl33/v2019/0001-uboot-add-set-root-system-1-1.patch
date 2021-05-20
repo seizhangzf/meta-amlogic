@@ -1,4 +1,4 @@
-From db2734e91dddbf6f662869f598f448bf211c65f3 Mon Sep 17 00:00:00 2001
+From 0a69bb62021e114993c5800f8499374920344dc7 Mon Sep 17 00:00:00 2001
 From: Bing Jiang <bing.jiang@amlogic.com>
 Date: Mon, 2 Nov 2020 16:02:04 +0800
 Subject: [PATCH 1/2] uboot: add set root system [1/1]
@@ -24,10 +24,10 @@ Signed-off-by: Bing Jiang <bing.jiang@amlogic.com>
  4 files changed, 20 insertions(+), 2 deletions(-)
 
 diff --git a/board/amlogic/configs/s4_ap222.h b/board/amlogic/configs/s4_ap222.h
-index 945c7d9f5ef..2db09ea839c 100644
+index 5aed3ce8af5..5a51b5fe73c 100644
 --- a/board/amlogic/configs/s4_ap222.h
 +++ b/board/amlogic/configs/s4_ap222.h
-@@ -167,6 +167,15 @@
+@@ -168,6 +168,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
@@ -44,10 +44,10 @@ index 945c7d9f5ef..2db09ea839c 100644
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
-index ebae6777823..6854e942983 100644
+index a1032c26656..a83377f3c41 100644
 --- a/board/amlogic/configs/sc2_ah212.h
 +++ b/board/amlogic/configs/sc2_ah212.h
-@@ -169,6 +169,15 @@
+@@ -173,6 +173,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\

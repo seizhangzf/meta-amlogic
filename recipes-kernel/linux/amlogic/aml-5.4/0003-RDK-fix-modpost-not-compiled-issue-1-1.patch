@@ -1,7 +1,7 @@
-From ddd190e7165aee10d8d7ed3460efc08dd310af34 Mon Sep 17 00:00:00 2001
+From 370e45a51590463fde37c043d7b1b062a37d8389 Mon Sep 17 00:00:00 2001
 From: Jun Zhang <jun.zhang@amlogic.com>
 Date: Wed, 14 Apr 2021 19:55:50 +0800
-Subject: [PATCH 4/8] RDK: fix modpost not compiled issue [1/1]
+Subject: [PATCH 3/3] RDK: fix modpost not compiled issue [1/1]
 
 PD#SWPL-
 

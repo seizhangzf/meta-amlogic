@@ -1,4 +1,4 @@
-From 83b4f988eeb55023ff04d0ed0d2820e9dd9b4e2c Mon Sep 17 00:00:00 2001
+From bec392e71e5cf463e3af06722ab4e1e657da9cbf Mon Sep 17 00:00:00 2001
 From: Johnny Lee - TW <johnny.lee@noodle.amlogic.com>
 Date: Tue, 10 Mar 2020 11:08:30 -0700
 Subject: [PATCH 2/9] RDK: migrate code base to trunk [2/3]
@@ -43,7 +43,7 @@ index 38897ab3e24..c6429026667 100644
              "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
              "run storeargs; run update;"\
 diff --git a/board/amlogic/configs/t5d_am301_v1.h b/board/amlogic/configs/t5d_am301_v1.h
-index f5998d0c129..de812682de4 100644
+index 08a15a5e378..594e0a98b02 100644
 --- a/board/amlogic/configs/t5d_am301_v1.h
 +++ b/board/amlogic/configs/t5d_am301_v1.h
 @@ -51,7 +51,7 @@
@@ -55,7 +55,7 @@ index f5998d0c129..de812682de4 100644
  
  /* Serial config */
  #define CONFIG_CONS_INDEX 2
-@@ -261,10 +261,12 @@
+@@ -262,10 +262,12 @@
              "fi;"\
              "if test ${avb2} = 0; then "\
                  "if test ${active_slot} = _a; then "\
