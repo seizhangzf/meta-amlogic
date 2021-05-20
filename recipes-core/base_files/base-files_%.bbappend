@@ -20,6 +20,17 @@ EOF
 FILES_${PN}_append_t5d = " /vendor/* "
 dirs755_append_t5d = " /vendor "
 
+#/*-----------------------T5D-K5.4 TV--------------------------------------*/
+do_install_append_t5d-5.4 () {
+    mkdir -p ${D}/vendor
+    mkdir -p ${D}/data
+    cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/vendor            /vendor                    auto       defaults              0  0
+EOF
+}
+FILES_${PN}_append_t5d-5.4 = " /vendor/* "
+dirs755_append_t5d-5.4 = " /vendor "
+
 #/*-----------------------G12A STB--------------------------------------*/
 do_install_append_g12a () {
     mkdir -p ${D}/vendor/lib
