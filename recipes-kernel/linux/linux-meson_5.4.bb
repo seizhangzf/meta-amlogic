@@ -13,6 +13,7 @@ KBRANCH = "amlogic-5.4-dev"
 SRC_URI_append = " file://gki-read_ext_module_config.sh"
 SRC_URI_append = " file://gki-read_ext_module_predefine.sh"
 SRC_URI_append_s4 = " file://s4.cfg"
+SRC_URI_append_sc2-5.4 = " file://sc2.cfg"
 
 #SRC_URI_append = " file://meson.scc \
 #            file://meson.cfg \
