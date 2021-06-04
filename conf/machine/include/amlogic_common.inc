@@ -30,12 +30,20 @@ TDK_VERSION_sc2 = "v3.8/dev/S905X4"
 TDK_VERSION_sc2-5.4 = "v3.8/dev/S905X4"
 TDK_VERSION_s4 = "v3.8/dev/S905Y4"
 
-AML_GIT_ROOT ?= "git.myamlogic.com"
-AML_GIT_PROTOCOL ?= "git"
-AML_GIT_ROOT_YOCTO_SUFFIX ?= "/yocto"
-AML_GIT_ROOT_PR ?= "git.myamlogic.com"
-AML_GIT_ROOT_WV ?= "git.myamlogic.com"
-AML_GIT_ROOT_PROTOCOL ?= "git"
+#AML_GIT_ROOT ?= "git.myamlogic.com"
+#AML_GIT_PROTOCOL ?= "git"
+#AML_GIT_ROOT_YOCTO_SUFFIX ?= "/yocto"
+#AML_GIT_ROOT_PR ?= "git.myamlogic.com"
+#AML_GIT_ROOT_WV ?= "git.myamlogic.com"
+#AML_GIT_ROOT_PROTOCOL ?= "git"
+
+AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"
+AML_GIT_PROTOCOL = "ssh"
+AML_GIT_ROOT_YOCTO_SUFFIX = ""
+AML_GIT_ROOT_PR = "git@openlinux.amlogic.com"
+AML_GIT_ROOT_WV = "git@openlinux.amlogic.com/yocto"
+AML_GIT_ROOT_PROTOCOL = "ssh"
+
 
 AML_META_LAYER ?= "meta-meson"
 
