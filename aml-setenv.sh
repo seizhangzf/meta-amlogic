@@ -2,7 +2,7 @@
 
 LOCAL_DIR=$(pwd)
 if [ -z $BUILD_DIR ]; then
-	BUILD_DIR="build"
+	BUILD_DIR="$LOCAL_DIR/build"
 fi
 
 DEFCONFIG_ARRAY=("mesong12a_u212"
