@@ -125,3 +125,11 @@ echo " Manifest Name = ${MANIFEST}"
 if [ -f "${BUILD_DIR}/../.repo/manifests/${MANIFEST}.conf" ]; then
   cp ${BUILD_DIR}/../.repo/manifests/${MANIFEST}.conf ${BUILD_DIR}/conf/auto.conf
 fi
+
+if [ -e ${RDK_ROOT_PATH}/CCACHE_DIR ]; then
+# Enable ccache
+cat >> conf/local.conf << EOF
+INHERIT += "ccache"
+CCACHE_TOP_DIR = "${RDK_ROOT_PATH}/CCACHE_DIR"
+EOF
+fi
