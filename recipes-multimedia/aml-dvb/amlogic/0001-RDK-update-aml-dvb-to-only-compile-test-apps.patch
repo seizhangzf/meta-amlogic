@@ -1,4 +1,4 @@
-From 192da527a7875efe9bed1389400414b3359944b6 Mon Sep 17 00:00:00 2001
+From 50af82f6e180475581c5c1a03c2326a976225236 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Fri, 18 Oct 2019 14:55:57 -0700
 Subject: [PATCH] RDK: update aml-dvb to only compile test apps
@@ -17,8 +17,8 @@ Verify:
 Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Change-Id: Ie70e765fe2a7cba644b397a093af130b008e8a4e
 ---
- Makefile                             | 14 +++++++-------
- am_adp/Makefile                      |  8 +++-----
+ Makefile                             | 18 +++++++++---------
+ am_adp/Makefile                      |  3 ++-
  am_adp/am_dmx/linux_dvb/linux_dvb.c  |  3 ++-
  am_adp/am_dvr/linux_dvb/linux_dvb.c  |  4 +++-
  am_adp/am_fend/linux_dvb/linux_dvb.c |  3 ++-
@@ -34,13 +34,13 @@ Change-Id: Ie70e765fe2a7cba644b397a093af130b008e8a4e
  test/am_epg_test/Makefile            |  2 +-
  test/am_fend_test/Makefile           |  2 +-
  test/am_scan_test/Makefile           |  2 +-
- test/am_smc_test/Makefile            |  3 +--
+ test/am_smc_test/Makefile            |  2 +-
  test/am_userdata_test/Makefile       |  2 +-
- 19 files changed, 39 insertions(+), 42 deletions(-)
+ 19 files changed, 40 insertions(+), 39 deletions(-)
  mode change 100755 => 100644 test/am_db_test/Makefile
 
 diff --git a/Makefile b/Makefile
-index 72a97fde..db37852a 100644
+index 8e8762e2..3a520f43 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -4,16 +4,16 @@ export ROOT_DIR
@@ -50,14 +50,15 @@ index 72a97fde..db37852a 100644
 -	make -C am_adp install
 -	make -C am_mw all
 -	make -C am_mw install
+-#	make -C test all
 +	#make -C am_adp install
 +	#make -C am_mw all
 +	#make -C am_mw install
- 	make -C test all
++	#make -C test all
  install:
 -	make -C am_adp install
 -	make -C am_mw install
--	make -C test install
+-#	make -C test install
 +	#make -C am_adp install
 +	#make -C am_mw install
 +	#make -C test install
@@ -65,13 +66,14 @@ index 72a97fde..db37852a 100644
  clean:
  	make -C am_adp clean
 -	make -C am_mw clean
+-#	make -C test clean
 +	#make -C am_mw clean
- 	make -C test clean
++	#make -C test clean
 diff --git a/am_adp/Makefile b/am_adp/Makefile
-index aa36b6e4..f1d94a8f 100644
+index 497bfb91..81cc8bf2 100644
 --- a/am_adp/Makefile
 +++ b/am_adp/Makefile
-@@ -13,15 +13,13 @@ LOCAL_C_INCLUDES := -I $(LOCAL_PATH)/../include/am_adp\
+@@ -13,6 +13,7 @@ LOCAL_C_INCLUDES := -I $(LOCAL_PATH)/../include/am_adp\
  		    -I$(LOCAL_PATH)/am_open_lib/am_ci\
  		    -I$(LOCAL_PATH)/../include/am_mw\
  		    -I$(LOCAL_PATH)/../android/ndk/include\
@@ -79,23 +81,10 @@ index aa36b6e4..f1d94a8f 100644
  			-I$(LOCAL_PATH)/am_fend
  
  SRC_FILES = $(wildcard am_dmx/*.c am_dmx/linux_dvb/*.c \
- 			am_fend/*.c am_fend/linux_dvb/*.c am_fend/linux_v4l2/*.c\
--			am_av/*.c am_av/aml/*.c\
- 	        am_dvr/*.c am_dvr/linux_dvb/*.c\
- 	        am_dmx/dvr/*.c\
--	        am_aout/*.c\
--	        am_vout/*.c am_vout/aml/*.c\
- 	        am_misc/am_adplock.c am_misc/am_misc.c am_misc/am_sig_handler.c\
- 	        am_time/*.c\
- 	        am_evt/*.c\
-@@ -43,10 +41,10 @@ SRC_FILES = $(wildcard am_dmx/*.c am_dmx/linux_dvb/*.c \
- 		    am_open_lib/am_freesat/freesat.c \
- 		    am_tfile/am_tfile.c)
+@@ -43,7 +44,7 @@ SRC_FILES = $(wildcard am_dmx/*.c am_dmx/linux_dvb/*.c \
+ CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions -DCHIP_8226M
  
--CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions -DUSE_ADEC_IN_DVB -DCHIP_8226M
-+CFLAGS   := -c -Wall -shared -fPIC -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions -DCHIP_8226M
- 
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
 -LDFLAGS  := -shared -fPIC -L$(TARGET_DIR)/usr/lib -lamadec
 +LDFLAGS  := -shared -fPIC -L$(TARGET_DIR)/usr/lib
  
@@ -157,28 +146,28 @@ index 9313d13b..eb241785 100755
  all :
  	@for dir in $(SUB_DIRS); do \
 diff --git a/test/am_av_test/Makefile b/test/am_av_test/Makefile
-index f2c6fcc3..a8d4559e 100755
+index 2e1924f3..beade493 100644
 --- a/test/am_av_test/Makefile
 +++ b/test/am_av_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_av_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
  
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_ci_test/Makefile b/test/am_ci_test/Makefile
-index db0f013a..4aad4785 100644
+index f90132ff..efd6c59e 100644
 --- a/test/am_ci_test/Makefile
 +++ b/test/am_ci_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_ci_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi -lasound
  
  all : $(OBJS) $(OUTPUT)
  
@@ -186,15 +175,15 @@ diff --git a/test/am_db_test/Makefile b/test/am_db_test/Makefile
 old mode 100755
 new mode 100644
 diff --git a/test/am_dmx_test/Makefile b/test/am_dmx_test/Makefile
-index 8a1b8c63..f73a73cb 100755
+index b7793f79..342612fb 100644
 --- a/test/am_dmx_test/Makefile
 +++ b/test/am_dmx_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_dmx_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamavutils
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamavutils -lasound
  
  all : $(OBJS) $(OUTPUT)
  
@@ -237,28 +226,28 @@ index c66dc0c4..46a1d7a5 100644
  		AM_TRY(AM_FEND_Lock(FEND_DEV_NO, &p, &status));
  		
 diff --git a/test/am_dsc_test/Makefile b/test/am_dsc_test/Makefile
-index 303b992d..fd3f6250 100755
+index a8e3f0c8..4b74998c 100644
 --- a/test/am_dsc_test/Makefile
 +++ b/test/am_dsc_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_dsc_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
  
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_dvr_test/Makefile b/test/am_dvr_test/Makefile
-index a073833e..eb376a6d 100644
+index 23814fc4..3a98f1c9 100644
 --- a/test/am_dvr_test/Makefile
 +++ b/test/am_dvr_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_dvr_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils -lpthread
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
  
  all : $(OBJS) $(OUTPUT)
  
@@ -276,68 +265,67 @@ index 9414733e..cb5f8700 100644
  #include <am_dvr.h>
  #include <errno.h>
 diff --git a/test/am_epg_test/Makefile b/test/am_epg_test/Makefile
-index ca20f453..f13a7bc5 100755
+index 450d2cdd..9baa576f 100644
 --- a/test/am_epg_test/Makefile
 +++ b/test/am_epg_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_epg_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lpthread -lzvbi -lasound
  
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_fend_test/Makefile b/test/am_fend_test/Makefile
-index 95cd79c3..b06ee24c 100755
+index 849577a0..67e2a009 100644
 --- a/test/am_fend_test/Makefile
 +++ b/test/am_fend_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_fend_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -L../../am_adp -lam_adp -lamavutils
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
  
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_scan_test/Makefile b/test/am_scan_test/Makefile
-index 97257b6c..db8673f1 100755
+index 696ce1f8..9a57a736 100644
 --- a/test/am_scan_test/Makefile
 +++ b/test/am_scan_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_scan_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lam_mw -lamavutils -lsqlite3 -lzvbi -lasound
  
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_smc_test/Makefile b/test/am_smc_test/Makefile
-index 5426c333..733cfa36 100755
+index e2855465..46cf0100 100644
 --- a/test/am_smc_test/Makefile
 +++ b/test/am_smc_test/Makefile
-@@ -20,8 +20,7 @@ SRC_FILES = am_smc_test.c
+@@ -20,7 +20,7 @@ SRC_FILES = am_smc_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
--
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils 
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
+ 
  all : $(OBJS) $(OUTPUT)
  
- $(OBJS) : %.o : %.c
 diff --git a/test/am_userdata_test/Makefile b/test/am_userdata_test/Makefile
-index 81d60c0e..85f9df1d 100755
+index 40d0f203..0bae9014 100644
 --- a/test/am_userdata_test/Makefile
 +++ b/test/am_userdata_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_userdata_test.c
  CFLAGS   := -c -Wall -Wno-unknown-pragmas -Wno-format -O3 -fexceptions -fnon-call-exceptions
  
- CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES)
--LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils
+ CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
+-LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
  
  all : $(OBJS) $(OUTPUT)
  

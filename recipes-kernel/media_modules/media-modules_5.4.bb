@@ -8,7 +8,7 @@ MBRANCH = "amlogic-5.4-dev"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=${MBRANCH};"
 
 #For common patches
-MDIR = "media_modules-5.4"
+MDIR = "media_modules"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${MDIR}')}"
 SRC_URI_append = " file://modules-load.sh"
 SRCREV ?= "${AUTOREV}"

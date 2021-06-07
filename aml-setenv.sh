@@ -109,7 +109,7 @@ function choose_type()
 function lunch()
 {
 	if [ -n "$TARGET_MACHINE" ]; then
-		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
+		MACHINE=$TARGET_MACHINE source meta-amlogic/setup-environment $BUILD_DIR
     if [ $OPENLINUX_BUILD == "1" ];then
         cat >> $BUILD_DIR/conf/local.conf <<EOF
 #Force OpenLinux Access
