@@ -13,6 +13,7 @@ PV = "${SRCPV}"
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_commonlib;protocol=${AML_GIT_PROTOCOL};branch=master;"
 #SRC_URI += "file://liblog.patch"
 SRC_URI += "file://LICENSE-2.0"
+PROVIDES = "liblog"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/aml_commonlib')}"

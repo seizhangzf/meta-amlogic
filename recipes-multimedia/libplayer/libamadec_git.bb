@@ -6,6 +6,7 @@ DEPENDS = "bzip2 virtual/gettext libxml2 libamavutils"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'alsa-lib aml-dvbaudioutils', '', d)}"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/packages/amlogic/LibPlayer.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-libplayer"
 
+PROVIDES = "libamadec_hal"
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libplayer/src')}"
 

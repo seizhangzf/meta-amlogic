@@ -2,12 +2,7 @@
 
 LOCAL_DIR=$(pwd)
 if [ -z $BUILD_DIR ]; then
-	BUILD_DIR="build"
-fi
-if [ -z $LOCAL_BUILD ]; then
-    LOCAL_BUILD=0
-else
-    LOCAL_BUILD=1
+	BUILD_DIR="$LOCAL_DIR/build"
 fi
 
 DEFCONFIG_ARRAY=("mesong12a_u212"
@@ -114,16 +109,16 @@ function choose_type()
 function lunch()
 {
 	if [ -n "$TARGET_MACHINE" ]; then
-		MACHINE=$TARGET_MACHINE source meta-amlogic/setup-environment $BUILD_DIR
-    if [ $LOCAL_BUILD == "1" ];then
+		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
+    if [ $OPENLINUX_BUILD == "1" ];then
         cat >> $BUILD_DIR/conf/local.conf <<EOF
-
-#AML_GIT_ROOT = "git.myamlogic.com"
-#AML_GIT_PROTOCOL = "git"
-#AML_GIT_ROOT_YOCTO_SUFFIX = "/yocto"
-AML_GIT_ROOT_PR = "git.myamlogic.com"
-AML_GIT_ROOT_WV = "git.myamlogic.com"
-AML_GIT_ROOT_PROTOCOL = "git"
+#Force OpenLinux Access
+AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"
+AML_GIT_PROTOCOL = "ssh"
+AML_GIT_ROOT_YOCTO_SUFFIX = ""
+AML_GIT_ROOT_PR = "git@openlinux.amlogic.com"
+AML_GIT_ROOT_WV = "git@openlinux.amlogic.com/yocto"
+AML_GIT_ROOT_PROTOCOL = "ssh"
 EOF
     fi
         export MACHINE=$TARGET_MACHINE
@@ -131,7 +126,6 @@ EOF
 		echo
 		echo "MACHINE=${TARGET_MACHINE}"
 		echo "OUTPUT_DIR=${BUILD_DIR}"
-		echo "LOCAL_BUILD=${LOCAL_BUILD}"
 		echo
 		echo "==========================================="
 	fi

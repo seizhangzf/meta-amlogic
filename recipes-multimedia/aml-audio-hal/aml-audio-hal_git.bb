@@ -8,12 +8,12 @@ SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/aml_audio_hal')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_audio_hal')}"
 
 DEPENDS += "aml-amaudioutils expat tinyalsa libamavutils liblog aml-avsync"
-DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb libamadec', '', d)}"
 RDEPENDS_${PN} += "liblog aml-amaudioutils aml-avsync"
-RDDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)}"
+DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb libamadec', '', d)}"
+RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils libamadec aml-dvb', '', d)}"
 
 inherit cmake pkgconfig
 

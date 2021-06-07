@@ -26,6 +26,8 @@ SRC_URI_append_s4 = " file://s4.cfg"
 KDIR = "aml-5.4"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${KDIR}')}"
 
+DEPENDS += "rsync-native"
+
 LINUX_VERSION ?= "5.4.86"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
 

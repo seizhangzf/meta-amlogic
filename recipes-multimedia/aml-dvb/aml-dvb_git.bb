@@ -11,6 +11,8 @@ PV = "${SRCPV}"
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 DEPENDS = " aml-zvbi sqlite libamavutils"
+RDEPENDS_${PN} = "libamavutils"
+PROVIDES = "libam_adp"
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
@@ -34,9 +36,9 @@ do_install() {
     install -D -m 0644 ${S}/am_adp/libam_adp.so ${D}/usr/lib
     install -D -m 0644 ${S}/include/am_adp/*.h ${D}/usr/include
     install -D -m 0644 ${S}/include/am_adp/libdvbsi/*.h ${D}/usr/include/libdvbsi
-    install -m 0755 ${S}/test/am_fend_test/am_fend_test ${D}${bindir}
-    install -m 0755 ${S}/test/am_dvr_test/am_dvr_test ${D}${bindir}
-    install -m 0755 ${S}/test/am_dmx_test/am_dmx_test ${D}${bindir}
+    #install -m 0755 ${S}/test/am_fend_test/am_fend_test ${D}${bindir}
+    #install -m 0755 ${S}/test/am_dvr_test/am_dvr_test ${D}${bindir}
+    #install -m 0755 ${S}/test/am_dmx_test/am_dmx_test ${D}${bindir}
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"

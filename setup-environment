@@ -8,6 +8,10 @@ if [ -n "$(echo $MACHINE | grep -- lib32)" ]; then
   NEED_A6432_SUPPORT=y
 fi
 
+if [ -d $TOP_DIR/meta-rdk-amazon ] && [ ! -d $TOP_DIR/meta-rdk-amazon/licenses ]; then
+  mkdir -p $TOP_DIR/meta-rdk-amazon/licenses
+fi
+
 if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" ]; then
     # add RDK WPE targets to conf file
     # this step has to be added before calling meta-cmf/setup-environment

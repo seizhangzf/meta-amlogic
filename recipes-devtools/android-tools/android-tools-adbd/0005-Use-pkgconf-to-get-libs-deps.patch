@@ -18,7 +18,7 @@ diff -urpN android-tools-4.2.2+git20130218.orig/debian/makefiles/adbd.mk android
  CPPFLAGS+= -I$(SRCDIR)/core/include
 
 -LIBS+= -lc -lpthread -lz -lcrypto -lcrypt
-+LIBS+= -lc -lpthread -lz `pkg-config --libs libcrypto` -lcrypt
++LIBS+= -lc -lpthread -lz `pkg-config --libs libcrypto` `pkg-config --libs libcrypt`
 
  OBJS= $(patsubst %, %.o, $(basename $(SRCS)))
 

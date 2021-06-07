@@ -2,10 +2,12 @@ DESCRIPTION = "android tools adbd"
 PR = "r0"
 LICENSE = "Apache-2.0"
 
-
 S = "${WORKDIR}"
 
+inherit pkgconfig
+
 DEPENDS := "zlib openssl"
+#RDEPENDS_${PN} += "usb-monitor "
 
 #FILESEXTRAPATHS_prepend := "${WORKDIR}/debian/patches:"
 
@@ -47,7 +49,7 @@ do_process_patches_in_srccode_tarball() {
     mv ${S}/android-tools/* ${S}
     rm -rf ${S}/android-tools
 
-    #apply the patches in the src code tarball, otherwise patches in 'SRC_URI' can't apply 
+    #apply the patches in the src code tarball, otherwise patches in 'SRC_URI' can't apply
     patch -p1 -d ${S} <  ${S}/debian/patches/remove-selinux-android.patch
     patch -p1 -d ${S} <  ${S}/debian/patches/add_adbd.patch
     patch -p1 -d ${S} <  ${S}/debian/patches/reboot-syscall.patch
@@ -67,7 +69,7 @@ do_install(){
     install -m 0755 adbd ${D}${bindir}
     install -m 0755 adbd_prepare.sh ${D}${bindir}
     install -m 0755 adbd_post.sh ${D}${bindir}
-    install -m 0644 ${S}/adbd.service ${D}/${systemd_unitdir}/system 
+    install -m 0644 ${S}/adbd.service ${D}/${systemd_unitdir}/system
     echo "MACHINE_ARCH is ${MACHINE_ARCH}"
     case ${MACHINE_ARCH} in
         "mesonc1_ae409" | "mesonc1_ae401" | "mesonc1_ae400")

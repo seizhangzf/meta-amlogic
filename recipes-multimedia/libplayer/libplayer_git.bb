@@ -67,7 +67,7 @@ do_compile () {
         install ${S}/amffmpeg/ffprobe ${D}/usr/bin
 }
 
-inherit  pkgconfig distro_features_check
+inherit  pkgconfig features_check
 do_install[noexec] = "1"
 
 FILES_${PN} += "/usr/share/lib* /usr/lib/amplayer/*.so /bin/ /usr/bin/"

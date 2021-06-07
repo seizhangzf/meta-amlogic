@@ -72,6 +72,8 @@ DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
 export BL30_ARG = ""
 export BL2_ARG = ""
 
+DEBUG_PREFIX_MAP = ""
+
 do_compile () {
     cd ${S}
     cp fip/mk .

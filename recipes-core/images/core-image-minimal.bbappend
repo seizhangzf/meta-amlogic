@@ -2,22 +2,23 @@ inherit image
 SDKEXTCLASS ?= "${@['populate_sdk', 'populate_sdk_ext']['linux' in d.getVar("SDK_OS", True)]}"
 inherit ${SDKEXTCLASS}
 
-DEPENDS_${PN}_append = " python-native"
+DEPENDS_append = " android-tools-native"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-IMAGE_INSTALL = "udev busybox ${ROOTFS_PKGMANAGE_BOOTSTRAP}"
+#IMAGE_INSTALL = "udev busybox ${ROOTFS_PKGMANAGE_BOOTSTRAP}"
+IMAGE_INSTALL = "udev busybox"
 IMAGE_INSTALL_append = "\
                     initramfs-meson-boot \
                     e2fsprogs \
                    "
 
-IMAGE_INSTALL_append_aarch64 = "\
-                    kernel-modules \
-                    gpu \
-                    kmod \
-                    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
-                    ${CORE_IMAGE_EXTRA_INSTALL} \
-                    "
+#IMAGE_INSTALL_append_aarch64 = "\
+#                    kernel-modules \
+#                    gpu \
+#                    kmod \
+#                    ${MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS} \
+#                    ${CORE_IMAGE_EXTRA_INSTALL} \
+#                    "
 
 IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 
@@ -36,19 +37,19 @@ python __anonymous () {
     d.setVar('KERNEL_IMAGETYPE_FOR_MAKE', typeformake)
 }
 
-do_rootfs_append () {
-    import shutil
-    rootfsdir = d.getVar('IMAGE_ROOTFS', True) or ""
-    bootdir = "%s/boot" % rootfsdir
-    shutil.rmtree(bootdir)
-}
+#do_rootfs_append () {
+#    import shutil
+#    rootfsdir = d.getVar('IMAGE_ROOTFS', True) or ""
+#    bootdir = "%s/boot" % rootfsdir
+#    shutil.rmtree(bootdir)
+#}
 
 KERNEL_BOOTARGS = "rootfstype=ext4"
 KERNEL_OFFSET = "0x1080000"
 KERNEL_OFFSET_sc2-5.4 = "0x3080000"
 
 do_bundle_initramfs_dtb() {
-	${STAGING_BINDIR_NATIVE}/python-native/python ${STAGING_BINDIR_NATIVE}/mkbootimg.py --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset ${KERNEL_OFFSET} --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --header_version 1 --output ${DEPLOY_DIR_IMAGE}/boot.img
+	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset ${KERNEL_OFFSET} --cmdline "${KERNEL_BOOTARGS}" --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --output ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 addtask bundle_initramfs_dtb before do_image_complete after do_image_cpio
