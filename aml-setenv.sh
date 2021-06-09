@@ -1,21 +1,20 @@
 #!/bin/sh
 
+if [ -n "$BASH_SOURCE" ]; then
+  THIS_SCRIPT=$BASH_SOURCE
+elif [ -n "$ZSH_NAME" ]; then
+  THIS_SCRIPT=$0
+else
+  THIS_SCRIPT="$(pwd)/oe-init-build-env"
+fi
+MESON_PATH=$(cd `dirname $(realpath -P $THIS_SCRIPT)`; pwd)
+
 LOCAL_DIR=$(pwd)
 if [ -z $BUILD_DIR ]; then
-	BUILD_DIR="build"
+    BUILD_DIR="build"
 fi
 
-DEFCONFIG_ARRAY=("mesong12a_u212"
-                 "mesonsc2_ah212"
-                 "mesonsc2_5.4_lib32_ah212"
-				 "mesont5d_am301"
-                 "mesont5d_5.4_lib32_am301"
-				 "mesons4_lib32_ap222"
-				 "mesontm2_ab301"
-				 "mesontm2_t962e2_llama"
-				 "mesontm2_t962x3_llama"
-				 "mesontm2_t962x3_a6gp"
-				 )
+DEFCONFIG_ARRAY=($(pushd $MESON_PATH/conf/machine 2>&1 >> /dev/null; find -name '*\.conf' | sed 's@./@@' | sed 's@\.conf@@' | sort))
 
 DEFCONFIG_ARRAY_LEN=${#DEFCONFIG_ARRAY[@]}
 
@@ -110,7 +109,7 @@ function lunch()
 {
 	if [ -n "$TARGET_MACHINE" ]; then
 		MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
-    if [ $OPENLINUX_BUILD == "1" ];then
+    if [ "$OPENLINUX_BUILD" == "1" ];then
         cat >> $BUILD_DIR/conf/local.conf <<EOF
 #Force OpenLinux Access
 AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"

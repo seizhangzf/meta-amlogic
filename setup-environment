@@ -2,47 +2,44 @@
 
 unset _RDK_FLAVOR
 export RDK_BSP_LAYER=meta-rdk-bsp-amlogic
-TOP_DIR=$(pwd)
+export RDK_ROOT_PATH=$(pwd -P)
 
 if [ -n "$(echo $MACHINE | grep -- lib32)" ]; then
   NEED_A6432_SUPPORT=y
 fi
 
-if [ -d $TOP_DIR/meta-rdk-amazon ] && [ ! -d $TOP_DIR/meta-rdk-amazon/licenses ]; then
-  mkdir -p $TOP_DIR/meta-rdk-amazon/licenses
+if [ -d $RDK_ROOT_PATH/meta-rdk-amazon ] && [ ! -d $RDK_ROOT_PATH/meta-rdk-amazon/licenses ]; then
+  mkdir -p $RDK_ROOT_PATH/meta-rdk-amazon/licenses
 fi
 
-if [ -d $TOP_DIR/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" ]; then
+if [ -d $RDK_ROOT_PATH/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadband)" ]; then
     # add RDK WPE targets to conf file
     # this step has to be added before calling meta-cmf/setup-environment
     # so that the target is displayed to the user
-    if [ $(grep -c 'rdk-generic-mediaclient-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-mediaclient-image/a \ \ \ \ rdk-generic-mediaclient-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-mediaclient-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-mediaclient-image/a \ \ \ \ rdk-generic-mediaclient-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
-    if [ $(grep -c 'rdk-generic-mediaclient-westeros-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-mediaclient-wpe-image/a \ \ \ \ rdk-generic-mediaclient-westeros-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-mediaclient-westeros-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-mediaclient-wpe-image/a \ \ \ \ rdk-generic-mediaclient-westeros-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
-    if [ $(grep -c 'rdk-generic-hybrid-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-image/a \ \ \ \ rdk-generic-hybrid-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-hybrid-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-image/a \ \ \ \ rdk-generic-hybrid-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
-    if [ $(grep -c 'rdk-generic-hybrid-wpe-lxc-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-wpe-lxc-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-hybrid-wpe-lxc-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-wpe-lxc-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
-    if [ $(grep -c 'rdk-generic-hybrid-westeros-wpe-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-westeros-wpe-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-hybrid-westeros-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-westeros-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
 
-    if [ $(grep -c 'rdk-generic-hybrid-thunder-image' $TOP_DIR/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-thunder-image" $TOP_DIR/meta-rdk/conf/conf-notes.txt
+    if [ $(grep -c 'rdk-generic-hybrid-thunder-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
+        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-thunder-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
     fi
 fi
-export RDK_ROOT_PATH=$(pwd -P)
 source meta-cmf/setup-environment $1
 if [ $? -ne 0 ]; then
     return 1
 fi
-
-#BUILD_DIR=$(pwd)
 
 if [ -z "$_RDK_FLAVOR" ]; then
     if [[ -z $(grep 'rdkv' conf/local.conf) ]]
@@ -116,14 +113,14 @@ fi
 . $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
 
 # Copy <manifest>.conf file to auto.conf for revision lock
-if [ -L ${BUILD_DIR}/../.repo/manifest.xml ] ; then
-  MANIFEST="$(basename `readlink -f ${BUILD_DIR}/../.repo/manifest.xml ` | cut -d '.' -f 1)"
+if [ -L $RDK_ROOT_PATH/.repo/manifest.xml ] ; then
+  MANIFEST="$(basename `readlink -f $RDK_ROOT_PATH/.repo/manifest.xml ` | cut -d '.' -f 1)"
 else
-  MANIFEST=$(grep include ${BUILD_DIR}/../.repo/manifest.xml | cut -d '"' -f 2 | cut -d '.' -f 1)
+  MANIFEST=$(grep include $RDK_ROOT_PATH/.repo/manifest.xml | cut -d '"' -f 2 | cut -d '.' -f 1)
 fi
 echo " Manifest Name = ${MANIFEST}"
-if [ -f "${BUILD_DIR}/../.repo/manifests/${MANIFEST}.conf" ]; then
-  cp ${BUILD_DIR}/../.repo/manifests/${MANIFEST}.conf ${BUILD_DIR}/conf/auto.conf
+if [ -f "$RDK_ROOT_PATH/.repo/manifests/${MANIFEST}.conf" ]; then
+  cp $RDK_ROOT_PATH/.repo/manifests/${MANIFEST}.conf conf/auto.conf
 fi
 
 if [ -e ${RDK_ROOT_PATH}/CCACHE_DIR ]; then
