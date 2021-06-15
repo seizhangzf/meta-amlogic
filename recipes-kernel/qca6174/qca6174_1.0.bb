@@ -17,7 +17,7 @@ PV = "git${SRCPV}"
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"
 
-COMPATIBLE_MACHINE="(mesonsc2_ah212*)"
+COMPATIBLE_MACHINE="(mesonsc2-ah212*)"
 
 do_install() {
     WIFIDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/qca/wifi

@@ -47,6 +47,9 @@ do_install_append_s4 () {
     mkdir -p ${D}/data
     mkdir -p ${D}/opt
     ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
+    cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/vendor            /vendor                    auto       defaults              0  0
+EOF
 }
 FILES_${PN}_append_s4 = " /vendor/* /data /opt "
 dirs755_append_s4 = " /vendor /data /opt"

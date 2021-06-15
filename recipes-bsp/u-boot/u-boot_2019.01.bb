@@ -67,7 +67,7 @@ DEPENDS_append_sc2 = " riscv-none-gcc-native "
 DEPENDS_append_sc2-5.4 = " riscv-none-gcc-native "
 DEPENDS_append_s4 = " riscv-none-gcc-native "
 
-DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
+DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-native "
 #override this in customer layer bbappend for customer specific bootloader binaries
 export BL30_ARG = ""
 export BL2_ARG = ""

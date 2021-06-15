@@ -82,3 +82,4 @@ EXTERNALSRC_pn-wpeframework-ocdm-playready = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/
 EXTERNALSRC_pn-wpeframework-ocdm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/OCDM-widevine')) else ''}"
 EXTERNALSRC_pn-aml-cobalt-starboard = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/cobalt/rdkcobalt-21' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/cobalt/rdkcobalt-21')) else ''}"
 EXTERNALSRC_pn-wifi-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
+EXTERNALSRC_pn-gst-plugins-playersinkbin-aml = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/playersinkbin-aml' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/playersinkbin-aml')) else ''}"
