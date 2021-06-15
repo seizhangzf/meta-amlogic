@@ -61,11 +61,6 @@ gki_module_install () {
   cd ${B}; rsync -R $(find ${1} -name *.ko | xargs) ${D}${nonarch_base_libdir}/modules/${KERNEL_VERSION}/kernel/; cd -
 }
 
-do_kernel_configme_append(){
-    rm ${WORKDIR}/linux-mesonsc2_5.4_lib32_ah212-standard-build/.config -f
-    cp ${WORKDIR}/git/arch/arm64/configs/meson64_a64_R_defconfig ${WORKDIR}/defconfig
-}
-
 do_compile_append () {
   if [ -n "${GKI_DEFCONFIG}" ]; then
     #Note, gki_ext_module_config/gki_ext_module_predefine will be used by all kernel module build

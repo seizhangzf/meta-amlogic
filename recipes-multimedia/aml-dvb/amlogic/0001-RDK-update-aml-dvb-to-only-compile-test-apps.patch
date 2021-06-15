@@ -1,4 +1,4 @@
-From 50af82f6e180475581c5c1a03c2326a976225236 Mon Sep 17 00:00:00 2001
+From 5a1962e276b31d010e2fecc9f15bafe3fd9e40d6 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Fri, 18 Oct 2019 14:55:57 -0700
 Subject: [PATCH] RDK: update aml-dvb to only compile test apps
@@ -91,10 +91,10 @@ index 497bfb91..81cc8bf2 100644
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/am_adp/am_dmx/linux_dvb/linux_dvb.c b/am_adp/am_dmx/linux_dvb/linux_dvb.c
-index 5c29a3fa..4a66fdce 100644
+index cbcbd156..538e208c 100644
 --- a/am_adp/am_dmx/linux_dvb/linux_dvb.c
 +++ b/am_adp/am_dmx/linux_dvb/linux_dvb.c
-@@ -107,7 +107,8 @@ static AM_ErrorCode_t dvb_open(AM_DMX_Device_t *dev, const AM_DMX_OpenPara_t *pa
+@@ -108,7 +108,8 @@ static AM_ErrorCode_t dvb_open(AM_DMX_Device_t *dev, const AM_DMX_OpenPara_t *pa
  		return AM_DMX_ERR_NO_MEM;
  	}
  	
@@ -239,7 +239,7 @@ index a8e3f0c8..4b74998c 100644
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_dvr_test/Makefile b/test/am_dvr_test/Makefile
-index 23814fc4..3a98f1c9 100644
+index 23814fc4..71a90dcf 100644
 --- a/test/am_dvr_test/Makefile
 +++ b/test/am_dvr_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_dvr_test.c
@@ -247,7 +247,7 @@ index 23814fc4..3a98f1c9 100644
  
  CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
 -LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lpthread -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -lam_adp -lamavutils -lpthread
  
  all : $(OBJS) $(OUTPUT)
  
@@ -278,7 +278,7 @@ index 450d2cdd..9baa576f 100644
  all : $(OBJS) $(OUTPUT)
  
 diff --git a/test/am_fend_test/Makefile b/test/am_fend_test/Makefile
-index 849577a0..67e2a009 100644
+index 849577a0..334e4a64 100644
 --- a/test/am_fend_test/Makefile
 +++ b/test/am_fend_test/Makefile
 @@ -20,7 +20,7 @@ SRC_FILES = am_fend_test.c
@@ -286,7 +286,7 @@ index 849577a0..67e2a009 100644
  
  CFLAGS += $(LOCAL_C_INCLUDES) $(DEFINES) -Wno-error=format-security
 -LDFLAGS  := -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
-+LDFLAGS  := $(TARGET_LDFLAGS) -L$(TARGET_DIR)/usr/lib -lam_adp -lamadec -lamavutils -lasound
++LDFLAGS  := $(TARGET_LDFLAGS) -lam_adp -lamavutils 
  
  all : $(OBJS) $(OUTPUT)
  
@@ -330,5 +330,5 @@ index 40d0f203..0bae9014 100644
  all : $(OBJS) $(OUTPUT)
  
 -- 
-2.31.1
+2.29.2
 

@@ -1,0 +1,138 @@
+From a1db31d2cc96e177e3a9f5b1047547d8bcac1c85 Mon Sep 17 00:00:00 2001
+From: "gan.zhang" <gan.zhang@amlogic.com>
+Date: Tue, 1 Jun 2021 15:44:08 +0800
+Subject: [PATCH] v4l2: fix hdr info error. [1/1]
+
+Change-Id: Iea399818e969bedbb2dc47d0f44e07cb08f41068
+Signed-off-by: gan.zhang <gan.zhang@amlogic.com>
+---
+ drivers/amvdec_ports/decoder/vdec_av1_if.c     | 10 ++++++++--
+ drivers/amvdec_ports/decoder/vdec_vp9_if.c     |  6 ++++++
+ drivers/frame_provider/decoder_v4l/vav1/vav1.c |  9 ++++++---
+ drivers/frame_provider/decoder_v4l/vp9/vvp9.c  |  4 ++--
+ 4 files changed, 22 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/amvdec_ports/decoder/vdec_av1_if.c b/drivers/amvdec_ports/decoder/vdec_av1_if.c
+index 334fc53c..f581b0d6 100644
+--- a/drivers/amvdec_ports/decoder/vdec_av1_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_av1_if.c
+@@ -263,6 +263,10 @@ static void vdec_parser_parms(struct vdec_av1_inst *inst)
+ {
+ 	struct aml_vcodec_ctx *ctx = inst->ctx;
+ 
++	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO,
++		"%s:parms_status = 0x%x, present_flag = %d\n",
++		__func__, ctx->config.parm.dec.parms_status,
++		ctx->config.parm.dec.hdr.color_parms.present_flag);
+ 	if (ctx->config.parm.dec.parms_status &
+ 		V4L2_CONFIG_PARM_DECODE_CFGINFO) {
+ 		u8 *pbuf = ctx->config.buf;
+@@ -291,7 +295,7 @@ static void vdec_parser_parms(struct vdec_av1_inst *inst)
+ 
+ 	if ((ctx->config.parm.dec.parms_status &
+ 		V4L2_CONFIG_PARM_DECODE_HDRINFO) &&
+-		inst->parms.hdr.color_parms.present_flag) {
++		ctx->config.parm.dec.hdr.color_parms.present_flag) {
+ 		u8 *pbuf = ctx->config.buf + ctx->config.length;
+ 
+ 		pbuf += sprintf(pbuf, "HDRStaticInfo:%d;", 1);
+@@ -323,6 +327,8 @@ static void vdec_parser_parms(struct vdec_av1_inst *inst)
+ 		inst->parms.hdr		= ctx->config.parm.dec.hdr;
+ 		inst->parms.parms_status |= V4L2_CONFIG_PARM_DECODE_HDRINFO;
+ 	}
++	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO,
++		"config.buf = %s\n", ctx->config.buf);
+ 
+ 	inst->vdec.config	= ctx->config;
+ 	inst->parms.cfg		= ctx->config.parm.dec.cfg;
+@@ -1272,7 +1278,7 @@ static void set_param_hdr_info(struct vdec_av1_inst *inst,
+ 			V4L2_CONFIG_PARM_DECODE_HDRINFO;
+ 		aml_vdec_dispatch_event(inst->ctx,
+ 			V4L2_EVENT_SRC_CH_HDRINFO);
+-		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_PRINFO,
++		v4l_dbg(inst->ctx, V4L_DEBUG_CODEC_EXINFO,
+ 			"av1 set HDR infos\n");
+ 	}
+ }
+diff --git a/drivers/amvdec_ports/decoder/vdec_vp9_if.c b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+index 1602bf9b..bbd9451c 100644
+--- a/drivers/amvdec_ports/decoder/vdec_vp9_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
+@@ -186,6 +186,10 @@ static void vdec_parser_parms(struct vdec_vp9_inst *inst)
+ {
+ 	struct aml_vcodec_ctx *ctx = inst->ctx;
+ 
++	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO,
++		"%s:parms_status = 0x%x, present_flag = %d\n",
++		__func__, ctx->config.parm.dec.parms_status,
++		ctx->config.parm.dec.hdr.color_parms.present_flag);
+ 	if (ctx->config.parm.dec.parms_status &
+ 		V4L2_CONFIG_PARM_DECODE_CFGINFO) {
+ 		u8 *pbuf = ctx->config.buf;
+@@ -250,6 +254,8 @@ static void vdec_parser_parms(struct vdec_vp9_inst *inst)
+ 		inst->parms.hdr		= ctx->config.parm.dec.hdr;
+ 		inst->parms.parms_status |= V4L2_CONFIG_PARM_DECODE_HDRINFO;
+ 	}
++	v4l_dbg(ctx, V4L_DEBUG_CODEC_EXINFO,
++		"config.buf = %s\n", ctx->config.buf);
+ 
+ 	inst->vdec.config	= ctx->config;
+ 	inst->parms.cfg		= ctx->config.parm.dec.cfg;
+diff --git a/drivers/frame_provider/decoder_v4l/vav1/vav1.c b/drivers/frame_provider/decoder_v4l/vav1/vav1.c
+index 22c4eb93..921b67c5 100644
+--- a/drivers/frame_provider/decoder_v4l/vav1/vav1.c
++++ b/drivers/frame_provider/decoder_v4l/vav1/vav1.c
+@@ -6079,6 +6079,7 @@ static void set_frame_info(struct AV1HW_s *hw, struct vframe_s *vf)
+ 		memset(&hdr, 0, sizeof(hdr));
+ 		hdr.signal_type = vf->signal_type;
+ 		hdr.color_parms = hw->vf_dp;
++		hdr.color_parms.luminance[0] = hdr.color_parms.luminance[0] / 10000;
+ 		vdec_v4l_set_hdr_infos(ctx, &hdr);
+ 	}
+ 
+@@ -10859,13 +10860,15 @@ static int ammvdec_av1_probe(struct platform_device *pdev)
+ 			get_config_int(pdata->config, "mMaxFALL",
+ 					&content_light_level.max_pic_average);
+ 			vf_dp.content_light_level = content_light_level;
+-			hw->video_signal_type = (1 << 29)
++			if (!hw->video_signal_type) {
++				hw->video_signal_type = (1 << 29)
+ 					| (5 << 26)	/* unspecified */
+ 					| (0 << 25)	/* limit */
+ 					| (1 << 24)	/* color available */
+ 					| (9 << 16)	/* 2020 */
+ 					| (16 << 8)	/* 2084 */
+ 					| (9 << 0);	/* 2020 */
++                        }
+ 		}
+ 		hw->vf_dp = vf_dp;
+ 	} else {
+@@ -10955,8 +10958,8 @@ static int ammvdec_av1_probe(struct platform_device *pdev)
+ 
+ #endif
+ 	av1_print(hw, 0,
+-			"no_head %d  low_latency %d\n",
+-			hw->no_head, hw->low_latency_flag);
++			"no_head %d  low_latency %d video_signal_type 0x%x\n",
++			hw->no_head, hw->low_latency_flag, hw->video_signal_type);
+ #if 0
+ 	hw->buf_start = pdata->mem_start;
+ 	hw->buf_size = pdata->mem_end - pdata->mem_start + 1;
+diff --git a/drivers/frame_provider/decoder_v4l/vp9/vvp9.c b/drivers/frame_provider/decoder_v4l/vp9/vvp9.c
+index 519e14f3..33db5aca 100644
+--- a/drivers/frame_provider/decoder_v4l/vp9/vvp9.c
++++ b/drivers/frame_provider/decoder_v4l/vp9/vvp9.c
+@@ -11371,8 +11371,8 @@ static int ammvdec_vp9_probe(struct platform_device *pdev)
+ 
+ 	pbi->low_latency_flag = 1;
+ 	vp9_print(pbi, 0,
+-			"no_head %d  low_latency %d\n",
+-			pbi->no_head, pbi->low_latency_flag);
++			"no_head %d  low_latency %d video_signal_type 0x%x\n",
++			pbi->no_head, pbi->low_latency_flag, pbi->video_signal_type);
+ #if 0
+ 	pbi->buf_start = pdata->mem_start;
+ 	pbi->buf_size = pdata->mem_end - pdata->mem_start + 1;
+-- 
+2.29.2
+

@@ -1,7 +1,7 @@
-From 137ba16ad7f4489b1592b3a2d8b212656bb2ed8c Mon Sep 17 00:00:00 2001
+From 4d71c59047dd0193add263b1780393d20e80e90d Mon Sep 17 00:00:00 2001
 From: Jun Zhang <jun.zhang@amlogic.com>
 Date: Wed, 14 Apr 2021 19:55:50 +0800
-Subject: [PATCH 3/6] RDK: fix modpost not compiled issue [1/1]
+Subject: [PATCH 5/8] RDK: fix modpost not compiled issue [1/1]
 
 PD#SWPL-
 
@@ -21,10 +21,10 @@ Signed-off-by: Jun Zhang <jun.zhang@amlogic.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/scripts/Makefile b/scripts/Makefile
-index c2ecb65155e7..a22d139f234b 100644
+index 3e86b300f5a1..76131f2da435 100644
 --- a/scripts/Makefile
 +++ b/scripts/Makefile
-@@ -38,6 +38,7 @@ hostprogs-y += unifdef
+@@ -34,6 +34,7 @@ hostprogs-y += unifdef
  subdir-$(CONFIG_GCC_PLUGINS) += gcc-plugins
  subdir-$(CONFIG_MODVERSIONS) += genksyms
  subdir-$(CONFIG_SECURITY_SELINUX) += selinux
@@ -33,5 +33,5 @@ index c2ecb65155e7..a22d139f234b 100644
  # Let clean descend into subdirs
  subdir-	+= basic dtc gdb kconfig mod
 -- 
-2.31.1
+2.29.2
 

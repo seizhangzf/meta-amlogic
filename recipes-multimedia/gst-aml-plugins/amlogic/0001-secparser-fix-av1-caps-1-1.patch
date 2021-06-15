@@ -1,0 +1,50 @@
+From 961feec428dc42de06ac54fce2a3d14f15cbb9a8 Mon Sep 17 00:00:00 2001
+From: Tao Guo <tao.guo@amlogic.com>
+Date: Fri, 7 May 2021 22:17:28 +0800
+Subject: [PATCH] secparser: fix av1 caps [1/1]
+
+PD#SWPL-46651
+
+Problem:
+av1 parser link failed
+caps not correct
+
+Solution:
+fix caps
+
+Verify:
+AH212 + RDK
+
+Change-Id: I55f6e6e437394b73f594e43aba8d547c6a79d970
+Signed-off-by: Tao Guo <tao.guo@amlogic.com>
+---
+ gst-aml-drm-plugins-1.0/src/secure_parse/gstav1_sec_trans.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/gst-aml-drm-plugins-1.0/src/secure_parse/gstav1_sec_trans.c b/gst-aml-drm-plugins-1.0/src/secure_parse/gstav1_sec_trans.c
+index 570c301..c8054ca 100644
+--- a/gst-aml-drm-plugins-1.0/src/secure_parse/gstav1_sec_trans.c
++++ b/gst-aml-drm-plugins-1.0/src/secure_parse/gstav1_sec_trans.c
+@@ -152,6 +152,10 @@ gst_av1_sec_trans_transform_caps(GstBaseTransform *trans, GstPadDirection direct
+                 gst_caps_set_simple (ret, "height", G_TYPE_INT, height, NULL);
+             }
+         }
++        unsigned size = gst_caps_get_size(ret);
++        for (unsigned i = 0; i < size; ++i) {
++            gst_caps_set_features(ret, i, gst_caps_features_from_string(GST_CAPS_FEATURE_MEMORY_DMABUF));
++        }
+         GST_DEBUG_OBJECT (plugin, "ret caps:%" GST_PTR_FORMAT, ret);
+         break;
+     }
+@@ -160,7 +164,7 @@ gst_av1_sec_trans_transform_caps(GstBaseTransform *trans, GstPadDirection direct
+             ret = gst_caps_copy(caps);
+             unsigned size = gst_caps_get_size(ret);
+             for (unsigned i = 0; i < size; ++i) {
+-                gst_caps_set_features(ret, i, gst_caps_features_from_string(GST_CAPS_FEATURE_MEMORY_DMABUF));
++                gst_caps_set_features(ret, i, gst_caps_features_from_string(GST_CAPS_FEATURE_MEMORY_SECMEM_MEMORY));
+             }
+         }  else {
+             ret = gst_caps_copy(srccaps);
+-- 
+2.29.2
+

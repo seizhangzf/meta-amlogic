@@ -1,0 +1,74 @@
+From eef37b5c7a6cf61ca7fea1a075811b15add46531 Mon Sep 17 00:00:00 2001
+From: "jiayi.zhou" <jiayi.zhou@amlogic.com>
+Date: Thu, 10 Jun 2021 11:38:14 +0800
+Subject: [PATCH 1/8] ir: fix crash issue caused remote  [1/1]
+
+PD#SWPL-52328
+
+Problem:
+The upper-level code is not modified synchronously,
+resulting in a crash problem
+
+Solution:
+Increase code protection mechanism
+
+Verify:
+sc2
+
+Change-Id: I03520abfff3e3a6842500df455e424d562ffb751
+Signed-off-by: jiayi.zhou <jiayi.zhou@amlogic.com>
+---
+ drivers/amlogic/input/ir/meson_ir_core.c | 12 ++++++++++++
+ drivers/amlogic/input/ir/meson_ir_main.c |  6 ++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/drivers/amlogic/input/ir/meson_ir_core.c b/drivers/amlogic/input/ir/meson_ir_core.c
+index 6f02a03765f5..bfd7dc6b9a18 100644
+--- a/drivers/amlogic/input/ir/meson_ir_core.c
++++ b/drivers/amlogic/input/ir/meson_ir_core.c
+@@ -37,6 +37,12 @@ static void meson_ir_do_keyup(struct meson_ir_dev *dev)
+ 			if (chip->search_id[cnt] == ct->tab.vendor)
+ 				break;
+ 		}
++		if (cnt > chip->input_cnt) {
++			dev_err(chip->dev, "vendor ID Configuration error\n");
++			dev_err(chip->dev, "vendor = %x, product = %x, version = %x\n",
++					ct->tab.vendor, ct->tab.product, ct->tab.version);
++			return;
++		}
+ 		input_report_key(dev->input_device_ots[cnt], dev->last_keycode, 0);
+ 		input_sync(dev->input_device_ots[cnt]);
+ 	} else {
+@@ -90,6 +96,12 @@ static void meson_ir_do_keydown(struct meson_ir_dev *dev, int scancode,
+ 				if (chip->search_id[cnt] == ct->tab.vendor)
+ 					break;
+ 			}
++			if (cnt > chip->input_cnt) {
++				dev_err(chip->dev, "vendor ID configuration error\n");
++				dev_err(chip->dev, "vendor = %x, product = %x, version = %x\n",
++						ct->tab.vendor, ct->tab.product, ct->tab.version);
++				return;
++			}
+ 			input_report_key(dev->input_device_ots[cnt], keycode, 1);
+ 			input_sync(dev->input_device_ots[cnt]);
+ 		} else {
+diff --git a/drivers/amlogic/input/ir/meson_ir_main.c b/drivers/amlogic/input/ir/meson_ir_main.c
+index c5b50a60c666..f9d2fb373114 100644
+--- a/drivers/amlogic/input/ir/meson_ir_main.c
++++ b/drivers/amlogic/input/ir/meson_ir_main.c
+@@ -199,6 +199,12 @@ static int meson_ir_report_rel(struct meson_ir_dev *dev, u32 scancode,
+ 			if (chip->search_id[cnt] == ct->tab.vendor)
+ 				break;
+ 		}
++		if (cnt > chip->input_cnt) {
++			dev_err(chip->dev, "vdndor ID Configuration error\n");
++			dev_err(chip->dev, "vendor = %x, product = %x, version = %x\n",
++					ct->tab.vendor, ct->tab.product, ct->tab.version);
++			return 0;
++		}
+ 		input_event(chip->r_dev->input_device_ots[cnt], EV_REL,
+ 					mouse_code, cursor_value);
+ 		input_sync(chip->r_dev->input_device_ots[cnt]);
+-- 
+2.29.2
+
