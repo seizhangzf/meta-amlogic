@@ -72,10 +72,10 @@ do_install(){
     install -m 0644 ${S}/adbd.service ${D}/${systemd_unitdir}/system
     echo "MACHINE_ARCH is ${MACHINE_ARCH}"
     case ${MACHINE_ARCH} in
-        "mesonc1_ae409" | "mesonc1_ae401" | "mesonc1_ae400")
+        mesonc1_*)
             sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
-        "mesonsc2_ah212" | "mesonsc2_ah219" | mesons4*ap222)
+        mesonsc2_* | mesons4_*)
             sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
         ;;
     esac

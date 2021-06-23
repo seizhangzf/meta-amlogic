@@ -14,7 +14,16 @@ do_install_append(){
     mkdir -p ${D}${sysconfdir}/bluetooth
     mkdir -p ${D}${bindir}
     install -m 644 ${WORKDIR}/main.conf ${D}${sysconfdir}/bluetooth/
-    sed -i '/Debug=0/a Device=qca' ${D}${sysconfdir}/bluetooth/main.conf
+
+    echo "MACHINE_ARCH is ${MACHINE_ARCH}"
+    case ${MACHINE_ARCH} in
+    mesons4*ap223)
+        sed -i '/Debug=0/a Device=rtk' ${D}${sysconfdir}/bluetooth/main.conf
+    ;;
+    *)
+        sed -i '/Debug=0/a Device=qca' ${D}${sysconfdir}/bluetooth/main.conf
+    ;;
+    esac
 
     install -m 0755 ${WORKDIR}/bluez_tool.sh ${D}/${bindir}
 }
