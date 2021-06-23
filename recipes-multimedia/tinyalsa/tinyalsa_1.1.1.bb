@@ -14,6 +14,7 @@ SRC_URI += " \
             file://0002-interval.h-add-missing-header.patch \
             file://0003-add-pcm-ioctl.patch \
             file://0004-pcm-rw-return-fix.patch \
+            file://0005-tinycap-function-error-fix.patch \
             "
 
 do_configure() {
