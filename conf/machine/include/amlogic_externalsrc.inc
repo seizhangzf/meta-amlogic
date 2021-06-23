@@ -15,6 +15,14 @@ EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/wifi/qu
 EXTERNALSRC_pn-qca6174_sc2-5.4 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
 EXTERNALSRC_pn-qca6174_s4 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
 EXTERNALSRC_pn-wififw = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/amlogic/wifi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/amlogic/wifi')) else ''}"
+
+EXTERNALSRC_pn-rtk8723bu = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723bu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723bu')) else ''}"
+EXTERNALSRC_pn-rtk8723du = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723du' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723du')) else ''}"
+EXTERNALSRC_pn-rtk8822cs = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8822cs' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8822cs')) else ''}"
+EXTERNALSRC_pn-realtek-btusb = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek')) else''}"
+EXTERNALSRC_pn-realtek-btuart = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek')) else''}"
+EXTERNALSRC_pn-realtek-hciattach = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/realtek')) else''}"
+
 EXTERNALSRC_pn-aml-hdcp = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/hdcp' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/hdcp')) else ''}"
 EXTERNALSRC_pn-aml-provision = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/provision' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/provision')) else ''}"
 EXTERNALSRC_pn-optee-userspace = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk')) else ''}"
