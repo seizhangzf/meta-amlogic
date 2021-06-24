@@ -52,7 +52,6 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     aml-hdcp \
                                     aml-hdcp-load-firmware \
                                     libbinder \
-                                    aml-pqserver \
                                     aml-mediahal-sdk \
                                     procrank \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
