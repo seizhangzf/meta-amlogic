@@ -4,13 +4,14 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 
 do_configure[noexec] = "1"
 inherit autotools pkgconfig
-DEPENDS += "aml-amaudioutils liblog libdvr-release libamadec"
+DEPENDS += "aml-amaudioutils liblog aml-libdvr"
 
-SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/common/aml_mp_sdk;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot;"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/common/aml_mp_sdk;protocol=${AML_GIT_PROTOCOL};branch=master;"
+#SRC_URI = "file://aml-comp/multimedia/aml_mp_sdk;protocol=file;branch=master;"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_mp_sdk')}"
 SRCREV = "${AUTOREV}"
 S="${WORKDIR}/git/"
-RDEPENDS_${PN} += " aml-amaudioutils liblog libdvr-release"
+RDEPENDS_${PN} += " aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk"
 EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} \
 		  TARGET_DIR=${D} \
 		"
@@ -33,3 +34,4 @@ FILES_${PN} = "${libdir}/* ${bindir}/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "ldflags"
 INSANE_SKIP_${PN}-dev = "dev-elf dev-so"
+
