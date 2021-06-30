@@ -1,0 +1,16 @@
+diff --git a/utils/tinycap.c b/utils/tinycap.c
+index 39c6f57..12b4978 100644
+--- a/utils/tinycap.c
++++ b/utils/tinycap.c
+@@ -248,9 +248,8 @@ unsigned int capture_sample(FILE *file, unsigned int card, unsigned int device,
+ 
+     bytes_per_frame = pcm_frames_to_bytes(pcm, 1);
+     total_frames_read = 0;
+-    frames_read = 0;
+-    while (capturing) {
+-        frames_read = pcm_readi(pcm, buffer, pcm_get_buffer_size(pcm));
++    frames_read = pcm_get_buffer_size(pcm);
++    while (capturing && !pcm_readi(pcm, buffer, frames_read)) {
+         total_frames_read += frames_read;
+         if ((total_frames_read / rate) >= capture_time) {
+             capturing = 0;

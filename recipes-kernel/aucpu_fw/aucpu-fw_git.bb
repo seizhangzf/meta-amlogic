@@ -19,12 +19,23 @@ do_install() {
     FIRMWAREDIR=${D}/lib/firmware
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${FIRMWAREDIR}
-    install -m 0666 ${S}/aucpu_fw.bin ${FIRMWAREDIR}
+    case ${MACHINE} in
+        mesonsc2-*)
+          FWSRCDIR=S905X4
+        ;;
+        mesons4-*)
+          FWSRCDIR=S905Y4
+        ;;
+        *)
+          FWSRCDIR=DUMMY
+        ;;
+    esac
+    install -m 0666 ${S}/${FWSRCDIR}/aucpu_fw.bin.signed ${FIRMWAREDIR}
     install -d ${D}/etc/udev/rules.d
     install -m 0755 ${WORKDIR}/52dvb.rules ${D}/etc/udev/rules.d
 }
 
 FILES_${PN} = " \
-        /lib/firmware/aucpu_fw.bin \
+        /lib/firmware/aucpu_fw.bin.signed \
         /etc/udev/rules.d/52dvb.rules \
         "
