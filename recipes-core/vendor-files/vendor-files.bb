@@ -20,6 +20,7 @@ SOC_t962e2 = "t962e2"
 SOC_am301 = "t950d4"
 SOC_t950d4 = "t950d4"
 SOC_ap222 = "s905y4"
+SOC_ah212 = "s905x4"
 
 S = "${WORKDIR}/git/"
 
