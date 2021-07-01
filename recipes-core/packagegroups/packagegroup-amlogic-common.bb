@@ -59,8 +59,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libamadec', '', d)} \
-                                    ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libdvr-release', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-mp-sdk', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-libdvr', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-cobalt-starboard', '', d)} \
                                     "
