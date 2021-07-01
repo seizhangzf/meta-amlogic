@@ -12,7 +12,7 @@ PROVIDES = "widevine"
 SRC_URI = "git://${AML_GIT_ROOT_WV}/vendor/widevine;protocol=${AML_GIT_PROTOCOL};branch=amlogic-linux;destsuffix=git/widevine-bin"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm/widevine-bin')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
