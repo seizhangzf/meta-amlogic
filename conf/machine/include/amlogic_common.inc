@@ -57,3 +57,5 @@ HOSTTOOLS_NONFATAL += "bc cc c++ bison cmake python"
 VIRTUAL-RUNTIME_dtcpmgr = ""
 
 PREFERRED_VERSION_gmp_dunfell = "6.2.%"
+
+AML_RDK_PREBUILT_SITE ?= "http://10.18.11.97/firmware/image/linux-distro/Public/RDK/prebuilt/"
