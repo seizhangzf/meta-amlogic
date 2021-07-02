@@ -1,0 +1,89 @@
+From ca7f92c777632ad82781d32c1440c25fa11f4645 Mon Sep 17 00:00:00 2001
+From: Nanxin Qin <nanxin.qin@amlogic.com>
+Date: Tue, 29 Jun 2021 22:27:44 +0800
+Subject: [PATCH 1/2] v4l: CB1 fixed irq-vdec-0 takes more cpu slice. [1/1]
+
+PD#SWPL-42732
+
+Problem:
+observe frame drop after seek vp9 stream 4k 60fps.
+
+Solution:
+The root cause is that the codec mm dcache mechanism
+is disabled after seek, which causes the allocation of buffer
+to be very time-consuming. the solution is to ensure that
+the codec mm's cache is valid.
+
+Verify:
+ah212
+
+Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
+Change-Id: I9a7d13e8067bce1830682b4cee48e89849b6070d
+---
+ .../decoder/utils/decoder_mmu_box.c             | 17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/frame_provider/decoder/utils/decoder_mmu_box.c b/drivers/frame_provider/decoder/utils/decoder_mmu_box.c
+index e8bb2bb7..30d2cb86 100644
+--- a/drivers/frame_provider/decoder/utils/decoder_mmu_box.c
++++ b/drivers/frame_provider/decoder/utils/decoder_mmu_box.c
+@@ -251,6 +251,7 @@ int decoder_mmu_box_free_idx(void *handle, int idx)
+ 			box ? (box->max_sc_num - 1) : 0);
+ 		return -1;
+ 	}
++
+ 	mutex_lock(&box->mutex);
+ 	sc = box->sc_list[idx];
+ 	if (sc && sc->page_cnt > 0) {
+@@ -258,10 +259,11 @@ int decoder_mmu_box_free_idx(void *handle, int idx)
+ 		box->sc_list[idx] = NULL;
+ 		box->box_ref_cnt--;
+ 	}
+-	mutex_unlock(&box->mutex);
+ 
+-	if (sc && box->box_ref_cnt == 0)
++	if (sc && (box->box_ref_cnt == 0)) {
+ 		codec_mm_scatter_mgt_delay_free_switch(0, 0, 0, box->tvp_mode);
++	}
++	mutex_unlock(&box->mutex);
+ 
+ 	return 0;
+ }
+@@ -271,24 +273,33 @@ int decoder_mmu_box_free(void *handle)
+ {
+ 	struct decoder_mmu_box *box = handle;
+ 	struct codec_mm_scatter *sc;
++	bool free_cache = false;
+ 	int i;
+ 
+ 	if (!box) {
+ 		pr_err("can't free box of NULL box!\n");
+ 		return -1;
+ 	}
++
+ 	mutex_lock(&box->mutex);
+ 	for (i = 0; i < box->max_sc_num; i++) {
+ 		sc = box->sc_list[i];
+ 		if (sc) {
+ 			codec_mm_scatter_dec_owner_user(sc, 0);
+ 			box->sc_list[i] = NULL;
++			box->box_ref_cnt--;
++			free_cache = true;
+ 		}
+ 	}
++
++	if (free_cache && (box->box_ref_cnt == 0)) {
++		codec_mm_scatter_mgt_delay_free_switch(0, 0, 0, box->tvp_mode);
++	}
+ 	mutex_unlock(&box->mutex);
++
+ 	decoder_mmu_box_mgr_del_box(box);
+-	codec_mm_scatter_mgt_delay_free_switch(0, 0, 0, box->tvp_mode);
+ 	kfree(box);
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL(decoder_mmu_box_free);
+-- 
+2.29.2
+

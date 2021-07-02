@@ -1,4 +1,4 @@
-From 0eda1b619bbd60c0200835b1f8c336092167944c Mon Sep 17 00:00:00 2001
+From 946e2c3dda9cbb3e48993a5c54718302cb6dcd66 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Thu, 29 Apr 2021 06:17:03 +0000
 Subject: [PATCH] RDK: correct wifi firmware path on RDK [1/1]

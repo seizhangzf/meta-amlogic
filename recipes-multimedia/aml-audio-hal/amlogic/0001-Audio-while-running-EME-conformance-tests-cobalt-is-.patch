@@ -1,0 +1,43 @@
+From dc327163875c41ed2704491aa944e1dc5c4cf318 Mon Sep 17 00:00:00 2001
+From: "shu.zhang" <shu.zhang@amlogic.com>
+Date: Tue, 29 Jun 2021 02:15:02 -0400
+Subject: [PATCH] Audio: while running EME conformance tests cobalt is getting
+ disabled [1/1]
+
+PD#SWPL-53654
+
+Problem:
+AC3&eAC3 EME conformance tests cobalt is getting disabled
+
+Solution:
+When the second aml_audio_hwsync_init, the aml_audio_hwsync_set_first_pts
+value appears negative, so two new condition variables are added to
+determine whether the second aml_audio_hwsync_init is required
+
+Verify:
+rdk-ah212
+
+Change-Id: I6b611618225e90f278dd296b9b41025dafc6bc55
+Signed-off-by: shu.zhang <shu.zhang@amlogic.com>
+---
+ audio_hal/audio_hw.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 1f8d0b0..43ba7f4 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -9357,8 +9357,9 @@ void config_output(struct audio_stream_out *stream,bool reset_decoder)
+             /* clean hwsync pts record and start from offset 0 after
+              * ms12 pipeline restart.
+              */
+-            if (aml_out->hw_sync_mode) {
++            if ((aml_out->hw_sync_mode) && (adev->ms12_main_input_size > 0) && (aml_out->hwsync->first_apts_flag)) {
+                 aml_audio_hwsync_init(aml_out->hwsync, aml_out);
++                aml_out->hwsync->first_apts_flag = true;
+             }
+             /*set the volume to current one*/
+             dolby_ms12_set_main_volume(aml_out->volume_l);
+-- 
+2.29.2
+
