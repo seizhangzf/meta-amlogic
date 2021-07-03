@@ -29,7 +29,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/kerne
 
 DEPENDS += "rsync-native"
 
-LINUX_VERSION ?= "5.4.86"
+LINUX_VERSION ?= "5.4.125"
 LINUX_VERSION_EXTENSION ?= "-amlogic"
 
 PR = "r2"
