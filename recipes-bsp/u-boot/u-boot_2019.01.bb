@@ -36,6 +36,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot
 
 do_configure[noexec] = "1"
 
+SRCREV_pn-u-boot ?="${AUTOREV}"
 SRCREV_bl2 ?="${AUTOREV}"
 SRCREV_bl30 ?="${AUTOREV}"
 SRCREV_src-ao ?="${AUTOREV}"
