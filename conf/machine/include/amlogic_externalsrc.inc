@@ -75,6 +75,7 @@ EXTERNALSRC_pn-aml-libdvr = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libdvr' if
 EXTERNALSRC_pn-vendor-files = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/vendor')) else ''}"
 EXTERNALSRC_pn-tuner-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/target' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/target')) else ''}"
 EXTERNALSRC_pn-pq-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/target' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/target')) else ''}"
+EXTERNALSRC_pn-dtvkit-release-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/dtvkit-release' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/dtvkit-release')) else ''}"
 EXTERNALSRC_pn-aml-img-packer-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
 EXTERNALSRC_pn-aml-hosttools-native = "${@'${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/prebuilt/hosttools')) else ''}"
 EXTERNALSRC_pn-devicesettings-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/Devicesettings-hal')) else ''}"
