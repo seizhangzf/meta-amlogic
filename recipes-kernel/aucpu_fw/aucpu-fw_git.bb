@@ -20,6 +20,9 @@ do_install() {
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${FIRMWAREDIR}
     case ${MACHINE} in
+        mesonsc2-*-ah232)
+          FWSRCDIR=S905C2
+        ;;
         mesonsc2-*)
           FWSRCDIR=S905X4
         ;;
