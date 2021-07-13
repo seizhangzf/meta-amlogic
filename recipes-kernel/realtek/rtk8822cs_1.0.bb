@@ -11,6 +11,8 @@ PV = "git${SRCPV}"
 do_populate_lic[noexec] = "1"
 do_configure[noexec] = "1"
 
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
+
 do_install() {
     WIFIDIR=${D}/lib/modules/${KERNEL_VERSION}/kernel/drivers/realtek/wifi
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS

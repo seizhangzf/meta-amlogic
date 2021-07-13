@@ -1,0 +1,200 @@
+From 35c87da6b8513f370ddbcf7c4d2c813ee4f77f1b Mon Sep 17 00:00:00 2001
+From: Bing Jiang <bing.jiang@amlogic.com>
+Date: Mon, 2 Nov 2020 16:02:04 +0800
+Subject: [PATCH 2/3] uboot: add set root system [1/1]
+
+PD#SWPL-35835
+
+Problem:
+  add set root system
+
+Solution:
+  add set root system
+
+Verify:
+  SC2_AH212 S4_AP222 SC2_AH219 S4_AP223 SC2_AH232
+
+Change-Id: I71d09b8a425f151aba55ea83b46a19540104dfbd
+Signed-off-by: Bing Jiang <bing.jiang@amlogic.com>
+---
+ board/amlogic/configs/s4_ap222.h             | 9 +++++++++
+ board/amlogic/configs/s4_ap223.h             | 9 +++++++++
+ board/amlogic/configs/sc2_ah212.h            | 9 +++++++++
+ board/amlogic/configs/sc2_ah219.h            | 9 +++++++++
+ board/amlogic/configs/sc2_ah232.h            | 9 +++++++++
+ board/amlogic/defconfigs/s4_ap222_defconfig  | 2 +-
+ board/amlogic/defconfigs/s4_ap223_defconfig  | 2 +-
+ board/amlogic/defconfigs/sc2_ah212_defconfig | 3 ++-
+ board/amlogic/defconfigs/sc2_ah219_defconfig | 2 +-
+ board/amlogic/defconfigs/sc2_ah232_defconfig | 2 +-
+ 10 files changed, 51 insertions(+), 5 deletions(-)
+
+diff --git a/board/amlogic/configs/s4_ap222.h b/board/amlogic/configs/s4_ap222.h
+index 27691a0899..daf0a38aba 100644
+--- a/board/amlogic/configs/s4_ap222.h
++++ b/board/amlogic/configs/s4_ap222.h
+@@ -178,6 +178,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 0; then "\
++                    "if test ${active_slot} = _a; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
++                    "else if test ${active_slot} = _b; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                    "else if test ${active_slot} = normal; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system;"\
++                    "fi;fi;fi;"\
++                "fi;"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+diff --git a/board/amlogic/configs/s4_ap223.h b/board/amlogic/configs/s4_ap223.h
+index 27691a0899..daf0a38aba 100644
+--- a/board/amlogic/configs/s4_ap223.h
++++ b/board/amlogic/configs/s4_ap223.h
+@@ -178,6 +178,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 0; then "\
++                    "if test ${active_slot} = _a; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
++                    "else if test ${active_slot} = _b; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                    "else if test ${active_slot} = normal; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system;"\
++                    "fi;fi;fi;"\
++                "fi;"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
+index 2416074aec..fbd1dee5a0 100644
+--- a/board/amlogic/configs/sc2_ah212.h
++++ b/board/amlogic/configs/sc2_ah212.h
+@@ -178,6 +178,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 0; then "\
++                    "if test ${active_slot} = _a; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
++                    "else if test ${active_slot} = _b; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                    "else if test ${active_slot} = normal; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system;"\
++                    "fi;fi;fi;"\
++                "fi;"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+diff --git a/board/amlogic/configs/sc2_ah219.h b/board/amlogic/configs/sc2_ah219.h
+index 93c3c5e623..0b6da24f9f 100644
+--- a/board/amlogic/configs/sc2_ah219.h
++++ b/board/amlogic/configs/sc2_ah219.h
+@@ -171,6 +171,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 0; then "\
++                    "if test ${active_slot} = _a; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
++                    "else if test ${active_slot} = _b; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                    "else if test ${active_slot} = normal; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system;"\
++                    "fi;fi;fi;"\
++                "fi;"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+diff --git a/board/amlogic/configs/sc2_ah232.h b/board/amlogic/configs/sc2_ah232.h
+index 771e72983b..4a31f650e0 100644
+--- a/board/amlogic/configs/sc2_ah232.h
++++ b/board/amlogic/configs/sc2_ah232.h
+@@ -183,6 +183,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 0; then "\
++                    "if test ${active_slot} = _a; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
++                    "else if test ${active_slot} = _b; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system_b;"\
++                    "else if test ${active_slot} = normal; then "\
++                        "setenv bootargs ${bootargs} root=/dev/system;"\
++                    "fi;fi;fi;"\
++                "fi;"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+diff --git a/board/amlogic/defconfigs/s4_ap222_defconfig b/board/amlogic/defconfigs/s4_ap222_defconfig
+index 78489b41c1..52a183d12c 100644
+--- a/board/amlogic/defconfigs/s4_ap222_defconfig
++++ b/board/amlogic/defconfigs/s4_ap222_defconfig
+@@ -35,7 +35,7 @@ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
+ CONFIG_CMD_MTDPARTS=y
+-CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_BOOTCTOL_AVB=y
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+diff --git a/board/amlogic/defconfigs/s4_ap223_defconfig b/board/amlogic/defconfigs/s4_ap223_defconfig
+index 551c09b6a3..50ecb46059 100644
+--- a/board/amlogic/defconfigs/s4_ap223_defconfig
++++ b/board/amlogic/defconfigs/s4_ap223_defconfig
+@@ -35,7 +35,7 @@ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
+ CONFIG_CMD_MTDPARTS=y
+-CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_BOOTCTOL_AVB=y
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
+index 440668acea..48ec29c38c 100644
+--- a/board/amlogic/defconfigs/sc2_ah212_defconfig
++++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
+@@ -36,7 +36,8 @@ CONFIG_CMD_IR=y
+ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
+-CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_RSVMEM is not set
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+diff --git a/board/amlogic/defconfigs/sc2_ah219_defconfig b/board/amlogic/defconfigs/sc2_ah219_defconfig
+index 0b2da43b99..2f9ac868c6 100644
+--- a/board/amlogic/defconfigs/sc2_ah219_defconfig
++++ b/board/amlogic/defconfigs/sc2_ah219_defconfig
+@@ -36,7 +36,7 @@ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
+ CONFIG_CMD_MTDPARTS=y
+-CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_BOOTCTOL_AVB=y
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+diff --git a/board/amlogic/defconfigs/sc2_ah232_defconfig b/board/amlogic/defconfigs/sc2_ah232_defconfig
+index 854c9b618e..ea2d1f53e3 100644
+--- a/board/amlogic/defconfigs/sc2_ah232_defconfig
++++ b/board/amlogic/defconfigs/sc2_ah232_defconfig
+@@ -36,7 +36,7 @@ CONFIG_CMD_IR=y
+ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
+-CONFIG_CMD_BOOTCTOL_AVB=y
++# CONFIG_CMD_BOOTCTOL_AVB=y
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+-- 
+2.29.2
+
