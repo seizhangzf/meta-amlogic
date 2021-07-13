@@ -1,0 +1,12 @@
+[Unit]
+Description=config zram
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+ExecStart=/usr/bin/zram.sh start
+ExecStop=/usr/bin/zram.sh stop
+
+[Install]
+WantedBy=multi-user.target

@@ -54,6 +54,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     libbinder \
                                     aml-mediahal-sdk \
                                     procrank \
+                                    zram \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \
