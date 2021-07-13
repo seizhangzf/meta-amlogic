@@ -29,6 +29,11 @@ do_install () {
 	install -d ${D}${includedir}
     install -m 0644 ${S}/amavutils/include/*.h ${D}${includedir}
     install -m 0644 -D ${S}/amavutils/libamavutils.so ${D}/usr/lib/libamavutils.so
+
+	install -d ${D}${includedir}/amports
+	install -m 0644 ${S}/amcodec/include/amports/amstream.h ${D}${includedir}
+#install -m 0644 ${S}/amcodec/include/amports/vformat.h ${D}${includedir}/amports/
+#install -m 0644 ${S}/amcodec/include/amports/aformat.h ${D}${includedir}/amports/
 }
 
 FILES_${PN} = " /usr/lib/* "
