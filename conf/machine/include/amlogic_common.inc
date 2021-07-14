@@ -60,7 +60,7 @@ PREFERRED_VERSION_gmp_dunfell = "6.2.%"
 
 AML_RDK_PREBUILT_SITE ?= "http://10.18.11.97/firmware/image/linux-distro/Public/RDK/prebuilt/"
 # For dm-verity
-IMAGE_CLASSES += "image_types dm-verity-img"
+IMAGE_CLASSES += "image_types aml-dm-verity-img"
 
 # Sytem partition
 DM_VERITY_IMAGE = "lib32-rdk-generic-mediaclient-image"

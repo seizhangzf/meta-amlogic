@@ -1,0 +1,13 @@
+diff --git a/lib/utils_device.c b/lib/utils_device.c
+index 610c84f..04e342b 100644
+--- a/lib/utils_device.c
++++ b/lib/utils_device.c
+@@ -383,7 +383,7 @@ int device_alloc_no_check(struct device **device, const char *path)
+ 	dev->ro_dev_fd = -1;
+ 	dev->dev_fd = -1;
+ 	dev->dev_fd_excl = -1;
+-	dev->o_direct = 1;
++	//dev->o_direct = 1;
+ 
+ 	*device = dev;
+ 	return 0;

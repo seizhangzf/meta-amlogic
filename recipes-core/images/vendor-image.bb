@@ -23,7 +23,7 @@ remove_folder() {
 }
 
 # For dm-verity
-IMAGE_CLASSES += "image_types dm-verity-img"
+IMAGE_CLASSES += "image_types aml-dm-verity-img"
 DM_VERITY_IMAGE = "vendor-image"
 DM_VERITY_IMAGE_TYPE = "ext4"
 STAGING_VERITY_DIR = "${DEPLOY_DIR_IMAGE}"
