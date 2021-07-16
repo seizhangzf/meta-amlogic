@@ -1,6 +1,7 @@
 DEPENDS_append = " aml-img-packer-native"
 DEPENDS_append_onepass = " core-image-minimal"
 DEPENDS_append = " vendor-image"
+DEPENDS_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'AVB', ' vbmeta-image', '', d)}"
 
 SOC_FAMILY = "gxl"
 SOC_FAMILY_gxl = "gxl"
@@ -33,6 +34,9 @@ do_aml_pack_32b() {
     cp -f ${STAGING_DIR_NATIVE}${bindir}/aml-img-packer/img2simg ${DEPLOY_DIR_IMAGE}/
     cp -f ${STAGING_DIR_NATIVE}${bindir}/aml-img-packer/res_packer ${DEPLOY_DIR_IMAGE}/
     cp -rf ${STAGING_DIR_NATIVE}${bindir}/aml-img-packer/${SOC_FAMILY}/* ${DEPLOY_DIR_IMAGE}/
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'AVB', 'false', 'true', d)}; then
+        sed -i '/vbmeta/ d' ${DEPLOY_DIR_IMAGE}/${PACK_CONF}
+    fi
     ${DEPLOY_DIR_IMAGE}/res_packer -r ${DEPLOY_DIR_IMAGE}/logo_img_files ${DEPLOY_DIR_IMAGE}/logo.img
     if ${@bb.utils.contains('DISTRO_FEATURES_NATIVE','dm-verity','true','false',d)}; then
         ${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4.verity ${DEPLOY_DIR_IMAGE}/rootfs.ext4.verity.img2simg
@@ -50,5 +54,6 @@ do_aml_pack_32b() {
 }
 do_aml_pack_32b[depends] += "core-image-minimal:do_image_complete "
 do_aml_pack_32b[depends] += "vendor-image:do_image_complete "
+do_aml_pack_32b[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'AVB', ' vbmeta-image:do_compile', '', d)}"
 addtask aml_pack_32b after do_image_complete before do_build
 do_aml_pack_32b[nostamp] = "1"

@@ -72,6 +72,8 @@ DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-n
 export BL30_ARG = ""
 export BL2_ARG = ""
 
+BL33_ARG = "${@bb.utils.contains('DISTRO_FEATURES','AVB','--avb2','',d)}"
+
 DEBUG_PREFIX_MAP = ""
 
 do_compile () {
@@ -83,7 +85,7 @@ do_compile () {
     export KCFLAGS="--sysroot=${PKG_CONFIG_SYSROOT_DIR}"
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
-    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
+    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG}
     cp -rf build/* fip/
 }
 
