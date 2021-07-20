@@ -95,3 +95,5 @@ EXTERNALSRC_pn-aml-cobalt-starboard = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlo
 EXTERNALSRC_pn-wifi-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-gst-plugins-playersinkbin-aml = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/playersinkbin-aml' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/playersinkbin-aml')) else ''}"
 EXTERNALSRC_pn-aml-residentapp = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/residentapp' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/residentapp')) else ''}"
+EXTERNALSRC_pn-drmplayer-bin = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/drmplayer-bin/prebuilt' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/drmplayer-bin/prebuilt')) else ''}"
+
