@@ -1,0 +1,11 @@
+[Unit]
+Description=system config
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=root
+ExecStart=/usr/bin/system-config.sh
+
+[Install]
+WantedBy=multi-user.target

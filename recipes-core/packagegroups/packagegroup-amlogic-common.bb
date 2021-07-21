@@ -55,6 +55,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     aml-mediahal-sdk \
                                     procrank \
                                     zram \
+                                    modules-load \
+                                    system-config \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \
