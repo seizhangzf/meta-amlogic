@@ -64,16 +64,9 @@ BL32_SOC_FAMILY_tm2 = "tm2"
 BL32_SOC_FAMILY_t5d = "t5d"
 BL32_SOC_FAMILY_t5d-5.4 = "t5d"
 
-PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-none-elf/bin"
-PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
-PATH_append_t5d = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
-PATH_append_t5d-5.4 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
-PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-elf/bin"
-DEPENDS_append = "gcc-linaro-aarch64-none-elf-native optee-scripts-native optee-userspace-securebl32"
-DEPENDS_append_tm2 = " riscv-none-gcc-native "
-DEPENDS_append_t5d = " riscv-none-gcc-native "
-DEPENDS_append_t5d-5.4 = " riscv-none-gcc-native "
-DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
+PATH_append = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+DEPENDS_append = "optee-scripts-native optee-userspace-securebl32"
+DEPENDS_append = " riscv-none-gcc-native "
 
 DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
 #override this in customer layer bbappend for customer specific bootloader binaries
@@ -85,6 +78,9 @@ do_compile () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
     export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
+    export CROSS_COMPILE=${TARGET_PREFIX}
+    export KCFLAGS="--sysroot=${PKG_CONFIG_SYSROOT_DIR}"
+    unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
         mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
@@ -106,6 +102,9 @@ do_compile_g12a () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
     export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
+    export CROSS_COMPILE=${TARGET_PREFIX}
+    export KCFLAGS="--sysroot=${PKG_CONFIG_SYSROOT_DIR}"
+    unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
         LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32_3.8/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
