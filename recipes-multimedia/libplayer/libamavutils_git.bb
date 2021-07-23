@@ -28,6 +28,7 @@ do_install () {
 	install -d ${D}/usr/lib
 	install -d ${D}${includedir}
     install -m 0644 ${S}/amavutils/include/*.h ${D}${includedir}
+    install -m 0644 ${S}/amsubdec/amstream.h ${D}${includedir}
     install -m 0644 -D ${S}/amavutils/libamavutils.so ${D}/usr/lib/libamavutils.so
 }
 
