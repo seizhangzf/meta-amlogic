@@ -11,6 +11,7 @@ EXTERNALSRC_pn-aml-avsync = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/avsync-lib
 EXTERNALSRC_pn-aml-mp-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_mp_sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/aml_mp_sdk')) else ''}"
 EXTERNALSRC_pn-android-tools-logcat = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-liblog = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
+EXTERNALSRC_pn-libatrace = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/wifi/qualcomm/drivers/qca6174')) else ''}"
 EXTERNALSRC_pn-qca6174_sc2-5.4 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
 EXTERNALSRC_pn-qca6174_s4 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
