@@ -40,7 +40,7 @@ TDK_VERSION_s4 = "v3.8/dev/S905Y4"
 AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"
 AML_GIT_PROTOCOL = "ssh"
 AML_GIT_ROOT_YOCTO_SUFFIX = ""
-AML_GIT_ROOT_PR = "git@openlinux.amlogic.com"
+AML_GIT_ROOT_OP = "git@openlinux.amlogic.com"
 AML_GIT_ROOT_WV = "git@openlinux.amlogic.com/yocto"
 AML_GIT_ROOT_PROTOCOL = "ssh"
 
