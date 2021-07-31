@@ -5,9 +5,12 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 ROOT_MOUNT="/rootfs"
 INIT="/sbin/init"
 ROOT_DEVICE="/dev/system"
+VENDOR_DEVICE="/dev/vendor"
 MOUNT="/bin/mount"
 UMOUNT="/bin/umount"
 FIRMWARE=""
+DM_VERITY_STATUS="disabled"
+DM_DEV_COUNT=0
 
 # Copied from initramfs-framework. The core of this script probably should be
 # turned into initramfs-framework modules to reduce duplication.
@@ -70,7 +73,7 @@ read_args() {
                         shelltimeout=30
                 else
                         shelltimeout=$optarg
-                fi 
+                fi
         esac
     done
 }
@@ -135,9 +138,9 @@ format_and_install() {
         umount /dev/system
         mkfs.ext4 -F /dev/system
         mkdir -p system
-    	if ! mount -o rw,noatime,nodiratime -t ext4 /dev/system /system ; then
-		fatal "Could not mount system device"
-    	fi
+        if ! mount -o rw,noatime,nodiratime -t ext4 /dev/system /system ; then
+            fatal "Could not mount system device"
+        fi
         echo "extracting file system ..."
         gunzip -c /${ROOT_MOUNT}/${FIRMWARE} | tar -xf - -C /system
         if [ $? -ne 0 ]; then
@@ -167,34 +170,62 @@ format_and_install() {
         echo "boot normally..."
     fi
 }
-
+dm_verity_setup() {
+    echo "setup dm-verity for ${1} partition(${2}) mount to ${3}"
+    if [ -f /usr/share/${1}-dm-verity.env ]; then
+        . /usr/share/${1}-dm-verity.env
+        veritysetup --data-block-size=${DATA_BLOCK_SIZE} --hash-offset=${DATA_SIZE} \
+            create ${1} ${2} ${2} ${ROOT_HASH}
+        if [ $? = 0 ]; then
+            if [ "${3}" != "none" ]; then
+                #mount -o ro /dev/mapper/${1} ${3}
+                mount -o ro /dev/dm-${DM_DEV_COUNT} ${3}
+            else
+                echo "skip mounting ${2}"
+            fi
+            DM_VERITY_STATUS="enabled"
+            DM_DEV_COUNT=$((DM_DEV_COUNT+1))
+        else
+            echo "dm-verity fails with return code $?"
+            DM_VERITY_STATUS="disabled"
+        fi
+    else
+        echo "Cannot find root hash in initramfs"
+        DM_VERITY_STATUS="disabled"
+    fi
+}
 # Try to mount the root image read-write and then boot it up.
 # This function distinguishes between a read-only image and a read-write image.
 # In the former case (typically an iso), it tries to make a union mount if possible.
 # In the latter case, the root image could be mounted and then directly booted up.
 mount_and_boot() {
     mkdir $ROOT_MOUNT
+
     mknod /dev/loop0 b 7 0 2>/dev/null
 
     if [ "${FIRMWARE}" != "" ];
     then
-        ROOT_DEVICE="/dev/mmcblk1p1"
-        wait_for_device
+	ROOT_DEVICE="/dev/mmcblk1p1"
+	wait_for_device
     fi
-	if [ "$ROOT_DEVICE" != "" ];
-	then
-    	if ! mount -o rw,noatime,nodiratime $ROOT_DEVICE $ROOT_MOUNT ; then
+    if [ "$ROOT_DEVICE" != "" ]; then
+	dm_verity_setup system ${ROOT_DEVICE} ${ROOT_MOUNT}
+	dm_verity_setup vendor ${VENDOR_DEVICE} none
+	echo "dm-verity is $DM_VERITY_STATUS"
+	if [ "$DM_VERITY_STATUS" = "disabled" ]; then
+	    if ! mount -o rw,noatime,nodiratime $ROOT_DEVICE $ROOT_MOUNT ; then
 		fatal "Could not mount rootfs device"
-    	fi
+	    fi
 	fi
+    fi
 
-	if [ "${FIRMWARE}" != "" ]; then
-		format_and_install
-	fi
+    if [ "${FIRMWARE}" != "" ]; then
+	format_and_install
+    fi
 
     if touch $ROOT_MOUNT/bin 2>/dev/null; then
-		# The root image is read-write, directly boot it up.
-		boot_root
+	# The root image is read-write, directly boot it up.
+	boot_root
     fi
 
     # determine which unification filesystem to use
@@ -215,7 +246,17 @@ mount_and_boot() {
 		rm -rf /rootfs.ro /rootfs.rw
 		fatal "Could not move rootfs mount point"
 	    else
-		mount -t tmpfs -o rw,noatime,mode=755 tmpfs /rootfs.rw
+		if [ "$DM_VERITY_STATUS" = "enabled" ]; then
+		    # mount /dev/product as overlay fs
+		    if [ -b "/dev/product" ]; then
+			if ! mount /dev/product /rootfs.rw; then
+			    mkfs.ext4 -F /dev/product
+			    mount /dev/product /rootfs.rw
+			fi
+		    fi
+		else
+		    mount -t tmpfs -o rw,noatime,mode=755 tmpfs /rootfs.rw
+		fi
 		mkdir -p /rootfs.rw/upperdir /rootfs.rw/work
 		mount -t overlay overlay -o "lowerdir=/rootfs.ro,upperdir=/rootfs.rw/upperdir,workdir=/rootfs.rw/work" $ROOT_MOUNT
 		mkdir -p $ROOT_MOUNT/rootfs.ro $ROOT_MOUNT/rootfs.rw

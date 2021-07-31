@@ -4,6 +4,7 @@ After=aml_key_inject.service
 
 [Service]
 User=root
+Type=oneshot
 ExecStart=/usr/bin/tee_hdcp
 
 [Install]
