@@ -53,6 +53,7 @@ EXTERNALSRC_pn-aml-mediadrm-cleartvp-bin = "${@'${RDK_ROOT_PATH}/aml-comp/multim
 EXTERNALSRC_pn-playready = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/playready-bin' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm/playready-bin')) else ''}"
 EXTERNALSRC_pn-gst-plugin-aml-asink = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-aml-asink' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-aml-asink')) else ''}"
 EXTERNALSRC_pn-gst-plugin-pcr-sink = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-pcr-sink' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-plugin-pcr-sink')) else ''}"
+EXTERNALSRC_pn-gstqamtunersrc-aml = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml')) else ''}"
 EXTERNALSRC_pn-gst-aml-drm-plugins = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0')) else ''}"
 EXTERNALSRC_pn-dvalin = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu')) else ''}"
 EXTERNALSRC_pn-libgles-eabihf-dvalin-wayland-drm = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali')) else ''}"
