@@ -1,4 +1,4 @@
-From d33f6d754537759efe2a93eda0af4ad6fd620e9a Mon Sep 17 00:00:00 2001
+From c1f1fb302e370d721f32330aaa23f85972d7be5d Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Mon, 1 Jun 2020 11:22:21 +0800
 Subject: [PATCH 1/2] playready: add headers for build [1/1]

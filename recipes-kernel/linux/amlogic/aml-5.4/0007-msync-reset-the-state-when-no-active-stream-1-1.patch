@@ -1,0 +1,48 @@
+From 5d513280647e027d2a564182c8ea4cbe7f4cfaba Mon Sep 17 00:00:00 2001
+From: "yongchun.li" <yongchun.li@amlogic.com>
+Date: Sun, 1 Aug 2021 06:19:59 +0000
+Subject: [PATCH 7/9] msync: reset the state when no active stream [1/1]
+
+PD#SWPL-56612
+
+Problem:
+state no clear can cause clock was incorrectly open
+by resume. cause seek could have a few second freeze
+to wait clock, as clock start too early and audio
+no started
+
+Solution:
+reset the state to make the state mechine run properly
+
+Verify:
+Ah-212 Netflix
+
+Change-Id: I0d17e48ac509db3c14309ed2f3061d6e58a22e45
+Signed-off-by: yongchun.li <yongchun.li@amlogic.com>
+---
+ drivers/amlogic/media/avsync/msync.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/amlogic/media/avsync/msync.c b/drivers/amlogic/media/avsync/msync.c
+index 1bd5a70949d5..74a0811b143b 100644
+--- a/drivers/amlogic/media/avsync/msync.c
++++ b/drivers/amlogic/media/avsync/msync.c
+@@ -1003,6 +1003,7 @@ static void session_video_stop(struct sync_session *session)
+ 		session->clock_start = false;
+ 		session->start_posted = false;
+ 		session->v_timeout = false;
++		session->stat = AVS_STAT_INIT;
+ 		msync_dbg(LOG_INFO, "[%d]%s clock stop\n",
+ 			session->id, __func__);
+ 	} else if (session->mode == AVS_MODE_IPTV) {
+@@ -1036,6 +1037,7 @@ static void session_audio_stop(struct sync_session *session)
+ 		session->clock_start = false;
+ 		session->start_posted = false;
+ 		session->v_timeout = false;
++		session->stat = AVS_STAT_INIT;
+ 		msync_dbg(LOG_INFO, "[%d]%d clock stop\n",
+ 			session->id, __LINE__);
+ 	} else if (session->audio_switching) {
+-- 
+2.29.2
+

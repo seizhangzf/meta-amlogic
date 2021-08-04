@@ -1,0 +1,56 @@
+From 0c01b166bb5263ff385572e17da7fbdc5a054db2 Mon Sep 17 00:00:00 2001
+From: Pengcheng Chen <pengcheng.chen@amlogic.com>
+Date: Fri, 23 Jul 2021 15:29:15 +0800
+Subject: [PATCH 9/9] vpp: correct VPP_HSC_PHASE_CTRL setting [1/1]
+
+PD#SWPL-56236
+
+Problem:
+VPP_HSC_PHASE_CTRL setting not init
+
+Solution:
+correct VPP_HSC_PHASE_CTRL setting
+
+Verify:
+t3
+
+Change-Id: Ic60b0f1c81f1b29886ec0e404b295a1ffb3a02ce
+Signed-off-by: Pengcheng Chen <pengcheng.chen@amlogic.com>
+---
+ drivers/amlogic/media/video_sink/vpp.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/amlogic/media/video_sink/vpp.c b/drivers/amlogic/media/video_sink/vpp.c
+index 871f00ad2dec..8b54941c387a 100644
+--- a/drivers/amlogic/media/video_sink/vpp.c
++++ b/drivers/amlogic/media/video_sink/vpp.c
+@@ -2366,8 +2366,12 @@ static void sr_pps_phase_auto_calculation(struct vpp_frame_par_s *next_frame_par
+ 	u32 sr1_sr2_vert_outphs;
+ 	u32 sr1_sr2_horz_outphs;
+ 
+-	if (!cur_dev->aisr_support ||
+-	    !cur_dev->pps_auto_calc)
++	if (hscaler_8tap_enable[0])
++		next_frame_par->hsc_rpt_p0_num0 = 3;
++	else
++		next_frame_par->hsc_rpt_p0_num0 = 1;
++	next_frame_par->vsc_top_rpt_l0_num = 1;
++	if (!cur_dev->pps_auto_calc)
+ 		return;
+ 	sr = &sr_info;
+ 	sr0_sharp_sr2_ctrl =
+@@ -2429,11 +2433,6 @@ static void sr_pps_phase_auto_calculation(struct vpp_frame_par_s *next_frame_par
+ 			next_frame_par->h_phase[2],
+ 			next_frame_par->v_phase[2]);
+ 	sr_pps_step_phase_id(next_frame_par);
+-	if (hscaler_8tap_enable[0])
+-		next_frame_par->hsc_rpt_p0_num0 = 3;
+-	else
+-		next_frame_par->hsc_rpt_p0_num0 = 1;
+-	next_frame_par->vsc_top_rpt_l0_num = 1;
+ 	vd_hphase_ctrl_adjust(next_frame_par);
+ 	if (next_frame_par->hsc_rpt_p0_num0 >= 15)
+ 		next_frame_par->hsc_rpt_p0_num0 = 15;
+-- 
+2.29.2
+

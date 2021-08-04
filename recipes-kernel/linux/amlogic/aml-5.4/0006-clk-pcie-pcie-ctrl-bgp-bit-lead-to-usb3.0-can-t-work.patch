@@ -1,0 +1,91 @@
+From 7dcd3b465e141a490e671efb76254b89beadddae Mon Sep 17 00:00:00 2001
+From: yu tu <yu.tu@amlogic.com>
+Date: Tue, 27 Jul 2021 19:00:33 +0800
+Subject: [PATCH 6/9] clk: pcie: pcie ctrl bgp bit lead to usb3.0 can't work
+ [1/1]
+
+PD#SWPL-55797
+
+Problem:
+pcie bgp bit lead to usb3.0 can't work
+
+Solution:
+bgp clk add clk flag don't close in boot step
+
+Verify:
+t7 and sc2
+
+Change-Id: Ifd7502998e37f528487dbd1bca390a860e640c1d
+Signed-off-by: yu tu <yu.tu@amlogic.com>
+---
+ drivers/clk/meson/g12a.c | 1 +
+ drivers/clk/meson/sc2.c  | 1 +
+ drivers/clk/meson/t3.c   | 1 +
+ drivers/clk/meson/t7.c   | 1 +
+ drivers/clk/meson/tm2.c  | 2 +-
+ 5 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/clk/meson/g12a.c b/drivers/clk/meson/g12a.c
+index 8476c25ac295..412f03f56545 100644
+--- a/drivers/clk/meson/g12a.c
++++ b/drivers/clk/meson/g12a.c
+@@ -2153,6 +2153,7 @@ static struct clk_regmap g12a_pcie_bgp = {
+ 		.ops = &clk_regmap_gate_ops,
+ 		.parent_hws = (const struct clk_hw *[]) { &g12a_pcie_pll.hw },
+ 		.num_parents = 1,
++		.flags = CLK_IGNORE_UNUSED,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/meson/sc2.c b/drivers/clk/meson/sc2.c
+index 54f222796e72..a5b2c17bdfdc 100644
+--- a/drivers/clk/meson/sc2.c
++++ b/drivers/clk/meson/sc2.c
+@@ -1426,6 +1426,7 @@ static struct clk_regmap sc2_pcie_bgp = {
+ 		.ops = &clk_regmap_gate_ops,
+ 		.parent_hws = (const struct clk_hw *[]) { &sc2_pcie_pll.hw },
+ 		.num_parents = 1,
++		.flags = CLK_IGNORE_UNUSED,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/meson/t3.c b/drivers/clk/meson/t3.c
+index abc1cf99ae5b..9c2d8f0f5b9b 100644
+--- a/drivers/clk/meson/t3.c
++++ b/drivers/clk/meson/t3.c
+@@ -1258,6 +1258,7 @@ static struct clk_regmap t3_pcie_bgp = {
+ 		.ops = &clk_regmap_gate_ops,
+ 		.parent_hws = (const struct clk_hw *[]) { &t3_pcie_pll.hw },
+ 		.num_parents = 1,
++		.flags = CLK_IGNORE_UNUSED,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/meson/t7.c b/drivers/clk/meson/t7.c
+index 323cf9ce826e..f3aee1d0c231 100644
+--- a/drivers/clk/meson/t7.c
++++ b/drivers/clk/meson/t7.c
+@@ -1293,6 +1293,7 @@ static struct clk_regmap t7_pcie_bgp = {
+ 		.ops = &clk_regmap_gate_ops,
+ 		.parent_hws = (const struct clk_hw *[]) { &t7_pcie_pll.hw },
+ 		.num_parents = 1,
++		.flags = CLK_IGNORE_UNUSED,
+ 	},
+ };
+ 
+diff --git a/drivers/clk/meson/tm2.c b/drivers/clk/meson/tm2.c
+index f6b7261ba48c..dba09e41250b 100644
+--- a/drivers/clk/meson/tm2.c
++++ b/drivers/clk/meson/tm2.c
+@@ -856,7 +856,7 @@ static struct clk_regmap tm2_pcie_bgp = {
+ 			&tm2_pcie_pll.hw
+ 		},
+ 		.num_parents = 1,
+-		.flags = CLK_SET_RATE_PARENT,
++		.flags = CLK_SET_RATE_PARENT | CLK_IGNORE_UNUSED,
+ 	},
+ };
+ 
+-- 
+2.29.2
+

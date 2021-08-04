@@ -1,0 +1,50 @@
+From 893e6d739524c652a0d4c53794f6c4ba46b905d1 Mon Sep 17 00:00:00 2001
+From: "yongchun.li" <yongchun.li@amlogic.com>
+Date: Thu, 29 Jul 2021 09:37:13 +0000
+Subject: [PATCH] audio_hal: adjust alsa start threshold for better underflow
+ tolerance [1/1]
+
+PD#SWPL-53638
+
+Problem:
+HDMI alsa path at low buffer level easy to  underflow
+due to SPDIF path is full,
+
+Solution:
+increase the alsa start threshold to let more buffer level in
+place to tolerance the underflow
+
+Verify:
+Ah-212 NTS 5.3 test
+
+Change-Id: I505a8a7eefd3d27449b9e3c89bd07a090dee8c53
+Signed-off-by: yongchun.li <yongchun.li@amlogic.com>
+---
+ audio_hal/alsa_config_parameters.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/audio_hal/alsa_config_parameters.c b/audio_hal/alsa_config_parameters.c
+index 7845bfc..7bc37c0 100644
+--- a/audio_hal/alsa_config_parameters.c
++++ b/audio_hal/alsa_config_parameters.c
+@@ -66,7 +66,7 @@ static void get_mat_hardware_config_parameters(
+     hardware_config->period_count = PLAYBACK_PERIOD_COUNT;
+     //hardware_config->period_size = PERIOD_SIZE /* * 4 */;
+     hardware_config->period_size = 61440 / 4; /* period_size in frame unit, MAT IEC61937 frame size (61440) bytes */
+-    hardware_config->start_threshold = hardware_config->period_size * hardware_config->period_count / 2;
++    hardware_config->start_threshold = hardware_config->period_size * hardware_config->period_count;
+ #ifndef TINYALSA_VERSION
+     hardware_config->avail_min = 0;
+ #endif
+@@ -157,7 +157,7 @@ static void get_pcm_hardware_config_parameters(
+     hardware_config->period_size = PERIOD_SIZE;
+     if (continuous_mode) {
+         hardware_config->period_count = PLAYBACK_PERIOD_COUNT;
+-        hardware_config->start_threshold = hardware_config->period_size * hardware_config->period_count / 2;
++        hardware_config->start_threshold = hardware_config->period_size * hardware_config->period_count;
+     } else {
+         hardware_config->period_count = PLAYBACK_PERIOD_COUNT;
+         hardware_config->start_threshold = hardware_config->period_size * hardware_config->period_count / 2;
+-- 
+2.29.2
+

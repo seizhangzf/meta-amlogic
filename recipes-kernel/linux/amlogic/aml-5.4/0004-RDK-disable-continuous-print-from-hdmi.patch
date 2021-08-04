@@ -1,7 +1,7 @@
-From 6a33823824f1ec4152514ee0cb4506ebdc8fce26 Mon Sep 17 00:00:00 2001
+From 979f7a2e988da009694a51206cb3822f040e42b6 Mon Sep 17 00:00:00 2001
 From: Ajay Gautam <ajay.gautam@amlogic.com>
 Date: Tue, 25 May 2021 11:54:34 -0700
-Subject: [PATCH 4/6] RDK: disable continuous print from hdmi
+Subject: [PATCH 4/9] RDK: disable continuous print from hdmi
 
 PD#SWPL-46838
 
@@ -23,10 +23,10 @@ Signed-off-by: Ajay Gautam <ajay.gautam@amlogic.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_edid.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_edid.c
-index 27dead5d756b..3b814f15420e 100644
+index cecda2d29100..ac5b5d5f6c28 100644
 --- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_edid.c
 +++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_edid.c
-@@ -3013,7 +3013,7 @@ enum hdmi_vic hdmitx_edid_get_VIC(struct hdmitx_dev *hdev,
+@@ -3180,7 +3180,7 @@ enum hdmi_vic hdmitx_edid_get_VIC(struct hdmitx_dev *hdev,
  		}
  		/* if TV only supports 480p/2, add 480p60hz as well */
  		if (is_sink_only_sd_4x3(hdev, disp_mode, &vic)) {

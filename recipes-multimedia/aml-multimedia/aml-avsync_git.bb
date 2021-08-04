@@ -7,6 +7,7 @@ include aml-multimedia.inc
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/libavsync;protocol=${AML_GIT_PROTOCOL};branch=master;"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/avsync-lib/')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 
 do_configure[noexec] = "1"

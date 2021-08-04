@@ -1,0 +1,37 @@
+From 6b8719a5d451ec4e7a4eec382484cff0e76ef681 Mon Sep 17 00:00:00 2001
+From: "yujun.zhang" <yujun.zhang@amlogic.com>
+Date: Mon, 12 Jul 2021 22:33:28 +0800
+Subject: [PATCH 8/9] drm: make fbdev framework usable [1/1]
+
+PD#SWPL-54399
+
+Problem:
+Fbdev framework is not usable, so no fb device nodes.
+
+Solution:
+Add DRM_FBDEV_EMULATION config to make fbdev framework usable.
+
+Verify:
+s4, sc2 with firebolt release.
+
+Change-Id: Ib3406072755367380931848701da05f9833623bc
+Signed-off-by: yujun.zhang <yujun.zhang@amlogic.com>
+---
+ init/Kconfig.gki | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/init/Kconfig.gki b/init/Kconfig.gki
+index c595f7e50e7d..f45536c2d272 100644
+--- a/init/Kconfig.gki
++++ b/init/Kconfig.gki
+@@ -8,6 +8,7 @@ config GKI_HIDDEN_DRM_CONFIGS
+ 	select VIDEOMODE_HELPERS
+ 	select WANT_DEV_COREDUMP if !AMLOGIC_MODIFY
+ 	select INTERVAL_TREE
++	select DRM_FBDEV_EMULATION if AMLOGIC_MODIFY
+ 	help
+ 	  Dummy config option used to enable hidden DRM configs.
+ 	  These are normally selected implicitly when including a
+-- 
+2.29.2
+

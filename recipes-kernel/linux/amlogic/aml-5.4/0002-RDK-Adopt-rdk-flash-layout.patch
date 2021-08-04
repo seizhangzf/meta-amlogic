@@ -1,24 +1,24 @@
-From 3ab75b0622739681e912ede235bdce905ca1a404 Mon Sep 17 00:00:00 2001
+From 5e37809b403773a7f27c87c2e7d8932907939530 Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Wed, 7 Apr 2021 12:25:49 +0800
-Subject: [PATCH 2/6] RDK: Adopt rdk flash layout
+Subject: [PATCH 2/9] RDK: Adopt rdk flash layout
 
 Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
 Change-Id: I8eb307c932801fc138c97538eb2b596d0c89fe96
 ---
- .../dts/amlogic/partition_normal_linux.dtsi   | 46 ++++++++++++-------
- 1 file changed, 30 insertions(+), 16 deletions(-)
+ .../dts/amlogic/partition_normal_linux.dtsi   | 60 ++++++++++++++-----
+ 1 file changed, 44 insertions(+), 16 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
-index 03bea1b99b2a..7bcbe0fc0ab7 100644
+index 03bea1b99b2a..f43000cbd29e 100644
 --- a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
 +++ b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
-@@ -12,22 +12,24 @@
+@@ -12,22 +12,26 @@
  
  / {
      partitions: partitions{
 -		parts = <15>;
-+		parts = <17>;
++		parts = <19>;
  		part-0 = <&logo>;
  		part-1 = <&recovery>;
  		part-2 = <&misc>;
@@ -45,11 +45,13 @@ index 03bea1b99b2a..7bcbe0fc0ab7 100644
 +		part-13 = <&system_b>;
 +		part-14 = <&product>;
 +		part-15 = <&cache>;
-+		part-16 = <&data>;
++		part-16 = <&vbmeta_a>;
++		part-17 = <&vbmeta_b>;
++		part-18 = <&data>;
  
  		logo:logo{
  			pname = "logo";
-@@ -60,9 +62,15 @@
+@@ -60,9 +64,15 @@
  			size = <0x0 0x1000000>;
  			mask = <2>;
  		};
@@ -67,7 +69,7 @@ index 03bea1b99b2a..7bcbe0fc0ab7 100644
  			size = <0x0 0x4000000>;
  			mask = <1>;
  		};
-@@ -88,10 +96,16 @@
+@@ -88,10 +98,16 @@
  			size = <0x0 0x8000000>;
  			mask = <1>;
  		};
@@ -87,6 +89,25 @@ index 03bea1b99b2a..7bcbe0fc0ab7 100644
  			mask = <1>;
  		};
  		product:product{
+@@ -105,6 +121,18 @@
+ 			size = <0x0 0x46000000>;
+ 			mask = <2>;
+ 		};
++		vbmeta_a:vbmeta_a
++		{
++			pname = "vbmeta_a";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
++		vbmeta_b:vbmeta_b
++		{
++			pname = "vbmeta_b";
++			size = <0x0 0x200000>;
++			mask = <1>;
++		};
+ 		data:data
+ 		{
+ 			pname = "data";
 -- 
 2.29.2
 
