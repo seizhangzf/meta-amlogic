@@ -47,6 +47,9 @@ do_install() {
 			install -d ${D}/logo_files
 			install -m 0644 -D ${S}/logo_files/${SOC}/bootup.bmp ${D}/logo_files/bootup.bmp
         fi
+        if [ -d ${S}/recovery_img/${SOC} ]; then
+			install -m 0644 -D ${S}/recovery_img/${SOC}/rdk-recovery.img ${DEPLOY_DIR_IMAGE}/recovery.img
+        fi
 
 }
 

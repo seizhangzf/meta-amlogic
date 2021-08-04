@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 include aml-multimedia.inc
 
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/libavsync;protocol=${AML_GIT_PROTOCOL};branch=master;"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/avsync-lib/')}"
 
 
 do_configure[noexec] = "1"

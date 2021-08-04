@@ -7,11 +7,14 @@ SRC_URI = " git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=$
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm')}"
 
 SRCREV ?= "${AUTOREV}"
 
 S = "${WORKDIR}/git"
 PATCHTOOL = "git"
+
+PATCHTOOL="git"
 
 ARM_TARGET = "arm.aapcs-linux.hard"
 ARM_TARGET_aarch64 = "aarch64.lp64."

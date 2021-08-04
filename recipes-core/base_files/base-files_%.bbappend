@@ -13,9 +13,16 @@ dirs755_append_tm2 = " /vendor "
 do_install_append_t5d () {
     mkdir -p ${D}/vendor
     mkdir -p ${D}/data
-    cat >> ${D}${sysconfdir}/fstab <<EOF
+    # if dm-verity is enabled, mount /dev/mapper/vendor(/dev/dm-1) as ro
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'true', 'false', d)}; then
+        cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/dm-1            /vendor                    ext4       ro              0  0
+EOF
+    else
+        cat >> ${D}${sysconfdir}/fstab <<EOF
  /dev/vendor            /vendor                    auto       defaults              0  0
 EOF
+    fi
 }
 FILES_${PN}_append_t5d = " /vendor/* "
 dirs755_append_t5d = " /vendor "
@@ -47,9 +54,16 @@ do_install_append_s4 () {
     mkdir -p ${D}/data
     mkdir -p ${D}/opt
     ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
-    cat >> ${D}${sysconfdir}/fstab <<EOF
+    # if dm-verity is enabled, mount /dev/mapper/vendor(/dev/dm-1) as ro
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'true', 'false', d)}; then
+        cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/dm-1            /vendor                    ext4       ro              0  0
+EOF
+    else
+        cat >> ${D}${sysconfdir}/fstab <<EOF
  /dev/vendor            /vendor                    auto       defaults              0  0
 EOF
+    fi
 }
 FILES_${PN}_append_s4 = " /vendor/* /data /opt "
 dirs755_append_s4 = " /vendor /data /opt"
@@ -60,9 +74,16 @@ do_install_append_sc2 () {
     mkdir -p ${D}/data
     mkdir -p ${D}/opt
     ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
-    cat >> ${D}${sysconfdir}/fstab <<EOF
+    # if dm-verity is enabled, mount /dev/mapper/vendor(/dev/dm-1) as ro
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'true', 'false', d)}; then
+        cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/dm-1            /vendor                    ext4       ro              0  0
+EOF
+    else
+        cat >> ${D}${sysconfdir}/fstab <<EOF
  /dev/vendor            /vendor                    auto       defaults              0  0
 EOF
+    fi
 }
 FILES_${PN}_append_sc2 = " /vendor/* /data /opt "
 dirs755_append_sc2 = " /vendor /data /opt"
@@ -74,10 +95,18 @@ do_install_append_sc2-5.4 () {
     mkdir -p ${D}/opt
     echo fdd00000.dwc2_a > ${D}/etc/adb_udc_file
     ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
-    cat >> ${D}${sysconfdir}/fstab <<EOF
- /dev/vendor            /vendor                    auto       defaults              0  0
+    # if dm-verity is enabled, mount /dev/mapper/vendor(/dev/dm-1) as ro
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'true', 'false', d)}; then
+        cat >> ${D}${sysconfdir}/fstab <<EOF
+/dev/dm-1            /vendor                    ext4       ro              0  0
 EOF
+    else
+        cat >> ${D}${sysconfdir}/fstab <<EOF
+/dev/vendor            /vendor                    auto       defaults              0  0
+EOF
+    fi
 }
+
 FILES_${PN}_append_sc2-5.4 = " /vendor/* /data /opt "
 dirs755_append_sc2-5.4 = " /vendor /data /opt"
 

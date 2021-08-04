@@ -8,9 +8,8 @@ MBRANCH = "amlogic-5.4-dev"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=${MBRANCH};"
 
 #For common patches
-MDIR = "media_modules-5.4"
-SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${MDIR}')}"
-SRC_URI_append = " file://modules-load.sh"
+MDIR = "media_modules"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-5.4/amlogic/${MDIR}')}"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
@@ -27,36 +26,10 @@ do_install() {
     mkdir -p ${MEDIADIR} ${FIRMWAREDIR}
     find ${S}/drivers/ -name *.ko | xargs -i install -m 0666 {} ${MEDIADIR}
     install -m 0666 ${MEDIA_MODULES_UCODE_BIN} ${FIRMWAREDIR}
-    install -d ${D}/etc
-    install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
-}
-
-do_install_append() {
-
-IS_TV=${@bb.utils.contains('DISTRO_FEATURES','amlogic-tv','ztv','z',d)}
-
-if [ ${IS_TV} == 'ztv' ]; then
-cat >> ${D}/etc/modules-load.sh <<EOF
-/sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/aml_hardware_dmx.ko
-if [ -f /lib/modules/${KERNEL_VERSION}/kernel/media/dovi_tm2_tv_16.ko ]
-then
-    /sbin/insmod /lib/modules/${KERNEL_VERSION}/kernel/media/dovi_tm2_tv_16.ko
-    /bin/echo Y > /sys/module/amdolby_vision/parameters/dolby_vision_enable
-    /bin/echo 0x100 > /sys/module/amdolby_vision/parameters/debug_dolby
-fi
-echo 1 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
-EOF
-else
-cat >> ${D}/etc/modules-load.sh <<EOF
-echo 0 > /sys/module/amvdec_ports/parameters/enable_nr
-echo 0 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
-EOF
-fi
 }
 
 FILES_${PN} = " \
         /lib/firmware/video/video_ucode.bin \
-        /etc/modules-load.sh \
         "
 
 # Header file provided by a separate package

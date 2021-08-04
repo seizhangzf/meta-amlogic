@@ -16,25 +16,13 @@ if [ -d $RDK_ROOT_PATH/meta-cmf ] && [ -z "$(echo $MACHINE | grep -- -rdk-broadb
     # add RDK WPE targets to conf file
     # this step has to be added before calling meta-cmf/setup-environment
     # so that the target is displayed to the user
-    if [ $(grep -c 'rdk-generic-mediaclient-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-mediaclient-image/a \ \ \ \ rdk-generic-mediaclient-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
-    if [ $(grep -c 'rdk-generic-mediaclient-westeros-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-mediaclient-wpe-image/a \ \ \ \ rdk-generic-mediaclient-westeros-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
-    if [ $(grep -c 'rdk-generic-hybrid-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-image/a \ \ \ \ rdk-generic-hybrid-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
-    if [ $(grep -c 'rdk-generic-hybrid-wpe-lxc-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-wpe-lxc-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
-    if [ $(grep -c 'rdk-generic-hybrid-westeros-wpe-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-westeros-wpe-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
-
-    if [ $(grep -c 'rdk-generic-hybrid-thunder-image' $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt) -eq 0 ]; then
-        sed -i -e "/rdk-generic-hybrid-wpe-image/a \ \ \ \ rdk-generic-hybrid-thunder-image" $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt
-    fi
+    
+        cat > $RDK_ROOT_PATH/meta-rdk/conf/conf-notes.txt <<EOF
+Common targets are:
+    lib32-rdk-generic-mediaclient-image
+    lib32-rdk-generic-hybrid-image
+EOF
+    
 fi
 source meta-cmf/setup-environment $1
 if [ $? -ne 0 ]; then
@@ -89,6 +77,14 @@ BBLAYERS =+ "\${RDKROOT}/meta-aml-netflix"
 EOF
 fi
 
+# Add meta-dvb only if a machine configuration choosed from different layer
+if [ -d $RDK_ROOT_PATH/meta-dvb ] && [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-dvb[^-]') -eq 0  ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-dvb"
+EOF
+fi
+
+
 
 # Add meta-openembedded/meta-initramfs only if a machine configuration choosed from different layer
 if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-initramfs[^-]') -eq 0 ]; then
@@ -96,6 +92,21 @@ if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-openembedded/meta-ini
 BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-initramfs"
 EOF
 fi
+
+# Add meta-security only if not already present.
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-security[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-security"
+EOF
+fi
+
+# Add meta-perl only if not already present.
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-perl[^-]') -eq 0 ]; then
+    cat >> conf/bblayers.conf <<EOF
+BBLAYERS =+ "\${RDKROOT}/meta-openembedded/meta-perl"
+EOF
+fi
+
 
 cat >> conf/local.conf <<EOF
 LICENSE_FLAGS_WHITELIST="commercial"
