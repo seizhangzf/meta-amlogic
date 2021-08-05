@@ -1,0 +1,44 @@
+From 8b931f980a815c0fcb13eb9ce6214f1054e6370b Mon Sep 17 00:00:00 2001
+From: Terrence Pu <terrence.pu@amlogic.com>
+Date: Thu, 5 Aug 2021 22:43:33 +0000
+Subject: [PATCH] RDK: fix toolchain path issue for customer
+
+Problem:
+acs is using hard-coded toolchain path cause build issue
+
+Solution:
+remove the hard-coded path and use staging toolchain
+
+Verify:
+build with RDKCentral BSP 408-RC10
+
+Signed-off-by: Terrence Pu <terrence.pu@amlogic.com>
+---
+ arch/arm/mach-meson/sc2/firmware/acs/Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-meson/sc2/firmware/acs/Makefile b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
+index 01d869a755..cf87bd4fe9 100644
+--- a/arch/arm/mach-meson/sc2/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?= aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+@@ -182,7 +182,7 @@ ASFLAGS			+= 	-nostdinc -ffreestanding -Wa,--fatal-warnings	\
+ 				-mgeneral-regs-only -D__ASSEMBLY__		\
+ 				${DEFINES} ${INCLUDES}
+ CFLAGS			+= 	-nostdinc -pedantic -ffreestanding -Wall	\
+-				-Werror -mgeneral-regs-only -std=c99 -c -Os	\
++				-mgeneral-regs-only -std=c99 -c -Os	\
+ 				${DEFINES} ${INCLUDES} $(VPATH_LIST:%=-I%)
+ CFLAGS			+=	-ffunction-sections -fdata-sections
+ ASFLAGS			+= 	${FIRMWARE_CPPFLAGS}
+-- 
+2.32.0
+
