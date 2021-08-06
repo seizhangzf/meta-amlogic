@@ -1,0 +1,126 @@
+From 8124c6fd3478ef3fdc4f4dd145c8d19b5c3db82c Mon Sep 17 00:00:00 2001
+From: Tao Zeng <tao.zeng@amlogic.com>
+Date: Thu, 15 Jul 2021 17:09:17 +0800
+Subject: [PATCH 1/2] bl33: support external toolchain path [2/2]
+
+PD#SWPL-55325
+
+Problem:
+Toolchain of BL33 is fixed path, can build failed when customer
+build boot loader
+
+Solution:
+Can dynamic select toolchain path, if not specified CROSS_COMPILE,
+will used default path. You can using command like to build uboot:
+export CROSS_COMPILE=/opt/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+./mk gxl_p212_v1
+
+Verify:
+local
+
+Change-Id: I7363127114271af74e06ab861392ffd3348bb459
+Signed-off-by: Tao Zeng <tao.zeng@amlogic.com>
+---
+ arch/arm/mach-meson/a1/firmware/acs/Makefile   | 2 +-
+ arch/arm/mach-meson/c1/firmware/acs/Makefile   | 2 +-
+ arch/arm/mach-meson/c2/firmware/acs/Makefile   | 2 +-
+ arch/arm/mach-meson/g12a/firmware/acs/Makefile | 2 +-
+ arch/arm/mach-meson/s4/firmware/acs/Makefile   | 2 +-
+ arch/arm/mach-meson/sc2/firmware/acs/Makefile  | 2 +-
+ arch/arm/mach-meson/t7/firmware/acs/Makefile   | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm/mach-meson/a1/firmware/acs/Makefile b/arch/arm/mach-meson/a1/firmware/acs/Makefile
+index 70d2d83720..78e616cbb4 100644
+--- a/arch/arm/mach-meson/a1/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/a1/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/c1/firmware/acs/Makefile b/arch/arm/mach-meson/c1/firmware/acs/Makefile
+index 70d2d83720..78e616cbb4 100644
+--- a/arch/arm/mach-meson/c1/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/c1/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/c2/firmware/acs/Makefile b/arch/arm/mach-meson/c2/firmware/acs/Makefile
+index 70d2d83720..78e616cbb4 100644
+--- a/arch/arm/mach-meson/c2/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/c2/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/g12a/firmware/acs/Makefile b/arch/arm/mach-meson/g12a/firmware/acs/Makefile
+index 47daf722f4..6f7b9f591f 100644
+--- a/arch/arm/mach-meson/g12a/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/g12a/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/s4/firmware/acs/Makefile b/arch/arm/mach-meson/s4/firmware/acs/Makefile
+index 06bd365e07..3738b1f0bd 100644
+--- a/arch/arm/mach-meson/s4/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/s4/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/sc2/firmware/acs/Makefile b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
+index 01d869a755..c390348753 100644
+--- a/arch/arm/mach-meson/sc2/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/sc2/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+diff --git a/arch/arm/mach-meson/t7/firmware/acs/Makefile b/arch/arm/mach-meson/t7/firmware/acs/Makefile
+index 01d869a755..c390348753 100644
+--- a/arch/arm/mach-meson/t7/firmware/acs/Makefile
++++ b/arch/arm/mach-meson/t7/firmware/acs/Makefile
+@@ -32,7 +32,7 @@
+ # Default values for build configurations
+ #
+ 
+-export CROSS_COMPILE=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
++export CROSS_COMPILE ?=/opt/gcc-linaro-aarch64-none-elf-4.8-2013.11_linux/bin/aarch64-none-elf-
+ 
+ include $(buildsrc)/config.mk
+ include $(buildtree)/include/autoconf.mk
+-- 
+2.29.2
+
