@@ -64,7 +64,9 @@ BL32_SOC_FAMILY_tm2 = "tm2"
 BL32_SOC_FAMILY_t5d = "t5d"
 BL32_SOC_FAMILY_t5d-5.4 = "t5d"
 
+PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-elf/bin"
 PATH_append = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+DEPENDS_append = "gcc-linaro-aarch64-elf-native "
 DEPENDS_append = "optee-scripts-native optee-userspace-securebl32"
 DEPENDS_append = " riscv-none-gcc-native "
 
@@ -78,8 +80,7 @@ do_compile () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
     export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
-    export CROSS_COMPILE=${TARGET_PREFIX}
-    export KCFLAGS="--sysroot=${PKG_CONFIG_SYSROOT_DIR}"
+    export CROSS_COMPILE=aarch64-elf-
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
@@ -102,8 +103,7 @@ do_compile_g12a () {
     cp fip/mk .
     export BUILD_FOLDER=${S}/build/
     export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
-    export CROSS_COMPILE=${TARGET_PREFIX}
-    export KCFLAGS="--sysroot=${PKG_CONFIG_SYSROOT_DIR}"
+    export CROSS_COMPILE=aarch64-elf-
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
