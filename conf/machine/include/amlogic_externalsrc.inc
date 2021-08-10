@@ -1,5 +1,6 @@
 INHERIT += "externalsrc"
 
+EXTERNALSRC_pn-vmx-sdk-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel')) else ''}"
 EXTERNALSRC_pn-nagra-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
 EXTERNALSRC_pn-nagra-cert-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
 EXTERNALSRC_pn-aml-audio-hal = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal')) else ''}"

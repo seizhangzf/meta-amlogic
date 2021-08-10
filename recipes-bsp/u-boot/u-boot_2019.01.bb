@@ -28,6 +28,7 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl40/dummy.git;protocol=${
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/soc/templates;name=soc-templates"
 #Only enable this in openlinux
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
+#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
 
 PATCHTOOL="git"
 
@@ -78,8 +79,11 @@ export BL2_ARG = ""
 BL33_ARG = "${@bb.utils.contains('DISTRO_FEATURES','AVB','--avb2','',d)}"
 AML_NAGRA_UBOOT_PARAM = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-nagra', '--chip-varient nocs-jts-ap --bl32 nagra-sdk/bootloader/sc2/bl32/blob-bl32.bin.signed --bl31 nagra-sdk/bootloader/sc2/bl31/blob-bl31.bin.signed', '', d)}"
 
-DEBUG_PREFIX_MAP = ""
+#VMX UBOOT PATH depends on SoC
+VMX_UBOOT_PATH_s4 = "s905y4"
+VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 vmx-sdk/bootloader/${VMX_UBOOT_PATH}/bl32/blob-bl32.bin.signed', '', d)}"
 
+DEBUG_PREFIX_MAP = ""
 do_compile () {
     cd ${S}
     cp fip/mk .
@@ -88,7 +92,7 @@ do_compile () {
     export CROSS_COMPILE=aarch64-elf-
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
-    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${AML_NAGRA_UBOOT_PARAM}
+    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${AML_NAGRA_UBOOT_PARAM} ${VMX_UBOOT_ARG}
     cp -rf build/* fip/
 }
 
