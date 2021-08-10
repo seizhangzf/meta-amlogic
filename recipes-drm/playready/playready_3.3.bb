@@ -4,7 +4,7 @@ DEPENDS = "optee-userspace bzip2 libxml2 aml-secmem aml-mediahal-sdk"
 RDEPENDS_${PN} = "libbz2"
 
 FILESEXTRAPATHS_preppend := "${THISDIR}/files/:"
-SRC_URI = "git://${AML_GIT_ROOT_PR}/vendor/playready.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=linux-3.x-amlogic"
+SRC_URI = "git://${AML_GIT_ROOT_OP}/vendor/playready.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=linux-3.x-amlogic"
 #SRC_URI += " file://0001-playready-add-headers-for-build-1-1.patch;patchdir=${WORKDIR}/git"
 
 #For common patches
