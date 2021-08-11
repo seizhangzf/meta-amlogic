@@ -1,7 +1,7 @@
-From 5e37809b403773a7f27c87c2e7d8932907939530 Mon Sep 17 00:00:00 2001
+From c9825f26db063e849106d12317af1133f942b28e Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Wed, 7 Apr 2021 12:25:49 +0800
-Subject: [PATCH 2/9] RDK: Adopt rdk flash layout
+Subject: [PATCH 02/11] RDK: Adopt rdk flash layout
 
 Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
 Change-Id: I8eb307c932801fc138c97538eb2b596d0c89fe96

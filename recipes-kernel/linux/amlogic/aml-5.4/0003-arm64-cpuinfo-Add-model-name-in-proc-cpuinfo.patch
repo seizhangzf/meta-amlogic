@@ -1,7 +1,7 @@
-From bbfa4ee630f291bbf6b19228d503f3a84855907d Mon Sep 17 00:00:00 2001
+From ba36861cff155380271eaa1535de5fd8fcde7807 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Mon, 17 May 2021 21:00:19 -0700
-Subject: [PATCH 3/9] arm64: cpuinfo: Add "model name" in /proc/cpuinfo
+Subject: [PATCH 03/11] arm64: cpuinfo: Add "model name" in /proc/cpuinfo
 
 PD#SWPL-48418
 

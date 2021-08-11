@@ -1,4 +1,4 @@
-From 17dfa3272f95ee023ea844f2ad73b2da78c1b9a7 Mon Sep 17 00:00:00 2001
+From e0053c5274bbb14a7a4c7b4faf690b16cf63b94b Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Mon, 19 Jul 2021 12:03:50 +0000
 Subject: [PATCH 3/3] RDK: change part_name from vendor_a/vendor_b to vendor in

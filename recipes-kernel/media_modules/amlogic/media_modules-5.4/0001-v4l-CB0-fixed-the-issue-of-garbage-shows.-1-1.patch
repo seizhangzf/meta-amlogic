@@ -1,0 +1,85 @@
+From 325f1697578b714d4bf5c2763c0d066990996aa5 Mon Sep 17 00:00:00 2001
+From: Nanxin Qin <nanxin.qin@amlogic.com>
+Date: Wed, 4 Aug 2021 13:07:20 +0800
+Subject: [PATCH] v4l: CB0 fixed the issue of garbage shows. [1/1]
+
+PD#SWPL-56438
+
+Problem:
+NTS: DRS-43-HEVC-29FPS-HEAAC-DWN Video decoder (HEVC)
+output two frames of garbage at resolution change
+
+Solution:
+reports resolution dose not do alignment that cause actual
+size allcated will be smaller than the size of configured
+for decoder HW, as well from logs the luma address
+over arangs of chorma. the solution is that reported
+width and height are aligned.
+
+Verify:
+ah212
+
+Signed-off-by: Nanxin Qin <nanxin.qin@amlogic.com>
+Change-Id: I9b94be8b5d3b4f882f4ea92cbfc6ec07844670f6
+---
+ drivers/amvdec_ports/aml_vcodec_dec.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/amvdec_ports/aml_vcodec_dec.c b/drivers/amvdec_ports/aml_vcodec_dec.c
+index 372eda4a..c5552bb8 100644
+--- a/drivers/amvdec_ports/aml_vcodec_dec.c
++++ b/drivers/amvdec_ports/aml_vcodec_dec.c
+@@ -654,6 +654,7 @@ static bool is_fb_mapped(struct aml_vcodec_ctx *ctx, ulong addr)
+ 	do {
+ 		unsigned int dw_mode = VDEC_DW_NO_AFBC;
+ 		struct file *fp;
++		char file_name[32] = {0};
+ 
+ 		if (!dump_capture_frame || ctx->is_drm_mode)
+ 			break;
+@@ -662,7 +663,9 @@ static bool is_fb_mapped(struct aml_vcodec_ctx *ctx, ulong addr)
+ 		if (dw_mode == VDEC_DW_AFBC_ONLY)
+ 			break;
+ 
+-		fp = filp_open("/data/dec_dump.raw",
++		snprintf(file_name, 32, "/data/dec_dump_%ux%u.raw", vf->width, vf->height);
++
++		fp = filp_open(file_name,
+ 				O_CREAT | O_RDWR | O_LARGEFILE | O_APPEND, 0600);
+ 
+ 		if (!IS_ERR(fp)) {
+@@ -2357,20 +2360,20 @@ static void update_ctx_dimension(struct aml_vcodec_ctx *ctx, u32 type)
+ 	}
+ 
+ 	if (V4L2_TYPE_IS_MULTIPLANAR(type)) {
+-		q_data->sizeimage[0] = ctx->picinfo.y_len_sz / ratio / ratio;
+-		q_data->sizeimage[1] = ctx->picinfo.c_len_sz / ratio / ratio;
++		q_data->sizeimage[0] = ctx->picinfo.y_len_sz;
++		q_data->sizeimage[1] = ctx->picinfo.c_len_sz;
+ 
+-		q_data->coded_width = ctx->picinfo.coded_width / ratio;
+-		q_data->coded_height = ctx->picinfo.coded_height / ratio;
++		q_data->coded_width = ALIGN(ctx->picinfo.coded_width / ratio, 64);
++		q_data->coded_height = ALIGN(ctx->picinfo.coded_height / ratio, 64);
+ 
+-		q_data->bytesperline[0] = ctx->picinfo.coded_width / ratio;
+-		q_data->bytesperline[1] = ctx->picinfo.coded_width / ratio;
++		q_data->bytesperline[0] = ALIGN(ctx->picinfo.coded_width / ratio, 64);
++		q_data->bytesperline[1] = ALIGN(ctx->picinfo.coded_width / ratio, 64);
+ 	} else {
+-		q_data->coded_width = ctx->picinfo.coded_width / ratio;
+-		q_data->coded_height = ctx->picinfo.coded_height / ratio;
+-		q_data->sizeimage[0] = ctx->picinfo.y_len_sz / ratio / ratio;
+-		q_data->sizeimage[0] += ctx->picinfo.c_len_sz / ratio / ratio;
+-		q_data->bytesperline[0] = ctx->picinfo.coded_width / ratio;
++		q_data->coded_width = ALIGN(ctx->picinfo.coded_width / ratio, 64);
++		q_data->coded_height = ALIGN(ctx->picinfo.coded_height / ratio, 64);
++		q_data->sizeimage[0] = ctx->picinfo.y_len_sz;
++		q_data->sizeimage[0] += ctx->picinfo.c_len_sz;
++		q_data->bytesperline[0] = ALIGN(ctx->picinfo.coded_width / ratio, 64);
+ 	}
+ }
+ 
+-- 
+2.29.2
+

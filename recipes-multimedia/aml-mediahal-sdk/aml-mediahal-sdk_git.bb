@@ -7,6 +7,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/mediahal-sdk')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-audio-hal libevent aml-audio-service', '', d)}"
 RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libevent', '', d)}"
@@ -19,6 +20,8 @@ SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"
+
+PATCHTOOL = "git"
 
 ARM_TARGET="arm.aapcs-linux.hard"
 TA_TARGET="noarch"

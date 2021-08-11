@@ -1,7 +1,7 @@
-From 6b8719a5d451ec4e7a4eec382484cff0e76ef681 Mon Sep 17 00:00:00 2001
+From a4641ad1ce925fd35463bb4eb78c4de69f9b6266 Mon Sep 17 00:00:00 2001
 From: "yujun.zhang" <yujun.zhang@amlogic.com>
 Date: Mon, 12 Jul 2021 22:33:28 +0800
-Subject: [PATCH 8/9] drm: make fbdev framework usable [1/1]
+Subject: [PATCH 08/11] drm: make fbdev framework usable [1/1]
 
 PD#SWPL-54399
 

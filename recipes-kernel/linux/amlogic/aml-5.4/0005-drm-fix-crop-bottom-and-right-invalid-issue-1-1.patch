@@ -1,7 +1,7 @@
-From 0493288f964ee176e9d1f185ec7878e76e1cdadd Mon Sep 17 00:00:00 2001
+From c519212a8ed107db6e07d5f02ef5be4484af2adc Mon Sep 17 00:00:00 2001
 From: Ao Xu <ao.xu@amlogic.com>
 Date: Wed, 2 Jun 2021 16:16:44 +0800
-Subject: [PATCH 5/9] drm: fix crop bottom and right invalid issue [1/1]
+Subject: [PATCH 05/11] drm: fix crop bottom and right invalid issue [1/1]
 
 PD#SWPL-xx
 

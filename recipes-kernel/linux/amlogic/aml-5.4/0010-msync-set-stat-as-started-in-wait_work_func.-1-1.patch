@@ -1,0 +1,38 @@
+From 62f4e3d22757d30a8a6d42606084d4d5d52502e9 Mon Sep 17 00:00:00 2001
+From: "bo.xiao" <bo.xiao@amlogic.com>
+Date: Wed, 4 Aug 2021 10:29:22 +0800
+Subject: [PATCH 10/11] msync: set stat as started in wait_work_func.[1/1]
+
+PD#SWPL-55101
+
+Problem:
+pause action be ignored when audio wait video timeout,
+then clock start to run and video will be dropped when resume.
+
+Solution:
+set stat as started, so pause action won't be ignored.
+
+Verify:
+Yacto.
+
+Change-Id: I5651042dc82c27987bd82af914ab0548ead218e3
+Signed-off-by: bo.xiao <bo.xiao@amlogic.com>
+---
+ drivers/amlogic/media/avsync/msync.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/amlogic/media/avsync/msync.c b/drivers/amlogic/media/avsync/msync.c
+index 74a0811b143b..91bfda28cf80 100644
+--- a/drivers/amlogic/media/avsync/msync.c
++++ b/drivers/amlogic/media/avsync/msync.c
+@@ -401,6 +401,7 @@ static void wait_work_func(struct work_struct *work)
+ 			session->id);
+ 		session->clock_start = true;
+ 		session->v_timeout = true;
++		session->stat = AVS_STAT_STARTED;
+ 	}
+ 
+ 	if (session->start_policy.policy == AMSYNC_START_ALIGN &&
+-- 
+2.29.2
+

@@ -1,7 +1,7 @@
-From 0c01b166bb5263ff385572e17da7fbdc5a054db2 Mon Sep 17 00:00:00 2001
+From ca6866c2fbb1f093aacce6125e29b50107ed7caa Mon Sep 17 00:00:00 2001
 From: Pengcheng Chen <pengcheng.chen@amlogic.com>
 Date: Fri, 23 Jul 2021 15:29:15 +0800
-Subject: [PATCH 9/9] vpp: correct VPP_HSC_PHASE_CTRL setting [1/1]
+Subject: [PATCH 09/11] vpp: correct VPP_HSC_PHASE_CTRL setting [1/1]
 
 PD#SWPL-56236
 

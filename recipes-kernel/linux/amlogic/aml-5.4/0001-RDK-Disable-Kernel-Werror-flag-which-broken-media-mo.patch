@@ -1,7 +1,7 @@
-From 4327aaa2a09e2f4086ed3916aead1f7d4537a363 Mon Sep 17 00:00:00 2001
+From 8cc7bbc3a2ca64ccfa74cf2cef5ed00dbc7f55be Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Tue, 5 Jan 2021 06:04:09 +0000
-Subject: [PATCH 1/9] RDK: Disable Kernel -Werror flag which broken
+Subject: [PATCH 01/11] RDK: Disable Kernel -Werror flag which broken
  media-module build.
 
 Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>

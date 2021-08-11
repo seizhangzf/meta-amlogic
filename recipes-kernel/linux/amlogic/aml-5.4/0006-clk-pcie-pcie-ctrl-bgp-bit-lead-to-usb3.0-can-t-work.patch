@@ -1,7 +1,7 @@
-From 7dcd3b465e141a490e671efb76254b89beadddae Mon Sep 17 00:00:00 2001
+From 632049db68a56fe3fa6deb476f700a6b98d2c2ac Mon Sep 17 00:00:00 2001
 From: yu tu <yu.tu@amlogic.com>
 Date: Tue, 27 Jul 2021 19:00:33 +0800
-Subject: [PATCH 6/9] clk: pcie: pcie ctrl bgp bit lead to usb3.0 can't work
+Subject: [PATCH 06/11] clk: pcie: pcie ctrl bgp bit lead to usb3.0 can't work
  [1/1]
 
 PD#SWPL-55797

@@ -1,0 +1,60 @@
+From 7b56dc7990ce4b0f85805e531edddd1048771c6a Mon Sep 17 00:00:00 2001
+From: "jing.zhang" <jing.zhang@amlogic.com>
+Date: Wed, 4 Aug 2021 05:45:11 -0400
+Subject: [PATCH 2/2] audio: dtv patch release block [1/1]
+
+PD#SWPL-53852
+
+Problem:
+dtv patch release block.
+
+Solution:
+remove patch_lock at src_dtv
+
+Verify:
+AH219
+
+Change-Id: I62e1dce0b327fda4bfdca18bcb74f98c4eb15111
+Signed-off-by: jing.zhang <jing.zhang@amlogic.com>
+---
+ audio_hal/audio_hw.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 112d7ba..ddda1af 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -8987,7 +8987,9 @@ ssize_t hw_write (struct audio_stream_out *stream
+              * patch release sequence grabs patch_lock first, then alsa_pcm_lock
+              */
+             pthread_mutex_unlock(&adev->alsa_pcm_lock);
+-            pthread_mutex_lock(&adev->patch_lock);
++            if (adev->patch_src != SRC_DTV)  {
++               pthread_mutex_lock(&adev->patch_lock);
++            }
+ 
+             if ((eDolbyMS12Lib == adev->dolby_lib_type) &&
+                 (adev->audio_patch) &&
+@@ -9007,13 +9009,16 @@ ssize_t hw_write (struct audio_stream_out *stream
+                 ALOGI("init_flush_count = %d, level = %d",
+                        adev->audio_patch->init_flush_count,
+                        get_buffer_read_space(&adev->audio_patch->aml_ringbuffer));
+-
+-                pthread_mutex_unlock(&adev->patch_lock);
++                if (adev->patch_src != SRC_DTV) {
++                   pthread_mutex_unlock(&adev->patch_lock);
++                }
+                 pthread_mutex_lock(&adev->alsa_pcm_lock);
+ 
+                 ret = bytes;
+             } else {
+-                pthread_mutex_unlock(&adev->patch_lock);
++                if (adev->patch_src != SRC_DTV) {
++                   pthread_mutex_unlock(&adev->patch_lock);
++                }
+ 
+                 if (continous_mode(adev) && (adev->hdmi_format != BYPASS)) {
+                     aml_dev_patch_lower_output_latency(adev);
+-- 
+2.29.2
+

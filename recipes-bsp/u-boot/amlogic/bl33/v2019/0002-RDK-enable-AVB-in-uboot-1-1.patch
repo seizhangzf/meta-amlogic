@@ -1,4 +1,4 @@
-From 89dcb73998523eab0ed6c85056344b8e0785fbaa Mon Sep 17 00:00:00 2001
+From 881ad09aa3cdf17fd72bf1598caa3dead50ea9e8 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Fri, 16 Jul 2021 07:13:09 +0000
 Subject: [PATCH 2/3] RDK: enable AVB in uboot  [1/1]

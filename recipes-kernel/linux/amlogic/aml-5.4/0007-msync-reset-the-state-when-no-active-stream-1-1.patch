@@ -1,7 +1,7 @@
-From 5d513280647e027d2a564182c8ea4cbe7f4cfaba Mon Sep 17 00:00:00 2001
+From 6fc5e67358ab2d906789a90e11a07c0daba6471d Mon Sep 17 00:00:00 2001
 From: "yongchun.li" <yongchun.li@amlogic.com>
 Date: Sun, 1 Aug 2021 06:19:59 +0000
-Subject: [PATCH 7/9] msync: reset the state when no active stream [1/1]
+Subject: [PATCH 07/11] msync: reset the state when no active stream [1/1]
 
 PD#SWPL-56612
 

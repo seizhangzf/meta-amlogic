@@ -1,8 +1,8 @@
-From 893e6d739524c652a0d4c53794f6c4ba46b905d1 Mon Sep 17 00:00:00 2001
+From 7ab63146954efc3a21fd63b188f46b6082d5ab63 Mon Sep 17 00:00:00 2001
 From: "yongchun.li" <yongchun.li@amlogic.com>
 Date: Thu, 29 Jul 2021 09:37:13 +0000
-Subject: [PATCH] audio_hal: adjust alsa start threshold for better underflow
- tolerance [1/1]
+Subject: [PATCH 1/2] audio_hal: adjust alsa start threshold for better
+ underflow tolerance [1/1]
 
 PD#SWPL-53638
 

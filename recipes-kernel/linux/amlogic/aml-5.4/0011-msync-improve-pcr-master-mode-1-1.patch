@@ -1,0 +1,47 @@
+From 1015c089ecdb7d6353179c7f6433a51078123201 Mon Sep 17 00:00:00 2001
+From: Song Zhao <song.zhao@amlogic.com>
+Date: Fri, 30 Jul 2021 06:36:09 +0000
+Subject: [PATCH 11/11] msync: improve pcr master mode [1/1]
+
+PD#SWPL-37180
+
+Problem:
+audio disc cleared and can not enter reset wall clock logic
+
+Solution:
+refine audio disc clear condition to 20ms
+
+Verify:
+TM2 + Platco
+
+Signed-off-by: Song Zhao <song.zhao@amlogic.com>
+Change-Id: I5ada4ee7fa0c2f6ee9493065d38ad9603fb1c3b8
+---
+ drivers/amlogic/media/avsync/msync.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/media/avsync/msync.c b/drivers/amlogic/media/avsync/msync.c
+index 91bfda28cf80..d983f92c53c2 100644
+--- a/drivers/amlogic/media/avsync/msync.c
++++ b/drivers/amlogic/media/avsync/msync.c
+@@ -35,6 +35,7 @@
+ #define TRANSIT_INTERVAL (HZ) //1s
+ #define DISC_THRE_MIN (UNIT90K / 3)
+ #define DISC_THRE_MAX (UNIT90K * 20)
++#define C_THRE (UNIT90K / 50)		/* 20ms */
+ 
+ #define TEN_MS_INTERVAL  (HZ / 100)
+ #define MIN_GAP (UNIT90K * 3)		/* 3s */
+@@ -1290,8 +1291,7 @@ static void pcr_check(struct sync_session *session)
+ 				session->last_check_apts = checkin_apts;
+ 				session->last_check_apts_cnt = 0;
+ 				if (abs_diff(session->wall_clock,
+-					checkin_apts) <=
+-						(session->disc_thres_min >> 1))
++					checkin_apts) <= C_THRE)
+ 					session->pcr_disc_flag &= ~(AUDIO_DISC);
+ 			}
+ 			if (flag != session->pcr_disc_flag)
+-- 
+2.29.2
+

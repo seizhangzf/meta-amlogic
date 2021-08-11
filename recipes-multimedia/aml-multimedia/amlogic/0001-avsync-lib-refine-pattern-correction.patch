@@ -1,4 +1,4 @@
-From 1c783e3b15a45b9647fe5ed3c812525a7cda970c Mon Sep 17 00:00:00 2001
+From 716897df8632b211b476eb8b6539de82d90322c0 Mon Sep 17 00:00:00 2001
 From: Song Zhao <song.zhao@amlogic.com>
 Date: Fri, 30 Jul 2021 05:21:53 +0000
 Subject: [PATCH] avsync-lib: refine pattern correction

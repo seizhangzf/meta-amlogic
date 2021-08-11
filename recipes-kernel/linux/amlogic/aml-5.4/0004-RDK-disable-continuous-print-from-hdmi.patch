@@ -1,7 +1,7 @@
-From 979f7a2e988da009694a51206cb3822f040e42b6 Mon Sep 17 00:00:00 2001
+From 228b840511bdff03e0ef6c59f1441035c2eef747 Mon Sep 17 00:00:00 2001
 From: Ajay Gautam <ajay.gautam@amlogic.com>
 Date: Tue, 25 May 2021 11:54:34 -0700
-Subject: [PATCH 4/9] RDK: disable continuous print from hdmi
+Subject: [PATCH 04/11] RDK: disable continuous print from hdmi
 
 PD#SWPL-46838
 
