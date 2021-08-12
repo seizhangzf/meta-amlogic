@@ -2,6 +2,17 @@
 
 configure_file="/etc/bluetooth/main.conf"
 
+function hci0_rfkill()
+{
+	for f in $(ls /sys/class/rfkill/rfkill*/name 2> /dev/null); do
+		rfk_name=$(cat $f)
+		if [ $rfk_name = "hci0" ];then
+			rfkill unblock ${f//[^0-9]/}
+		fi
+	done
+}
+
+
 function get_device_from_conf()
 {
 	if [ -f $configure_file ];then
@@ -198,12 +209,14 @@ Blue_start()
 			break
 		fi
 	done
-
+	
 	if [ $cnt -eq 0 ];then
 		echo "hci0 bring up failed!!!"
 		exit 0
 	fi
-
+	
+        hci0_rfkill
+        
 	grep -Insr "debug=1" $configure_file > /dev/null
 	if [ $? -eq 0 ]; then
 		hcidump -w /etc/bluetooth/btsnoop.cfa &
