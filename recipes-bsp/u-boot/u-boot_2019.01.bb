@@ -79,11 +79,13 @@ export BL2_ARG = ""
 BL33_ARG = "${@bb.utils.contains('DISTRO_FEATURES','AVB','--avb2','',d)}"
 
 #NAGRA UBOOT PATH depends on SoC
+NAGRA_UBOOT_PATH = "TBD"
 NAGRA_UBOOT_PATH_sc2 = "sc2"
 NAGRA_UBOOT_PATH_sc2-5.4 = "sc2"
 NAGRA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', '--chip-varient nocs-jts-ap --bl32 nagra-sdk/bootloader/${NAGRA_UBOOT_PATH}/bl32/blob-bl32.bin.signed --bl31 nagra-sdk/bootloader/${NAGRA_UBOOT_PATH}/bl31/blob-bl31.bin.signed', '', d)}"
 
 #VMX UBOOT PATH depends on SoC
+VMX_UBOOT_PATH = "TBD"
 VMX_UBOOT_PATH_s4 = "s905y4"
 VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 vmx-sdk/bootloader/${VMX_UBOOT_PATH}/bl32/blob-bl32.bin.signed', '', d)}"
 
