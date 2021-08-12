@@ -90,7 +90,7 @@ VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 
 DEBUG_PREFIX_MAP = ""
 do_compile () {
     cd ${S}
-    cp fip/mk .
+    cp -f fip/mk .
     export BUILD_FOLDER=${S}/build/
     export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
     export CROSS_COMPILE=aarch64-elf-
