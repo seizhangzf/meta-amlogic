@@ -5,14 +5,14 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 #do_configure[noexec] = "1"
 #inherit autotools pkgconfig
 inherit cmake
-DEPENDS += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal"
+DEPENDS += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal libamadec"
 
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/common/aml_mp_sdk;protocol=${AML_GIT_PROTOCOL};branch=master;"
 #SRC_URI = "file://aml-comp/multimedia/aml_mp_sdk;protocol=file;branch=master;"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_mp_sdk')}"
 SRCREV = "${AUTOREV}"
 S="${WORKDIR}/git/"
-RDEPENDS_${PN} += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal"
+RDEPENDS_${PN} += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal libamadec"
 EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} \
 		  TARGET_DIR=${D} \
 		"
