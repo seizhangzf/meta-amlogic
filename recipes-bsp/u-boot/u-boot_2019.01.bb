@@ -26,9 +26,16 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl40/dummy.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl40/bin;name=bl40"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/soc/templates;name=soc-templates"
+
 #Only enable this in openlinux
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
+
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
+
+#IRDETO_BRANCH = "TBD"
+#IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
+#IRDETO_BRANCH_sc2-5.4 = "openlinux/sc2-msr4-linux"
+#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
 PATCHTOOL="git"
 
@@ -89,6 +96,16 @@ VMX_UBOOT_PATH = "TBD"
 VMX_UBOOT_PATH_s4 = "s905y4"
 VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 vmx-sdk/bootloader/${VMX_UBOOT_PATH}/bl32/blob-bl32.bin.signed', '', d)}"
 
+#IRDETO UBOOT PATH depends on SoC
+IRDETO_UBOOT_PATH = "TBD"
+IRDETO_UBOOT_PATH_sc2 = "sc2"
+IRDETO_UBOOT_PATH_sc2-5.4 = "sc2"
+IRDETO_BL2x_ARG="--bl2x irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2x.bin.signed"
+IRDETO_BL2e_ARG="--bl2e irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2e.sto.bin.signed"
+IRDETO_BL32_ARG="--bl32 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl32/blob-bl32.bin.signed"
+IRDETO_BL40_ARG="--bl40 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl40/blob-bl40.bin.signed"
+IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO_BL2x_ARG} ${IRDETO_BL2e_ARG} ${IRDETO_BL32_ARG} ${IRDETO_BL40_ARG}', '', d)}"
+
 DEBUG_PREFIX_MAP = ""
 do_compile () {
     cd ${S}
@@ -98,7 +115,7 @@ do_compile () {
     export CROSS_COMPILE=aarch64-elf-
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
-    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${NAGRA_UBOOT_ARG} ${VMX_UBOOT_ARG}
+    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${NAGRA_UBOOT_ARG} ${VMX_UBOOT_ARG} ${IRDETO_UBOOT_ARG}
     cp -rf build/* fip/
 }
 

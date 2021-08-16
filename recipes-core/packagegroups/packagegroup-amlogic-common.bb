@@ -25,6 +25,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'bluez5', 'bluez5', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'nagra-sdk nagra-cert-prebuilt', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-sdk-rel', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'irdeto-sdk irdeto-hal', '', d)} \
                                     tinyalsa \
                                     dolby-ms12 \
                                     libamavutils \
