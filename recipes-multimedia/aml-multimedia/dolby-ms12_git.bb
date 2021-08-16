@@ -45,6 +45,7 @@ do_install() {
 
 FILES_SOLIBSDEV = ""
 
+RDEPENDS_${PN} = "optee-userspace"
 FILES_${PN} += "${libdir}/*.so ${bindir}/* /lib/teetz/*"
 #FILES_${PN}-dev = "${includedir} ${libdir}/pkgconfig/*"
 INSANE_SKIP_${PN} = "ldflags dev-so dev-elf"
