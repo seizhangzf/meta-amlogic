@@ -18,6 +18,7 @@ S = "${WORKDIR}/git/"
 EXTRA_OECONF += "--enable-xrun-detection=yes"
 EXTRA_OECONF += "--enable-ms12=yes"
 EXTRA_OECONF += "--enable-essos-rm=yes"
+EXTRA_OECONF += "--enable-dts=yes"
 
 EXTRA_OEMAKE = "CROSS=${TARGET_PREFIX} TARGET_DIR=${STAGING_DIR_TARGET} STAGING_DIR=${D} DESTDIR=${D}"
 inherit autotools pkgconfig features_check
