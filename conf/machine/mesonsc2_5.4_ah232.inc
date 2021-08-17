@@ -44,8 +44,6 @@ DISTRO_FEATURES_append = " bluetooth bluez5 "
 DISTRO_FEATURES_append = " ptest "
 DISTRO_FEATURES_remove = " alsa "
 
-#DISTRO_FEATURES_append = " nagra "
-
 OVERRIDES .= ":ah212:sc2-5.4:onepass"
 MACHINEOVERRIDES .= ":client"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
