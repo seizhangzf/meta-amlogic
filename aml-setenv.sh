@@ -62,7 +62,6 @@ function choose_type()
     DEFAULT_NUM=2
     DEFAULT_VALUE="mesong12a_u212.conf"
 
-    export TARGET_MACHINE=
     local ANSWER
     while [ -z $TARGET_MACHINE ]
     do
