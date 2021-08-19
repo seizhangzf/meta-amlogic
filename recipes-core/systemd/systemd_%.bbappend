@@ -7,4 +7,5 @@ cat >> ${D}/lib/systemd/system/systemd-modules-load.service <<EOF
 ExecStartPost=-/bin/sh -c '/etc/modules-load.sh'
 EOF
 install -m 0644 ${WORKDIR}/70-keyboard.hwdb ${D}/lib/udev/hwdb.d/70-keyboard.hwdb
+sed -i '/HandlePowerKey/c\HandlePowerKey=suspend' ${D}/etc/systemd/logind.conf
 }
