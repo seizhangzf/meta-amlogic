@@ -36,12 +36,16 @@ do_compile() {
 do_install() {
     install -d ${D}${libdir}
     install -d ${D}${bindir}
+    install -m 0755 -d ${D}${includedir}
     install -m 0755 -d ${D}${includedir}/libdvr
     install -m 0755 ${S}/libamdvr.so ${D}${libdir}/
     install -m 0755 ${S}/am_fend_test ${D}${bindir}/
     install -m 0755 ${S}/am_dmx_test ${D}${bindir}/
     install -m 0755 ${S}/dvr_wrapper_test ${D}${bindir}/
     install -m 0644 ${S}/include/* ${D}${includedir}/libdvr/
+    install -m 0644 ${S}/include/dvb_*.h ${D}${includedir}/
+    install -m 0644 ${S}/include/dvr_*.h ${D}${includedir}/
+    install -m 0644 ${S}/include/segment.h ${D}${includedir}/
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"
