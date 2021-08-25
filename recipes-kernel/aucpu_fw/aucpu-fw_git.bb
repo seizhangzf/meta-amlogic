@@ -20,7 +20,7 @@ do_install() {
     unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
     mkdir -p ${FIRMWAREDIR}
     case ${MACHINE} in
-        mesonsc2-*-ah232)
+        mesonsc2-*-ah232*)
           FWSRCDIR=S905C2
         ;;
         mesonsc2-*)
@@ -33,12 +33,12 @@ do_install() {
           FWSRCDIR=DUMMY
         ;;
     esac
-    install -m 0666 ${S}/${FWSRCDIR}/aucpu_fw.bin.signed ${FIRMWAREDIR}
+    install -m 0666 ${S}/${FWSRCDIR}/aucpu_fw.bin.signed ${FIRMWAREDIR}/aucpu_fw.bin
     install -d ${D}/etc/udev/rules.d
     install -m 0755 ${WORKDIR}/52dvb.rules ${D}/etc/udev/rules.d
 }
 
 FILES_${PN} = " \
-        /lib/firmware/aucpu_fw.bin.signed \
+        /lib/firmware/aucpu_fw.bin \
         /etc/udev/rules.d/52dvb.rules \
         "
