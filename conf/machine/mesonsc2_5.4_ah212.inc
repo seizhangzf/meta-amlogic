@@ -59,3 +59,6 @@ DISTRO_FEATURES_remove_dunfell = " virtualization"
 # dm-verity
 DISTRO_FEATURES_append = " ${@bb.utils.contains('READONLY', 'y', 'dm-verity', '', d)}"
 DISTRO_FEATURES_NATIVE_append = " ${@bb.utils.contains('READONLY', 'y', 'dm-verity', '', d)}"
+
+#Xconf Firmware Upgrade
+XCONF_MODELNAME = "AH212"
