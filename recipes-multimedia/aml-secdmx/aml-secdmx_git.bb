@@ -4,6 +4,9 @@ LICENSE = "AMLOGIC"
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
+SRC_URI = "git://${AML_GIT_ROOT}/libsecdmx_release;protocol=${AML_GIT_PROTOCOL};branch=master"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+
 S = "${WORKDIR}/git"
 
 do_compile[noexec] = "1"
