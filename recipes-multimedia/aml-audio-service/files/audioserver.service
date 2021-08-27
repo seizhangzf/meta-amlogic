@@ -1,5 +1,6 @@
 [Unit]
 Description=Audio Server Startup
+After=tee-supplicant.service
 
 [Service]
 User=root
