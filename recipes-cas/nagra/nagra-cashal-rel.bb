@@ -5,7 +5,7 @@ PV = "git${SRCPV}"
 PR = "r0"
 
 #Only enable it in OpenLinux
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-cashal-rel.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk','', d)}"
+#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-cashal-rel-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../vendor/nagra/nagra-cashal-rel')}"
 
 PN = 'nagra-cashal-rel'
