@@ -37,6 +37,8 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${A
 #IRDETO_BRANCH_sc2-5.4 = "openlinux/sc2-msr4-linux"
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
+#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
+
 PATCHTOOL="git"
 
 #For common patch
@@ -106,6 +108,19 @@ IRDETO_BL32_ARG="--bl32 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl32/blob-bl3
 IRDETO_BL40_ARG="--bl40 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl40/blob-bl40.bin.signed"
 IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO_BL2x_ARG} ${IRDETO_BL2e_ARG} ${IRDETO_BL32_ARG} ${IRDETO_BL40_ARG}', '', d)}"
 
+#SYNAMEDIA UBOOT PATH depends on SoC
+SYNAMEDIA_UBOOT_PATH = "TBD"
+SYNAMEDIA_UBOOT_PATH_sc2 = "s905c2eng"
+SYNAMEDIA_UBOOT_PATH_sc2-5.4 = "s905c2eng"
+
+SYNAMEDIA_BL2_ARG="--bl2 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/bb1st.sto.bin.signed"
+SYNAMEDIA_BL2e_ARG="--bl2e synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2e.sto.bin.signed"
+SYNAMEDIA_BL2x_ARG="--bl2x synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2x.bin.signed"
+SYNAMEDIA_BL31_ARG="--bl31 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl31.bin.signed"
+SYNAMEDIA_BL32_ARG="--bl32 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl32.bin.signed"
+SYNAMEDIA_DDR_FIP_ARG="--ddr-fip synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-ddr-fip.bin.signed"
+SYNAMEDIA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', ' ${SYNAMEDIA_BL2e_ARG} ${SYNAMEDIA_BL2x_ARG} ${SYNAMEDIA_BL2_ARG} ${SYNAMEDIA_BL31_ARG} ${SYNAMEDIA_BL32_ARG}', '', d)}"
+
 DEBUG_PREFIX_MAP = ""
 do_compile () {
     cd ${S}
@@ -115,7 +130,10 @@ do_compile () {
     export CROSS_COMPILE=aarch64-elf-
     unset SOURCE_DATE_EPOCH
     UBOOT_TYPE="${UBOOT_MACHINE}"
-    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${NAGRA_UBOOT_ARG} ${VMX_UBOOT_ARG} ${IRDETO_UBOOT_ARG}
+    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'true', 'false', d)}" = "true" ] ; then
+        sed -i 's/CONFIG_CHIPSET_NAME="s905c2"/CONFIG_CHIPSET_NAME="s905c2eng"/g' ${S}/bl33/v2019/board/amlogic/defconfigs/sc2_ah232_defconfig
+    fi
+    LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG} ${BL33_ARG} ${NAGRA_UBOOT_ARG} ${VMX_UBOOT_ARG} ${IRDETO_UBOOT_ARG} ${SYNAMEDIA_UBOOT_ARG}
     cp -rf build/* fip/
 }
 

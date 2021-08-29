@@ -6,6 +6,8 @@ EXTERNALSRC_pn-nagra-cashal-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/na
 EXTERNALSRC_pn-nagra-cert-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
 EXTERNALSRC_pn-irdeto-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/irdeto-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/irdeto-sdk')) else ''}"
 EXTERNALSRC_pn-irdeto-hal = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/hal')) else ''}"
+EXTERNALSRC_pn-synamedia-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/synamedia/synamedia-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/synamedia/synamedia-sdk')) else ''}"
+
 EXTERNALSRC_pn-aml-audio-hal = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal')) else ''}"
 EXTERNALSRC_pn-aml-dvbaudioutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/aml_audio_hal')) else ''}"
 EXTERNALSRC_pn-aml-audio-service = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/hal_audio_service' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/hal_audio_service')) else ''}"
