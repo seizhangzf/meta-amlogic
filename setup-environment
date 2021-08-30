@@ -134,6 +134,10 @@ if [ -f "$RDK_ROOT_PATH/.repo/manifests/${MANIFEST}.conf" ]; then
   cp $RDK_ROOT_PATH/.repo/manifests/${MANIFEST}.conf conf/auto.conf
 fi
 
+if [ -f "$RDK_ROOT_PATH/rdk-release-info" ]; then
+    cat $RDK_ROOT_PATH/rdk-release-info  >> conf/auto.conf
+fi
+
 if [ -e ${RDK_ROOT_PATH}/CCACHE_DIR ]; then
 # Enable ccache
 cat >> conf/local.conf << EOF

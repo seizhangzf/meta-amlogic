@@ -4,8 +4,9 @@ SUMMARY = "nagra amlsec and cert kernel driver"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM=""
 
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk', '', d)}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../vendor/nagra/nagra-sdk')}"
+#Only enable it in OpenLinux
+#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk','', d)}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/nagra/nagra-sdk')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

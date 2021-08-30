@@ -17,6 +17,8 @@ RDEPENDS_${PN} += "aml-audio-service"
 
 SRCREV ?= "${AUTOREV}"
 
+PATCHTOOL = "git"
+
 PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"

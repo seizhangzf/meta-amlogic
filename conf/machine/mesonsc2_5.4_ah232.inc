@@ -43,10 +43,11 @@ DISTRO_FEATURES_append = " amlogic-dvb "
 DISTRO_FEATURES_append = " bluetooth bluez5 "
 DISTRO_FEATURES_append = " ptest "
 DISTRO_FEATURES_remove = " alsa "
-DISTRO_FEATURES_append = " aml-nagra "
 
 OVERRIDES .= ":ah212:sc2-5.4:onepass"
 MACHINEOVERRIDES .= ":client"
+OVERRIDES .= ":dtv"
+DISTRO_FEATURES_append = " dvb"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
 
 PREFERRED_VERSION_wayland = "1.17.0"

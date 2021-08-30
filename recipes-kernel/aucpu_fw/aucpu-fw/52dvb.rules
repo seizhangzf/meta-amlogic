@@ -2,3 +2,4 @@
 KERNEL=="dvb0.frontend[0-9]*", SUBSYSTEM=="dvb", SYMLINK+="%k", MODE="0666"
 KERNEL=="dvb0.demux[0-9]*", SUBSYSTEM=="dvb", SYMLINK+="%k", MODE="0666"
 KERNEL=="dvb0.dvr[0-9]*", SUBSYSTEM=="dvb", SYMLINK+="%k", MODE="0666"
+KERNEL=="dvb0.ca[0-9]*", SUBSYSTEM=="dvb", SYMLINK+="%k", MODE="0666"
