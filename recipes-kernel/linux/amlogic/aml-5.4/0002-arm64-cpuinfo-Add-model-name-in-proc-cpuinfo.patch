@@ -1,7 +1,7 @@
-From ba36861cff155380271eaa1535de5fd8fcde7807 Mon Sep 17 00:00:00 2001
+From 61e8a555632c76486dde946ee224c927be1d2ae2 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Mon, 17 May 2021 21:00:19 -0700
-Subject: [PATCH 03/11] arm64: cpuinfo: Add "model name" in /proc/cpuinfo
+Subject: [PATCH 2/3] arm64: cpuinfo: Add "model name" in /proc/cpuinfo
 
 PD#SWPL-48418
 
@@ -34,5 +34,5 @@ index be9d39d56c07..d07c930ebe48 100644
  
  		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
 -- 
-2.29.2
+2.31.1
 

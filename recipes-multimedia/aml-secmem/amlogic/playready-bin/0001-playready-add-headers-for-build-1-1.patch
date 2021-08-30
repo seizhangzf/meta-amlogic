@@ -1,4 +1,4 @@
-From a8b098e561f28b41105a8ca8e7f9a774ad8d089f Mon Sep 17 00:00:00 2001
+From 1b8cb96ae4d14c1c1cb6f73756cc3ed9507df1a7 Mon Sep 17 00:00:00 2001
 From: Tao Guo <tao.guo@amlogic.com>
 Date: Mon, 1 Jun 2020 11:22:21 +0800
 Subject: [PATCH 1/2] playready: add headers for build [1/1]
@@ -90121,5 +90121,5 @@ index 0000000..8f8f632
 +Libs: -L${libdir} -lplayready -lteec
 +Cflags: -I${includedir} -I${includedir}/inc -I${includedir}/results -I${includedir}/oem/common/inc -I${includedir}/oem/ansi/inc
 -- 
-2.29.2
+2.31.1
 

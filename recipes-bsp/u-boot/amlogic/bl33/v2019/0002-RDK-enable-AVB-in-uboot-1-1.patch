@@ -1,4 +1,4 @@
-From 881ad09aa3cdf17fd72bf1598caa3dead50ea9e8 Mon Sep 17 00:00:00 2001
+From 2ab14a418bc6a8212d52b914913c0a61a7cfd2c9 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Fri, 16 Jul 2021 07:13:09 +0000
 Subject: [PATCH 2/3] RDK: enable AVB in uboot  [1/1]
@@ -22,7 +22,7 @@ Signed-off-by: Xueling Li <xueling.li@amlogic.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
-index 7674d7ce99f..733c432b282 100644
+index 3b8f2934d86..b7d516889ca 100644
 --- a/board/amlogic/configs/sc2_ah212.h
 +++ b/board/amlogic/configs/sc2_ah212.h
 @@ -178,7 +178,7 @@
@@ -35,10 +35,10 @@ index 7674d7ce99f..733c432b282 100644
                          "setenv bootargs ${bootargs} root=/dev/system_a;"\
                      "else if test ${active_slot} = _b; then "\
 diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
-index 48ec29c38cd..16ad5c2c198 100644
+index 05204567c55..841f1d6344c 100644
 --- a/board/amlogic/defconfigs/sc2_ah212_defconfig
 +++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
-@@ -36,7 +36,7 @@ CONFIG_CMD_IR=y
+@@ -37,7 +37,7 @@ CONFIG_CMD_IR=y
  CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
@@ -48,5 +48,5 @@ index 48ec29c38cd..16ad5c2c198 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
 -- 
-2.29.2
+2.31.1
 
