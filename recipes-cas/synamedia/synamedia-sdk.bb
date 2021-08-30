@@ -6,7 +6,7 @@ PR = "r0"
 
 #Only enable it in OpenLinux
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../vendor/synamedia/synamedia-sdk')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/synamedia/synamedia-sdk')}"
 
 PN = 'synamedia-sdk'
 SRCREV ?= "${AUTOREV}"
