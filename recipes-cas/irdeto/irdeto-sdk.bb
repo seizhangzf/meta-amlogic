@@ -7,7 +7,6 @@ PR = "r0"
 #Only enable it in OpenLinux
 #IRDETO_BRANCH = "TBD"
 #IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
-#IRDETO_BRANCH_sc2-5.4 = "openlinux/sc2-msr4-linux"
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH}','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/irdeto/irdeto-sdk')}"
 
@@ -19,7 +18,6 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 
 IRDETO_PATH = "TBD"
 IRDETO_PATH_sc2 = "v3/dev/S905C2"
-IRDETO_PATH_sc2-5.4 = "v3/dev/S905C2"
 
 do_install() {
     install -d -m 0644 ${D}/usr/lib

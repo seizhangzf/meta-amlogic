@@ -55,7 +55,7 @@ python do_copy_initramfslist() {
     fetcher.unpack(d.getVar('WORKDIR', True))
 }
 KERNEL_OFFSET = "0x1080000"
-KERNEL_OFFSET_sc2-5.4 = "0x3080000"
+KERNEL_OFFSET_sc2 = "0x3080000"
 
 do_bundle_initramfs_dtb() {
 	mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} --base 0x0 --kernel_offset ${KERNEL_OFFSET} --ramdisk ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.cpio.gz --second ${DEPLOY_DIR_IMAGE}/dtb.img --output ${DEPLOY_DIR_IMAGE}/boot.img

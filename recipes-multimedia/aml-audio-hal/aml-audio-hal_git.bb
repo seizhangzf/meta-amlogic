@@ -29,7 +29,6 @@ PACKAGECONFIG += "eqdrc"
 PACKAGECONFIG[eqdrc] = "-DUSE_EQ_DRC=ON,-DUSE_EQ_DRC=OFF,"
 
 PACKAGECONFIG_append_sc2 += "sc2-dvb"
-PACKAGECONFIG_append_sc2-5.4 += "sc2-dvb"
 PACKAGECONFIG[sc2-dvb] = "-DUSE_SC2=ON,-DUSE_SC2=OFF,"
 
 PACKAGECONFIG += "msync"

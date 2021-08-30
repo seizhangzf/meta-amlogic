@@ -62,7 +62,6 @@ BL32_SOC_FAMILY_txlx = "txlx"
 BL32_SOC_FAMILY_sm2 = "g12a"
 BL32_SOC_FAMILY_tm2 = "tm2"
 BL32_SOC_FAMILY_t5d = "t5d"
-BL32_SOC_FAMILY_t5d-5.4 = "t5d"
 
 PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-elf/bin"
 PATH_append = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
