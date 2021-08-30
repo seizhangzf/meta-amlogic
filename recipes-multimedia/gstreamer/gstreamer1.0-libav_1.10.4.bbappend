@@ -1,6 +1,5 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
-
 EXTRA_OECONF_append = " --with-libav-extra-configure='\
              --disable-decoder=ac3 \
              --disable-decoder=eac3 \
