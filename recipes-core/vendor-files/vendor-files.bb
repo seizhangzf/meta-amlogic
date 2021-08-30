@@ -53,9 +53,14 @@ do_install() {
 			install -m 0644 -D ${S}/recovery_img/${SOC}/rdk-recovery.img ${DEPLOY_DIR_IMAGE}/recovery.img
         fi
 
+        ###for irdeto conf
+        if [ "${@bb.utils.contains("DISTRO_FEATURES", "irdeto", "yes", "no", d)}" = "yes" ]; then
+			install -d ${D}/etc/cas/irdeto/
+			install -m 0644 -D ${S}/etc/cas/irdeto/conf/irdeto_hal.conf ${D}/etc/cas/irdeto/
+        fi
 }
 
-FILES_${PN} = " /etc/tvconfig/* /lib/* logo_files/*"
+FILES_${PN} = " /etc/tvconfig/* /lib/* logo_files/* /etc/cas/irdeto/*"
 FILES_${PN}-dev = " "
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INSANE_SKIP_${PN} = "dev-so dev-elf already-stripped"
