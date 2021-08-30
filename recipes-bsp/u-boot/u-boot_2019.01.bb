@@ -26,6 +26,8 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl40/dummy.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/bl40/bin;name=bl40"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/soc/templates;name=soc-templates"
+#Only enable this in openlinux
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
 
 #Only enable this in openlinux
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
@@ -84,6 +86,7 @@ export BL30_ARG = ""
 export BL2_ARG = ""
 
 BL33_ARG = "${@bb.utils.contains('DISTRO_FEATURES','AVB','--avb2','',d)}"
+AML_NAGRA_UBOOT_PARAM = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-nagra', '--chip-varient nocs-jts-ap --bl32 nagra-sdk/bootloader/sc2/bl32/blob-bl32.bin.signed --bl31 nagra-sdk/bootloader/sc2/bl31/blob-bl31.bin.signed', '', d)}"
 
 #NAGRA UBOOT PATH depends on SoC
 NAGRA_UBOOT_PATH = "TBD"
