@@ -12,7 +12,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendo
 #PN = 'verimatrix'
 SRCREV ?= "${AUTOREV}"
 S = "${WORKDIR}/git"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 #VMX SDK Version depends on SoC used
 VMX_SDK_VERSION_s4 = "SDK_M9Y4_1_0_0"
