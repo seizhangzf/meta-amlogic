@@ -103,4 +103,4 @@ EXTERNALSRC_pn-drmplayer-bin = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmedi
 EXTERNALSRC_pn-sectionfilter-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/soc_qamsource' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/soc_qamsource')) else ''}"
 EXTERNALSRC_pn-dvrmgr-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/dvr/common/dvrmgr/soc' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/dvr/common/dvrmgr/soc')) else ''}"
 EXTERNALSRC_pn-rmfhalheaders = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/')) else ''}"
-
+EXTERNALSRC_pn-iptv-eos = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos')) else ''}"
