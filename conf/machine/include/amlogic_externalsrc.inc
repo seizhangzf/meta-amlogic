@@ -2,6 +2,7 @@ INHERIT += "externalsrc"
 
 EXTERNALSRC_pn-vmx-sdk-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel')) else ''}"
 EXTERNALSRC_pn-nagra-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
+EXTERNALSRC_pn-wpeframework-ocdm-connect = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/OCDM-nagra' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/OCDM-nagra')) else ''}"
 EXTERNALSRC_pn-nagra-cashal-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-cashal-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-cashal-rel')) else ''}"
 EXTERNALSRC_pn-nagra-cert-prebuilt = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
 EXTERNALSRC_pn-irdeto-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/irdeto-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/irdeto/irdeto-sdk')) else ''}"
