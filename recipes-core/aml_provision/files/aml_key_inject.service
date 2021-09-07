@@ -4,10 +4,7 @@ After=tee-supplicant.service
 
 [Service]
 User=root
-ExecStartPre=/bin/mkdir -p /factory
-ExecStartPre=/bin/mount /dev/factory /factory
 ExecStart=/usr/bin/tee_key_inject -p /factory
-ExecStop=/bin/umount /factory
 
 [Install]
 WantedBy=multi-user.target
