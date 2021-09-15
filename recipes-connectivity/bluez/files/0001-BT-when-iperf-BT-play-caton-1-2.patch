@@ -1,0 +1,176 @@
+From 0a0c99e8a5253f548491416dd3b5edf5ff1965e4 Mon Sep 17 00:00:00 2001
+From: "jiabin.chen" <jiabin.chen@amlogic.com>
+Date: Thu, 2 Sep 2021 13:18:48 +0800
+Subject: [PATCH] BT : when iperf BT play caton [1/2]
+
+PD#SH-7248
+
+Problem:
+BT stutter in buildroot
+
+Solution:
+set rf params
+
+Verify:
+xiaomi
+
+Change-Id: Ib984e24e565d4f45da5aaec19af1da8577dee55c
+Signed-off-by: jiabin.chen <jiabin.chen@amlogic.com>
+---
+ tools/hciattach_aml.c | 126 ++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 121 insertions(+), 5 deletions(-)
+
+diff --git a/tools/hciattach_aml.c b/tools/hciattach_aml.c
+index c4fa84b04..7ed601707 100755
+--- a/tools/hciattach_aml.c
++++ b/tools/hciattach_aml.c
+@@ -331,6 +331,122 @@ error:
+ 
+ }
+ 
++/*******************************************************************************
++**
++** Function         hw_config_set_rf_params
++**
++** Description      Config rf parameters to controller
++**
++** Returns
++**
++**
++*******************************************************************************/
++static int hw_config_set_rf_params(int fd)
++{
++	int retval = FALSE;
++	int err = -1;
++	int size;
++	unsigned char cmd[HCI_MAX_CMD_SIZE];
++	unsigned char rsp[HCI_MAX_EVENT_SIZE];
++	char *cmd_hdr = NULL;
++	uint8_t antenna_num = 0;
++	int antenna_cfg = 0, fd_a2dp_cfg = 0;
++	uint8_t size_a2dp_cfg = 0;
++	char buffer[255] = { 0 };
++	char c = '=';
++	uint32_t reg_data = 0;
++	uint8_t a2dp_sink_enable = 0;
++
++	antenna_cfg = open("/etc/bluetooth/w1/aml_bt_rf.txt", O_RDONLY);
++	if (antenna_cfg < 0)
++	{
++		pr_info("In %s, Open failed:%s", __FUNCTION__, strerror(errno));
++		return FALSE;
++	}
++
++	size = read(antenna_cfg, buffer, sizeof(buffer));
++	if (size < 0)
++	{
++		pr_info("In %s, Read failed:%s", __FUNCTION__, strerror(errno));
++		return FALSE;
++	}
++
++	char *ptr = strchr(buffer, c);
++	ptr++;
++	antenna_num = atoi(ptr);
++
++	close(antenna_cfg);
++	pr_info("Setting parameters to controller: antenna number=%d.", antenna_num);
++
++	//////////////////////////////////////////////////////////////////
++	fd_a2dp_cfg = open("/etc/bluetooth/w1/a2dp_mode_cfg.txt", O_RDONLY);
++	if (fd_a2dp_cfg < 0)
++	{
++		pr_info("In %s, Open failed:%s", __FUNCTION__, strerror(errno));
++		return FALSE;
++	}
++
++	size_a2dp_cfg = read(fd_a2dp_cfg, buffer, sizeof(buffer));
++	if (size_a2dp_cfg < 0)
++	{
++		pr_info("In %s, Read failed:%s", __FUNCTION__, strerror(errno));
++		return FALSE;
++	}
++
++	char *ptr_a2dp_cfg = strchr(buffer, c);
++	ptr_a2dp_cfg++;
++	a2dp_sink_enable = atoi(ptr_a2dp_cfg);
++
++	close(fd_a2dp_cfg);
++
++	pr_info("Setting parameters to controller: a2dp_sink_enable=%d.", a2dp_sink_enable);
++
++	memset(cmd, 0x0, HCI_MAX_CMD_SIZE);
++	memset(rsp, 0x0, HCI_MAX_EVENT_SIZE);
++
++	cmd_hdr = (void *) (cmd + 1);
++	cmd[0]	= HCI_COMMAND_PKT;
++	UINT16_TO_STREAM(cmd_hdr, TCI_WRITE_REG);
++
++	*cmd_hdr++ = 0x08;       	/* parameter length */
++	UINT32_TO_STREAM(cmd_hdr, 0xf03040);  /* addr */
++	if (antenna_num == 1)
++	{
++		// UINT32_TO_STREAM(p, 0x10000000);
++		reg_data = 0x10000000;
++	}
++	else if (antenna_num == 2)
++	{
++		//UINT32_TO_STREAM(p, 0x20000000);
++		reg_data = 0x20000000;
++	}
++
++	if (a2dp_sink_enable == 1)
++	{
++		reg_data |= (1<<25);	// bit25 means a2dp_sink_enable.
++	}
++
++	UINT32_TO_STREAM(cmd_hdr, reg_data);
++
++	size = (HCI_CMD_IND + HCI_COMMAND_HDR_SIZE + 0x08);
++
++	err = write(fd, cmd, size);
++	if (err != size) {
++		pr_err("Send failed with ret value: %d", err);
++		goto error;
++	}
++
++	/* Wait for command complete event */
++	err = read_hci_event(fd, rsp, HCI_MAX_EVENT_SIZE);
++	if ( err < 0) {
++		pr_err("Failed to set rf params");
++		goto error;
++	}
++
++error:
++	return err;
++}
++
+ int aml_start_cpu_uart(int fd, callback func)
+ {
+ 	int size;
+@@ -416,11 +532,6 @@ int aml_start_cpu_before_cmd(int fd)
+ 	UINT32_TO_STREAM(cmd_hdr, 0xa7000c);
+ 	UINT32_TO_STREAM(cmd_hdr, 0x8000000);
+ 
+-	UINT16_TO_STREAM(cmd_hdr, TCI_WRITE_REG);
+-	*cmd_hdr++ = 0x08;
+-	UINT32_TO_STREAM(cmd_hdr, 0xf03040);
+-	UINT32_TO_STREAM(cmd_hdr, 0x22000000);
+-
+ 	/* Total length of the packet to be sent to the Controller */
+ 	size = (HCI_CMD_IND + HCI_COMMAND_HDR_SIZE + 0x08);
+ 
+@@ -1209,6 +1320,11 @@ int aml_init(int fd, char *bdaddr)
+ 		goto error;
+ 	}
+ 	pr_info("Download fw file successfully");
++	err = hw_config_set_rf_params(fd);
++	if (err < 0) {
++		pr_err("hw_config_set_rf_params failed!");
++		goto error;
++	}
+ 	/*start cup cmd*/
+ 	err = aml_start_cpu_before_cmd(fd);
+ 	if (err < 0) {
+-- 
+2.29.0
+

@@ -3,6 +3,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += "file://0001-bluez5_utils-add-qca9377-bt-support-1-3.patch"
 SRC_URI += "file://0001-BT-add-qca6174-bt-support-2-3.patch"
+SRC_URI += "file://0001-BT-add-amlbt-w1-5-5.patch"
+SRC_URI += "file://0001-BT-when-iperf-BT-play-caton-1-2.patch"
 SRC_URI += "file://main.conf"
 SRC_URI += "file://bluez.service"
 SRC_URI += "file://bluez_tool.sh"
@@ -19,6 +21,9 @@ do_install_append(){
     case ${MACHINE_ARCH} in
     mesons4*ap223)
         sed -i '/Debug=0/a Device=rtk' ${D}${sysconfdir}/bluetooth/main.conf
+    ;;
+    mesons4*aq223)
+        sed -i '/Debug=0/a Device=aml' ${D}${sysconfdir}/bluetooth/main.conf
     ;;
     *)
         sed -i '/Debug=0/a Device=qca' ${D}${sysconfdir}/bluetooth/main.conf

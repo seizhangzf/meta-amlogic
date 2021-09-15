@@ -78,6 +78,14 @@ qca_bt_init()
 	hciattach -s 115200 /dev/ttyS1 qca 2> /dev/null
 }
 
+aml_bt_init()
+{
+	modprobe sdio_bt
+	usleep 200000
+	hciattach -s 115200 /dev/ttyS1 aml &> /dev/null
+	usleep 100000
+}
+
 A2DP_SINK_SERVICE()
 {
 	echo "|--bluez a2dp-sink/hfp-hf service--|"
@@ -193,6 +201,8 @@ Blue_start()
 		realtek_bt_init
 	elif [ $device = "qca" ];then
 		qca_bt_init
+	elif [ $device = "aml" ];then
+		aml_bt_init
 	else
 		modprobe hci_uart
 		usleep 300000
@@ -234,6 +244,7 @@ Blue_stop()
 	#service_down
 	killall rtk_hciattach
 	killall hciattach
+	rmmod sdio_bt
 	rmmod hci_uart
 	rmmod rtk_btusb
 	sleep 2
