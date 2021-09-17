@@ -92,6 +92,7 @@ do_deploy () {
     case ${UBOOT_SUFFIX} in
     "bin.signed")
         install ${S}/fip/u-boot.bin.signed ${DEPLOYDIR}/
+        test -f ${S}/fip/u-boot.bin.device.signed && install ${S}/fip/u-boot.bin.device.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.usb.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.sd.bin.signed ${DEPLOYDIR}/
     ;;
