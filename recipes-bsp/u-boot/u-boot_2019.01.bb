@@ -92,6 +92,7 @@ NAGRA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', '--chip-var
 #VMX UBOOT PATH depends on SoC
 VMX_UBOOT_PATH = "TBD"
 VMX_UBOOT_PATH_s4 = "s905y4"
+VMX_UBOOT_PATH_sc2 = "sc2"
 VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 vmx-sdk/bootloader/${VMX_UBOOT_PATH}/bl32/blob-bl32.bin.signed', '', d)}"
 
 #IRDETO UBOOT PATH depends on SoC
