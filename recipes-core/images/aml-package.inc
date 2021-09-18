@@ -1,7 +1,6 @@
 DEPENDS_append = " aml-img-packer-native"
 DEPENDS_append_onepass = " core-image-minimal"
 DEPENDS_append = " vendor-image"
-DEPENDS_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'AVB', ' vbmeta-image', '', d)}"
 
 SOC_FAMILY = "gxl"
 SOC_FAMILY_gxl = "gxl"
