@@ -12,6 +12,7 @@ if [ -f /etc/adb_udc_file ]; then
 else
     echo ff400000.dwc2_a > /sys/kernel/config/usb_gadget/amlogic/UDC
 fi
+/usr/bin/usb_monitor &
 
 usb_net_ipconfig
 

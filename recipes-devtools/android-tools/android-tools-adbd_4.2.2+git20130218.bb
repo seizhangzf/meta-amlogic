@@ -7,7 +7,7 @@ S = "${WORKDIR}"
 inherit pkgconfig
 
 DEPENDS := "zlib openssl"
-#RDEPENDS_${PN} += "usb-monitor "
+RDEPENDS_${PN} += "usb-monitor "
 
 #FILESEXTRAPATHS_prepend := "${WORKDIR}/debian/patches:"
 
@@ -30,6 +30,7 @@ SRC_URI += "file://0010-adb-added-patch-for-openssl-1.1.0-compatibility.patch"
 SRC_URI += "file://adbd.service"
 SRC_URI += "file://adbd_post.sh"
 SRC_URI += "file://adbd_prepare.sh"
+SRC_URI += "file://adb_udc_file"
 
 
 SRC_URI[core.md5sum] = "0e653b129ab0c95bdffa91410c8b55be"
@@ -64,8 +65,10 @@ do_compile(){
 }
 
 do_install(){
+    install -d ${D}/etc
     install -d ${D}${bindir}
     install -d ${D}/${systemd_unitdir}/system
+    install -m 0644 adb_udc_file ${D}/etc
     install -m 0755 adbd ${D}${bindir}
     install -m 0755 adbd_prepare.sh ${D}${bindir}
     install -m 0755 adbd_post.sh ${D}${bindir}
@@ -73,10 +76,10 @@ do_install(){
     echo "MACHINE_ARCH is ${MACHINE_ARCH}"
     case ${MACHINE_ARCH} in
         mesonc1_*)
-            sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
+            sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
         mesonsc2_* | mesons4_*)
-            sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}${bindir}/adbd_post.sh
+            sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
     esac
 }

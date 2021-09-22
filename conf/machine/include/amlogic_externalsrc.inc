@@ -19,6 +19,7 @@ EXTERNALSRC_pn-aml-uvm-test = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/v4l2-uvm
 EXTERNALSRC_pn-aml-avsync = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/avsync-lib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/avsync-lib')) else ''}"
 EXTERNALSRC_pn-aml-mp-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/aml_mp_sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/aml_mp_sdk')) else ''}"
 EXTERNALSRC_pn-android-tools-logcat = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
+EXTERNALSRC_pn-usb-monitor = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-liblog = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-libatrace = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
