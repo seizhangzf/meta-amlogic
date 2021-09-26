@@ -3,8 +3,9 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += "file://0001-bluez5_utils-add-qca9377-bt-support-1-3.patch"
 SRC_URI += "file://0001-BT-add-qca6174-bt-support-2-3.patch"
-SRC_URI += "file://0001-BT-add-amlbt-w1-5-5.patch"
-SRC_URI += "file://0001-BT-when-iperf-BT-play-caton-1-2.patch"
+SRC_URI += "${@bb.utils.contains("DISTRO_FEATURES", "aml-w1", \
+            "file://0001-BT-add-amlbt-w1-5-5.patch \
+            file://0001-BT-when-iperf-BT-play-caton-1-2.patch", "", d)}"
 SRC_URI += "file://main.conf"
 SRC_URI += "file://bluez.service"
 SRC_URI += "file://bluez_tool.sh"
