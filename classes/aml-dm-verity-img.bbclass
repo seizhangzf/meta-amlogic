@@ -1,5 +1,7 @@
 inherit dm-verity-img
 
+CONVERSION_DEPENDS_verity += "e2fsprogs-native"
+
 process_verity() {
     local ENV="${STAGING_VERITY_DIR}/${IMAGE_BASENAME}.$TYPE.verity.env"
     install -d ${STAGING_VERITY_DIR}
@@ -31,11 +33,24 @@ verity_setup() {
     local SIZE=$(stat --printf="%s" $INPUT)
     #local OUTPUT=$INPUT.verity
     VERITYSETUP_LOG=${STAGING_VERITY_DIR}/${INPUT}.veritysetup.log
+    local DUMPE2FS_LOG=${STAGING_VERITY_DIR}/${INPUT}.dumpe2fs.log
+    local BLOCK_SIZE=0
 
     # Let's drop the first line of output (doesn't contain any useful info)
     # and feed the rest to another function.
     if [ -f $INPUT ]; then
-        bbwarn "`veritysetup --debug --data-block-size=1024 --hash-offset=$SIZE format $INPUT $INPUT | tee $VERITYSETUP_LOG`"
+        # Read block size for types "ext2/3/4"
+        if [ "$TYPE" = "ext4" -o "$TYPE" = "ext3" -o "$TYPE" = "ext2" ]; then
+            bbwarn "`dumpe2fs $INPUT | grep -i "block size"  | tee $DUMPE2FS_LOG`"
+            BLOCK_SIZE=`cat $DUMPE2FS_LOG | tr -d ' \t' | awk '{split($0, a, ":"); print a[2]}'`
+        fi
+        if [ $BLOCK_SIZE = 4096 -o $BLOCK_SIZE = 2048 -o $BLOCK_SIZE = 1024 ]; then
+            # If block size is valid, set --data-block-size to it
+            bbwarn "`veritysetup --debug --data-block-size=$BLOCK_SIZE --hash-offset=$SIZE format $INPUT $INPUT | tee $VERITYSETUP_LOG`"
+        else
+            # Otherwise, default block size will be 4096
+            bbwarn "`veritysetup --debug --hash-offset=$SIZE format $INPUT $INPUT | tee $VERITYSETUP_LOG`"
+        fi
     else
         bberror "Cannot find $INPUT"
         exit 1
