@@ -23,7 +23,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'opencdm', 'wpeframework-ocdm-clearkey', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'alsa-utils', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'bluez5', 'bluez5', '', d)}\
-                                    ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'nagra-sdk wpeframework-ocdm-connect nagra-cert-prebuilt nagra-cashal-rel', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'nagra-sdk wpeframework-ocdm-connect nagra-cert-prebuilt nagra-cashal-rel aml-sesg', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-sdk-rel', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'irdeto-sdk irdeto-hal', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'synamedia-sdk', '', d)}\
