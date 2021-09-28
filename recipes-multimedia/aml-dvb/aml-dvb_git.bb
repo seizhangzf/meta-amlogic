@@ -38,9 +38,10 @@ do_install() {
     install -D -m 0644 ${S}/include/am_adp/*.h ${D}/usr/include
     install -D -m 0644 ${S}/include/am_adp/*.h ${D}/usr/include/am_adp
     install -D -m 0644 ${S}/include/am_adp/libdvbsi/*.h ${D}/usr/include/libdvbsi
-    #install -m 0755 ${S}/test/am_fend_test/am_fend_test ${D}${bindir}
-    #install -m 0755 ${S}/test/am_dvr_test/am_dvr_test ${D}${bindir}
-    #install -m 0755 ${S}/test/am_dmx_test/am_dmx_test ${D}${bindir}
+    install -d ${D}${includedir}/am_adp
+    install -m 0755 ${S}/include/am_adp/am_evt.h ${D}${includedir}/am_adp
+    install -m 0755 ${S}/include/am_adp/am_types.h ${D}${includedir}/am_adp
+    install -m 0755 ${S}/include/am_adp/am_userdata.h ${D}${includedir}/am_adp
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"

@@ -16,7 +16,6 @@ UBOOT_LOCALVERSION ?= ""
 # but enable individual recipes to change this value.
 UBOOT_SUFFIX ?= "bin"
 UBOOT_SUFFIX_sc2 ?= "bin.signed"
-UBOOT_SUFFIX_sc2-5.4 ?= "bin.signed"
 UBOOT_SUFFIX_s4 ?= "bin.signed"
 UBOOT_IMAGE ?= "u-boot-${MACHINE}-${PV}-${PR}.${UBOOT_SUFFIX}"
 UBOOT_BINARY ?= "u-boot.${UBOOT_SUFFIX}"
@@ -93,6 +92,7 @@ do_deploy () {
     case ${UBOOT_SUFFIX} in
     "bin.signed")
         install ${S}/fip/u-boot.bin.signed ${DEPLOYDIR}/
+        test -f ${S}/fip/u-boot.bin.device.signed && install ${S}/fip/u-boot.bin.device.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.usb.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.sd.bin.signed ${DEPLOYDIR}/
     ;;

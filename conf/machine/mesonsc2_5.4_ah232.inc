@@ -44,7 +44,7 @@ DISTRO_FEATURES_append = " bluetooth bluez5 "
 DISTRO_FEATURES_append = " ptest "
 DISTRO_FEATURES_remove = " alsa "
 
-OVERRIDES .= ":ah212:sc2-5.4:onepass"
+OVERRIDES .= ":ah212:sc2:onepass"
 MACHINEOVERRIDES .= ":client"
 OVERRIDES .= ":dtv"
 DISTRO_FEATURES_append = " dvb"
@@ -55,4 +55,3 @@ PREFERRED_VERSION_wayland-protocol = "1.18.0"
 
 DISTRO_FEATURES_remove_dunfell = " virtualization"
 TDK_VERSION_sc2 = "v3.8/dev/S905C2"
-TDK_VERSION_sc2-5.4 = "v3.8/dev/S905C2"
