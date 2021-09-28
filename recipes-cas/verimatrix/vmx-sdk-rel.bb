@@ -8,7 +8,7 @@ PR = "r0"
 VMX_SDK_BRANCH_s4 = "m9y4-rel-linux"
 VMX_SDK_BRANCH_sc2 = "m9x4-rel-linux"
 
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/sdk-rel.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_SDK_BRANCH_s4}','', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/sdk-rel.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_SDK_BRANCH}','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/vmx/sdk-rel')}"
 
 #PN = 'verimatrix'
