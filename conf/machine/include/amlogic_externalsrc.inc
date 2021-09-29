@@ -36,6 +36,7 @@ EXTERNALSRC_pn-realtek-hciattach = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5
 
 EXTERNALSRC_pn-aml-hdcp = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/hdcp' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/hdcp')) else ''}"
 EXTERNALSRC_pn-aml-provision = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/provision' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/provision')) else ''}"
+EXTERNALSRC_pn-aml-sesg = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/sesg' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/sesg')) else ''}"
 
 #tdk-3.8 is default
 EXTERNALSRC_pn-optee-userspace = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk-3.8')) else ''}"
