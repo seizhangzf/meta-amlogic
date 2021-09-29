@@ -61,6 +61,7 @@ EXTERNALSRC_pn-gst-plugin-pcr-sink = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/g
 EXTERNALSRC_pn-gstqamtunersrc-aml = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml')) else ''}"
 EXTERNALSRC_pn-gst-aml-drm-plugins = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0')) else ''}"
 EXTERNALSRC_pn-dvalin = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu')) else ''}"
+EXTERNALSRC_pn-libdrm-meson = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic/meson' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic')) else ''}"
 EXTERNALSRC_pn-libgles-eabihf-dvalin-wayland-drm = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali')) else ''}"
 
 EXTERNALSRC_pn-u-boot = "${@'${RDK_ROOT_PATH}/aml-comp/uboot' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/uboot')) else ''}"
