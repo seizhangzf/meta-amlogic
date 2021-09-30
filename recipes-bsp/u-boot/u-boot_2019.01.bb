@@ -30,7 +30,10 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${A
 #Only enable this in openlinux
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.2-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
 
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
+VMX_BRANCH = "TBD"
+VMX_BRANCH_sc2 = "m9x4-rel-linux"
+VMX_BRANCH_s4 = "m9y4-rel-linux"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_BRANCH};destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
 
 IRDETO_BRANCH = "TBD"
 IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
