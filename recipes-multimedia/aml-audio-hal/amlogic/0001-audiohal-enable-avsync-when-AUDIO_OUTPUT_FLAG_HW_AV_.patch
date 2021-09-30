@@ -1,0 +1,52 @@
+From 050c5fcc4db884318e828d871ffc75f35a161f7a Mon Sep 17 00:00:00 2001
+From: "wei.du" <wei.du@amlogic.com>
+Date: Sun, 26 Sep 2021 19:19:33 +0800
+Subject: [PATCH] audiohal: enable avsync when AUDIO_OUTPUT_FLAG_HW_AV_SYNC
+ flag [1/1]
+
+PD#SWPL-58535
+
+Problem:
+when flags contains AUDIO_OUTPUT_FLAG_HW_AV_SYNC
+but msync session is not set, audiohal doesn't drop
+avsync header, so there is noise.
+
+Solution:
+enable avsync when AUDIO_OUTPUT_FLAG_HW_AV_SYNC flag
+
+Verify:
+AP222
+
+Change-Id: I931cddff4a60c2cf2dfd70422f13d310a37cb316
+Signed-off-by: wei.du <wei.du@amlogic.com>
+---
+ audio_hal/audio_hw.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/audio_hal/audio_hw.c b/audio_hal/audio_hw.c
+index 73a6e62..dab56b2 100644
+--- a/audio_hal/audio_hw.c
++++ b/audio_hal/audio_hw.c
+@@ -3151,6 +3151,11 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
+         } else if (out->config.channels > 2) {
+             out->multich = out->config.channels;
+         }
++
++        if (flags & AUDIO_OUTPUT_FLAG_HW_AV_SYNC) {
++            ALOGI("Set out->hw_sync_mode true");
++            out->hw_sync_mode = true;
++        }
+     } else {
+         // TODO: add other cases here
+         ALOGE("%s: flags = %#x invalid", __func__, flags);
+@@ -3209,7 +3214,6 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
+     out->dev = adev;
+     out->standby = true;
+     out->frame_write_sum = 0;
+-    out->hw_sync_mode = false;
+     out->need_convert = false;
+     out->need_drop_size = 0;
+     out->position_update = 0;
+-- 
+2.25.1
+

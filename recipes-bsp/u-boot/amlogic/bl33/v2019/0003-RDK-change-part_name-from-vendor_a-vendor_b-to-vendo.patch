@@ -1,4 +1,4 @@
-From a52bfb8d52db329557965a480182b55c9ec51ab5 Mon Sep 17 00:00:00 2001
+From 8e8e758be603ce772b8a4c0351f085c6b04e65c1 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Mon, 19 Jul 2021 12:03:50 +0000
 Subject: [PATCH 3/3] RDK: change part_name from vendor_a/vendor_b to vendor in
@@ -23,7 +23,7 @@ Change-Id: Ie50532e5f0a7e0adbe0fe2a4a7ea28fb3be979d7
  1 file changed, 5 insertions(+)
 
 diff --git a/cmd/amlogic/ini/ini_platform.c b/cmd/amlogic/ini/ini_platform.c
-index 7ff904965d1..6c73aeb78f6 100644
+index 7ff904965d..6c73aeb78f 100644
 --- a/cmd/amlogic/ini/ini_platform.c
 +++ b/cmd/amlogic/ini/ini_platform.c
 @@ -66,6 +66,11 @@ static int splitFilePath(const char *file_path, char part_name[], char file_name
@@ -39,5 +39,5 @@ index 7ff904965d1..6c73aeb78f6 100644
  
      i = 0;
 -- 
-2.31.1
+2.25.1
 

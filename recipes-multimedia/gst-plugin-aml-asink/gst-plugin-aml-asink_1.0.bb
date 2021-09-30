@@ -9,6 +9,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gst_plugin_asink.git;protocol=
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-plugin-aml-asink/')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
