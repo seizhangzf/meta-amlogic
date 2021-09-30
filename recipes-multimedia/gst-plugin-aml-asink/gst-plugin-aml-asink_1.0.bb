@@ -8,7 +8,7 @@ RDEPENDS_${PN} = " aml-audio-service aml-avsync"
 SRC_URI = "git://${AML_GIT_ROOT}/linux/multimedia/gst_plugin_asink.git;protocol=${AML_GIT_PROTOCOL};branch=master"
 
 #For common patches
-#SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-aml-plugins1/', '../')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/gst-plugin-aml-asink/')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
