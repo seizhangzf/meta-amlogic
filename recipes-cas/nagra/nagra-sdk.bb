@@ -23,7 +23,7 @@ do_install() {
 
     install -d -m 0644 ${D}/lib/teetz
     install -D -m 0644 ${S}/lib/ta/efdfed0c-a6bd-44d3-9c64-de426fc5fb89.ta ${D}/lib/teetz
-    test -f ${WORKDIR}/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta && install -D -m 0644 ${WORKDIR}/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta ${D}/lib/teetz
+    test -f ${WORKDIR}/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta && install -D -m 0644 ${WORKDIR}/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta ${D}/lib/teetz || true
 }
 
 FILES_${PN} = "${libdir}/* /usr/lib/* /lib/teetz/*"
