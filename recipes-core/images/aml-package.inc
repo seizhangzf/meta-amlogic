@@ -11,9 +11,7 @@ SOC_FAMILY_g12a = "g12a"
 SOC_FAMILY_g12b = "g12b"
 SOC_FAMILY_tm2 = "tm2"
 SOC_FAMILY_sc2 = "sc2"
-SOC_FAMILY_sc2-5.4 = "sc2"
 SOC_FAMILY_t5d = "t5d"
-SOC_FAMILY_t5d-5.4 = "t5d"
 SOC_FAMILY_s4 = "s4"
 
 ABSYS = "${@bb.utils.contains('DISTRO_FEATURES','absystem','_ab','', d)}"
@@ -43,7 +41,11 @@ do_aml_pack_32b() {
         ${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/vendor.ext4.img2simg
     fi
 
+    #if system have generate secureboot uboot, just use it.
+    test -f ${DEPLOY_DIR_IMAGE}/u-boot.bin.device.signed && sed 's/"u-boot.bin.signed"/"u-boot.bin.device.signed"/' -i ${DEPLOY_DIR_IMAGE}/${PACK_CONF}
+
     ${DEPLOY_DIR_IMAGE}/aml_image_v2_packer_new -r ${DEPLOY_DIR_IMAGE}/${PACK_CONF} ${DEPLOY_DIR_IMAGE} ${DEPLOY_DIR_IMAGE}/aml_upgrade_package.img
+
 }
 do_aml_pack_32b[depends] += "core-image-minimal:do_image_complete "
 do_aml_pack_32b[depends] += "vendor-image:do_image_complete "

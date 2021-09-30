@@ -1,4 +1,4 @@
 # common configuration
 require conf/machine/include/amlogic_common.inc
 PREFERRED_PROVIDER_virtual/gpu ?= "dvalin"
-OVERRIDES .= ":t5d"
+OVERRIDES .= ":t5d-4.9"

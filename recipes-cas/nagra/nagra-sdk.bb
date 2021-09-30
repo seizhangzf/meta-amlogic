@@ -5,7 +5,7 @@ PV = "git${SRCPV}"
 PR = "r0"
 
 #Only enable it in OpenLinux
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.0-rdk','', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.2-rdk','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/nagra/nagra-sdk')}"
 
 PN = 'nagra-sdk'
@@ -21,6 +21,7 @@ do_install() {
 
     install -d -m 0644 ${D}/lib/teetz
     install -D -m 0644 ${S}/lib/ta/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta ${D}/lib/teetz
+    install -D -m 0644 ${S}/lib/ta/efdfed0c-a6bd-44d3-9c64-de426fc5fb89.ta ${D}/lib/teetz
 
 }
 

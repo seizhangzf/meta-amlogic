@@ -7,9 +7,8 @@ PR = "r0"
 #Only enable it in OpenLinux
 IRDETO_BRANCH = "TBD"
 IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
-IRDETO_BRANCH_sc2-5.4 = "openlinux/sc2-msr4-linux"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-imw.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH}','', d)}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/irdeto/hal')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/irdeto/hal')}"
 
 PN = 'irdeto-hal'
 SRCREV ?= "${AUTOREV}"
@@ -17,8 +16,8 @@ S = "${WORKDIR}/git"
 
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
-DEPENDS += "liblog aml-libdvr aml-mediahal-sdk irdeto-sdk aml-dvb"
-RDEPENDS_${PN} += "liblog aml-libdvr aml-mediahal-sdk irdeto-sdk"
+DEPENDS += "liblog aml-libdvr aml-mediahal-sdk irdeto-sdk libamadec"
+RDEPENDS_${PN} += "liblog aml-libdvr aml-mediahal-sdk irdeto-sdk libamadec"
 
 EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} TARGET_DIR=${D} \
           mode=debug \

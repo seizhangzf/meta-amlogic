@@ -1,0 +1,8 @@
+{
+	"TV_Platform": 1,
+	"STB_Platform": 0,
+	"Dual_Spdif_Support": 1,
+	"Ms12_Force_Ddp_Out": 0,
+	"Dtv_Audio_Skipamadec": 0,
+	"Dtv_Audio_Syncenable": 1
+}
