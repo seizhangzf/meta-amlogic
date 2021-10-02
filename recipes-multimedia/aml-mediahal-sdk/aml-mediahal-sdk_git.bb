@@ -8,9 +8,8 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/mediahal-sdk')}"
 
-DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-audio-hal libevent aml-audio-service', '', d)}"
-RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libevent', '', d)}"
-RDEPENDS_${PN} += "aml-audio-service"
+DEPENDS += "aml-audio-hal aml-audio-service libdrm-meson wayland"
+RDEPENDS_${PN} += "aml-audio-service libdrm-meson"
 
 #do_compile[noexec] = "1"
 
@@ -29,10 +28,8 @@ EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
                  EXTRA_LDFLAGS=-L${S}/prebuilt/${ARM_TARGET}/ \
                                "
 do_compile(){
-    if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
-        cd ${S}/example/AmTsPlayerExample
-        oe_runmake
-    fi
+    cd ${S}/example/AmTsPlayerExample
+    oe_runmake
 }
 
 do_install() {
@@ -41,14 +38,11 @@ do_install() {
 
     install -D -m 0644 ${S}/prebuilt/${TA_TARGET}/include/*.h ${D}/usr/include
     install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_resman.so ${D}/usr/lib
-
-    if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
-        install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_tsplayer.so ${D}/usr/lib
-        install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_videodec.so ${D}/usr/lib
-        install -d -m 0755 ${D}/usr/bin
-        install -D -m 0755 ${S}/example/AmTsPlayerExample/AmTsPlayerExample ${D}/usr/bin
-    fi
-
+    install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_tsplayer.so ${D}/usr/lib
+    install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_videodec.so ${D}/usr/lib
+    install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_mediasync.so ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/bin
+    install -D -m 0755 ${S}/example/AmTsPlayerExample/AmTsPlayerExample ${D}/usr/bin
 }
 
 FILES_${PN} = "${libdir}/* ${includedir}/* /usr/bin/*"
