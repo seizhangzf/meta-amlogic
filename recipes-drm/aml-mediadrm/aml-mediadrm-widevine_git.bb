@@ -33,10 +33,10 @@ def get_widevine_version(datastore):
 WIDEVINE_VER = "${@get_widevine_version(d)}"
 do_install() {
 
-    install -d -m 0644 ${D}/lib/teetz
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/usr/bin
-    install -d -m 0644 ${D}/usr/include
+    install -d -m 0755 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/bin
+    install -d -m 0755 ${D}/usr/include
 
     install -D -m 0755 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     install -D -m 0644 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/include/*.h ${D}${includedir}/

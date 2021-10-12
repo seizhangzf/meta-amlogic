@@ -36,8 +36,8 @@ do_compile(){
 }
 
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/usr/include
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/include
 
     install -D -m 0644 ${S}/prebuilt/${TA_TARGET}/include/*.h ${D}/usr/include
     install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_resman.so ${D}/usr/lib
@@ -45,7 +45,7 @@ do_install() {
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "amlogic-dvb", "yes", "no", d)}" = "yes"   ]; then
         install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_tsplayer.so ${D}/usr/lib
         install -D -m 0644 ${S}/prebuilt/${ARM_TARGET}/libmediahal_videodec.so ${D}/usr/lib
-        install -d -m 0644 ${D}/usr/bin
+        install -d -m 0755 ${D}/usr/bin
         install -D -m 0755 ${S}/example/AmTsPlayerExample/AmTsPlayerExample ${D}/usr/bin
     fi
 

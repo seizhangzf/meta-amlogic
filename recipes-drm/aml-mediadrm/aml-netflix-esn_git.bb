@@ -20,8 +20,8 @@ ARM_TARGET_aarch64 = "aarch64.lp64."
 TA_TARGET="noarch"
 
 do_install_append() {
-    install -d -m 0644 ${D}/usr/bin
-    install -d -m 0644 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/bin
+    install -d -m 0755 ${D}/lib/teetz
     install -D -m 0755 ${S}/netflix_ta-bin/prebuilt/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     install -D -m 0755 ${S}/netflix_ta-bin/prebuilt/${ARM_TARGET}/esn_provision ${D}/usr/bin/
 }
