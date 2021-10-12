@@ -28,9 +28,11 @@ do_compile(){
 }
 
 do_install(){
+    install -d ${D}${bindir}
     install -d ${D}${libdir}
     install -d ${D}${includedir}
     install -m 0644 ${S}/libatrace/libatrace.so ${D}${libdir}
+    install -m 0755 ${S}/libatrace/atrace ${D}${bindir}
     #install -m 0644 ${S}/libatrace/lib/* ${D}${libdir}
     cp -ra ${S}/libatrace/*.h ${D}${includedir}
 }
