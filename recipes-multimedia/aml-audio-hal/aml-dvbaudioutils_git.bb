@@ -11,7 +11,7 @@ PV = "${SRCPV}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/aml_audio_hal')}"
 EXTRA_OEMAKE = "TARGET_DIR=${D} STAGING_DIR=${D}"
 
-DEPENDS += "liblog libbinder aml-amaudioutils alsa-lib libamavutils"
+DEPENDS += "liblog aml-amaudioutils alsa-lib libamavutils"
 RDEPENDS_${PN} += "liblog libamavutils"
 do_compile () {
     cd ${S}/dtv_audio_utils

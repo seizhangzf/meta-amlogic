@@ -12,6 +12,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/common/aml_mp_sdk;protocol=${AML
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_mp_sdk')}"
 SRCREV = "${AUTOREV}"
 S="${WORKDIR}/git/"
+DEPENDS += "libbinder"
 RDEPENDS_${PN} += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal libamadec"
 EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} \
 		  TARGET_DIR=${D} \
