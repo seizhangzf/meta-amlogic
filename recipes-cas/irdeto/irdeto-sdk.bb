@@ -17,7 +17,7 @@ S = "${WORKDIR}/git"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 IRDETO_PATH = "TBD"
-IRDETO_PATH_sc2 = "v3/dev/S905C2"
+IRDETO_PATH_sc2 = "v3/dev/S905C2/signed"
 
 do_install() {
     install -d -m 0755 ${D}/usr/lib
