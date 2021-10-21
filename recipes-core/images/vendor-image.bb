@@ -31,7 +31,7 @@ create_dolbyms12_link() {
 }
 
 # For dm-verity
-IMAGE_CLASSES += "image_types aml-dm-verity-img"
+IMAGE_CLASSES += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'image_types aml-dm-verity-img', '', d)}"
 DM_VERITY_IMAGE = "vendor-image"
 DM_VERITY_IMAGE_TYPE = "ext4"
 STAGING_VERITY_DIR = "${DEPLOY_DIR_IMAGE}"
