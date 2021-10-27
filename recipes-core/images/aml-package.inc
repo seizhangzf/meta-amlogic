@@ -35,6 +35,9 @@ do_aml_pack_32b() {
     if ${@bb.utils.contains('DISTRO_FEATURES', 'AVB', 'false', 'true', d)}; then
         sed -i '/vbmeta/ d' ${DEPLOY_DIR_IMAGE}/${PACK_CONF}
     fi
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'recovery', 'false', 'true', d)}; then
+        sed -i '/recovery/ d' ${DEPLOY_DIR_IMAGE}/${PACK_CONF}
+    fi
     ${DEPLOY_DIR_IMAGE}/res_packer -r ${DEPLOY_DIR_IMAGE}/logo_img_files ${DEPLOY_DIR_IMAGE}/logo.img
     ${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/rootfs.ext4.img2simg
     if [ -f ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ];then
