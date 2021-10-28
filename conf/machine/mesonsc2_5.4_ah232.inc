@@ -30,6 +30,7 @@ KERNEL_MODULE_AUTOLOAD += "snd-soc-dummy_codec"
 KERNEL_MODULE_AUTOLOAD += "snd-soc-aml_t9015"
 KERNEL_MODULE_AUTOLOAD += "dolby_fw"
 KERNEL_MODULE_AUTOLOAD += "meson-cpufreq"
+KERNEL_MODULE_AUTOLOAD += " media_sync"
 
 UBOOT_MACHINE = "sc2_ah232_config"
 DISTRO_FEATURES_append = " drm"
