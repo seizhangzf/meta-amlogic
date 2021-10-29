@@ -45,10 +45,11 @@ DISTRO_FEATURES_append = " bluetooth bluez5 "
 DISTRO_FEATURES_append = " ptest "
 DISTRO_FEATURES_remove = " alsa "
 
-OVERRIDES .= ":ah212:sc2:onepass"
+OVERRIDES .= ":ah212:ah232:sc2:onepass"
 MACHINEOVERRIDES .= ":client"
 OVERRIDES .= ":dtv"
 DISTRO_FEATURES_append = " dvb"
+DISTRO_FEATURES_append = " aml-iptv"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
 
 PREFERRED_VERSION_wayland = "1.17.0"

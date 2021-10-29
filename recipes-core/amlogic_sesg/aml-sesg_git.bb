@@ -28,13 +28,18 @@ do_compile() {
 
 }
 
+SOC = "TBD"
+SOC_ah212 = "S905X4"
+#Please keep ah212 before ah232 because ah232 is a special case of ah212.
+SOC_ah232 = "S905C2"
+
 do_install() {
     # install headers
     install -d -m 0644 ${D}/lib/teetz
     install -d -m 0644 ${D}/usr/lib
     install -d -m 0644 ${D}/usr/bin
 
-    install -D -m 0755 ${S}/ta/dev/S905C2/*.ta ${D}/lib/teetz/
+    install -D -m 0755 ${S}/ta/dev/${SOC}/*.ta ${D}/lib/teetz/
     install -D -m 0644 ${S}/lib/*.so ${D}/usr/lib/
     install -D -m 0755 ${S}/ca/tee_sesg_example ${D}/usr/bin/
 
