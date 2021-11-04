@@ -22,6 +22,8 @@ VMX_SDK_VERSION_sc2 = "SDK_M9X4_1_0_0"
 
 do_install() {
     install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/include
+    install -D -m 0644 ${S}/${VMX_SDK_VERSION}/include/* ${D}/usr/include
     install -D -m 0644 ${S}/${VMX_SDK_VERSION}/libs/libvmxca_client.so ${D}/usr/lib
     install -D -m 0644 ${S}/${VMX_SDK_VERSION}/libs/libvmxca_iptvclient.so ${D}/usr/lib
     install -D -m 0644 ${S}/${VMX_SDK_VERSION}/libs/libvmxca_webclient.so ${D}/usr/lib

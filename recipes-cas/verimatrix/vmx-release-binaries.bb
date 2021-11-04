@@ -20,10 +20,11 @@ do_install() {
     mkdir -p ${D}/lib/teetz
     install -d -m 0644 ${D}/usr/lib
     install -d -m 0644 ${D}/usr/bin
-    install -D -m 0644 ${S}/${VMX_REL_PATH}/lib/libvmx_dvb.so ${D}/usr/lib
-    install -D -m 0644 ${S}/${VMX_REL_PATH}/ta/cb4066f7-e18f-4fb9-b6b1-9511bd319ebc.ta ${D}/lib/teetz
-    install -D -m 0644 ${S}/${VMX_REL_PATH}/ta/37eb0e02-c43d-48a8-a129-a95dd3d43929.ta ${D}/lib/teetz
+    install -d -m 0644 ${D}/usr/include
+    install -D -m 0644 ${S}/${VMX_REL_PATH}/lib/* ${D}/usr/lib
+    install -D -m 0644 ${S}/${VMX_REL_PATH}/ta/* ${D}/lib/teetz
     install -D -m 0755 ${S}/${VMX_REL_PATH}/vmx-indiv/* ${D}/usr/bin
+    install -D -m 0644 ${S}/${VMX_REL_PATH}/include/* ${D}/usr/include
 }
 
 FILES_${PN} = "${libdir}/* /usr/lib/* /usr/bin/* /lib/teetz/*"
