@@ -43,6 +43,8 @@ DISTRO_FEATURES_append = " bluetooth bluez5 "
 DISTRO_FEATURES_remove = " alsa "
 OVERRIDES .= ":aq222:s4:onepass"
 MACHINEOVERRIDES .= ":client"
+OVERRIDES .= ":dtv"
+DISTRO_FEATURES_append = " dvb"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
 DISTRO_FEATURES_remove_dunfell = " virtualization"
 
