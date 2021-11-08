@@ -44,6 +44,10 @@ PREFERRED_VERSION_libdrm = "2.4.100"
 PREFERRED_VERSION_u-boot = "v2015.%"
 WIDEVINE_VERSION = "16"
 
+#for vulkan
+PREFERRED_VERSION_vulkan-headers = "1.2.196"
+PREFERRED_VERSION_vulkan-loader = "1.2.196"
+
 WARN_QA_append = "ldflags installed-vs-shipped already-stripped pkgvarcheck file-rdeps"
 ERROR_QA_remove = "ldflags installed-vs-shipped already-stripped pkgvarcheck file-rdeps"
 
