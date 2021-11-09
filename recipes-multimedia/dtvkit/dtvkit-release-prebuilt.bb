@@ -8,7 +8,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/DTVKit/releaseDTVKit;protocol=${AML_GIT_PROTOCO
 SRCREV ?= "${AUTOREV}"
 
 S = "${WORKDIR}/git"
-
+INSANE_SKIP_${PN}-dev = "dev-elf dev-so"
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
@@ -34,6 +34,7 @@ do_install () {
 
 
     install -D -m 0644 ${S}/android-rpcservice/dtvkit_demo ${D}/usr/bin
+    install -D -m 0644 ${S}/android-rpcservice/libdtvkitserver.so ${D}/usr/lib
     install -D -m 0644 ${S}/android-rpcservice/config/config.xml ${D}/etc
 }
 
