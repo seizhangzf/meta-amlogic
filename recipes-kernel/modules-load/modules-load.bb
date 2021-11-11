@@ -12,6 +12,11 @@ do_compile[noexec] = "1"
 do_install() {
     install -d ${D}/etc
     install -m 0755 ${WORKDIR}/modules-load.sh ${D}/etc
+    case ${MACHINE} in
+    *t5d*)
+        sed -i 's@PATH/.*/dvb_demux.ko@PATH/media/aml_hardware_dmx.ko@' ${D}/etc/modules-load.sh
+        ;;
+    esac
 }
 
 do_install_append() {

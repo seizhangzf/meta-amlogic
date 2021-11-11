@@ -19,8 +19,8 @@ if [ -e $PATH/drivers/amlogic/audiodsp/audiodsp.ko ];then
     /sbin/insmod $PATH/drivers/amlogic/audiodsp/audiodsp.ko
 fi
 
-if [ -e $PATH/media/aml_hardware_dmx.ko ];then
-    /sbin/insmod $PATH/media/aml_hardware_dmx.ko
+if [ -e $PATH/drivers/amlogic/dvb/demux/dvb_demux.ko ];then
+    /sbin/insmod $PATH/drivers/amlogic/dvb/demux/dvb_demux.ko
 fi
 
 if [ -e $PATH/media/dovi_tm2_tv_16.ko ];then
