@@ -14,6 +14,8 @@ PREFERRED_PROVIDER_virtual/libgles2 = "libgles-eabihf-dvalin-wayland-drm"
 MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
         wififw-qca6174 \
         qca6174 \
+        aucpu-fw \
+        tuner-prebuilt \
         "
 
 KERNEL_DEVICETREE = "s4_s805x2_aq222_linux_1g.dtb"
