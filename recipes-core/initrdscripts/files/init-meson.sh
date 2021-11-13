@@ -223,7 +223,7 @@ mount_and_boot() {
 	format_and_install
     fi
 
-    if touch $ROOT_MOUNT/bin 2>/dev/null; then
+    if touch $ROOT_MOUNT/bin 2>/dev/null || [ -e $ROOT_MOUNT/read-only ]; then
 	# The root image is read-write, directly boot it up.
 	boot_root
     fi

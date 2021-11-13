@@ -55,6 +55,7 @@ PREFERRED_VERSION_wayland = "1.17.0"
 PREFERRED_VERSION_wayland-protocol = "1.18.0"
 
 DISTRO_FEATURES_remove_dunfell = " virtualization"
+#READONLY = "y"
 # dm-verity
-#DISTRO_FEATURES_append = " dm-verity"
-#DISTRO_FEATURES_NATIVE_append = " dm-verity"
+DISTRO_FEATURES_append = " ${@bb.utils.contains('READONLY', 'y', 'dm-verity', '', d)}"
+DISTRO_FEATURES_NATIVE_append = " ${@bb.utils.contains('READONLY', 'y', 'dm-verity', '', d)}"
