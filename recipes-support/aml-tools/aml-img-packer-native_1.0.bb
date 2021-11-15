@@ -22,6 +22,7 @@ SOC_FAMILY_s4 = "s4"
 SOC_BOARD = "default"
 SOC_BOARD_ab301 = "ab301"
 SOC_BOARD_t962x3 = "ab301"
+SOC_BOARD_ah232 = "ah232"
 
 PR = "r3"
 
