@@ -7,6 +7,13 @@ SRC_URI = "git://${AML_GIT_ROOT}/DTVKit/releaseDTVKit;protocol=${AML_GIT_PROTOCO
 #use head version, ?= conditonal operator can be control revision in external rdk-next.conf like configuration file
 SRCREV ?= "${AUTOREV}"
 
+CONFIG = "config_ah212.xml"
+CONFIG_ah212 = "config_ah212.xml"
+CONFIG_ap222 = "config_ap222.xml"
+CONFIG_aq222 = "config_aq222.xml"
+CONFIG_ah232 = "config_ah232.xml"
+CONFIG_ap232 = "config_ap232.xml"
+
 S = "${WORKDIR}/git"
 
 do_configure[noexec] = "1"
@@ -35,7 +42,7 @@ do_install () {
 
     install -D -m 0644 ${S}/android-rpcservice/dtvkit_demo ${D}/usr/bin
     install -D -m 0644 ${S}/android-rpcservice/libdtvkitserver.so ${D}/usr/lib
-    install -D -m 0644 ${S}/android-rpcservice/config/config.xml ${D}/etc
+    install -D -m 0644 ${S}/android-rpcservice/config/${CONFIG} ${D}/etc/config.xml
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
