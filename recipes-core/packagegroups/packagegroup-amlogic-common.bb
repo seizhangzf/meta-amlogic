@@ -65,6 +65,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     modules-load \
                                     system-config \
                                     simulate-key \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-rtos', 'dsp-util aml-rtos', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \

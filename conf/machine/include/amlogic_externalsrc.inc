@@ -49,6 +49,8 @@ EXTERNALSRC_pn-optee-userspace_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/a
 EXTERNALSRC_pn-optee-scripts-native_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk')) else ''}"
 EXTERNALSRC_pn-optee-linux-driver_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk')) else ''}"
 
+EXTERNALSRC_pn-dsp-util = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/dsp_util' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/dsp_util')) else ''}"
+EXTERNALSRC_pn-aml-rtos = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/freertos' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/freertos')) else ''}"
 
 EXTERNALSRC_pn-aml-mediadrm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
 EXTERNALSRC_pn-aml-netflix-esn = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
