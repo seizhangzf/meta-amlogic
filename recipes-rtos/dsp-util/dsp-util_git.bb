@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 #SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/dsp_util;protocol=${AML_GIT_PROTOCOL};branch=projects/amlogic-dev;"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${AML_PATCH_PATH}/vendor/amlogic/rtos/dsp_util')}"
+#SRC_URI_append = " ${@get_patch_list_with_path('${AML_PATCH_PATH}/vendor/amlogic/rtos/dsp_util')}"
 
 SRCREV = "${AUTOREV}"
 PV = "${SRCPV}"
