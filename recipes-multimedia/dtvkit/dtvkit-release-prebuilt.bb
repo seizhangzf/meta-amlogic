@@ -9,10 +9,11 @@ SRCREV ?= "${AUTOREV}"
 
 CONFIG = "config_ah212.xml"
 CONFIG_ah212 = "config_ah212.xml"
+CONFIG_ah232 = "config_ah232.xml"
 CONFIG_ap222 = "config_ap222.xml"
 CONFIG_aq222 = "config_aq222.xml"
-CONFIG_ah232 = "config_ah232.xml"
 CONFIG_ap232 = "config_ap232.xml"
+CONFIG_ah212-pip = "config_ah212_pip.xml"
 
 S = "${WORKDIR}/git"
 
