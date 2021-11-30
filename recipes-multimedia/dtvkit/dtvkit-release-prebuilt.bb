@@ -43,6 +43,7 @@ do_install () {
     install -D -m 0644 ${S}/android-rpcservice/dtvkit_demo ${D}/usr/bin
     install -D -m 0644 ${S}/android-rpcservice/libdtvkitserver.so ${D}/usr/lib
     install -D -m 0644 ${S}/android-rpcservice/config/${CONFIG} ${D}/etc/config.xml
+    install -D -m 0644 ${S}/android-rpcservice/config/*.json  ${D}/etc/
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
