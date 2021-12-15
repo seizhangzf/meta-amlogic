@@ -22,6 +22,9 @@ TARGET_CFLAGS += "-fPIC"
 
 PACKAGECONFIG = "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'dtv', '', d)}"
 
+PACKAGECONFIG_append_sc2 += "dtv"
+PACKAGECONFIG_append_s4 += "dtv"
+PACKAGECONFIG_append_t5w += "dtv"
 PACKAGECONFIG[dtv] = "-DUSE_DTV=ON,-DUSE_DTV=OFF,"
 
 PACKAGECONFIG += "eqdrc"
@@ -38,6 +41,7 @@ SRC_URI  += "\
   file://aml_audio_config.json \
   file://aml_audio_config.ah212.json \
   file://aml_audio_config.am301.json \
+  file://aml_audio_config.at301.json \
   file://aml_audio_config.ap222.json \
   file://aml_audio_config.u212.json \
 "
@@ -46,6 +50,7 @@ PROPERTY_SET_CONF = "aml_audio_config.json"
 PROPERTY_SET_CONF_ah212 = "aml_audio_config.ah212.json"
 PROPERTY_SET_CONF_u212 = "aml_audio_config.u212.json"
 PROPERTY_SET_CONF_am301 = "aml_audio_config.am301.json"
+PROPERTY_SET_CONF_at301 = "aml_audio_config.at301.json"
 PROPERTY_SET_CONF_ap222 = "aml_audio_config.ap222.json"
 
 do_install_append() {

@@ -26,6 +26,9 @@ do_install_append(){
     mesons4*aq223)
         sed -i '/Debug=0/a Device=aml' ${D}${sysconfdir}/bluetooth/main.conf
     ;;
+    mesont5d* | mesont5w*)
+        sed -i '/Debug=0/a Device=rtk' ${D}${sysconfdir}/bluetooth/main.conf
+    ;;
     *)
         sed -i '/Debug=0/a Device=qca' ${D}${sysconfdir}/bluetooth/main.conf
     ;;

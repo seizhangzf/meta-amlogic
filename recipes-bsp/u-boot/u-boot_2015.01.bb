@@ -62,53 +62,47 @@ BL32_SOC_FAMILY_txlx = "txlx"
 BL32_SOC_FAMILY_sm2 = "g12a"
 BL32_SOC_FAMILY_tm2 = "tm2"
 BL32_SOC_FAMILY_t5d = "t5d"
+BL32_SOC_FAMILY_t5w = "t5w"
+BL32_SOC_FAMILY_t3 = "t3"
 
+PATH_prepend = "${STAGING_DIR_NATIVE}/usr/bin/python3-native:"
 PATH_append = ":${STAGING_DIR_NATIVE}/gcc-linaro-aarch64-elf/bin"
 PATH_append = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 DEPENDS_append = "gcc-linaro-aarch64-elf-native "
 DEPENDS_append = "optee-scripts-native optee-userspace-securebl32"
 DEPENDS_append = " riscv-none-gcc-native "
 
-DEPENDS_append = " coreutils-native python-native python-pycrypto-native "
+DEPENDS_append = " coreutils-native python3-native python3-pycryptodomex-native cmake-native ninja-native"
 #override this in customer layer bbappend for customer specific bootloader binaries
 export BL30_ARG = ""
 export BL2_ARG = ""
+CFLAGS +=" -DCONFIG_YOCTO "
+KCFLAGS +=" -DCONFIG_YOCTO "
 
 do_compile () {
     cd ${S}
-    cp fip/mk .
+    cp -f fip/mk .
     export BUILD_FOLDER=${S}/build/
-    export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
+    export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python3.8/site-packages/"
     export CROSS_COMPILE=aarch64-elf-
-    unset SOURCE_DATE_EPOCH
+    export KCFLAGS="${KCFLAGS}"
+    unset SOURCE_DATE_EPOCH CFLAGS
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
-        mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
-        ${STAGING_DIR_NATIVE}/tdk/scripts/pack_kpub.py \
-            --rsk=${STAGING_DIR_NATIVE}/tdk/keys/root_rsa_pub_key.pem \
-            --rek=${STAGING_DIR_NATIVE}/tdk/keys/root_aes_key.bin \
-            --in=${STAGING_DIR_TARGET}/usr/share/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
-            --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
+        if [ "${BL32_SOC_FAMILY}" = "t5d" ];then
+            mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
+            ${STAGING_DIR_NATIVE}/tdk/scripts/pack_kpub.py \
+                --rsk=${STAGING_DIR_NATIVE}/tdk/keys/root_rsa_pub_key.pem \
+                --rek=${STAGING_DIR_NATIVE}/tdk/keys/root_aes_key.bin \
+                --in=${STAGING_DIR_TARGET}/usr/share/tdk/secureos/${BL32_SOC_FAMILY}/bl32.img \
+                --out=${S}/bl32/bin/${BL32_SOC_FAMILY}/bl32.img
 
-        LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
+            LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
+        else
+            LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32_3.8/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
+        fi
     else
-        LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
-    fi
-    cp -rf build/* fip/
-}
-
-do_compile_g12a () {
-    cd ${S}
-    cp fip/mk .
-    export BUILD_FOLDER=${S}/build/
-    export PYTHONPATH="${STAGING_DIR_NATIVE}/usr/lib/python2.7/site-packages/"
-    export CROSS_COMPILE=aarch64-elf-
-    unset SOURCE_DATE_EPOCH
-    UBOOT_TYPE="${UBOOT_MACHINE}"
-    if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
-        LDFLAGS= ./mk ${UBOOT_TYPE%_config} --bl32 bl32_3.8/bin/${BL32_SOC_FAMILY}/bl32.img ${BL30_ARG} ${BL2_ARG}
-    else
-        LDFLAGS= ./mk ${UBOOT_TYPE%_config} ${BL30_ARG} ${BL2_ARG}
+        LDFLAGS= ./mk ${UBOOT_TYPE%_config}
     fi
     cp -rf build/* fip/
 }

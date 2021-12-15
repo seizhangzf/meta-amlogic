@@ -107,4 +107,28 @@ EOF
 FILES_${PN}_append_sc2 = " /vendor/* /data /opt /factory/* "
 dirs755_append_sc2 = " /vendor /data /opt /factory "
 
+#/*-----------------------T5W TV----------------------------------*/
+do_install_append_t5w () {
+    mkdir -p ${D}/vendor
+    mkdir -p ${D}/factory
+    mkdir -p ${D}/data
+    mkdir -p ${D}/opt
+#    ln -sf /tmp/ds/0x4d_0x5331_0x32.so ${D}/vendor/lib/libdolbyms12.so
+
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'true', 'false', d)}; then
+    cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/dm-1            /vendor                    auto       defaults              0  0
+ /dev/factory           /factory                   auto       defaults              0  0
+EOF
+    else
+    cat >> ${D}${sysconfdir}/fstab <<EOF
+ /dev/vendor_a            /vendor                    auto       defaults              0  0
+ /dev/factory           /factory                   auto       defaults              0  0
+EOF
+    fi
+}
+FILES_${PN}_append_t5w = " /vendor/* /factory/* "
+dirs755_append_t5w = " /vendor /factory "
+
+
 INSANE_SKIP_${PN} = "dev-so"
