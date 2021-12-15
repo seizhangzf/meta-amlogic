@@ -19,8 +19,8 @@ S = "${WORKDIR}/git"
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
                  TARGET_DIR=${D} \"
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/usr/include/libdvr
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/include/libdvr
     install -D -m 0644 ${S}/lib/libamdvr.product.so  ${D}/usr/lib
     install -D -m 0644 ${S}/include/*.h ${D}/usr/include/libdvr
 }

@@ -10,11 +10,10 @@ PV = "${SRCPV}"
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_audio_hal')}"
 
-DEPENDS += "aml-amaudioutils expat libbinder libamavutils liblog aml-avsync"
-RDEPENDS_${PN} += "liblog aml-amaudioutils aml-avsync libbinder libamavutils"
+DEPENDS += "aml-amaudioutils expat libamavutils liblog aml-avsync"
+RDEPENDS_${PN} += "liblog aml-amaudioutils aml-avsync  libamavutils"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvb aml-dvbaudioutils', '', d)}"
 RDEPENDS_${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils aml-dvb', '', d)}"
-
 
 inherit cmake pkgconfig
 

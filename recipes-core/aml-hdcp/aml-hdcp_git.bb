@@ -23,8 +23,8 @@ ARM_TARGET_aarch64 = "64"
 
 do_install() {
     # install headers
-    install -d -m 0644 ${D}/lib/teetz
-    install -d -m 0644 ${D}/usr/bin
+    install -d -m 0755 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/bin
     install -D -m 0755 ${S}/ca/bin${ARM_TARGET}/tee_hdcp ${D}/usr/bin/
     install -D -m 0755 ${S}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then

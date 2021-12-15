@@ -93,7 +93,7 @@ do_compile () {
 do_install() {
     make DESTDIR=${D} install-headers
     mkdir -p ${D}${libdir}/
-	install -d -m 0644 ${D}${libdir}/
+	install -d -m 0755 ${D}${libdir}/
     install -D -m 0644 libffmpeg-vendor.so ${D}${libdir}/
 	${STRIP} -s ${D}${libdir}/libffmpeg-vendor.so
 }

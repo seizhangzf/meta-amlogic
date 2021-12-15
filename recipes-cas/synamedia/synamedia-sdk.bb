@@ -28,10 +28,10 @@ do_compile () {
 }
 
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/lib
     install -D -m 0644 ${S}/nsk2hdi/lib/linux/*.so ${D}/usr/lib
 
-    install -d -m 0644 ${D}/lib/teetz
+    install -d -m 0755 ${D}/lib/teetz
     install -D -m 0644 ${S}/nsk2tee/${CHIP_PATH}/nsk_ta/*.ta ${D}/lib/teetz
     install -D -m 0644 ${S}/nsk2tee/${CHIP_PATH}/syna_ta/*.ta ${D}/lib/teetz
 
