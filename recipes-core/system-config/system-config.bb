@@ -35,6 +35,12 @@ echo 0 > /sys/module/amvdec_ports/parameters/enable_nr
 echo 0 > /sys/module/amvdec_ports/parameters/use_di_localbuffer
 EOF
 fi
+#init the unifykeys
+case ${MACHINE_ARCH} in
+mesont5w*)
+    sed -i '$a\\necho 1 > /sys/class/unifykeys/attach' ${D}/${bindir}/system-config.sh
+;;
+esac
 }
 
 FILES_${PN} += "${bindir}/*"
