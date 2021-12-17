@@ -1,4 +1,4 @@
-From 80babf5c8351a702acd6863f27342cb9415890c3 Mon Sep 17 00:00:00 2001
+From acfa57705cb53a3b627dda9c21090d58f849bba8 Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Wed, 7 Apr 2021 12:25:49 +0800
 Subject: [PATCH 1/3] RDK: Adopt rdk flash layout
@@ -6,18 +6,18 @@ Subject: [PATCH 1/3] RDK: Adopt rdk flash layout
 Signed-off-by: Blance Tang <guofeng.tang@amlogic.com>
 Change-Id: I8eb307c932801fc138c97538eb2b596d0c89fe96
 ---
- .../dts/amlogic/partition_normal_linux.dtsi   | 60 ++++++++++++++-----
- 1 file changed, 44 insertions(+), 16 deletions(-)
+ .../dts/amlogic/partition_normal_linux.dtsi   | 65 ++++++++++++-------
+ 1 file changed, 43 insertions(+), 22 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
-index 03bea1b99b2a..f43000cbd29e 100644
+index 775e565f24aa..44015d40f31a 100644
 --- a/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
 +++ b/arch/arm64/boot/dts/amlogic/partition_normal_linux.dtsi
-@@ -12,22 +12,26 @@
+@@ -12,23 +12,26 @@
  
  / {
      partitions: partitions{
--		parts = <15>;
+-		parts = <16>;
 +		parts = <19>;
  		part-0 = <&logo>;
  		part-1 = <&recovery>;
@@ -29,18 +29,18 @@ index 03bea1b99b2a..f43000cbd29e 100644
 -		part-7 = <&tee>;
 -		part-8 = <&factory>;
 -		part-9 = <&vendor>;
--		part-10 = <&odm>;
--		part-11 = <&system>;
--		part-12 = <&product>;
--		part-13 = <&cache>;
--		part-14 = <&data>;
+-		part-10 = <&vbmeta>;
 +		part-5 = <&boot_a>;
 +		part-6 = <&boot_b>;
 +		part-7 = <&rsv>;
 +		part-8 = <&tee>;
 +		part-9 = <&factory>;
 +		part-10 = <&vendor>;
-+		part-11 = <&odm>;
+ 		part-11 = <&odm>;
+-		part-12 = <&system>;
+-		part-13 = <&product>;
+-		part-14 = <&cache>;
+-		part-15 = <&data>;
 +		part-12 = <&system_a>;
 +		part-13 = <&system_b>;
 +		part-14 = <&product>;
@@ -51,7 +51,7 @@ index 03bea1b99b2a..f43000cbd29e 100644
  
  		logo:logo{
  			pname = "logo";
-@@ -60,9 +64,15 @@
+@@ -61,9 +64,15 @@
  			size = <0x0 0x1000000>;
  			mask = <2>;
  		};
@@ -69,27 +69,39 @@ index 03bea1b99b2a..f43000cbd29e 100644
  			size = <0x0 0x4000000>;
  			mask = <1>;
  		};
-@@ -88,10 +98,16 @@
+@@ -83,22 +92,22 @@
+ 			size = <0x0 0x1C000000>;
+ 			mask = <1>;
+ 		};
+-		vbmeta:vbmeta
+-		{
+-			pname = "vbmeta";
+-			size = <0x0 0x200000>;
+-			mask = <1>;
+-		};
+ 		odm:odm
+ 		{
+ 			pname = "odm";
  			size = <0x0 0x8000000>;
  			mask = <1>;
  		};
 -		system:system
 +		system_a:system_a
-+		{
+ 		{
+-			pname = "system";
+-			size = <0x0 0x40000000>;
 +			pname = "system_a";
 +			size = <0x0 0x96000000>;
 +			mask = <1>;
 +		};
 +		system_b:system_b
- 		{
--			pname = "system";
--			size = <0x0 0x40000000>;
++		{
 +			pname = "system_b";
 +			size = <0x0 0x96000000>;
  			mask = <1>;
  		};
  		product:product{
-@@ -105,6 +121,18 @@
+@@ -112,6 +121,18 @@
  			size = <0x0 0x46000000>;
  			mask = <2>;
  		};
@@ -109,5 +121,5 @@ index 03bea1b99b2a..f43000cbd29e 100644
  		{
  			pname = "data";
 -- 
-2.25.1
+2.31.1
 

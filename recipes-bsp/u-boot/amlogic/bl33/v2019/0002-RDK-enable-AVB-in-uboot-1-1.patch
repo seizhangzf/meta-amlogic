@@ -1,4 +1,4 @@
-From fb0090c6af2131f766eb210076bb31ed609092af Mon Sep 17 00:00:00 2001
+From 4356e4fa5a5abb28dfc428397c53bf5b0f0efecf Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Fri, 16 Jul 2021 07:13:09 +0000
 Subject: [PATCH 2/3] RDK: enable AVB in uboot  [1/1]
@@ -22,10 +22,10 @@ Signed-off-by: Xueling Li <xueling.li@amlogic.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
-index 0dc0ab88fc..aae291f559 100644
+index bc17c827e94..0328863823e 100644
 --- a/board/amlogic/configs/sc2_ah212.h
 +++ b/board/amlogic/configs/sc2_ah212.h
-@@ -177,7 +177,7 @@
+@@ -180,7 +180,7 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
@@ -35,7 +35,7 @@ index 0dc0ab88fc..aae291f559 100644
                          "setenv bootargs ${bootargs} root=/dev/system_a;"\
                      "else if test ${active_slot} = _b; then "\
 diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
-index 1e5cc5cba9..b350dffb7b 100644
+index 1e5cc5cba99..b350dffb7b6 100644
 --- a/board/amlogic/defconfigs/sc2_ah212_defconfig
 +++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
 @@ -37,7 +37,7 @@ CONFIG_CMD_IR=y
@@ -48,5 +48,5 @@ index 1e5cc5cba9..b350dffb7b 100644
  CONFIG_CMD_JTAG=y
  CONFIG_CMD_INI=y
 -- 
-2.25.1
+2.31.1
 

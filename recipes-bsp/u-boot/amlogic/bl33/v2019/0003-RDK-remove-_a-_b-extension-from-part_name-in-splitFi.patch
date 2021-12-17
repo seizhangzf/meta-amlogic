@@ -1,7 +1,7 @@
-From 8e8e758be603ce772b8a4c0351f085c6b04e65c1 Mon Sep 17 00:00:00 2001
+From b134a6ad9e1ef3f079d36f398242f3829a8a0adc Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Mon, 19 Jul 2021 12:03:50 +0000
-Subject: [PATCH 3/3] RDK: change part_name from vendor_a/vendor_b to vendor in
+Subject: [PATCH 3/3] RDK: remove _a/_b extension from part_name in
  splitFilePath() [1/1]
 
 PD#SWPL-51970
@@ -11,7 +11,7 @@ Problem:
   partition
 
 Solution:
-  - change part_name from vendor_a/vendor_b to vendor in splitFilePath()
+  - remove _a/_b extension from part_name in splitFilePath()
 
 Verify:
   - dolby_fw can be load normally in uboot
@@ -19,14 +19,14 @@ Verify:
 Signed-off-by: Xueling Li <xueling.li@amlogic.com>
 Change-Id: Ie50532e5f0a7e0adbe0fe2a4a7ea28fb3be979d7
 ---
- cmd/amlogic/ini/ini_platform.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ cmd/amlogic/ini/ini_platform.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
 diff --git a/cmd/amlogic/ini/ini_platform.c b/cmd/amlogic/ini/ini_platform.c
-index 7ff904965d..6c73aeb78f 100644
+index 7ff904965d1..35f2cdbcbd0 100644
 --- a/cmd/amlogic/ini/ini_platform.c
 +++ b/cmd/amlogic/ini/ini_platform.c
-@@ -66,6 +66,11 @@ static int splitFilePath(const char *file_path, char part_name[], char file_name
+@@ -66,6 +66,16 @@ static int splitFilePath(const char *file_path, char part_name[], char file_name
          //ALOGD("%s, partition name is %s\n", __FUNCTION__, part_name);
      }
  
@@ -35,9 +35,14 @@ index 7ff904965d..6c73aeb78f 100644
 +        snprintf(part_name, CC_MAX_INI_FILE_NAME_LEN, "%s", "vendor");
 +    }
 +
++    if (!strcmp(part_name, "data_a") || !strcmp(part_name, "data_b")) {
++        printf("RDK change part_name %s to data\n", part_name);
++        snprintf(part_name, CC_MAX_INI_FILE_NAME_LEN, "%s", "data");
++    }
++
      tmp_start_ptr = tmp_end_ptr;
  
      i = 0;
 -- 
-2.25.1
+2.31.1
 
