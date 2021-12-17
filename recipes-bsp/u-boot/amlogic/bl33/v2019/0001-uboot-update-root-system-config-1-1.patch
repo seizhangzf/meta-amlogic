@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 From 38431784171b52a0060cf330a52b2bd83fb92c45 Mon Sep 17 00:00:00 2001
 From: Bing Jiang <bing.jiang@amlogic.com>
 Date: Mon, 2 Nov 2020 16:02:04 +0800
@@ -35,6 +36,12 @@ diff --git a/board/amlogic/configs/s4_ap222.h b/board/amlogic/configs/s4_ap222.h
 index 5bf8b3c50a..381febdef6 100644
 --- a/board/amlogic/configs/s4_ap222.h
 +++ b/board/amlogic/configs/s4_ap222.h
+=======
+Index: v2019/board/amlogic/configs/s4_ap222.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/s4_ap222.h
++++ v2019/board/amlogic/configs/s4_ap222.h
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 @@ -178,6 +178,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
@@ -51,10 +58,17 @@ index 5bf8b3c50a..381febdef6 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+<<<<<<< HEAD
 diff --git a/board/amlogic/configs/s4_ap223.h b/board/amlogic/configs/s4_ap223.h
 index 9065b1871f..da69fbcbc9 100644
 --- a/board/amlogic/configs/s4_ap223.h
 +++ b/board/amlogic/configs/s4_ap223.h
+=======
+Index: v2019/board/amlogic/configs/s4_ap223.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/s4_ap223.h
++++ v2019/board/amlogic/configs/s4_ap223.h
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 @@ -178,6 +178,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
@@ -71,10 +85,17 @@ index 9065b1871f..da69fbcbc9 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+<<<<<<< HEAD
 diff --git a/board/amlogic/configs/s4_aq222.h b/board/amlogic/configs/s4_aq222.h
 index 8cf8925af0..f05f97e5c7 100644
 --- a/board/amlogic/configs/s4_aq222.h
 +++ b/board/amlogic/configs/s4_aq222.h
+=======
+Index: v2019/board/amlogic/configs/s4_aq222.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/s4_aq222.h
++++ v2019/board/amlogic/configs/s4_aq222.h
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 @@ -168,6 +168,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
@@ -91,6 +112,7 @@ index 8cf8925af0..f05f97e5c7 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+<<<<<<< HEAD
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
 index 3d169a8ed6..0dc0ab88fc 100644
 --- a/board/amlogic/configs/sc2_ah212.h
@@ -100,6 +122,17 @@ index 3d169a8ed6..0dc0ab88fc 100644
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
 +                "if test ${avb2} = 0; then "\
+=======
+Index: v2019/board/amlogic/configs/sc2_ah212.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/sc2_ah212.h
++++ v2019/board/amlogic/configs/sc2_ah212.h
+@@ -178,6 +178,15 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
++                "if test ${avb2} = 1; then "\
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 +                    "if test ${active_slot} = _a; then "\
 +                        "setenv bootargs ${bootargs} root=/dev/system_a;"\
 +                    "else if test ${active_slot} = _b; then "\
@@ -111,10 +144,10 @@ index 3d169a8ed6..0dc0ab88fc 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
-diff --git a/board/amlogic/configs/sc2_ah219.h b/board/amlogic/configs/sc2_ah219.h
-index dd00e3f0dc..6d7596cfc4 100644
---- a/board/amlogic/configs/sc2_ah219.h
-+++ b/board/amlogic/configs/sc2_ah219.h
+Index: v2019/board/amlogic/configs/sc2_ah219.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/sc2_ah219.h
++++ v2019/board/amlogic/configs/sc2_ah219.h
 @@ -170,6 +170,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
@@ -131,11 +164,11 @@ index dd00e3f0dc..6d7596cfc4 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
-diff --git a/board/amlogic/configs/sc2_ah232.h b/board/amlogic/configs/sc2_ah232.h
-index f12dcf983e..a3b15a6eb1 100644
---- a/board/amlogic/configs/sc2_ah232.h
-+++ b/board/amlogic/configs/sc2_ah232.h
-@@ -182,6 +182,15 @@
+Index: v2019/board/amlogic/configs/sc2_ah232.h
+===================================================================
+--- v2019.orig/board/amlogic/configs/sc2_ah232.h
++++ v2019/board/amlogic/configs/sc2_ah232.h
+@@ -183,6 +183,15 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
@@ -151,10 +184,10 @@ index f12dcf983e..a3b15a6eb1 100644
                  "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
                  "setenv loadaddr ${loadaddr_kernel};"\
                  "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
-diff --git a/board/amlogic/defconfigs/s4_ap222_defconfig b/board/amlogic/defconfigs/s4_ap222_defconfig
-index 814ebe2d5d..57cbdbb630 100644
---- a/board/amlogic/defconfigs/s4_ap222_defconfig
-+++ b/board/amlogic/defconfigs/s4_ap222_defconfig
+Index: v2019/board/amlogic/defconfigs/s4_ap222_defconfig
+===================================================================
+--- v2019.orig/board/amlogic/defconfigs/s4_ap222_defconfig
++++ v2019/board/amlogic/defconfigs/s4_ap222_defconfig
 @@ -36,7 +36,7 @@ CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
@@ -164,10 +197,17 @@ index 814ebe2d5d..57cbdbb630 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_CMD_INI=y
+<<<<<<< HEAD
 diff --git a/board/amlogic/defconfigs/s4_ap223_defconfig b/board/amlogic/defconfigs/s4_ap223_defconfig
 index 551c09b6a3..50ecb46059 100644
 --- a/board/amlogic/defconfigs/s4_ap223_defconfig
 +++ b/board/amlogic/defconfigs/s4_ap223_defconfig
+=======
+Index: v2019/board/amlogic/defconfigs/s4_ap223_defconfig
+===================================================================
+--- v2019.orig/board/amlogic/defconfigs/s4_ap223_defconfig
++++ v2019/board/amlogic/defconfigs/s4_ap223_defconfig
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 @@ -35,7 +35,7 @@ CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
@@ -177,10 +217,17 @@ index 551c09b6a3..50ecb46059 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_CMD_INI=y
+<<<<<<< HEAD
 diff --git a/board/amlogic/defconfigs/s4_aq222_defconfig b/board/amlogic/defconfigs/s4_aq222_defconfig
 index 10a013dcfa..045787fc6d 100644
 --- a/board/amlogic/defconfigs/s4_aq222_defconfig
 +++ b/board/amlogic/defconfigs/s4_aq222_defconfig
+=======
+Index: v2019/board/amlogic/defconfigs/s4_aq222_defconfig
+===================================================================
+--- v2019.orig/board/amlogic/defconfigs/s4_aq222_defconfig
++++ v2019/board/amlogic/defconfigs/s4_aq222_defconfig
+>>>>>>> 335d8f964fd94ca0056eec8f6c98c4ad17d21364
 @@ -36,7 +36,7 @@ CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
@@ -190,23 +237,10 @@ index 10a013dcfa..045787fc6d 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_AML_PARTITION=y
-diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
-index b350dffb7b..1e5cc5cba9 100644
---- a/board/amlogic/defconfigs/sc2_ah212_defconfig
-+++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
-@@ -37,7 +37,7 @@ CONFIG_CMD_IR=y
- CONFIG_CMD_BMP=y
- CONFIG_CMD_CACHE=y
- # CONFIG_CMD_MISC is not set
--CONFIG_CMD_BOOTCTOL_AVB=y
-+# CONFIG_CMD_BOOTCTOL_AVB=y
- CONFIG_CMD_WATCHDOG=y
- CONFIG_CMD_JTAG=y
- CONFIG_CMD_INI=y
-diff --git a/board/amlogic/defconfigs/sc2_ah219_defconfig b/board/amlogic/defconfigs/sc2_ah219_defconfig
-index 53cd670b95..27494ebb79 100644
---- a/board/amlogic/defconfigs/sc2_ah219_defconfig
-+++ b/board/amlogic/defconfigs/sc2_ah219_defconfig
+Index: v2019/board/amlogic/defconfigs/sc2_ah219_defconfig
+===================================================================
+--- v2019.orig/board/amlogic/defconfigs/sc2_ah219_defconfig
++++ v2019/board/amlogic/defconfigs/sc2_ah219_defconfig
 @@ -36,7 +36,7 @@ CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
  # CONFIG_CMD_MISC is not set
@@ -216,10 +250,10 @@ index 53cd670b95..27494ebb79 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_CMD_INI=y
-diff --git a/board/amlogic/defconfigs/sc2_ah232_defconfig b/board/amlogic/defconfigs/sc2_ah232_defconfig
-index 95dc8364c0..eb96af8eb2 100644
---- a/board/amlogic/defconfigs/sc2_ah232_defconfig
-+++ b/board/amlogic/defconfigs/sc2_ah232_defconfig
+Index: v2019/board/amlogic/defconfigs/sc2_ah232_defconfig
+===================================================================
+--- v2019.orig/board/amlogic/defconfigs/sc2_ah232_defconfig
++++ v2019/board/amlogic/defconfigs/sc2_ah232_defconfig
 @@ -36,7 +36,7 @@ CONFIG_CMD_IR=y
  CONFIG_CMD_BMP=y
  CONFIG_CMD_CACHE=y
@@ -229,6 +263,3 @@ index 95dc8364c0..eb96af8eb2 100644
  CONFIG_CMD_WATCHDOG=y
  CONFIG_CMD_JTAG=y
  CONFIG_CMD_INI=y
--- 
-2.25.1
-

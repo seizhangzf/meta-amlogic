@@ -26,10 +26,10 @@ TA_TARGET="noarch"
 do_install() {
     case ${MACHINE} in
         mesonsc2-*)
-          CHIPFAMILY=X4
+          CHIPFAMILY=S905X4
         ;;
         mesons4-*)
-          CHIPFAMILY=Y4
+          CHIPFAMILY=S905Y4
         ;;
         *)
           CHIPFAMILY=
@@ -41,7 +41,7 @@ do_install() {
     install -m 0644 ${S}/include/* ${D}/${includedir}
 
     install -d ${D}/lib/teetz
-    install -m 0644 ${S}/ta/${CHIPFAMILY}/b472711b-3ada-4c37-8c2a-7c64d8af0223.ta ${D}/lib/teetz
+    install -m 0644 ${S}/ta/v3/dev/${CHIPFAMILY}/b472711b-3ada-4c37-8c2a-7c64d8af0223.ta ${D}/lib/teetz
 }
 
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"

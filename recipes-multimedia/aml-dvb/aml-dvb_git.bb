@@ -20,6 +20,7 @@ S="${WORKDIR}/git"
 
 EXTRA_OEMAKE="TARGET_DIR=${S} \ 
               TARGET_LDFLAGS=' -lstdc++ -lpthread -lrt -lm -ldl -lc -lgcc -L${STAGING_DIR_TARGET}/usr/lib' \
+              STAGING_DIR='${STAGING_DIR_TARGET}' \
              " 
 do_compile() {
     cd ${S}

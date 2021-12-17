@@ -29,12 +29,12 @@ ARM_TARGET_aarch64 ="aarch64.lp64."
 TA_TARGET="noarch"
 
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/lib
     install -D -m 0644 ${S}/${ARM_TARGET}/libdrmp.so ${D}/usr/lib
     install -D -m 0644 ${S}/${ARM_TARGET}/libdec_ca.so ${D}/usr/lib
     install -D -m 0644 ${S}/${ARM_TARGET}/libstbwrapper.so ${D}/usr/lib
 
-    install -d -m 0644 ${D}/usr/bin
+    install -d -m 0755 ${D}/usr/bin
     install -D -m 0755 ${S}/${ARM_TARGET}/drmptest ${D}/usr/bin
 
 }

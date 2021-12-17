@@ -17,12 +17,12 @@ S = "${WORKDIR}/git"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 IRDETO_PATH = "TBD"
-IRDETO_PATH_sc2 = "v3/dev/S905C2"
+IRDETO_PATH_sc2 = "v3/dev/S905C2/signed"
 
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/lib/teetz
-    install -d -m 0644 ${D}/usr/include
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/include
     install -D -m 0644 ${S}/lib/ca/libirdetoca.so ${D}/usr/lib
     install -D -m 0644 ${S}/lib/ta/${IRDETO_PATH}/b64fd559-658d-48a4-bbc7-b95d8663f457.ta ${D}/lib/teetz
     install -D -m 0644 ${S}/include/*.h ${D}/usr/include

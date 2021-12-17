@@ -1,0 +1,10 @@
+[Unit]
+Description=DSP firmware load
+
+[Service]
+Type=forking
+User=root
+ExecStart=/usr/bin/load_dsp.sh start
+
+[Install]
+WantedBy=multi-user.target

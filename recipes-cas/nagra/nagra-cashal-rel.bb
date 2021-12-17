@@ -15,10 +15,10 @@ S = "${WORKDIR}/git"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 do_install() {
-    install -d -m 0644 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/lib
     install -D -m 0644 ${S}/libnv_dvb.so ${D}/usr/lib
 
-    install -d -m 0644 ${D}/etc/cas/nagra
+    install -d -m 0755 ${D}/etc/cas/nagra
     install -D -m 0644 ${S}/config/nagra_hal.conf ${D}/etc/cas/nagra/
 }
 

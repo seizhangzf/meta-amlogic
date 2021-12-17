@@ -24,9 +24,9 @@ inherit autotools pkgconfig systemd
 
 do_install() {
     # install headers
-    install -d -m 0644 ${D}/lib/teetz
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/usr/bin
+    install -d -m 0755 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/bin
 
     install -D -m 0755 ${S}/ca/bin${ARM_TARGET}/tee_provision ${D}/usr/bin/
     install -D -m 0755 ${S}/ca/bin${ARM_TARGET}/tee_key_inject ${D}/usr/bin/

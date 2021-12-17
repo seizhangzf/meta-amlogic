@@ -17,7 +17,7 @@ SYSTEMD_AUTO_ENABLE = "enable"
 inherit systemd
 
 do_install() {
-    install -d -m 0644 ${D}/lib/firmware/hdcp/
+    install -d -m 0755 ${D}/lib/firmware/hdcp/
     install -d ${D}/${systemd_unitdir}/system
     touch ${D}/lib/firmware/hdcp/firmware.le
     if [ "${@bb.utils.contains("DISTRO_FEATURES", "systemd", "yes", "no", d)}" = "yes"  ]; then

@@ -35,7 +35,6 @@ AML_GIT_PROTOCOL ?= "https"
 AML_GIT_ROOT_YOCTO_SUFFIX ?= ""
 AML_META_LAYER ?= "meta-amlogic"
 AML_GIT_ROOT_OP = "git@openlinux.amlogic.com"
-AML_GIT_ROOT_WV = "git@openlinux.amlogic.com/yocto"
 AML_GIT_ROOT_PROTOCOL = "ssh"
 
 
@@ -61,7 +60,7 @@ PREFERRED_VERSION_gmp_dunfell = "6.2.%"
 
 AML_RDK_PREBUILT_SITE ?= "http://10.18.11.97/firmware/image/linux-distro/Public/RDK/prebuilt/"
 # For dm-verity
-IMAGE_CLASSES += "image_types aml-dm-verity-img"
+IMAGE_CLASSES += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'image_types aml-dm-verity-img', '', d)}"
 
 # Sytem partition
 DM_VERITY_IMAGE = "lib32-rdk-generic-mediaclient-image"

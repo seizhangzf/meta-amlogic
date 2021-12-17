@@ -1,6 +1,7 @@
 INHERIT += "externalsrc"
 
 EXTERNALSRC_pn-vmx-sdk-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel')) else ''}"
+EXTERNALSRC_pn-vmx-release-binaries = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/vmx/vmx_release_binaries' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/vmx/vmx_release_binaries')) else ''}"
 EXTERNALSRC_pn-nagra-sdk = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-sdk')) else ''}"
 EXTERNALSRC_pn-wpeframework-ocdm-connect = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/OCDM-nagra' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/OCDM-nagra')) else ''}"
 EXTERNALSRC_pn-nagra-cashal-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-cashal-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/nagra/nagra-cashal-rel')) else ''}"
@@ -22,6 +23,7 @@ EXTERNALSRC_pn-android-tools-logcat = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlo
 EXTERNALSRC_pn-usb-monitor = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-liblog = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-libatrace = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
+EXTERNALSRC_pn-simulate-key = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_commonlib')) else ''}"
 EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qualcomm/drivers/qca6174')) else ''}"
 EXTERNALSRC_pn-aml-wifi-w1 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/amlogic/drivers/w1' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/amlogic/drivers/w1')) else ''}"
 EXTERNALSRC_pn-aml-bt-w1 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/amlogic' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/amlogic')) else ''}"
@@ -47,6 +49,8 @@ EXTERNALSRC_pn-optee-userspace_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/a
 EXTERNALSRC_pn-optee-scripts-native_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk')) else ''}"
 EXTERNALSRC_pn-optee-linux-driver_tdk-2.4 = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/tdk')) else ''}"
 
+EXTERNALSRC_pn-dsp-util = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/dsp_util' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/dsp_util')) else ''}"
+EXTERNALSRC_pn-aml-rtos = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/freertos' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/rtos/freertos')) else ''}"
 
 EXTERNALSRC_pn-aml-mediadrm-widevine = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
 EXTERNALSRC_pn-aml-netflix-esn = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libmediadrm')) else ''}"
@@ -60,6 +64,7 @@ EXTERNALSRC_pn-gst-plugin-pcr-sink = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/g
 EXTERNALSRC_pn-gstqamtunersrc-aml = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/qamtunersrc-aml')) else ''}"
 EXTERNALSRC_pn-gst-aml-drm-plugins = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/gst-aml-drm-plugins1/gst-aml-drm-plugins-1.0')) else ''}"
 EXTERNALSRC_pn-dvalin = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu')) else ''}"
+EXTERNALSRC_pn-libdrm-meson = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic/meson' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic')) else ''}"
 EXTERNALSRC_pn-libgles-eabihf-dvalin-wayland-drm = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali')) else ''}"
 
 EXTERNALSRC_pn-u-boot = "${@'${RDK_ROOT_PATH}/aml-comp/uboot' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/uboot')) else ''}"
@@ -106,3 +111,4 @@ EXTERNALSRC_pn-sectionfilter-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/me
 EXTERNALSRC_pn-dvrmgr-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/dvr/common/dvrmgr/soc' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/dvr/common/dvrmgr/soc')) else ''}"
 EXTERNALSRC_pn-rmfhalheaders = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/')) else ''}"
 EXTERNALSRC_pn-iptv-eos = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos')) else ''}"
+EXTERNALSRC_pn-wpeframework-plugin-iptv = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/iptv-rdkservice' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/iptv-rdkservice')) else ''}"

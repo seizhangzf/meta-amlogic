@@ -10,7 +10,7 @@ do_populate_lic[noexec] = "1"
 PROVIDES = "widevine"
 PATCHTOOL = "git"
 
-SRC_URI = "git://${AML_GIT_ROOT_WV}/vendor/widevine;protocol=${AML_GIT_ROOT_PROTOCOL};branch=amlogic-linux;destsuffix=git/widevine-bin"
+SRC_URI = "git://${AML_GIT_ROOT_OP}/yocto/vendor/widevine;protocol=${AML_GIT_PROTOCOL};branch=amlogic-linux;destsuffix=git/widevine-bin"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm/widevine-bin')}"
@@ -34,10 +34,10 @@ def get_widevine_version(datastore):
 WIDEVINE_VER = "${@get_widevine_version(d)}"
 do_install() {
 
-    install -d -m 0644 ${D}/lib/teetz
-    install -d -m 0644 ${D}/usr/lib
-    install -d -m 0644 ${D}/usr/bin
-    install -d -m 0644 ${D}/usr/include
+    install -d -m 0755 ${D}/lib/teetz
+    install -d -m 0755 ${D}/usr/lib
+    install -d -m 0755 ${D}/usr/bin
+    install -d -m 0755 ${D}/usr/include
 
     install -D -m 0755 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/ta/${TDK_VERSION}/*.ta ${D}/lib/teetz/
     install -D -m 0644 ${S}/widevine-bin/${WIDEVINE_VER}/${TA_TARGET}/include/*.h ${D}${includedir}/

@@ -8,7 +8,7 @@ PV = "${SRCPV}"
 #For common patches
 SRC_URI = "git://${AML_GIT_ROOT}/cas/cas-hal;branch=master;protocol=${AML_GIT_PROTOCOL}"
 SRC_URI_append = " ${@get_patch_list_with_path('$(AML_PATCH_PATH)/multimedia/cas-hal')}"
-DEPENDS += "aml-audio-service aml-mediahal-sdk aml-libdvr liblog"
+DEPENDS += "aml-audio-service aml-mediahal-sdk aml-libdvr liblog optee-userspace"
 
 #do_configure[noexec] = "1"
 #inherit autotools pkgconfig

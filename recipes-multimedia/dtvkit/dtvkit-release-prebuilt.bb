@@ -7,6 +7,14 @@ SRC_URI = "git://${AML_GIT_ROOT}/DTVKit/releaseDTVKit;protocol=${AML_GIT_PROTOCO
 #use head version, ?= conditonal operator can be control revision in external rdk-next.conf like configuration file
 SRCREV ?= "${AUTOREV}"
 
+CONFIG = "config_ah212.xml"
+CONFIG_ah212 = "config_ah212.xml"
+CONFIG_ah232 = "config_ah232.xml"
+CONFIG_ap222 = "config_ap222.xml"
+CONFIG_aq222 = "config_aq222.xml"
+CONFIG_ap232 = "config_ap232.xml"
+CONFIG_ah212-pip = "config_ah212_pip.xml"
+
 S = "${WORKDIR}/git"
 
 do_configure[noexec] = "1"
@@ -34,10 +42,13 @@ do_install () {
 
 
     install -D -m 0644 ${S}/android-rpcservice/dtvkit_demo ${D}/usr/bin
-    install -D -m 0644 ${S}/android-rpcservice/config/config.xml ${D}/etc
+    install -D -m 0644 ${S}/android-rpcservice/libdtvkitserver.so ${D}/usr/lib
+    install -D -m 0644 ${S}/android-rpcservice/config/${CONFIG} ${D}/etc/config.xml
+    install -D -m 0644 ${S}/android-rpcservice/config/*.json  ${D}/etc/
 }
 
-FILES_${PN} += "/usr/bin/* /etc/*"
-FILES_${PN}-dev += "/usr/include/* /usr/lib/*"
+FILES_${PN} = "${libdir}/* ${bindir}/* ${sysconfdir}/*"
+FILES_${PN}-dev = "${includedir}/* "
 
 INSANE_SKIP_${PN} = "ldflags"
+INSANE_SKIP_${PN}-dev = "dev-elf dev-so"

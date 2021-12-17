@@ -32,9 +32,9 @@ python () {
 
 
 do_install() {
-    install -d -m 0644 ${D}${bindir}
-    install -d -m 0644 ${D}${libdir}
-    install -d -m 0644 ${D}/lib/teetz
+    install -d -m 0755 ${D}${bindir}
+    install -d -m 0755 ${D}${libdir}
+    install -d -m 0755 ${D}/lib/teetz
 
     install -m 0755 ${S}/${ARCH}.${CC_ABI}.${FLOAT_ABI}/dolby_fw_dms12 ${D}${bindir}
     mkdir -p ${STAGING_DIR_TARGET}/vendor/lib/

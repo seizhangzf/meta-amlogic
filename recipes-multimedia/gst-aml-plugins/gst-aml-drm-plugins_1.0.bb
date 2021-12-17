@@ -19,7 +19,7 @@ S = "${WORKDIR}/git/gst-aml-drm-plugins-1.0"
 
 do_install_append() {
 
-    install -d -m 0644 ${D}/usr/include
+    install -d -m 0755 ${D}/usr/include
     install -D -m 0644 ${S}/src/secmem/gstsecmemallocator.h   ${D}/usr/include/
 
 }

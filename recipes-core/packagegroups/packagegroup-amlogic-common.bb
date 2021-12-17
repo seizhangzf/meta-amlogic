@@ -27,6 +27,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'bluez5', 'bluez5', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'nagra-sdk wpeframework-ocdm-connect nagra-cert-prebuilt nagra-cashal-rel aml-sesg', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-sdk-rel', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-release-binaries', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'irdeto-sdk irdeto-hal', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'synamedia-sdk', '', d)}\
                                     tinyalsa \
@@ -64,6 +65,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     modules-load \
                                     system-config \
                                     aml-secmem \
+                                    simulate-key \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-rtos', 'dsp-util aml-rtos', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'playready', 'aml-secmem', '', d)} \

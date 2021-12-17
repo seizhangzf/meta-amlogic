@@ -107,18 +107,7 @@ function choose_type()
 function lunch()
 {
     if [ -n "$TARGET_MACHINE" ]; then
-        MACHINE=$TARGET_MACHINE source meta-amlogic/setup-environment $BUILD_DIR
-    if [ "$OPENLINUX_BUILD" == "1" ];then
-        cat >> $BUILD_DIR/conf/local.conf <<EOF
-#Force OpenLinux Access
-AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"
-AML_GIT_PROTOCOL = "ssh"
-AML_GIT_ROOT_YOCTO_SUFFIX = ""
-AML_GIT_ROOT_PR = "git@openlinux.amlogic.com"
-AML_GIT_ROOT_WV = "git@openlinux.amlogic.com/yocto"
-AML_GIT_ROOT_PROTOCOL = "ssh"
-EOF
-    fi
+        MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
         export MACHINE=$TARGET_MACHINE
         echo "==========================================="
 		echo
