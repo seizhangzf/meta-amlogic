@@ -37,7 +37,7 @@ AML_GIT_ROOT_PROTOCOL ?= "git"
 AML_META_LAYER ?= "meta-meson"
 
 #check connectivity using bing
-CONNECTIVITY_CHECK_URIS = "https://www.bing.com/"
+#CONNECTIVITY_CHECK_URIS = "https://www.bing.com/"
 
 LINUXLIBCVERSION ?= "4.9%"
 PREFERRED_VERSION_libdrm = "2.4.100"
