@@ -112,3 +112,4 @@ EXTERNALSRC_pn-dvrmgr-hal-amlogic = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediafram
 EXTERNALSRC_pn-rmfhalheaders = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/mediaframework/')) else ''}"
 EXTERNALSRC_pn-iptv-eos = "${@'${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/thirdparty/iptv-eos')) else ''}"
 EXTERNALSRC_pn-wpeframework-plugin-iptv = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/iptv-rdkservice' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/iptv-rdkservice')) else ''}"
+EXTERNALSRC_pn-volume-ctl = "${@'${RDK_ROOT_PATH}/aml-comp/rdk/volume-ctl' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/rdk/volume-ctl')) else ''}"
