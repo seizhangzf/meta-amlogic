@@ -74,6 +74,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libamadec', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-mp-sdk', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-libdvr', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-subtitleserver', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-cobalt-starboard', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'aml-cas', 'drmplayer-bin ffmpeg-vendor', '', d)} \

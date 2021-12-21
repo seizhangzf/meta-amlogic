@@ -76,6 +76,7 @@ EXTERNALSRC_pn-media-modules = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/a
 EXTERNALSRC_pn-aucpu-fw = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aucpu_fw' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aucpu_fw')) else ''}"
 EXTERNALSRC_pn-aml-tvserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_tvserver' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_tvserver')) else ''}"
 EXTERNALSRC_pn-aml-pqserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_pqserver' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_pqserver')) else ''}"
+EXTERNALSRC_pn-aml-subtitleserver = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_subtitleserver' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/aml_subtitleserver')) else ''}"
 EXTERNALSRC_pn-aml-dvb = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/dvb')) else ''}"
 EXTERNALSRC_pn-aml-zvbi = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/zvbi')) else ''}"
 EXTERNALSRC_pn-libamavutils = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/multimedia/libplayer/src')) else ''}"
