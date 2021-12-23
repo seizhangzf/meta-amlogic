@@ -66,6 +66,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     system-config \
                                     simulate-key \
                                     vulkan-loader \
+                                    volume-ctl \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'aml-rtos', 'dsp-util aml-rtos', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
