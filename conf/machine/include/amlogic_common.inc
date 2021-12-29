@@ -70,3 +70,6 @@ VENDOR_DM_VERITY_IMAGE = "vendor-image"
 
 DM_VERITY_IMAGE_TYPE = "ext4"
 STAGING_VERITY_DIR = "${DEPLOY_DIR_IMAGE}"
+
+# YouTube Cobalt Version
+PREFERRED_VERSION_libcobalt = "22%"
