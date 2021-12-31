@@ -1,4 +1,4 @@
-From ae8bd4d068a1d1ab28341c5b32bcb5f7a5a9a1ed Mon Sep 17 00:00:00 2001
+From 5be084664f1fab792295b71c3fa9b0449dd8a153 Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Wed, 10 Jun 2020 14:02:59 +0800
 Subject: [PATCH] RDK: Just for RDK build  [1/1]
@@ -81,5 +81,5 @@ index 492f9d8..62a5b72 100644
  #define GL_PATH_FORMAT_PS_NV              0x9071
  #define GL_STANDARD_FONT_NAME_NV          0x9072
 -- 
-2.31.1
+2.29.2
 

@@ -1,4 +1,4 @@
-From b4e1aaa24b2fbc5d1df6832f2b0d615d1cee3e1c Mon Sep 17 00:00:00 2001
+From 3cc9729ac11bea5132661ce17f514ed7d7fbe0aa Mon Sep 17 00:00:00 2001
 From: Ajay Gautam <ajay.gautam@amlogic.com>
 Date: Tue, 25 May 2021 11:54:34 -0700
 Subject: [PATCH 3/3] RDK: disable continuous print from hdmi
@@ -36,5 +36,5 @@ index a2d0f5b5cf7a..8f0568d0c049 100644
  	}
  	if (vic == HDMI_UNKNOWN && vesa_vic != HDMI_UNKNOWN) {
 -- 
-2.31.1
+2.29.2
 
