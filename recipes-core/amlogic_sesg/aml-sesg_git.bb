@@ -3,7 +3,7 @@ SUMMARY = "aml software execution safeguard"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
-SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/sesg;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev"
+SRC_URI = "git://${AML_GIT_ROOT_OP}/yocto/vendor/amlogic/sesg;protocol=${AML_GIT_ROOT_PROTOCOL};branch=amlogic-dev"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/sesg')}"
