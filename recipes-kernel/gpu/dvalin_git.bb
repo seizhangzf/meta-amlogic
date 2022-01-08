@@ -13,7 +13,7 @@ PROVIDES += "virtual/gpu"
 RPROVIDES_${PN} += "gpu"
 GPU_ARCH = "bifrost"
 GPU_DRV_SRC = "${S}/${GPU_ARCH}/${VER}/kernel/drivers/gpu/arm/midgard"
-GPU_LOW_MEM ?= 0
+GPU_LOW_MEM ?= "0"
 
 do_configure[noexec] = "1"
 
