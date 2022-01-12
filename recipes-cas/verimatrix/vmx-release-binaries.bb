@@ -5,7 +5,7 @@ PV = "git${SRCPV}"
 PR = "r0"
 
 #Only enable it in OpenLinux
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vmx_release_binaries.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vmx_release_binaries.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/vmx/vmx_release_binaries')}"
 
 SRCREV ?= "${AUTOREV}"

@@ -5,11 +5,11 @@ LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 #For common patches
-#SRC_URI_append = " ${@get_patch_list_with_path('${AML_PATCH_PATH}/multimedia/libmediadrm/drmplayer-bin/prebuilt')}"
+SRC_URI = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_ROOT_PROTOCOL};branch=linux-buildroot','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm/drmplayer-bin/prebuilt')}"
 #PV = "git${SRCPV}"
 
-S = "${WORKDIR}/git"
+S = "${WORKDIR}/git/drmplayer-bin/prebuilt"
 SRCREV ?= "${AUTOREV}"
 
 do_compile[noexec] = "1"
