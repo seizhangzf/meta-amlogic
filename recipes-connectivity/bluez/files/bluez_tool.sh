@@ -86,6 +86,17 @@ aml_bt_init()
 	usleep 100000
 }
 
+bcm_bt_init()
+{
+	echo 0 > /sys/class/rfkill/rfkill0/state
+    usleep 300000
+    echo 1 > /sys/class/rfkill/rfkill0/state
+    usleep 300000
+    brcm_patchram_plus -d --enable_hci --no2bytes --tosleep 200000 --baudrate 3000000 --patchram /etc/bluetooth/BCM4359C0.hcd /dev/ttyS1 & > /dev/null
+
+	brcm_patchram_plus -d --enable_hci --no2bytes --tosleep 200000 --baudrate 3000000 --patchram /etc/wifi/bcm/BCM4362A2.hcd /dev/ttyS1 & > /dev/null
+}
+
 A2DP_SINK_SERVICE()
 {
 	echo "|--bluez a2dp-sink/hfp-hf service--|"
@@ -203,6 +214,8 @@ Blue_start()
 		qca_bt_init
 	elif [ $device = "aml" ];then
 		aml_bt_init
+	elif [ $device = "bcm" ];then
+		bcm_bt_init
 	else
 		modprobe hci_uart
 		usleep 300000

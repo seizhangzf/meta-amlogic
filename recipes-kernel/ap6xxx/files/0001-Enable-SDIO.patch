@@ -1,0 +1,30 @@
+From 40880ea78bb5217104e55a63d1671838ce2161c6 Mon Sep 17 00:00:00 2001
+From: "journ.zhou" <journ.zhou@amlogic.com>
+Date: Sun, 26 Sep 2021 15:42:27 +0800
+Subject: [PATCH] add-bcm-sdio-driver
+
+---
+ bcmdhd.101.10.361.x/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/bcmdhd.101.10.361.x/Makefile b/bcmdhd.101.10.361.x/Makefile
+index 9a4e308..8173e11 100755
+--- a/bcmdhd.101.10.361.x/Makefile
++++ b/bcmdhd.101.10.361.x/Makefile
+@@ -1,4 +1,5 @@
+ # bcmdhd
++CONFIG_BCMDHD_SDIO = y
+ 
+ # if not confiure pci mode, we use sdio mode as default
+ ifeq ($(CONFIG_BCMDHD_PCIE),)
+@@ -42,6 +43,7 @@ endif
+ DHDCFLAGS = -Wall -Wstrict-prototypes -Wno-date-time                      \
+ 	-Dlinux -DLINUX -DBCMDRIVER                                           \
+ 	-Wno-maybe-uninitialized -Werror -Wno-format-security                 \
++	-Wno-implicit-fallthrough	\
+ 	-Wno-unknown-warning-option -Wno-sometimes-uninitialized              \
+ 	-Wno-parentheses-equality                                             \
+ 	-DBCMDONGLEHOST -DBCMDMA32 -DBCMFILEIMAGE                             \
+-- 
+2.25.1
+
