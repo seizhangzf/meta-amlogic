@@ -31,7 +31,7 @@ do_compile() {
 SOC = "TBD"
 SOC_ah212 = "S905X4"
 SOC_ap222 = "S905Y4"
-SOC_aq223 = "S805X2"
+SOC_aq222 = "S805X2"
 #Please keep ah212 before ah232 because ah232 is a special case of ah212.
 SOC_ah232 = "S905C2"
 
