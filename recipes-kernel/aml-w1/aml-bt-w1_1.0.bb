@@ -3,7 +3,7 @@ inherit module
 SUMMARY = "amlogic aml_bt driver"
 LICENSE = "GPLv2"
 
-SRC_URI = "git://${AML_GIT_ROOT}/hardware/amlogic/bluetooth.git;protocol=${AML_GIT_PROTOCOL};branch=r-amlogic"
+SRC_URI = "git://${AML_GIT_ROOT}/hardware/amlogic/bluetooth.git;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI_append = " file://a2dp_mode_cfg.txt"
 SRC_URI_append = " file://aml_bt_rf.txt"
 
