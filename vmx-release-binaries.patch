@@ -1,0 +1,14 @@
+diff --git a/recipes-cas/verimatrix/vmx-release-binaries.bb b/recipes-cas/verimatrix/vmx-release-binaries.bb
+index f0f11c9..a88ddf0 100644
+--- a/recipes-cas/verimatrix/vmx-release-binaries.bb
++++ b/recipes-cas/verimatrix/vmx-release-binaries.bb
+@@ -5,7 +5,8 @@ PV = "git${SRCPV}"
+ PR = "r0"
+ 
+ #Only enable it in OpenLinux
+-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vmx_release_binaries.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
++#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vmx_release_binaries.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
++SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://zhenyu.gao@scgit.amlogic.com:29418/vmx_release_binaries;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master','', d)}"
+ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/vmx/vmx_release_binaries')}"
+ 
+ SRCREV ?= "${AUTOREV}"
