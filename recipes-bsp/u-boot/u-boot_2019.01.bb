@@ -71,11 +71,13 @@ PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-elf/bin"
 PATH_append_sc2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 PATH_append_s4 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+PATH_append_t7 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 DEPENDS_append = "gcc-linaro-aarch64-elf-native optee-scripts-native optee-userspace-securebl32"
 DEPENDS_append_tm2 = " riscv-none-gcc-native "
 DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 DEPENDS_append_sc2 = " riscv-none-gcc-native "
 DEPENDS_append_s4 = " riscv-none-gcc-native "
+DEPENDS_append_t7 = " riscv-none-gcc-native "
 
 DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-native "
 #override this in customer layer bbappend for customer specific bootloader binaries

@@ -29,7 +29,7 @@ EXTERNALSRC_pn-qca6174 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/qu
 EXTERNALSRC_pn-aml-wifi-w1 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/amlogic/drivers/w1' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/amlogic/drivers/w1')) else ''}"
 EXTERNALSRC_pn-aml-bt-w1 = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/amlogic' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/bluetooth/amlogic')) else ''}"
 EXTERNALSRC_pn-wififw = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/amlogic/wifi' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/amlogic/wifi')) else ''}"
-
+EXTERNALSRC_pn-ap6xxx = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/broadcom/drivers/ap6xxx' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/broadcom/drivers/ap6xxx')) else ''}"
 EXTERNALSRC_pn-rtk8723bu = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723bu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723bu')) else ''}"
 EXTERNALSRC_pn-rtk8723du = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723du' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8723du')) else ''}"
 EXTERNALSRC_pn-rtk8822cs = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8822cs' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-5.4/wifi/realtek/drivers/8822cs')) else ''}"
@@ -67,6 +67,7 @@ EXTERNALSRC_pn-gst-aml-drm-plugins = "${@'${RDK_ROOT_PATH}/aml-comp/multimedia/g
 EXTERNALSRC_pn-dvalin = "${@'${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/hardware/aml-4.9/arm/gpu')) else ''}"
 EXTERNALSRC_pn-libdrm-meson = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic/meson' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/libdrm_amlogic')) else ''}"
 EXTERNALSRC_pn-libgles-eabihf-dvalin-wayland-drm = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali')) else ''}"
+EXTERNALSRC_pn-libgles-eabihf-gondul-wayland-drm = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/amlogic/meson_mali')) else ''}"
 
 EXTERNALSRC_pn-u-boot = "${@'${RDK_ROOT_PATH}/aml-comp/uboot' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/uboot')) else ''}"
 

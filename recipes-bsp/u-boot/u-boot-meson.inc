@@ -11,12 +11,14 @@ EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHA
 # u-boot build system and appended to the u-boot version.  If the .scmversion
 # file already exists it will not be overwritten.
 UBOOT_LOCALVERSION ?= ""
+SOURCE_DATE_EPOCH = ""
 
 # Some versions of u-boot use .bin and others use .img.  By default use .bin
 # but enable individual recipes to change this value.
 UBOOT_SUFFIX ?= "bin"
 UBOOT_SUFFIX_sc2 ?= "bin.signed"
 UBOOT_SUFFIX_s4 ?= "bin.signed"
+UBOOT_SUFFIX_t7 ?= "bin.signed"
 UBOOT_IMAGE ?= "u-boot-${MACHINE}-${PV}-${PR}.${UBOOT_SUFFIX}"
 UBOOT_BINARY ?= "u-boot.${UBOOT_SUFFIX}"
 UBOOT_SYMLINK ?= "u-boot-${MACHINE}.${UBOOT_SUFFIX}"

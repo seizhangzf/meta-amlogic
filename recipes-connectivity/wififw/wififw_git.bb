@@ -42,35 +42,35 @@ do_install() {
 	mkdir -p ${D}${sysconfdir}/wifi/6181/
 #ap6181
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6181/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6181/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6181/Wi-Fi/nvram_ap6181.txt ${D}${sysconfdir}/wifi/6181/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6181/Wi-Fi/nvram_ap6181.txt ${D}${sysconfdir}/wifi/6181/
 #ap6210
 	mkdir -p ${D}${sysconfdir}/wifi/6210/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6210/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6210/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6210/Wi-Fi/nvram_ap6210.txt ${D}${sysconfdir}/wifi/6210/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6210/Wi-Fi/nvram_ap6210.txt ${D}${sysconfdir}/wifi/6210/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6210/BT/bcm20710a1.hcd ${D}${sysconfdir}/bluetooth/
 #ap6476
 	mkdir -p ${D}${sysconfdir}/wifi/6476/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6476/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6476/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6476/Wi-Fi/nvram_ap6476.txt ${D}${sysconfdir}/wifi/6476/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6476/Wi-Fi/nvram_ap6476.txt ${D}${sysconfdir}/wifi/6476/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6476/GPS/bcm2076b1.hcd ${D}${sysconfdir}/bluetooth/
 #ap6493
 	mkdir -p ${D}${sysconfdir}/wifi/6493/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6493/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6493/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6493/Wi-Fi/nvram_ap6493.txt ${D}${sysconfdir}/wifi/6493/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6493/Wi-Fi/nvram_ap6493.txt ${D}${sysconfdir}/wifi/6493/
 #ap6398
 	mkdir -p ${D}${sysconfdir}/wifi/6398/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6398/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6398/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6398/Wi-Fi/nvram_ap6398s.txt ${D}${sysconfdir}/wifi/6398/nvram.txt
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6398/BT/BCM4359C0SR2.hcd ${D}/etc/bluetooth/;
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6398/Wi-Fi/nvram_ap6398s.txt ${D}${sysconfdir}/wifi/6398/
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6398/BT/BCM4359C0SR2.hcd ${D}/etc/bluetooth/
 #ap6330
 	mkdir -p ${D}${sysconfdir}/wifi/6330/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6330/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/Wi-Fi/nvram_ap6330.txt ${D}${sysconfdir}/wifi/6330/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/Wi-Fi/nvram_ap6330.txt ${D}${sysconfdir}/wifi/6330/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6330/BT/bcm40183b2.hcd ${D}${sysconfdir}/bluetooth/
 #ap6256
 	mkdir -p ${D}${sysconfdir}/wifi/6256/
 	install -D -m 0644 ${S}/bcm_ampak/config/AP6256/Wi-Fi/*.bin ${D}${sysconfdir}/wifi/6256/
-	install -D -m 0644 ${S}/bcm_ampak/config/AP6256/Wi-Fi/nvram_ap6256.txt ${D}${sysconfdir}/wifi/6256/nvram.txt
+	install -D -m 0644 ${S}/bcm_ampak/config/AP6256/Wi-Fi/nvram_ap6256.txt ${D}${sysconfdir}/wifi/6256/
 
 #ath10k
 	mkdir -p ${D}/lib/firmware/ath10k/QCA6174/hw3.0/
