@@ -20,9 +20,6 @@ do_install_append(){
 
     echo "MACHINE_ARCH is ${MACHINE_ARCH}"
     case ${MACHINE_ARCH} in
-    mesonsc2*ah212)
-        sed -i '/Debug=0/a Device=bcm' ${D}${sysconfdir}/bluetooth/main.conf
-    ;;
     mesons4*ap223)
         sed -i '/Debug=0/a Device=rtk' ${D}${sysconfdir}/bluetooth/main.conf
     ;;
