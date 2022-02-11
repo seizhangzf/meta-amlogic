@@ -24,6 +24,7 @@ SOC_BOARD = "default"
 SOC_BOARD_ab301 = "ab301"
 SOC_BOARD_t962x3 = "ab301"
 SOC_BOARD_ah232 = "ah232"
+SOC_BOARD_ap232 = "ap232"
 
 PR = "r3"
 

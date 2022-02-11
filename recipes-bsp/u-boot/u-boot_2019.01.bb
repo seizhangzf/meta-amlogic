@@ -100,6 +100,7 @@ VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 
 #IRDETO UBOOT PATH depends on SoC
 IRDETO_UBOOT_PATH = "TBD"
 IRDETO_UBOOT_PATH_sc2 = "sc2"
+IRDETO_UBOOT_PATH_s4 = "s4d"
 IRDETO_BL2x_ARG="--bl2x irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2x.bin.signed"
 IRDETO_BL2e_ARG="--bl2e irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2e.sto.bin.signed"
 IRDETO_BL32_ARG="--bl32 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl32/blob-bl32.bin.signed"
@@ -109,7 +110,6 @@ IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO
 #SYNAMEDIA UBOOT PATH depends on SoC
 SYNAMEDIA_UBOOT_PATH = "TBD"
 SYNAMEDIA_UBOOT_PATH_sc2 = "s905c2eng"
-
 SYNAMEDIA_BL2_ARG="--bl2 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/bb1st.sto.bin.signed"
 SYNAMEDIA_BL2e_ARG="--bl2e synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2e.sto.bin.signed"
 SYNAMEDIA_BL2x_ARG="--bl2x synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2x.bin.signed"

@@ -7,6 +7,7 @@ PR = "r0"
 #Only enable it in OpenLinux
 #IRDETO_BRANCH = "TBD"
 #IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
+#IRDETO_BRANCH_s4 = "openlinux/s4d-msr4-linux"
 #SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-imw.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH}','', d)}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/irdeto/hal')}"
 
