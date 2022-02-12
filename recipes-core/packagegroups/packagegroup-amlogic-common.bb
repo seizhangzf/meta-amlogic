@@ -30,6 +30,10 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-release-binaries', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'irdeto-sdk irdeto-hal', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'synamedia-sdk', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-v4l2', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-iq', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-lens', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-sensor', '', d)}\
                                     tinyalsa \
                                     dolby-ms12 \
                                     libamavutils \
