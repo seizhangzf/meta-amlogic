@@ -78,7 +78,7 @@ do_install(){
         mesonc1_*)
             sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
-        mesonsc2_* | mesons4_*)
+        mesonsc2_* | mesons4_* | mesons4d_*)
             sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
     esac
