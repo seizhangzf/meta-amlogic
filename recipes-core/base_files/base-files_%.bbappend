@@ -76,7 +76,7 @@ do_install_append_s4 () {
 EOF
     else
         cat >> ${D}${sysconfdir}/fstab <<EOF
- /dev/vendor            /vendor                    auto       defaults              0  0
+ /dev/vendor_a          /vendor                    auto       defaults              0  0
  /dev/factory           /factory                   auto       defaults              0  0
 EOF
     fi
@@ -99,7 +99,7 @@ do_install_append_sc2 () {
 EOF
     else
         cat >> ${D}${sysconfdir}/fstab <<EOF
- /dev/vendor            /vendor                    auto       defaults              0  0
+ /dev/vendor_a          /vendor                    auto       defaults              0  0
  /dev/factory           /factory                   auto       defaults              0  0
 EOF
     fi
