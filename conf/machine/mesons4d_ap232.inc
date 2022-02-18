@@ -51,7 +51,7 @@ DISTRO_FEATURES_append = " dvb"
 DISTRO_FEATURES_append = " aml-iptv"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
 DISTRO_FEATURES_remove_dunfell = " virtualization"
-TDK_VERSION_sc2 = "v3.8/dev/S905C3"
+TDK_VERSION_s4 = "v3.8/dev/S905C3"
 # dm-verity
 #DISTRO_FEATURES_append = " dm-verity"
 #DISTRO_FEATURES_NATIVE_append = " dm-verity"
