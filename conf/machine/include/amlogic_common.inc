@@ -61,7 +61,7 @@ VIRTUAL-RUNTIME_dtcpmgr = ""
 
 PREFERRED_VERSION_gmp_dunfell = "6.2.%"
 
-AML_RDK_PREBUILT_SITE ?= "http://10.18.11.97/firmware/image/linux-distro/Public/RDK/prebuilt/"
+AML_RDK_PREBUILT_SITE ?= "http://10.18.11.6/shanghai/image/linux-distro/Public/RDK/prebuilt/"
 # For dm-verity
 IMAGE_CLASSES += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'image_types aml-dm-verity-img', '', d)}"
 
