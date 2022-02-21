@@ -33,9 +33,12 @@ do_install() {
     install -d ${D}${bindir}
     install -m 0755 -D ${S}/target/debug.target.test/idway/IDwayJ.exe ${D}/usr/bin/
     install -m 0755 -D ${S}/target/debug.target.test/idway/startIDwayJ.sh ${D}/usr/bin/
+
+    install -d -m 0644 ${D}/etc/cas/irdeto
+    install -D -m 0644 ${S}/prebuilts/conf/irdeto_hal.conf ${D}/etc/cas/irdeto/
 }
 
-FILES_${PN} = "${bindir}/* "
+FILES_${PN} = "${bindir}/* /etc/cas/irdeto/*"
 FILES_${PN}-dev = "${includedir}/* "
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"
 INSANE_SKIP_${PN}-dev = "dev-so ldflags dev-elf"
