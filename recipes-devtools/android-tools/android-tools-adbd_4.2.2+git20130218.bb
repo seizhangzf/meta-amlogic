@@ -36,7 +36,7 @@ SRC_URI += "file://adb_udc_file"
 SRC_URI[core.md5sum] = "0e653b129ab0c95bdffa91410c8b55be"
 SRC_URI[debian.md5sum] = "214cce305149326ca1aa661ef2b54886"
 
-SYSTEMD_AUTO_ENABLE = "${@bb.utils.contains('READONLY', 'y', 'enable', 'disable', d)}"
+#SYSTEMD_AUTO_ENABLE = "${@bb.utils.contains('READONLY', 'y', 'enable', 'disable', d)}"
 SYSTEMD_SERVICE_${PN} = "adbd.service"
 
 FILES_${PN} += "${systemd_unitdir}/system/adbd.service"
