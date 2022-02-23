@@ -15,9 +15,8 @@ S = "${WORKDIR}/git"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 do_install() {
-    install -d -m 0755 ${D}/usr/lib
-    install -D -m 0644 ${S}/lib/ca/libnagra_dal.a ${D}/usr/lib
-    install -D -m 0644 ${S}/lib/ca/libnagra_dal.so ${D}/usr/lib
+    install -d -m 0755 ${D}/${libdir}
+    install -D -m 0644 ${S}/lib/ca/${libdir}/libnagra_dal.so ${D}/${libdir}
 
     install -d -m 0755 ${D}/lib/teetz
     install -D -m 0644 ${S}/lib/ta/bc2f95bc-14b6-4445-a43c-a1796e7cac31.ta ${D}/lib/teetz
