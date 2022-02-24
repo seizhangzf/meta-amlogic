@@ -3,6 +3,10 @@ LICENSE = "CLOSED"
 DEPENDS = "aml-mp-sdk"
 RDEPENDS_${PN} = "aml-mp-sdk"
 
+
+ARM_TARGET = "lib32"
+ARM_TARGET_aarch64 = "lib64"
+
 SRC_URI = "git://${AML_GIT_ROOT}/DTVKit/releaseDTVKit;protocol=${AML_GIT_PROTOCOL};branch=linux-rdk"
 #use head version, ?= conditonal operator can be control revision in external rdk-next.conf like configuration file
 SRCREV ?= "${AUTOREV}"
@@ -35,14 +39,12 @@ do_install () {
     install -D -m 0644 ${S}/DVBCore/include/dvbcore/platform/inc/*.h ${D}/usr/include/dtvkit/platform/inc
     install -D -m 0644 ${S}/DVBCore/include/dvbcore/inc/*.h ${D}/usr/include/dtvkit/inc
     install -D -m 0644 ${S}/DVBCore/include/dvbcore/midware/stb/inc/*.h ${D}/usr/include/dtvkit/midware/stb/inc
-    install -D -m 0644 ${S}/DVBCore/lib/libdvbcore.a  ${D}/usr/lib
+    install -D -m 0644 ${S}/DVBCore/${ARM_TARGET}/libdvbcore.a  ${D}/${libdir}
 
     install -D -m 0644 ${S}/dtvkit-amlogic/include/dtvkit_platform/hw/inc/*.h ${D}/usr/include/dtvkit/hw/inc
-    install -D -m 0644 ${S}/dtvkit-amlogic/lib/libdtvkit_platform.a ${D}/usr/lib
+    install -D -m 0644 ${S}/dtvkit-amlogic/${ARM_TARGET}/libdtvkit_platform.a ${D}/${libdir}
 
-
-    install -D -m 0644 ${S}/android-rpcservice/dtvkit_demo ${D}/usr/bin
-    install -D -m 0644 ${S}/android-rpcservice/libdtvkitserver.so ${D}/usr/lib
+    install -D -m 0644 ${S}/android-rpcservice/${ARM_TARGET}/libdtvkitserver.so ${D}/${libdir}
     install -D -m 0644 ${S}/android-rpcservice/config/${CONFIG} ${D}/etc/config.xml
     install -D -m 0644 ${S}/android-rpcservice/config/*.json  ${D}/etc/
 }
