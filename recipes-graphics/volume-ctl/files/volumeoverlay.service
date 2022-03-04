@@ -1,0 +1,16 @@
+[Unit]
+Description=volume overlay service
+Requires=wpeframework.service
+After=wpeframework.service ui-init.target
+PartOf=wpeframework.service
+
+[Service]
+Environment="XDG_RUNTIME_DIR=/run"
+Environment="WAYLAND_DISPLAY=vol_overlay"
+
+ExecStartPre=/usr/bin/startvol.sh
+ExecStart=/usr/bin/volume-ctl-server
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

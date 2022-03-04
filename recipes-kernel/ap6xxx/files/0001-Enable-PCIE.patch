@@ -1,0 +1,30 @@
+From 6e8447dbc57eb5c3cc15367726d1e60ca6c7ca15 Mon Sep 17 00:00:00 2001
+From: Jonas Tsai <jonas.tsai@amlogic.com>
+Date: Fri, 10 Sep 2021 07:59:35 +0800
+Subject: [PATCH] Enable PCIE
+
+---
+ bcmdhd.101.10.361.x/Makefile | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/bcmdhd.101.10.361.x/Makefile b/bcmdhd.101.10.361.x/Makefile
+index 9a4e308..45032b5 100755
+--- a/bcmdhd.101.10.361.x/Makefile
++++ b/bcmdhd.101.10.361.x/Makefile
+@@ -1,5 +1,5 @@
+ # bcmdhd
+-
++CONFIG_BCMDHD_PCIE=y
+ # if not confiure pci mode, we use sdio mode as default
+ ifeq ($(CONFIG_BCMDHD_PCIE),)
+ $(info bcm SDIO driver configured)
+@@ -54,6 +54,7 @@ DHDCFLAGS = -Wall -Wstrict-prototypes -Wno-date-time                      \
+ 	-DUSE_NEW_RSPEC_DEFS                                                  \
+ 	-DWL_EXT_IAPSTA -DWL_ESCAN -DCCODE_LIST                               \
+ 	-DENABLE_INSMOD_NO_FW_LOAD                                            \
++	-Wno-implicit-fallthrough	\
+ 	-I$(src) -I$(src)/include
+ 
+ DHDOFILES = aiutils.o siutils.o sbutils.o bcmutils.o bcmwifi_channels.o   \
+-- 
+2.31.1

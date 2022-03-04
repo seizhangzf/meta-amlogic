@@ -24,24 +24,13 @@ ARM_TARGET_aarch64 ="aarch64.lp64."
 TA_TARGET="noarch"
 
 do_install() {
-    case ${MACHINE} in
-        mesonsc2-*)
-          CHIPFAMILY=S905X4
-        ;;
-        mesons4-*)
-          CHIPFAMILY=S905Y4
-        ;;
-        *)
-          CHIPFAMILY=
-        ;;
-    esac
     install -d ${D}${libdir}
     install -m 0755 -d ${D}${includedir}
     install ${S}/lib/libdmx_client_linux.so ${D}${libdir}/libdmx_client.so
     install -m 0644 ${S}/include/* ${D}/${includedir}
 
     install -d ${D}/lib/teetz
-    install -m 0644 ${S}/ta/v3/dev/${CHIPFAMILY}/b472711b-3ada-4c37-8c2a-7c64d8af0223.ta ${D}/lib/teetz
+    install -m 0644 ${S}/ta/${TDK_VERSION}/b472711b-3ada-4c37-8c2a-7c64d8af0223.ta ${D}/lib/teetz
 }
 
 INSANE_SKIP_${PN} = "dev-so ldflags dev-elf"

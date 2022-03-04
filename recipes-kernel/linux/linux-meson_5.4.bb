@@ -14,6 +14,7 @@ SRC_URI_append = " file://gki-read_ext_module_config.sh"
 SRC_URI_append = " file://gki-read_ext_module_predefine.sh"
 SRC_URI_append_s4 = " file://s4.cfg"
 SRC_URI_append_sc2 = " file://sc2.cfg"
+SRC_URI_append_t7 = " file://t7.cfg"
 
 #SRC_URI_append = " file://meson.scc \
 #            file://meson.cfg \
@@ -42,15 +43,13 @@ KERNEL_IMAGETYPE = "Image"
 KCONFIG_MODE = "alldefconfig"
 
 S = "${WORKDIR}/git"
-KBUILD_DEFCONFIG_t7 = "meson64_a64_P_defconfig"
+KBUILD_DEFCONFIG_t7 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_sc2 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_tm2-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_t5d = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_s4 = "meson64_a64_R_defconfig"
 
 GKI_DEFCONFIG = "meson64_gki_module_config"
-#T7 did not use GKI yet.
-GKI_DEFCONFIG_t7 = ""
 
 gki_module_compile () {
   oe_runmake -C ${STAGING_KERNEL_DIR}/${1} CC="${KERNEL_CC}" LD="${KERNEL_LD}" O=${B} M=${1} KERNEL_SRC=${S}

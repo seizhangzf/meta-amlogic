@@ -74,11 +74,13 @@ PATH_append_tm2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 PATH_append_g12a = ":${STAGING_DIR_NATIVE}/gcc-arm-none-elf/bin"
 PATH_append_sc2 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 PATH_append_s4 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
+PATH_append_t7 = ":${STAGING_DIR_NATIVE}/riscv-none-gcc/bin"
 DEPENDS_append = "gcc-linaro-aarch64-elf-native optee-scripts-native optee-userspace-securebl32"
 DEPENDS_append_tm2 = " riscv-none-gcc-native "
 DEPENDS_append_g12a = " gcc-arm-none-eabi-native"
 DEPENDS_append_sc2 = " riscv-none-gcc-native "
 DEPENDS_append_s4 = " riscv-none-gcc-native "
+DEPENDS_append_t7 = " riscv-none-gcc-native "
 
 DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-native "
 #override this in customer layer bbappend for customer specific bootloader binaries
@@ -101,6 +103,7 @@ VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 
 #IRDETO UBOOT PATH depends on SoC
 IRDETO_UBOOT_PATH = "TBD"
 IRDETO_UBOOT_PATH_sc2 = "sc2"
+IRDETO_UBOOT_PATH_s4 = "s4d"
 IRDETO_BL2x_ARG="--bl2x irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2x.bin.signed"
 IRDETO_BL2e_ARG="--bl2e irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2e.sto.bin.signed"
 IRDETO_BL32_ARG="--bl32 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl32/blob-bl32.bin.signed"
@@ -110,7 +113,6 @@ IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO
 #SYNAMEDIA UBOOT PATH depends on SoC
 SYNAMEDIA_UBOOT_PATH = "TBD"
 SYNAMEDIA_UBOOT_PATH_sc2 = "s905c2eng"
-
 SYNAMEDIA_BL2_ARG="--bl2 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/bb1st.sto.bin.signed"
 SYNAMEDIA_BL2e_ARG="--bl2e synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2e.sto.bin.signed"
 SYNAMEDIA_BL2x_ARG="--bl2x synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2x.bin.signed"
