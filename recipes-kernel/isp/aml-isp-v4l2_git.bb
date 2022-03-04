@@ -11,6 +11,7 @@ DEPENDS += " aml-isp-iq aml-isp-lens aml-isp-sensor"
 #For common patches
 MDIR = "isp"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-5.4/amlogic/${MDIR}')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/arm_isp/')}"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
