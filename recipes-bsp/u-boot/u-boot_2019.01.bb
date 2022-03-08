@@ -37,6 +37,7 @@ SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://
 
 IRDETO_BRANCH = "TBD"
 IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
+IRDETO_BRANCH_s4 = "openlinux/s4d-msr4-linux"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
