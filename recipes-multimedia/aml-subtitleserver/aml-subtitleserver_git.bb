@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 inherit autotools cmake pkgconfig systemd
 DEPENDS = " libbinder liblog aml-zvbi cairo libgles-eabihf-dvalin-wayland-drm"
 
-#SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_subtitleserver.git;protocol=${AML_GIT_PROTOCOL};branch=master"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_subtitleserver.git;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 SRC_URI +="file://subtitleserver.service"
