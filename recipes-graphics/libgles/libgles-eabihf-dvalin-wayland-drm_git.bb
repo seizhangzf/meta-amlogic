@@ -82,15 +82,14 @@ do_install() {
     ln -s libwayland-egl.so.1.0.0 ${D}${libdir}/libwayland-egl.so.1
     ln -s libwayland-egl.so.1 ${D}${libdir}/libwayland-egl.so
 
-    ln -s libMali.so ${D}${libdir}/libvulkan.so.1.0.0
-    ln -s libvulkan.so.1.0.0 ${D}${libdir}/libvulkan.so.1
-    ln -s libvulkan.so.1 ${D}${libdir}/libvulkan.so
-
     ln -s libMali.so ${D}${libdir}/libgbm.so.1.0.0
     ln -s libgbm.so.1.0.0 ${D}${libdir}/libgbm.so.1
     ln -s libgbm.so.1 ${D}${libdir}/libgbm.so
+
+    mkdir -p ${D}/${datadir}/vulkan/icd.d/
+    install -m 0644 ${S}/lib/${MALI_ARCH}/dvalin/${VER}/mali.json ${D}${datadir}/vulkan/icd.d/
 }
 
-FILES_${PN} += "${libdir}/*.so"
+FILES_${PN} += "${libdir}/*.so ${datadir}"
 FILES_${PN}-dev = "${includedir} ${libdir}/pkgconfig/*"
 INSANE_SKIP_${PN} = "ldflags dev-so"

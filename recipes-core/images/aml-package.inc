@@ -1,6 +1,7 @@
 DEPENDS_append = " aml-img-packer-native"
 DEPENDS_append_onepass = " core-image-minimal"
 DEPENDS_append = " vendor-image"
+DEPENDS_append = " android-tools-native"
 
 SOC_FAMILY = "gxl"
 SOC_FAMILY_gxl = "gxl"
@@ -12,6 +13,7 @@ SOC_FAMILY_tm2 = "tm2"
 SOC_FAMILY_sc2 = "sc2"
 SOC_FAMILY_t5d = "t5d"
 SOC_FAMILY_s4 = "s4"
+SOC_FAMILY_t7 = "t7"
 
 ABSYS = "${@bb.utils.contains('DISTRO_FEATURES','absystem','_ab','', d)}"
 SBL33 = "${@bb.utils.contains('DISTRO_FEATURES','separate-bl33','_sbl33','', d)}"
@@ -38,9 +40,11 @@ do_aml_pack_32b() {
         sed -i '/recovery/ d' ${DEPLOY_DIR_IMAGE}/${PACK_CONF}
     fi
     ${DEPLOY_DIR_IMAGE}/res_packer -r ${DEPLOY_DIR_IMAGE}/logo_img_files ${DEPLOY_DIR_IMAGE}/logo.img
-    ${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/rootfs.ext4.img2simg
+    #${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/rootfs.ext4.img2simg
+    img2simg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/rootfs.ext4.img2simg
     if [ -f ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ];then
-        ${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/vendor.ext4.img2simg
+        #${DEPLOY_DIR_IMAGE}/img2simg ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/vendor.ext4.img2simg
+        img2simg ${DEPLOY_DIR_IMAGE}/vendor-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/vendor.ext4.img2simg
     fi
 
     #if system have generate secureboot uboot, just use it.

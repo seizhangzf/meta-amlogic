@@ -11,6 +11,7 @@ UMOUNT="/bin/umount"
 FIRMWARE=""
 DM_VERITY_STATUS="disabled"
 DM_DEV_COUNT=0
+ACTIVE_SLOT=""
 
 # Copied from initramfs-framework. The core of this script probably should be
 # turned into initramfs-framework modules to reduce duplication.
@@ -52,6 +53,8 @@ read_args() {
                 ROOT_DEVICE=$optarg ;;
             rootfstype=*)
                 modprobe $optarg 2> /dev/null ;;
+            androidboot.slot_suffix=*)
+                ACTIVE_SLOT=$optarg ;;
             LABEL=*)
                 label=$optarg ;;
             video=*)
@@ -95,6 +98,14 @@ boot_root() {
     mount -n --move /proc ${ROOT_MOUNT}/proc
     mount -n --move /sys ${ROOT_MOUNT}/sys
     mount -n --move /dev ${ROOT_MOUNT}/dev
+
+    if [ ! -e $ROOT_MOUNT/read-only ] && [ "${ACTIVE_SLOT}" != "" ]; then
+        slot=$(cat ${ROOT_MOUNT}/etc/fstab | grep -E "/dev/vendor" | awk '{print $1}' | cut -c 12-)
+        if [ "${ACTIVE_SLOT}" != "${slot}" ]; then
+            echo "switch vendor${slot} to vendor${ACTIVE_SLOT}"
+            sed -i "s/vendor\\${slot}/vendor\\${ACTIVE_SLOT}/" ${ROOT_MOUNT}/etc/fstab
+        fi
+    fi
 
     cd $ROOT_MOUNT
 
@@ -210,7 +221,7 @@ mount_and_boot() {
     fi
     if [ "$ROOT_DEVICE" != "" ]; then
 	dm_verity_setup system ${ROOT_DEVICE} ${ROOT_MOUNT}
-	dm_verity_setup vendor ${VENDOR_DEVICE} none
+	dm_verity_setup vendor ${VENDOR_DEVICE}${ACTIVE_SLOT} none
 	echo "dm-verity is $DM_VERITY_STATUS"
 	if [ "$DM_VERITY_STATUS" = "disabled" ]; then
 	    if ! mount -o rw,noatime,nodiratime $ROOT_DEVICE $ROOT_MOUNT ; then

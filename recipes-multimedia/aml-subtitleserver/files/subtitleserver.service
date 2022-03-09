@@ -1,0 +1,10 @@
+[Unit]
+Description=Subtitle Server Startup
+After=binder.service
+
+[Service]
+User=root
+ExecStart=/usr/bin/subtitleservice
+
+[Install]
+WantedBy=multi-user.target

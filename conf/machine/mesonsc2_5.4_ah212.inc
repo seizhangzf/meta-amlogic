@@ -16,6 +16,10 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
         aucpu-fw \
         tuner-prebuilt \
         "
+#ap6xxx-pcie
+#ap6xxx-sdio
+#brcm-tools
+#wififw-ap6398
 
 KERNEL_DEVICETREE = "sc2_s905x4_ah212_linux.dtb"
 KERNEL_MODULE_AUTOLOAD += " btqca"

@@ -36,7 +36,7 @@ SRC_URI += "file://adb_udc_file"
 SRC_URI[core.md5sum] = "0e653b129ab0c95bdffa91410c8b55be"
 SRC_URI[debian.md5sum] = "214cce305149326ca1aa661ef2b54886"
 
-SYSTEMD_AUTO_ENABLE = "${@bb.utils.contains('READONLY', 'y', 'enable', 'disable', d)}"
+#SYSTEMD_AUTO_ENABLE = "${@bb.utils.contains('READONLY', 'y', 'enable', 'disable', d)}"
 SYSTEMD_SERVICE_${PN} = "adbd.service"
 
 FILES_${PN} += "${systemd_unitdir}/system/adbd.service"
@@ -78,7 +78,7 @@ do_install(){
         mesonc1_*)
             sed 's@ff400000.dwc2_a@ff500000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
-        mesonsc2_* | mesons4_*)
+        mesonsc2_* | mesons4_* | mesons4d_*)
             sed 's@ff400000.dwc2_a@fdd00000.dwc2_a@' -i ${D}/etc/adb_udc_file
         ;;
     esac

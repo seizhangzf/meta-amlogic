@@ -30,6 +30,10 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'vmx-release-binaries', '', d)}\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'irdeto-sdk irdeto-hal', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'synamedia-sdk', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-v4l2', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-iq', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-lens', '', d)}\
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'aml-isp', 'aml-isp-sensor', '', d)}\
                                     tinyalsa \
                                     dolby-ms12 \
                                     libamavutils \
@@ -56,6 +60,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     android-tools-logcat \
                                     wifi-amlogic \
                                     liblog \
+                                    libamldeviceproperty \
                                     aml-hdcp \
                                     aml-hdcp-load-firmware \
                                     libbinder \
@@ -66,6 +71,8 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     system-config \
                                     aml-secmem \
                                     simulate-key \
+                                    vulkan-loader \
+                                    volume-ctl \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'aml-rtos', 'dsp-util aml-rtos', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-youtubesign-bin', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'widevine', 'aml-secmem', '', d)} \
@@ -73,6 +80,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'libamadec', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-mp-sdk', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-libdvr', '', d)} \
+                                    ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-subtitleserver', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'amlogic-dvb', 'aml-dvbaudioutils', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'cobalt-plugin', 'aml-cobalt-starboard', '', d)} \
                                     ${@bb.utils.contains('DISTRO_FEATURES', 'aml-cas', 'drmplayer-bin ffmpeg-vendor', '', d)} \

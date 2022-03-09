@@ -50,6 +50,9 @@ OVERRIDES .= ":dtv"
 DISTRO_FEATURES_append = " dvb"
 PREFERRED_PROVIDER_widevine = "aml-mediadrm-widevine"
 DISTRO_FEATURES_remove_dunfell = " virtualization"
+
+TDK_VERSION_s4 = "v3.8/dev/S805X2"
+
 # dm-verity
 #DISTRO_FEATURES_append = " dm-verity"
 #DISTRO_FEATURES_NATIVE_append = " dm-verity"
