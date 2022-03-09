@@ -20,10 +20,10 @@ Signed-off-by: jiabin.chen <jiabin.chen@amlogic.com>
  tools/hciattach_aml.c | 126 ++++++++++++++++++++++++++++++++++++++++--
  1 file changed, 121 insertions(+), 5 deletions(-)
 
-diff --git a/tools/hciattach_aml.c b/tools/hciattach_aml.c
-index c4fa84b04..7ed601707 100755
---- a/tools/hciattach_aml.c
-+++ b/tools/hciattach_aml.c
+Index: bluez-5.45/tools/hciattach_aml.c
+===================================================================
+--- bluez-5.45.orig/tools/hciattach_aml.c
++++ bluez-5.45/tools/hciattach_aml.c
 @@ -331,6 +331,122 @@ error:
  
  }
@@ -171,6 +171,3 @@ index c4fa84b04..7ed601707 100755
  	/*start cup cmd*/
  	err = aml_start_cpu_before_cmd(fd);
  	if (err < 0) {
--- 
-2.29.0
-
