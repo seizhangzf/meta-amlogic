@@ -1,0 +1,282 @@
+From c3c8ea0daf7234dc8f599a4b0869e28f5cd0124b Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Wed, 2 Feb 2022 12:59:31 -0800
+Subject: [PATCH] fix yocto compile
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: Ifdac5cb126e2213a41ff55d433007bdc2048b848
+---
+ app/v4l2_test_android/Makefile            |  6 +--
+ app/v4l2_test_android/v4l2_test.c         |  6 +--
+ linux_54_t7/kernel/subdev/iq/Makefile     | 40 ++--------------
+ linux_54_t7/kernel/subdev/lens/Makefile   | 40 ++--------------
+ linux_54_t7/kernel/subdev/sensor/Makefile | 46 ++----------------
+ linux_54_t7/kernel/v4l2_dev/Makefile      | 58 ++---------------------
+ 6 files changed, 26 insertions(+), 170 deletions(-)
+
+diff --git a/app/v4l2_test_android/Makefile b/app/v4l2_test_android/Makefile
+index 55e716e..24734b0 100644
+--- a/app/v4l2_test_android/Makefile
++++ b/app/v4l2_test_android/Makefile
+@@ -1,11 +1,11 @@
+-CC=/opt/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc
+-CROSS_COMPILE=/opt/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
++CC ?= /opt/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc
++CROSS_COMPILE ?= /opt/gcc-linaro-6.3.1-2017.02-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+ 
+ CFLAGS=-I. -g -fPIE -Wall -pthread
+ ODIR=obj
+ OFILE=v4l2_test
+ 
+-_OBJ = v4l2_test.o capture.o renderer.o isp_metadata.o gdc.o
++_OBJ = v4l2_test.o
+ OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ))
+ 
+ $(ODIR)/%.o: %.c
+diff --git a/app/v4l2_test_android/v4l2_test.c b/app/v4l2_test_android/v4l2_test.c
+index 34f5fdb..a873fb6 100644
+--- a/app/v4l2_test_android/v4l2_test.c
++++ b/app/v4l2_test_android/v4l2_test.c
+@@ -494,8 +494,8 @@ void * video_thread(void *arg)
+     INFO("[T#%d] VIDIOC_QUERYCAP: capabilities=0x%x, device_caps:0x%x\n",
+         stream_type, v4l2_cap.capabilities, v4l2_cap.device_caps);
+     
+-    if(stream_type == ARM_V4L2_TEST_STREAM_FR)
+-        isp_lib_enable();
++    //if(stream_type == ARM_V4L2_TEST_STREAM_FR)
++    //    isp_lib_enable();
+ 
+     //do_sensor_preset(videofd,1);
+ 
+@@ -880,7 +880,7 @@ void * video_thread(void *arg)
+ fatal:
+ 
+     close(videofd);
+-    isp_lib_disable();
++    //isp_lib_disable();
+     MSG("thread %d terminated ...\n", stream_type);
+ 
+     return NULL;
+diff --git a/linux_54_t7/kernel/subdev/iq/Makefile b/linux_54_t7/kernel/subdev/iq/Makefile
+index 9a00d0b..5f872fe 100644
+--- a/linux_54_t7/kernel/subdev/iq/Makefile
++++ b/linux_54_t7/kernel/subdev/iq/Makefile
+@@ -16,38 +16,8 @@
+ #
+ 
+ obj-m += iv009_isp_iq.o
+-
+-M_PATH := $(shell dirname $(lastword $(MAKEFILE_LIST)))
+-
+-ifeq ($(FW_SRC_OBJ),)
+-	FW_SRC := $(wildcard src/*.c src/*/*.c src/*/*/*.c app/*.c app/*/*.c)
+-	export FW_SRC_OBJ := $(FW_SRC:.c=.o)
+-
+-	ifneq ($(wildcard src/fw_lib/libacamera_isp.a),)
+-		export FW_SRC_OBJ := $(FW_SRC_OBJ) src/fw_lib/libacamera_isp.a
+-	endif
+-endif
+-
+-iv009_isp_iq-objs += $(FW_SRC_OBJ)
+-$(warning iv009_isp_iq-objs=$(iv009_isp_iq-objs))
+-LOCAL_INCLUDES := -I$(M_PATH)/app -I$(M_PATH)/inc -I$(M_PATH)/app/control \
+-                -I$(M_PATH)/inc/api -I$(M_PATH)/inc/isp -I$(M_PATH)/inc/sys \
+-                -I$(M_PATH)/src/platform -I$(M_PATH)/src/fw \
+-                -I$(M_PATH)/src/fw_lib -I$(M_PATH)/src/calibration -I$(M_PATH)/src/drv_otp \
+-                -I$(M_PATH)/src/drv_tuning  \
+-                -I$(M_PATH)/src/driver/sensor -I$(M_PATH)/src/driver/lens
+-
+-ccflags-y += $(LOCAL_INCLUDES)
+-ccflags-y += -Wno-declaration-after-statement -Idrivers/staging/android/ \
+-		-Wno-error
+-EXTRA_CFLAGS += $(LOCAL_INCLUDES)
+-all:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M)  modules
+-modules_install:
+-	@echo "$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install"
+-	@$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install
+-	mkdir -p ${OUT_DIR}/../vendor_lib
+-	cp $(OUT_DIR)/$(M)/*.ko ${OUT_DIR}/../vendor_lib/modules/
+-
+-clean:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M_PATH) clean
+\ No newline at end of file
++SRCDIR		:= $(shell dirname $(lastword $(MAKEFILE_LIST)))
++SOURCES     := $(shell find $(SRCDIR) -type f -name *.c)
++OBJECTS     := $(patsubst $(SRCDIR)/%.c,%.o,$(SOURCES))
++iv009_isp_iq-objs = $(OBJECTS)
++ccflags-y += -Wno-declaration-after-statement -Wno-error
+diff --git a/linux_54_t7/kernel/subdev/lens/Makefile b/linux_54_t7/kernel/subdev/lens/Makefile
+index e459e29..06a167b 100644
+--- a/linux_54_t7/kernel/subdev/lens/Makefile
++++ b/linux_54_t7/kernel/subdev/lens/Makefile
+@@ -16,38 +16,8 @@
+ #
+ 
+ obj-m += iv009_isp_lens.o
+-
+-M_PATH := $(shell dirname $(lastword $(MAKEFILE_LIST)))
+-
+-ifeq ($(FW_SRC_OBJ),)
+-	FW_SRC := $(wildcard src/*.c src/*/*.c src/*/*/*.c app/*.c app/*/*.c)
+-	export FW_SRC_OBJ := $(FW_SRC:.c=.o)
+-
+-	ifneq ($(wildcard src/fw_lib/libacamera_isp.a),)
+-		export FW_SRC_OBJ := $(FW_SRC_OBJ) src/fw_lib/libacamera_isp.a
+-	endif
+-endif
+-
+-iv009_isp_lens-objs += $(FW_SRC_OBJ)
+-
+-LOCAL_INCLUDES := -I$(M_PATH)/app -I$(M_PATH)/inc -I$(M_PATH)/app/control \
+-                -I$(M_PATH)/inc/api -I$(M_PATH)/inc/isp -I$(M_PATH)/inc/sys \
+-                -I$(M_PATH)/src/platform -I$(M_PATH)/src/fw \
+-                -I$(M_PATH)/src/fw_lib -I$(M_PATH)/src/calibration \
+-                -I$(M_PATH)/src/driver/sensor -I$(M_PATH)/src/driver/lens
+-
+-ccflags-y += $(LOCAL_INCLUDES)
+-ccflags-y += -Wno-declaration-after-statement -Idrivers/staging/android/ \
+-		-Wno-error
+-EXTRA_CFLAGS += $(LOCAL_INCLUDES)
+-
+-all:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M)  modules
+-modules_install:
+-	@echo "$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install"
+-	@$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install
+-	mkdir -p ${OUT_DIR}/../vendor_lib
+-	cp $(OUT_DIR)/$(M)/*.ko ${OUT_DIR}/../vendor_lib/modules/
+-
+-clean:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M) clean
+\ No newline at end of file
++SRCDIR		:= $(shell dirname $(lastword $(MAKEFILE_LIST)))
++SOURCES     := $(shell find $(SRCDIR) -type f -name *.c)
++OBJECTS     := $(patsubst $(SRCDIR)/%.c,%.o,$(SOURCES))
++iv009_isp_lens-objs = $(OBJECTS)
++ccflags-y += -Wno-declaration-after-statement -Wno-error
+diff --git a/linux_54_t7/kernel/subdev/sensor/Makefile b/linux_54_t7/kernel/subdev/sensor/Makefile
+index bf168e9..675ae0b 100644
+--- a/linux_54_t7/kernel/subdev/sensor/Makefile
++++ b/linux_54_t7/kernel/subdev/sensor/Makefile
+@@ -16,44 +16,8 @@
+ #
+ 
+ obj-m += iv009_isp_sensor.o
+-
+-M_PATH := $(shell dirname $(lastword $(MAKEFILE_LIST)))
+-
+-ifeq ($(FW_SRC_OBJ),)
+-	FW_SRC := $(wildcard src/*.c src/*/*.c src/*/*/*.c app/*.c app/*/*.c)
+-	export FW_SRC_OBJ := $(FW_SRC:.c=.o)
+-
+-	ifneq ($(wildcard src/fw_lib/libacamera_isp.a),)
+-		export FW_SRC_OBJ := $(FW_SRC_OBJ) src/fw_lib/libacamera_isp.a
+-	endif
+-endif
+-
+-iv009_isp_sensor-objs += $(FW_SRC_OBJ)
+-
+-LOCAL_INCLUDES := -I$(M_PATH)/app -I$(M_PATH)/inc -I$(M_PATH)/app/control \
+-                -I$(M_PATH)/inc/api -I$(M_PATH)/inc/isp -I$(M_PATH)/inc/sys \
+-                -I$(M_PATH)/src/platform -I$(M_PATH)/src/fw \
+-                -I$(M_PATH)/src/fw_lib -I$(M_PATH)/src/calibration \
+-                -I$(M_PATH)/src/driver/sensor -I$(M_PATH)/src/driver/lens
+-
+-ifeq ($(PLATFORM_VERSION),)  
+-    ccflags-y += -DCONFIG_T7
+-else
+-    ccflags-y += -DCONFIG_$(PLATFORM_VERSION)
+-endif
+-
+-ccflags-y += $(LOCAL_INCLUDES)
+-ccflags-y += -Wno-declaration-after-statement -Idrivers/staging/android/ \
+-		-Wno-error
+-EXTRA_CFLAGS += $(LOCAL_INCLUDES)
+-
+-all:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M)  modules
+-modules_install:
+-	@echo "$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install"
+-	@$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install
+-	mkdir -p ${OUT_DIR}/../vendor_lib
+-	cp $(OUT_DIR)/$(M)/*.ko ${OUT_DIR}/../vendor_lib/modules/
+-
+-clean:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M_PATH) clean
+\ No newline at end of file
++SRCDIR		:= $(shell dirname $(lastword $(MAKEFILE_LIST)))
++SOURCES     := $(shell find $(SRCDIR) -type f -name *.c)
++OBJECTS     := $(patsubst $(SRCDIR)/%.c,%.o,$(SOURCES))
++iv009_isp_sensor-objs = $(OBJECTS)
++ccflags-y += -Wno-declaration-after-statement -Wno-strict-prototypes -Wno-error -DCONFIG_T7
+diff --git a/linux_54_t7/kernel/v4l2_dev/Makefile b/linux_54_t7/kernel/v4l2_dev/Makefile
+index 3e9360a..5e365e5 100644
+--- a/linux_54_t7/kernel/v4l2_dev/Makefile
++++ b/linux_54_t7/kernel/v4l2_dev/Makefile
+@@ -16,56 +16,8 @@
+ #
+ 
+ obj-m += iv009_isp.o
+-
+-M_PATH := $(shell dirname $(lastword $(MAKEFILE_LIST)))
+-
+-ifeq ($(FW_SRC_OBJ),)
+-	FW_SRC := $(wildcard src/*.c src/*/*.c src/*/*/*.c app/*.c app/*/*.c)
+-	export FW_SRC_OBJ := $(FW_SRC:.c=.o)
+-
+-	ifneq ($(wildcard src/fw_lib/libacamera_isp.a),)
+-		export FW_SRC_OBJ := $(FW_SRC_OBJ) src/fw_lib/libacamera_isp.a
+-	endif
+-endif
+-
+-iv009_isp-objs += $(FW_SRC_OBJ)
+-
+-LOCAL_INCLUDES := -I$(M_PATH)/app -I$(M_PATH)/inc -I$(M_PATH)/app/control \
+-		-I$(M_PATH)/inc/api -I$(M_PATH)/inc/isp -I$(M_PATH)/inc/sys \
+-		-I$(M_PATH)/src/platform -I$(M_PATH)/src/fw \
+-		-I$(M_PATH)/src/fw_lib -I$(M_PATH)/src/calibration \
+-		-I$(M_PATH)/src/driver/sensor -I$(M_PATH)/src/driver/lens
+-
+-ifeq ($(SYSTEM_VERSION),)
+-    ccflags-y += -DCONFIG_ANDROID_OS
+-else
+-    ccflags-y += -DCONFIG_$(SYSTEM_VERSION)
+-endif
+-
+-ifeq ($(PLATFORM_VERSION),)
+-    ccflags-y += -DCONFIG_T7
+-else
+-    ccflags-y += -DCONFIG_$(PLATFORM_VERSION)
+-endif
+-
+-ifeq ($(SEAMLESS_SUPPORT),)
+-    ccflags-y += -DCONFIG_SEAMLESS_N
+-else
+-    ccflags-y += -DCONFIG_SEAMLESS_$(SEAMLESS_SUPPORT)
+-endif
+-
+-ccflags-y += $(LOCAL_INCLUDES)
+-ccflags-y += -Wno-declaration-after-statement -Idrivers/staging/android/ \
+-		-Wno-error
+-EXTRA_CFLAGS += $(LOCAL_INCLUDES)
+-
+-all:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M)  modules
+-modules_install:
+-	@echo "$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install"
+-	@$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install
+-	mkdir -p ${OUT_DIR}/../vendor_lib
+-	cp $(OUT_DIR)/$(M)/*.ko ${OUT_DIR}/../vendor_lib/modules/
+-
+-clean:
+-	@$(MAKE) -C $(KERNEL_SRC) M=$(M) clean
+\ No newline at end of file
++SRCDIR		:= $(shell dirname $(lastword $(MAKEFILE_LIST)))
++SOURCES     := $(shell find $(SRCDIR) -type f -name *.c)
++OBJECTS     := $(patsubst $(SRCDIR)/%.c,%.o,$(SOURCES))
++iv009_isp-objs = $(OBJECTS)
++ccflags-y += -Wno-declaration-after-statement -Wno-error -DCONFIG_T7 -DCONFIG_ANDROID_OS -DCONFIG_SEAMLESS_N
+-- 
+2.31.1
+

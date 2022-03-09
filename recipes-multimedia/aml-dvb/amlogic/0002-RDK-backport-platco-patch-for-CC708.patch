@@ -1,4 +1,4 @@
-From 99f16da2e04fe29eadbb732c2b776965fdd94250 Mon Sep 17 00:00:00 2001
+From 8dbfa9778974d8f052de9e06fcbc2cf014b3a75b Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 25 Aug 2021 21:12:45 -0700
 Subject: [PATCH 2/2] RDK: backport platco patch for CC708
@@ -439,5 +439,5 @@ index 6aca4e5a..93b22b23 100644
  
  typedef struct
 -- 
-2.29.2
+2.31.1
 

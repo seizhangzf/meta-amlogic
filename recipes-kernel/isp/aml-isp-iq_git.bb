@@ -11,6 +11,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/arm/isp;protocol=${AML_GIT_PR
 MDIR = "isp_iq"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/hardware/aml-5.4/amlogic/${MDIR}')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/arm_isp/')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/')}"
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
