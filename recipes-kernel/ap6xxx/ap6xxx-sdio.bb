@@ -5,7 +5,7 @@ LICENSE = "GPLv2"
 FILESEXTRAPATHS_prepend := "${THISDIR}/file:"
 
 # Source
-SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=git;branch=r-amlogic"
+#SRC_URI = "git://git.myamlogic.com/platform/hardware/wifi/broadcom/drivers/ap6xxx.git;protocol=git;branch=r-amlogic"
 
 # Patch
 SRC_URI += "file://0001-Enable-SDIO.patch"
