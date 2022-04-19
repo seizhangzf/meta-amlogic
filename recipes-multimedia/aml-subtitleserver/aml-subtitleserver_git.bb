@@ -5,14 +5,14 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138
 
 #do_configure[noexec] = "1"
 inherit autotools cmake pkgconfig systemd
-DEPENDS = " libbinder liblog aml-zvbi cairo libgles-eabihf-dvalin-wayland-drm"
+DEPENDS = " libbinder liblog aml-zvbi cairo libgles-eabihf-dvalin-wayland-drm aml-mediahal-sdk"
 
 #SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_subtitleserver.git;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 SRC_URI +="file://subtitleserver.service"
 S="${WORKDIR}/git"
-RDEPENDS_${PN} = " liblog libbinder aml-zvbi cairo libgles-eabihf-dvalin-wayland-drm"
+RDEPENDS_${PN} = " liblog libbinder aml-zvbi cairo libgles-eabihf-dvalin-wayland-drm aml-mediahal-sdk"
 
 
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
