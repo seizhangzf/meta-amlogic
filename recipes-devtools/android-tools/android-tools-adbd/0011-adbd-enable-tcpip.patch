@@ -1,0 +1,19 @@
+Index: 4.2.2+git20130218-r0/core/adbd/adb.c
+===================================================================
+--- 4.2.2+git20130218-r0.orig/core/adbd/adb.c
++++ 4.2.2+git20130218-r0/core/adbd/adb.c
+@@ -1323,11 +1323,11 @@ int adb_main(int is_daemon, int server_p
+         // listen on TCP port specified by service.adb.tcp.port property
+     //    local_init(port);
+     //} else 
+-    if (!usb) {
+-        printf("Using USB\n");
++    //if (!usb) {
++    //    printf("Using USB\n");
+         // listen on default port
+         local_init(DEFAULT_ADB_LOCAL_TRANSPORT_PORT);
+-    }
++    //}
+ 
+     D("adb_main(): pre init_jdwp()\n");
+     init_jdwp();
