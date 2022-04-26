@@ -27,6 +27,7 @@ do_install() {
     install -d -m 0755 ${D}/usr/include
     install -D -m 0644 ${S}/lib/ca/libirdetoca.so ${D}/usr/lib
     install -D -m 0644 ${S}/lib/ta/${IRDETO_PATH}/b64fd559-658d-48a4-bbc7-b95d8663f457.ta ${D}/lib/teetz
+    install -D -m 0644 ${S}/lib/ta/opc/1d0f7170-3209-481c-b4ad-8fca95113b71.ta ${D}/lib/teetz
     install -D -m 0644 ${S}/include/*.h ${D}/usr/include
 }
 

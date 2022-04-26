@@ -97,6 +97,8 @@ do_deploy () {
         test -f ${S}/fip/u-boot.bin.device.signed && install ${S}/fip/u-boot.bin.device.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.usb.signed ${DEPLOYDIR}/
         install ${S}/fip/u-boot.bin.sd.bin.signed ${DEPLOYDIR}/
+        UBOOT_TYPE="${UBOOT_MACHINE}"
+        install ${S}/fip/${UBOOT_TYPE%_config}-u-boot.aml.zip ${DEPLOYDIR}/ || true
     ;;
     "bin")
         install ${S}/fip/u-boot.bin.usb.bl2 ${DEPLOYDIR}/

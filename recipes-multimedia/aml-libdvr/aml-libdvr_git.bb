@@ -8,8 +8,8 @@ SRC_URI = "git://${AML_GIT_ROOT}/libdvr.git;protocol=${AML_GIT_PROTOCOL};branch=
 #For common patches
 
 SRC_URI_append = "${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libdvr')}"
-DEPENDS += "aml-audio-service aml-mediahal-sdk liblog"
-RDEPENDS_${PN} += "aml-audio-service aml-mediahal-sdk liblog"
+DEPENDS += "aml-audio-service aml-mediahal-sdk liblog aml-dvb"
+RDEPENDS_${PN} += "aml-audio-service aml-mediahal-sdk liblog aml-dvb"
 
 #do_compile[noexec] = "1"
 

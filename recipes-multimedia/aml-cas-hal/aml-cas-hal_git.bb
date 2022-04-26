@@ -32,6 +32,11 @@ do_install() {
     install -m 0755 ${S}/libamcas.a ${D}${libdir}
     install -m 0644 ${S}/libamcas/include/* ${D}${includedir}/libamcas/
     install -m 0755 ${S}/cas_hal_test_bin ${D}${bindir}
+
+    install -m 0755 -d ${D}${includedir}/liblinuxdvb_port
+    install -m 0755 ${S}/liblinuxdvb_port.a ${D}${libdir}
+    install -m 0644 ${S}/liblinuxdvb_port/include/* ${D}${includedir}/liblinuxdvb_port/
+
 }
 
 FILES_${PN} = "${libdir}/* ${bindir}/*"

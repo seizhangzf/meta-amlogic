@@ -83,7 +83,7 @@ DEPENDS_append_sc2 = " riscv-none-gcc-native "
 DEPENDS_append_s4 = " riscv-none-gcc-native "
 DEPENDS_append_t7 = " riscv-none-gcc-native "
 
-DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-native "
+DEPENDS_append = " bison-native coreutils-native python-native python-pycrypto-native vim-native zip-native"
 #override this in customer layer bbappend for customer specific bootloader binaries
 export BL30_ARG = ""
 export BL2_ARG = ""
@@ -92,7 +92,8 @@ BL33_ARG = "${@bb.utils.contains('DISTRO_FEATURES','AVB','--avb2','',d)}"
 
 #NAGRA UBOOT PATH depends on SoC
 NAGRA_UBOOT_PATH = "TBD"
-NAGRA_UBOOT_PATH_sc2 = "sc2"
+NAGRA_UBOOT_PATH_ah232 = "sc2/s905c2"
+NAGRA_UBOOT_PATH_ah221 = "sc2/s905c2l"
 NAGRA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', '--chip-varient nocs-jts-ap --bl32 nagra-sdk/bootloader/${NAGRA_UBOOT_PATH}/bl32/blob-bl32.bin.signed --bl31 nagra-sdk/bootloader/${NAGRA_UBOOT_PATH}/bl31/blob-bl31.bin.signed', '', d)}"
 
 #VMX UBOOT PATH depends on SoC
