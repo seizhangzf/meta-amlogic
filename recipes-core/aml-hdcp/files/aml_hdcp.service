@@ -1,6 +1,7 @@
 [Unit]
 Description=hdcp Startup
 After=aml_key_inject.service
+Before=wifi.service
 
 [Service]
 User=root
