@@ -1,7 +1,8 @@
 [Unit]
 Description=HDCP firmware load
-After=tee-supplicant.service aml_hdcp.service pwrmgr.service 
+After=tee-supplicant.service aml_hdcp.service
 Requires=tee-supplicant.service aml_hdcp.service 
+Before=wifi.service dsmgr.service
 
 [Service]
 Type=forking
