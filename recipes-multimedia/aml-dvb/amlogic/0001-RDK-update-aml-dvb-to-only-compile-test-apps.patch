@@ -1,4 +1,4 @@
-From 111cbf46f6b1b55c73f095a2932859363d3b09b5 Mon Sep 17 00:00:00 2001
+From 88faed546786636ed88755cf4a08db6452ea8430 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Fri, 18 Oct 2019 14:55:57 -0700
 Subject: [PATCH 1/2] RDK: update aml-dvb to only compile test apps
@@ -98,7 +98,7 @@ index 468269cd..c46d8a40 100644
  	if (fd == -1)
  	{
 diff --git a/am_adp/am_fend/linux_dvb/linux_dvb.c b/am_adp/am_fend/linux_dvb/linux_dvb.c
-index fb9f3446..9bb91809 100644
+index 95b8a86e..3e93723a 100644
 --- a/am_adp/am_fend/linux_dvb/linux_dvb.c
 +++ b/am_adp/am_fend/linux_dvb/linux_dvb.c
 @@ -117,7 +117,8 @@ static AM_ErrorCode_t dvb_open (AM_FEND_Device_t *dev, const AM_FEND_OpenPara_t

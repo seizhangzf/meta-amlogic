@@ -1,4 +1,4 @@
-From c3c8ea0daf7234dc8f599a4b0869e28f5cd0124b Mon Sep 17 00:00:00 2001
+From ad0a6af4b329f580ea941d4963db8631a43cf3a2 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 2 Feb 2022 12:59:31 -0800
 Subject: [PATCH] fix yocto compile

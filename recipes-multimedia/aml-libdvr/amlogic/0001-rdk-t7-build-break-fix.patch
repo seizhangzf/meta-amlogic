@@ -1,4 +1,4 @@
-From 77c6f12f86250f699bf88e959ff56506f96659db Mon Sep 17 00:00:00 2001
+From 02f182f4a8838fea7f7d8f0f9d52540f4d45244c Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Thu, 20 Jan 2022 20:13:32 -0800
 Subject: [PATCH] rdk: t7 build break fix

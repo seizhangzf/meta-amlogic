@@ -1,4 +1,4 @@
-From 1a7351bc04269477f08711a0f0db26d2417b4c33 Mon Sep 17 00:00:00 2001
+From 962f12dad0c1c899f533f7a60b506a9a6255ac82 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Mon, 19 Jul 2021 12:03:50 +0000
 Subject: [PATCH 3/4] RDK: remove _a/_b extension from part_name in

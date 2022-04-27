@@ -1,4 +1,4 @@
-From 8dbfa9778974d8f052de9e06fcbc2cf014b3a75b Mon Sep 17 00:00:00 2001
+From f2d74302dc91d40851415707331b21ace7fe33e3 Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Wed, 25 Aug 2021 21:12:45 -0700
 Subject: [PATCH 2/2] RDK: backport platco patch for CC708

@@ -1,4 +1,4 @@
-From 5435b937d44b434d56900efd8ccdcd7d3bdb46a0 Mon Sep 17 00:00:00 2001
+From 26881b50f5ffd9377f18d0734b84831a2d28fbfc Mon Sep 17 00:00:00 2001
 From: Pradeep Sriram <pradeep.sriram@amlogic.com>
 Date: Thu, 20 Jan 2022 15:05:39 -0800
 Subject: [PATCH 4/4] rdk: adjust boot args for rdk
@@ -21,10 +21,10 @@ Change-Id: I2414545d2cb33a6c8a6b17395c7fdbe11d3c6a6d
  1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/board/amlogic/configs/t7_an400_lpddr4x.h b/board/amlogic/configs/t7_an400_lpddr4x.h
-index 453dd867ad6..834377c8812 100644
+index 6539851b96f..bad438f8afb 100644
 --- a/board/amlogic/configs/t7_an400_lpddr4x.h
 +++ b/board/amlogic/configs/t7_an400_lpddr4x.h
-@@ -374,7 +374,7 @@
+@@ -389,7 +389,7 @@
          "lcd1_ctrl=0x00000000\0" \
          "lcd2_ctrl=0x00000000\0" \
          "lcd_debug=0x00000000\0" \
@@ -32,8 +32,8 @@ index 453dd867ad6..834377c8812 100644
 +	"outputmode=1080p60hz\0" \
          "outputmode2=1080p60hz\0" \
          "hdmimode=1080p60hz\0" \
-         "cvbsmode=576cvbs\0" \
-@@ -548,7 +548,16 @@
+         "cvbsmode=dummy_l\0" \
+@@ -574,7 +574,16 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\

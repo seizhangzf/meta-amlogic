@@ -1,0 +1,58 @@
+From ff0330cd0f711f964df6414841339d20774aaac4 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Tue, 19 Apr 2022 11:58:16 -0700
+Subject: [PATCH] RDK: enable AB partition supporti for t5w-at301
+
+PD#SWPL-75225
+
+Problem:
+add t5w_at301
+
+Solution:
+add t5w_at301
+
+Verify:
+T5W_AT301
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I004d6b2fff4dbd085f5957fd2b875dfbeaeb6f95
+---
+ board/amlogic/configs/t5w_at301_v1.h | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/board/amlogic/configs/t5w_at301_v1.h b/board/amlogic/configs/t5w_at301_v1.h
+index 682f90d2871..f3dc880e81a 100644
+--- a/board/amlogic/configs/t5w_at301_v1.h
++++ b/board/amlogic/configs/t5w_at301_v1.h
+@@ -124,11 +124,11 @@
+         "powermode=on\0"\
+         "ffv_wake=off\0"\
+         "ffv_freeze=off\0"\
+-        "edid_14_dir=/odm/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir=/odm/etc/tvconfig/hdmi/port_20.bin\0" \
+-        "edid_14_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_14.bin\0" \
+-        "edid_20_dir_dynamic=/odm_ext/etc/tvconfig/hdmi/port_20.bin\0" \
+-        "edid_select=0\0" \
++				"edid_14_dir=/vendor/etc/tvconfig/hdmi/port_14.bin\0" \
++				"edid_20_dir=/vendor/etc/tvconfig/hdmi/port_20.bin\0" \
++				"edid_14_dir_dynamic=/data/etc/tvconfig/hdmi/port_14.bin\0" \
++				"edid_20_dir_dynamic=/data/etc/tvconfig/hdmi/port_20.bin\0" \
++				"edid_select=0\0" \
+         "port_map=0x4321\0" \
+         "cec_fun=0x2F\0" \
+         "logic_addr=0x0\0" \
+@@ -266,9 +266,9 @@
+             "fi;"\
+             "if test ${avb2} = 0; then "\
+                 "if test ${active_slot} = _a; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p23;"\
++						"setenv bootargs ${bootargs} root=/dev/system_a;"\
+                 "else if test ${active_slot} = _b; then "\
+-                    "setenv bootargs ${bootargs} root=/dev/mmcblk0p24;"\
++						"setenv bootargs ${bootargs} root=/dev/system_b;"\
+                 "fi;fi;"\
+             "fi;"\
+             "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+-- 
+2.31.1
+

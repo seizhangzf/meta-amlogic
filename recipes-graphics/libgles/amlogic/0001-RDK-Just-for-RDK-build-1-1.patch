@@ -1,4 +1,4 @@
-From 23ef276498fc319ff29a0df1b1caeb2ed53e76f5 Mon Sep 17 00:00:00 2001
+From a79dffb00898753053e6720ed4ca28523582913d Mon Sep 17 00:00:00 2001
 From: Blance Tang <guofeng.tang@amlogic.com>
 Date: Wed, 10 Jun 2020 14:02:59 +0800
 Subject: [PATCH] RDK: Just for RDK build  [1/1]

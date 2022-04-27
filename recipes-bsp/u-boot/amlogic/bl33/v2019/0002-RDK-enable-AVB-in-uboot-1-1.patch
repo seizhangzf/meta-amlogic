@@ -1,4 +1,4 @@
-From fb8ae1cdd7491a8b768f1bba6ffaa65256d7bcf8 Mon Sep 17 00:00:00 2001
+From 95a7bb899b2f9aa086e0254ba13d2e990831c3e0 Mon Sep 17 00:00:00 2001
 From: Xueling Li <xueling.li@amlogic.com>
 Date: Fri, 16 Jul 2021 07:13:09 +0000
 Subject: [PATCH 2/4] RDK: enable AVB in uboot  [1/1]
@@ -22,10 +22,10 @@ Signed-off-by: Xueling Li <xueling.li@amlogic.com>
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
-index 058c8a616eb..c881c3e2e69 100644
+index a25d98fa10a..0500d1cc91d 100644
 --- a/board/amlogic/configs/sc2_ah212.h
 +++ b/board/amlogic/configs/sc2_ah212.h
-@@ -181,7 +181,7 @@
+@@ -185,7 +185,7 @@
                  "if test ${active_slot} != normal; then "\
                      "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
                  "fi;"\
