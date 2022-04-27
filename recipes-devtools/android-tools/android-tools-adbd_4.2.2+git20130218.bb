@@ -26,6 +26,7 @@ SRC_URI += "file://0007-include-cdefs-h-when-needed.patch"
 SRC_URI += "file://0008-Include-sysmacros.h-to-compile-with-glibc-2.28.patch"
 SRC_URI += "file://0009-Fix-makefiles-for-out-of-tree-ext4_utils-build.patch"
 SRC_URI += "file://0010-adb-added-patch-for-openssl-1.1.0-compatibility.patch"
+#SRC_URI += "file://0011-adbd-enable-tcpip.patch"
 
 SRC_URI += "file://adbd.service"
 SRC_URI += "file://adbd_post.sh"

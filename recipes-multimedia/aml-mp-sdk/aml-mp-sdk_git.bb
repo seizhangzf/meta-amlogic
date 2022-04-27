@@ -16,7 +16,6 @@ SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 SRCREV = "${AUTOREV}"
 S="${WORKDIR}/git/"
-DEPENDS += "libbinder"
 RDEPENDS_${PN} += "aml-amaudioutils liblog aml-libdvr aml-mediahal-sdk aml-cas-hal libamadec"
 EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} \
 		  TARGET_DIR=${D} \

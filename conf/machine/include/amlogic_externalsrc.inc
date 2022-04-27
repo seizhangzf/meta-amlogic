@@ -1,3 +1,4 @@
+SRCTREECOVEREDTASKS ?= "do_unpack do_fetch"
 INHERIT += "externalsrc"
 
 EXTERNALSRC_pn-vmx-sdk-rel = "${@'${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel' if (os.path.isdir('${RDK_ROOT_PATH}/aml-comp/vendor/vmx/sdk-rel')) else ''}"

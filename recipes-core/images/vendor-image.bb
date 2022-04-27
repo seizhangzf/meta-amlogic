@@ -10,7 +10,7 @@ IMAGE_FSTYPES = "ext4"
 
 inherit core-image
 
-IMAGE_ROOTFS_SIZE = "327680"
+IMAGE_ROOTFS_SIZE = "15360"
 IMAGE_ROOTFS_EXTRA_SPACE = "0"
 IMAGE_PREPROCESS_COMMAND += "remove_folder;create_dolbyms12_link;"
 

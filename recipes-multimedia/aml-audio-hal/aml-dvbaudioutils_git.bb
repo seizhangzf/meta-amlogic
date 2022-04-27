@@ -11,8 +11,8 @@ PV = "${SRCPV}"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/')}"
 EXTRA_OEMAKE = "TARGET_DIR=${D} STAGING_DIR=${D}"
 
-DEPENDS += "liblog aml-amaudioutils alsa-lib libamavutils"
-RDEPENDS_${PN} += "liblog libamavutils"
+DEPENDS += "liblog aml-amaudioutils alsa-lib libamavutils  aml-mediahal-sdk"
+RDEPENDS_${PN} += "liblog libamavutils  aml-mediahal-sdk"
 do_compile () {
     cd ${S}/dtv_audio_utils
     oe_runmake -j1 ${EXTRA_OEMAKE} all

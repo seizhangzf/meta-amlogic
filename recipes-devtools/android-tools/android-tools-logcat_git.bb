@@ -21,8 +21,10 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendo
 
 S = "${WORKDIR}/git/"
 
+EXTRA_OEMAKE = "STAGING_DIR=${STAGING_DIR_TARGET} TARGET_DIR=${D}"
+
 do_compile(){
-    ${MAKE} -C ${S}/logcat
+    oe_runmake -C ${S}/logcat
 }
 
 do_install(){

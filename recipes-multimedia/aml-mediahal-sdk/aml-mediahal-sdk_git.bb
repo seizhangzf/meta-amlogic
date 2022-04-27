@@ -9,7 +9,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/mediahal-sdk')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
-DEPENDS += "aml-audio-hal aml-audio-service libdrm-meson wayland"
+DEPENDS += "aml-audio-service libdrm-meson wayland"
 RDEPENDS_${PN} += "aml-audio-service libdrm-meson"
 
 #do_compile[noexec] = "1"
