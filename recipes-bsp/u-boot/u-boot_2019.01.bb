@@ -36,8 +36,8 @@ VMX_BRANCH_s4 = "m9y4-rel-linux"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_BRANCH};destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
 
 IRDETO_BRANCH = "TBD"
-IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
-IRDETO_BRANCH_s4 = "openlinux/s4d-msr4-linux"
+IRDETO_BRANCH_sc2 = "projects/openlinux/v2.2"
+IRDETO_BRANCH_s4 = "projects/openlinux/v3.4"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
