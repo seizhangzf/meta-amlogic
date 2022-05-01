@@ -1,6 +1,7 @@
 [Unit]
 Description=tee_key_inject start
 After=tee-supplicant.service
+Before=wifi.service
 
 [Service]
 User=root

@@ -1,5 +1,6 @@
 [Unit]
 Description=Optee Tee-Supplicant
+Before=wifi.service
 
 [Service]
 ExecStartPre=/sbin/modprobe -q optee_armtz

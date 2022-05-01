@@ -14,8 +14,7 @@ SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"
 
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/media_modules-5.4')}"
-
-COMPATIBLE_MACHINE="(mesontm2-5.4*|mesonsc2-5.4*|mesont5d-5.4*|mesont7-*|mesons4-*)"
+COMPATIBLE_MACHINE="(mesontm2-5.4*|mesonsc2-5.4*|mesont5d-5.4*|mesont7-*|mesons4-*|mesont5w-*)"
 
 do_configure[noexec] = "1"
 

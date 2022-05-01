@@ -36,8 +36,8 @@ VMX_BRANCH_s4 = "m9y4-rel-linux"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_BRANCH};destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
 
 IRDETO_BRANCH = "TBD"
-IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
-IRDETO_BRANCH_s4 = "openlinux/s4d-msr4-linux"
+IRDETO_BRANCH_sc2 = "projects/openlinux/v2.2"
+IRDETO_BRANCH_s4 = "projects/openlinux/v3.4"
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
 SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
@@ -106,22 +106,20 @@ VMX_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', '--bl32 
 IRDETO_UBOOT_PATH = "TBD"
 IRDETO_UBOOT_PATH_sc2 = "sc2"
 IRDETO_UBOOT_PATH_s4 = "s4d"
-IRDETO_BL2x_ARG="--bl2x irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2x.bin.signed"
 IRDETO_BL2e_ARG="--bl2e irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl2/blob-bl2e.sto.bin.signed"
 IRDETO_BL32_ARG="--bl32 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl32/blob-bl32.bin.signed"
 IRDETO_BL40_ARG="--bl40 irdeto-sdk/bootloader/${IRDETO_UBOOT_PATH}/bl40/blob-bl40.bin.signed"
-IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO_BL2x_ARG} ${IRDETO_BL2e_ARG} ${IRDETO_BL32_ARG} ${IRDETO_BL40_ARG}', '', d)}"
+IRDETO_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', '${IRDETO_BL2e_ARG} ${IRDETO_BL32_ARG} ${IRDETO_BL40_ARG}', '', d)}"
 
 #SYNAMEDIA UBOOT PATH depends on SoC
 SYNAMEDIA_UBOOT_PATH = "TBD"
 SYNAMEDIA_UBOOT_PATH_sc2 = "s905c2eng"
 SYNAMEDIA_BL2_ARG="--bl2 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/bb1st.sto.bin.signed"
 SYNAMEDIA_BL2e_ARG="--bl2e synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2e.sto.bin.signed"
-SYNAMEDIA_BL2x_ARG="--bl2x synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl2x.bin.signed"
 SYNAMEDIA_BL31_ARG="--bl31 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl31.bin.signed"
 SYNAMEDIA_BL32_ARG="--bl32 synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-bl32.bin.signed"
 SYNAMEDIA_DDR_FIP_ARG="--ddr-fip synamedia-sdk/bootloader/${SYNAMEDIA_UBOOT_PATH}/blob-ddr-fip.bin.signed"
-SYNAMEDIA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', ' ${SYNAMEDIA_BL2e_ARG} ${SYNAMEDIA_BL2x_ARG} ${SYNAMEDIA_BL2_ARG} ${SYNAMEDIA_BL31_ARG} ${SYNAMEDIA_BL32_ARG}', '', d)}"
+SYNAMEDIA_UBOOT_ARG = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', '${SYNAMEDIA_BL2e_ARG} ${SYNAMEDIA_BL2_ARG} ${SYNAMEDIA_BL31_ARG} ${SYNAMEDIA_BL32_ARG}', '', d)}"
 
 DEBUG_PREFIX_MAP = ""
 do_compile () {
