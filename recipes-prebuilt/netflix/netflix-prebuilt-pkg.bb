@@ -21,6 +21,12 @@ RDEPENDS_${PN} += "nghttp2 aml-netflix-esn"
 FILES_${PN}-dev = "${includedir}/"
 FILES_${PN} += "${libdir}/"
 
+FILES_SOLIBSDEV = ""
+SOLIBS = ".so"
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+
 INSANE_SKIP_${PN} += "file-rdeps dev-so"
 
 do_unpack[depends] += "xz-native:do_populate_sysroot"
