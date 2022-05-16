@@ -35,7 +35,9 @@ do_install() {
 
     cd ${S}
     install -D -m 0644 ${S}/am_adp/libam_adp.so ${D}/usr/lib
+    install -d -m 0644 ${D}/usr/include/am_adp/
     install -D -m 0644 ${S}/include/am_adp/*.h ${D}/usr/include
+    install -D -m 0644 ${S}/include/am_adp/*.h ${D}/usr/include/am_adp
     install -D -m 0644 ${S}/include/am_adp/libdvbsi/*.h ${D}/usr/include/libdvbsi
     install -d ${D}${includedir}/am_adp
     install -m 0755 ${S}/include/am_adp/am_evt.h ${D}${includedir}/am_adp

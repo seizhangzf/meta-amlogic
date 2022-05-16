@@ -2,7 +2,7 @@ SUMMARY = "aml volume control service"
 LICENSE = "AMLOGIC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
-SRC_URI = "git://${AML_GIT_ROOT}/yocto/rdk/volumectl;protocol=${AML_GIT_PROTOCOL};branch=master"
+SRC_URI = "git://${AML_GIT_ROOT}/rdk/volumectl;protocol=${AML_GIT_PROTOCOL};branch=master"
 SRC_URI += "file://volumeoverlay.service"
 SRC_URI += "file://startvol.sh"
 
@@ -11,7 +11,7 @@ SRC_URI += "file://startvol.sh"
 DEPENDS += " curl virtual/egl wayland freetype fontconfig cairo"
 SRCREV = "${AUTOREV}"
 PV = "${SRCPV}"
-S = "${WORKDIR}"
+S = "${WORKDIR}/git"
 EXTRA_OEMAKE="DESTDIR=${S}"
 
 inherit systemd

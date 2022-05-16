@@ -5,6 +5,7 @@ LIC_FILES_CHKSUM = "file://${THISDIR}/../../license/COPYING.GPL;md5=751419260aa9
 
 MBRANCH = "android-p"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/arm/isp;protocol=${AML_GIT_PROTOCOL};branch=${MBRANCH};"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/arm_isp/')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

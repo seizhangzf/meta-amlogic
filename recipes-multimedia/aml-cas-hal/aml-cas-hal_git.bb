@@ -1,11 +1,12 @@
 SUMMARY = "aml cas hal"
 LICENSE = "AMLOGIC"
-LIC_FILES_CHECKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
 #For common patches
+SRC_URI = "git://${AML_GIT_ROOT}/cas/cas-hal;branch=master;protocol=${AML_GIT_PROTOCOL}"
 SRC_URI_append = " ${@get_patch_list_with_path('$(AML_PATCH_PATH)/multimedia/cas-hal')}"
 DEPENDS += "aml-audio-service aml-mediahal-sdk aml-libdvr liblog optee-userspace"
 

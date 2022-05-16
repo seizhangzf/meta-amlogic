@@ -13,14 +13,14 @@ PV = "1.0"
 PR = "r0"
 
 SRCREV = "${AUTOREV}"
-#SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_commonlib;protocol=${AML_GIT_PROTOCOL};branch=master;"
+SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/aml_commonlib;protocol=${AML_GIT_PROTOCOL};branch=master;"
 #SRC_URI += "file://liblog.patch"
 SRC_URI += "file://LICENSE-2.0"
 
 #For common patches
-#SRC_URI_append = " ${@get_patch_list_with_path('${AML_PATCH_PATH}/vendor/amlogic/aml_commonlib')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/aml_commonlib')}"
 
-S = "${WORKDIR}"
+S = "${WORKDIR}/git"
 do_configure[noexec] = "1"
 do_package_qa[noexec] = "1"
 

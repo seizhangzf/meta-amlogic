@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 SRC_URI = " git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_PROTOCOL};branch=linux-buildroot"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/libmediadrm')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm')}"
 
 SRCREV ?= "${AUTOREV}"
 

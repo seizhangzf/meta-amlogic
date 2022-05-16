@@ -28,15 +28,19 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl40/dummy.git;protocol=${
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/templates.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/soc/templates;name=soc-templates"
 
 #Only enable this in openlinux
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.2-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nagra', 'git://${AML_GIT_ROOT_OP}/nagra-sdk-nocs.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=projects/openlinux/v3.2-rdk;destsuffix=uboot-repo/nagra-sdk;name=nagra', '', d)}"
 
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
+VMX_BRANCH = "TBD"
+VMX_BRANCH_sc2 = "m9x4-rel-linux"
+VMX_BRANCH_s4 = "m9y4-rel-linux"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'verimatrix', 'git://${AML_GIT_ROOT_OP}/vendor/vmx/bootloader.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${VMX_BRANCH};destsuffix=uboot-repo/vmx-sdk/bootloader;name=vmx', '', d)}"
 
-#IRDETO_BRANCH = "TBD"
-#IRDETO_BRANCH_sc2 = "openlinux/sc2-msr4-linux"
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
+IRDETO_BRANCH = "TBD"
+IRDETO_BRANCH_sc2 = "projects/openlinux/v2.2"
+IRDETO_BRANCH_s4 = "projects/openlinux/v3.4"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'irdeto', 'git://${AML_GIT_ROOT_OP}/irdeto-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=${IRDETO_BRANCH};destsuffix=uboot-repo/irdeto-sdk;name=irdeto', '', d)}"
 
-#SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'synamedia', 'git://${AML_GIT_ROOT_OP}/synamedia/synamedia-sdk.git;protocol=${AML_GIT_ROOT_PROTOCOL};branch=master;destsuffix=uboot-repo/synamedia-sdk;name=synamedia', '', d)}"
 
 PATCHTOOL="git"
 

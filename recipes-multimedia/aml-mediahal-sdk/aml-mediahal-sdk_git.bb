@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/../${AML_META_LAYER}/license/AMLOGIC;md5=
 SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_PROTOCOL};branch=linux-master"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/../multimedia/mediahal-sdk')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/mediahal-sdk')}"
 
 DEPENDS += "aml-audio-service libdrm-meson wayland"
 RDEPENDS_${PN} += "aml-audio-service libdrm-meson"
@@ -14,6 +14,8 @@ RDEPENDS_${PN} += "aml-audio-service libdrm-meson"
 #do_compile[noexec] = "1"
 
 SRCREV ?= "${AUTOREV}"
+
+PATCHTOOL = "git"
 
 PV = "git${SRCPV}"
 

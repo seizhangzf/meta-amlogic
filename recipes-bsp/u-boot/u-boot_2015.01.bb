@@ -25,11 +25,30 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/uboot.git;protocol=${AML_GIT_PROTOCOL};
 SRC_URI_append = " git://${AML_GIT_ROOT}/amlogic/tools/fip.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev;destsuffix=uboot-repo/fip;name=fip"
 SRC_URI_append = " git://${AML_GIT_ROOT}/firmware/bin/bl32.git;protocol=${AML_GIT_PROTOCOL};branch=amlogic-dev-3.8.0;destsuffix=uboot-repo/bl32_3.8/bin;name=bl32-3.8"
 
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/arch/riscv.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/arch/riscv;name=rtos-arch-riscv"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/boards/riscv.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/boards/riscv;name=rtos-boards-riscv"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/build.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/build_system;name=rtos-build"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/drivers_aocpu.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/drivers_aocpu;name=rtos-drivers-aocpu"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/freertos.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/kernel/freertos;name=rtos-freertos"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/libc.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/libs/libc;name=rtos-libc"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/product/aocpu.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/products/aocpu;name=rtos-product-aocpu"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/scripts.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/scripts;name=rtos-scripts"
+SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/soc/riscv.git;protocol=${AML_GIT_PROTOCOL};branch=refs/tags/220120;destsuffix=uboot-repo/bl30/rtos_sdk/soc/riscv;name=rtos-soc-riscv"
+
 PATCHTOOL="git"
 
 #For common patch
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl33/v2015', 'bl33/v2015')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/fip', 'fip')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/arch/riscv', 'bl30/rtos_sdk/arch/riscv')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/boards/riscv', 'bl30/rtos_sdk/boards/riscv')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/build_system', 'bl30/rtos_sdk/build_system')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/drivers_aocpu', 'bl30/rtos_sdk/drivers_aocpu')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/kernel/freertos', 'bl30/rtos_sdk/kernel/freertos')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/libs/libc', 'bl30/rtos_sdk/libs/libc')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/products/aocpu', 'bl30/rtos_sdk/products/aocpu')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/scripts', 'bl30/rtos_sdk/scripts')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/soc/riscv', 'bl30/rtos_sdk/soc/riscv')}"
 #can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"
@@ -89,6 +108,7 @@ do_compile () {
     unset SOURCE_DATE_EPOCH CFLAGS
     UBOOT_TYPE="${UBOOT_MACHINE}"
     if ${@bb.utils.contains('DISTRO_FEATURES','secure-u-boot','true','false',d)}; then
+        cp -f ${S}/bl30/rtos_sdk/build_system/Makefile ${S}/bl30/rtos_sdk/
         if [ "${BL32_SOC_FAMILY}" = "t5d" ];then
             mkdir -p ${S}/bl32/bin/${BL32_SOC_FAMILY}/
             ${STAGING_DIR_NATIVE}/tdk/scripts/pack_kpub.py \

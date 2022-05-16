@@ -10,16 +10,30 @@ SRC_URI = "${@' '.join(['file://' + f + ';subdir=ipk' \
 
 S = "${WORKDIR}/ipk"
 
-DEPENDS += "aml-audio-service curl expat freetype icu jpeg \
-            gstreamer1.0 gstreamer1.0-plugins-base gst-aml-drm-plugins \
-            westeros libmng libnl libogg libpng libunwind \
-            libwebp nghttp2 openjpeg openssl tremor zlib \
-            wpeframework wpeframework-interfaces aml-netflix-esn"
+#This is for netflix-aml
+DEPENDS += "aml-audio-service aml-netflix-esn c-ares cjson curl elfutils essos \
+            expat fdk-aac freetype glib-2.0 gst-aml-drm-plugins gstreamer1.0 \
+            gstreamer1.0-plugins-base harfbuzz hdmicec iarmbus iarmmgrs icu jpeg \
+            lcms libdwarf libmng libnl libogg libpng libunwind libwebp nghttp2 \
+            openh264 openjpeg openssl optee-userspace playready rdkservices tremor \
+            util-linux westeros wpeframework wpeframework-interfaces zlib \
+            "
 
-RDEPENDS_${PN} += "nghttp2 aml-netflix-esn"
+#This is for netflix-aml
+RDEPENDS_${PN} += " \
+            aml-audio-service nghttp2 playready rdkservices wpeframework \
+            wpeframework-interfaces aml-netflix-esn \
+            "
 
 FILES_${PN}-dev = "${includedir}/"
-FILES_${PN} += "${libdir}/"
+#Need include everything
+FILES_${PN} += "/"
+
+FILES_SOLIBSDEV = ""
+SOLIBS = ".so"
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 
 FILES_SOLIBSDEV = ""
 SOLIBS = ".so"
