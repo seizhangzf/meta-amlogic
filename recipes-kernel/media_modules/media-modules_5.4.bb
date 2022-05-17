@@ -4,7 +4,7 @@ SUMMARY = "Amlogic media driver"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${THISDIR}/../../license/COPYING.GPL;md5=751419260aa954499f7abaabaa882bbe"
 
-MBRANCH = "amlogic-5.4-dev"
+MBRANCH = "openlinux/rdk-firebolt-dunfell-20220430"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/hardware/amlogic/media_modules.git;protocol=${AML_GIT_PROTOCOL};branch=${MBRANCH};"
 
 #For common patches

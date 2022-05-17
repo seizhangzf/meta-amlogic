@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://${THISDIR}/../../license/COPYING.GPL;md5=751419260aa9
 SRCTREECOVEREDTASKS_remove = "do_patch"
 FILESEXTRAPATHS_prepend := "${THISDIR}/5.4:"
 
-KBRANCH = "amlogic-5.4-dev"
+KBRANCH = "openlinux/rdk-firebolt-dunfell-20220430"
 SRC_URI = "git://${AML_GIT_ROOT}/kernel/common.git;protocol=${AML_GIT_PROTOCOL};branch=${KBRANCH};"
 #SRC_URI_append = " file://defconfig"
 SRC_URI_append = " file://gki-read_ext_module_config.sh"
