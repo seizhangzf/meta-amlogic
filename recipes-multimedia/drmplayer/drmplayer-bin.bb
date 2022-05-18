@@ -2,7 +2,7 @@
 DESCRIPTION = "aml drmplayer library"
 PN = 'drmplayer-bin'
 LICENSE = "AMLOGIC"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 #For common patches
 SRC_URI = " ${@bb.utils.contains('DISTRO_FEATURES', 'aml-cas', 'git://${AML_GIT_ROOT}/vendor/amlogic/prebuilt/libmediadrm;protocol=${AML_GIT_ROOT_PROTOCOL};branch=linux-buildroot','', d)}"

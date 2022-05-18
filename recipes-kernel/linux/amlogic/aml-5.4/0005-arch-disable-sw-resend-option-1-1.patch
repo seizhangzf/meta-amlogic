@@ -1,0 +1,52 @@
+From 38709b94cacc13ce31628ab73a6bc284cf39869a Mon Sep 17 00:00:00 2001
+From: Ao Xu <ao.xu@amlogic.com>
+Date: Mon, 25 Apr 2022 21:42:54 +0800
+Subject: [PATCH] arch: disable sw resend option [1/1]
+
+PD#SWPL-79187
+
+Problem:
+non cpu0 processor call rdma to write register trigger dump_stack
+
+Solution:
+disable sw resend option
+
+Verify:
+ah212
+
+Change-Id: Ib7851382e7a74b1f09f91f1011493bf956262437
+Signed-off-by: Ao Xu <ao.xu@amlogic.com>
+---
+ arch/arm/Kconfig   | 2 +-
+ arch/arm64/Kconfig | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index e10affdb73b8..5087317824bd 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -63,7 +63,7 @@ config ARM
+ 	select GENERIC_STRNCPY_FROM_USER
+ 	select GENERIC_STRNLEN_USER
+ 	select HANDLE_DOMAIN_IRQ
+-	select HARDIRQS_SW_RESEND
++	select HARDIRQS_SW_RESEND if !AMLOGIC_MODIFY
+ 	select HAVE_ARCH_AUDITSYSCALL if AEABI && !OABI_COMPAT
+ 	select HAVE_ARCH_BITREVERSE if (CPU_32v7M || CPU_32v7) && !CPU_32v6
+ 	select HAVE_ARCH_JUMP_LABEL if !XIP_KERNEL && !CPU_ENDIAN_BE32 && MMU
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index ed56532d05dd..c24b2bcbe179 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -115,7 +115,7 @@ config ARM64
+ 	select GENERIC_TIME_VSYSCALL
+ 	select GENERIC_GETTIMEOFDAY
+ 	select HANDLE_DOMAIN_IRQ
+-	select HARDIRQS_SW_RESEND
++	select HARDIRQS_SW_RESEND if !AMLOGIC_MODIFY
+ 	select HAVE_MOVE_PMD
+ 	select HAVE_MOVE_PUD
+ 	select HAVE_PCI
+-- 
+2.31.0
+

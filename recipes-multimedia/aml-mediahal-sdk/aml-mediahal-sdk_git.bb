@@ -7,6 +7,7 @@ SRC_URI = "git://${AML_GIT_ROOT}/vendor/amlogic/mediahal_sdk;protocol=${AML_GIT_
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/mediahal-sdk')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 DEPENDS += "aml-audio-service libdrm-meson wayland"
 RDEPENDS_${PN} += "aml-audio-service libdrm-meson"
@@ -20,6 +21,8 @@ PATCHTOOL = "git"
 PV = "git${SRCPV}"
 
 S = "${WORKDIR}/git"
+
+PATCHTOOL = "git"
 
 ARM_TARGET="arm.aapcs-linux.hard"
 TA_TARGET="noarch"

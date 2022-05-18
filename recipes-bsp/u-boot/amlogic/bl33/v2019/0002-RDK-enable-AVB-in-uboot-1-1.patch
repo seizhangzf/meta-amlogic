@@ -1,0 +1,51 @@
+From 95a7bb899b2f9aa086e0254ba13d2e990831c3e0 Mon Sep 17 00:00:00 2001
+From: Xueling Li <xueling.li@amlogic.com>
+Date: Fri, 16 Jul 2021 07:13:09 +0000
+Subject: [PATCH 2/4] RDK: enable AVB in uboot  [1/1]
+
+PD#SWPL-51970
+
+Problem:
+ dolbyVision need check firmware signature in uboot
+
+Solution:
+ enable AVB in uboot
+
+Verify:
+ check if system can boot up normally
+
+Change-Id: I17b7be8c9a2e358926b477d4ac92d4e50b9ddd24
+Signed-off-by: Xueling Li <xueling.li@amlogic.com>
+---
+ board/amlogic/configs/sc2_ah212.h            | 2 +-
+ board/amlogic/defconfigs/sc2_ah212_defconfig | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/board/amlogic/configs/sc2_ah212.h b/board/amlogic/configs/sc2_ah212.h
+index a25d98fa10a..0500d1cc91d 100644
+--- a/board/amlogic/configs/sc2_ah212.h
++++ b/board/amlogic/configs/sc2_ah212.h
+@@ -185,7 +185,7 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
+-		"if test ${avb2} = 0; then "\
++		"if test ${avb2} = 1; then "\
+ 			"if test ${active_slot} = _a; then "\
+ 				"setenv bootargs ${bootargs} root=/dev/system_a;"\
+ 			"else if test ${active_slot} = _b; then "\
+diff --git a/board/amlogic/defconfigs/sc2_ah212_defconfig b/board/amlogic/defconfigs/sc2_ah212_defconfig
+index 1a89811b61b..b350dffb7b6 100644
+--- a/board/amlogic/defconfigs/sc2_ah212_defconfig
++++ b/board/amlogic/defconfigs/sc2_ah212_defconfig
+@@ -37,6 +37,7 @@ CONFIG_CMD_IR=y
+ CONFIG_CMD_BMP=y
+ CONFIG_CMD_CACHE=y
+ # CONFIG_CMD_MISC is not set
++CONFIG_CMD_BOOTCTOL_AVB=y
+ CONFIG_CMD_WATCHDOG=y
+ CONFIG_CMD_JTAG=y
+ CONFIG_CMD_INI=y
+-- 
+2.31.1
+

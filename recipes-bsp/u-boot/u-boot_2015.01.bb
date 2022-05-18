@@ -38,17 +38,17 @@ SRC_URI_append = " git://${AML_GIT_ROOT}/rtos_sdk/soc/riscv.git;protocol=${AML_G
 PATCHTOOL="git"
 
 #For common patch
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl33/v2015', 'bl33/v2015')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/fip', 'fip')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/arch/riscv', 'bl30/rtos_sdk/arch/riscv')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/boards/riscv', 'bl30/rtos_sdk/boards/riscv')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/build_system', 'bl30/rtos_sdk/build_system')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/drivers_aocpu', 'bl30/rtos_sdk/drivers_aocpu')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/kernel/freertos', 'bl30/rtos_sdk/kernel/freertos')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/libs/libc', 'bl30/rtos_sdk/libs/libc')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/products/aocpu', 'bl30/rtos_sdk/products/aocpu')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/scripts', 'bl30/rtos_sdk/scripts')}"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/uboot/bl30/rtos_sdk/soc/riscv', 'bl30/rtos_sdk/soc/riscv')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl33/v2015', 'bl33/v2015')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/fip', 'fip')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/arch/riscv', 'bl30/rtos_sdk/arch/riscv')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/boards/riscv', 'bl30/rtos_sdk/boards/riscv')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/build_system', 'bl30/rtos_sdk/build_system')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/drivers_aocpu', 'bl30/rtos_sdk/drivers_aocpu')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/kernel/freertos', 'bl30/rtos_sdk/kernel/freertos')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/libs/libc', 'bl30/rtos_sdk/libs/libc')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/products/aocpu', 'bl30/rtos_sdk/products/aocpu')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/scripts', 'bl30/rtos_sdk/scripts')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/rtos_sdk/soc/riscv', 'bl30/rtos_sdk/soc/riscv')}"
 #can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"

@@ -27,7 +27,7 @@ SRC_URI_append_sc2 = " file://sc2.cfg"
 
 #For common patches
 KDIR = "aml-5.4"
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/kernel/${KDIR}')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${KDIR}')}"
 
 DEPENDS += "rsync-native"
 
@@ -49,6 +49,7 @@ KBUILD_DEFCONFIG_sc2 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_tm2-5.4 = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_t5w = "meson64_a64_R_defconfig"
 KBUILD_DEFCONFIG_s4 = "meson64_a64_R_defconfig"
+
 
 GKI_DEFCONFIG = "meson64_gki_module_config"
 

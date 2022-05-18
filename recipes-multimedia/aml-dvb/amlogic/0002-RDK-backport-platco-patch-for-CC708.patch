@@ -1,0 +1,443 @@
+From f2d74302dc91d40851415707331b21ace7fe33e3 Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Wed, 25 Aug 2021 21:12:45 -0700
+Subject: [PATCH 2/2] RDK: backport platco patch for CC708
+
+PD#RSP-2281
+
+Problem:
+CEA-708 CC cant render
+
+Solution:
+Port platco patches
+
+Verify:
+yet to verify on ah212
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I591fe47dae59ba86b629bf547e007d341e4ecebb
+---
+ am_adp/am_userdata/am_userdata.c |   1 +
+ am_adp/am_userdata/aml/aml.c     | 116 +++++++++++++++++++------------
+ am_mw/am_cc/am_cc.c              |   3 +
+ include/am_adp/am_userdata.h     |   4 ++
+ 4 files changed, 78 insertions(+), 46 deletions(-)
+
+diff --git a/am_adp/am_userdata/am_userdata.c b/am_adp/am_userdata/am_userdata.c
+index ba3e2224..b5d0b7d2 100644
+--- a/am_adp/am_userdata/am_userdata.c
++++ b/am_adp/am_userdata/am_userdata.c
+@@ -251,6 +251,7 @@ static int userdata_package_write(AM_USERDATA_Device_t *dev, const uint8_t *buf,
+ 		ret = size;
+ 	}
+ 	pthread_mutex_unlock(&dev->lock);
++	pthread_yield();
+ 	
+ 	//AM_DEBUG(3, "write %d bytes\n", ret);
+ 	dump_user_data(buf, size);
+diff --git a/am_adp/am_userdata/aml/aml.c b/am_adp/am_userdata/aml/aml.c
+index 839b57f9..f84a61a0 100644
+--- a/am_adp/am_userdata/aml/aml.c
++++ b/am_adp/am_userdata/aml/aml.c
+@@ -16,7 +16,8 @@
+  * \date 2013-3-13: create the document
+  ***************************************************************************/
+ 
+-#define AM_DEBUG_LEVEL 4
++#define AM_DEBUG_LEVEL 3
++#define AM_DEBUG_LEVEL_DEBUG 4
+ 
+ #include <am_debug.h>
+ #include <am_mem.h>
+@@ -122,7 +123,7 @@ struct userdata_meta_info_t {
+ 		3: FRAME_PICTURE
+ 	**********************************************/
+ 	uint32_t flags;
+-	uint32_t vpts;			/*video frame pts*/
++	uint32_t vpts;			/*video frame pts*/   /*Low 32 bits of timestamp.*/
+ 	/******************************************
+ 	0: pts is invalid, please use duration to calcuate
+ 	1: pts is valid
+@@ -133,7 +134,7 @@ struct userdata_meta_info_t {
+ 	/* how many records left in queue waiting to be read*/
+ 	uint32_t records_in_que;
+ 	unsigned long long priv_data;
+-	uint32_t padding_data[4];
++	uint32_t padding_data[4];     /*padding_data[0] is the high 32 bits of timestamp.*/
+ };
+ 
+ 
+@@ -150,7 +151,7 @@ typedef struct AM_CCData_s AM_CCData;
+ struct AM_CCData_s {
+ 	AM_CCData *next;
+ 	uint8_t   *buf;
+-	uint32_t pts;
++	uint64_t pts;
+ 	uint32_t duration;
+ 	int pts_valid;
+ 	int		size;
+@@ -183,6 +184,8 @@ typedef struct {
+ 	uint32_t curr_duration;
+ 	int scte_enable;
+ 	int mode;
++	AM_USERDATA_TimestampFunc_t timestamp_func;
++	void *timestamp_userdata;
+ } AM_UDDrvData;
+ 
+ #define MOD_ON(__mod, __mask) (__mod & __mask)
+@@ -206,12 +209,14 @@ const AM_USERDATA_Driver_t aml_ud_drv = {
+ .get_mode = aml_get_mode,
+ };
+ 
+-uint32_t am_get_video_pts()
++uint64_t am_get_video_pts(const AM_UDDrvData *ud)
+ {
+-#define VIDEO_PTS_PATH "/sys/class/tsync/pts_video"
+-	char buffer[16] = {0};
+-	AM_FileRead(VIDEO_PTS_PATH,buffer,16);
+-	return strtoul(buffer, NULL, 16);
++	uint64_t timestamp = 0;
++
++	if (ud && ud->timestamp_func)
++		timestamp = ud->timestamp_func(ud->timestamp_userdata);
++
++	return timestamp;
+ }
+ 
+ static void dump_cc_data(char *who, int poc, uint8_t *buff, int size)
+@@ -226,7 +231,7 @@ static void dump_cc_data(char *who, int poc, uint8_t *buff, int size)
+ 		sprintf(buf+i*3, "%02x ", buff[i]);
+ 	}
+ 
+-	AM_DEBUG(AM_DEBUG_LEVEL, "CC DUMP:who:%s poc: %d :%s", who, poc, buf);
++	AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "CC DUMP:who:%s poc: %d :%s", who, poc, buf);
+ }
+ 
+ static void aml_free_cc_data (AM_CCData *cc)
+@@ -294,12 +299,12 @@ static userdata_type aml_check_userdata_format (uint8_t *buf, int vfmt, int len)
+ 	{
+ 		if (IS_H264(buf))
+ 		{
+-			AM_DEBUG(AM_DEBUG_LEVEL,"CC format is h264_cc_type");
++			AM_DEBUG(AM_DEBUG_LEVEL_DEBUG,"CC format is h264_cc_type");
+ 			return H264_CC_TYPE;
+ 		}
+ 		else if (IS_DIRECTV(buf))
+ 		{
+-			AM_DEBUG(AM_DEBUG_LEVEL,"CC format is directv_cc_type");
++			AM_DEBUG(AM_DEBUG_LEVEL_DEBUG,"CC format is directv_cc_type");
+ 			return DIRECTV_CC_TYPE;
+ 		}
+ 		else if (IS_H264_AFD(buf))
+@@ -310,7 +315,7 @@ static userdata_type aml_check_userdata_format (uint8_t *buf, int vfmt, int len)
+ 	else if (vfmt == 7)
+ 	{
+ 		if (IS_AVS(buf)) {
+-			AM_DEBUG(AM_DEBUG_LEVEL,"CC format is avs_cc_type");
++			AM_DEBUG(AM_DEBUG_LEVEL_DEBUG,"CC format is avs_cc_type");
+ 			return AVS_CC_TYPE;
+ 		}
+ 	}
+@@ -322,12 +327,12 @@ static userdata_type aml_check_userdata_format (uint8_t *buf, int vfmt, int len)
+ 
+ 			if (IS_ATSC(hdr->atsc_flag))
+ 			{
+-				AM_DEBUG(AM_DEBUG_LEVEL,"CC format is mpeg_cc_type");
++				AM_DEBUG(AM_DEBUG_LEVEL_DEBUG,"CC format is mpeg_cc_type");
+ 				return MPEG_CC_TYPE;
+ 			}
+ 			else if (IS_SCTE(hdr->atsc_flag))
+ 			{
+-				AM_DEBUG(AM_DEBUG_LEVEL, "CC format is scte_cc_type");
++				AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "CC format is scte_cc_type");
+ 				return SCTE_CC_TYPE;
+ 			}
+ 			else if (IS_AFD(hdr->atsc_flag))
+@@ -342,13 +347,13 @@ static userdata_type aml_check_userdata_format (uint8_t *buf, int vfmt, int len)
+ 		}
+ 	}
+ 	else
+-		AM_DEBUG(AM_DEBUG_LEVEL, "vfmt not handled");
++		AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "vfmt not handled");
+ 
+ 	AM_DEBUG(AM_DEBUG_LEVEL,"CC format is INVALID_TYPE");
+ 	return INVALID_TYPE;
+ }
+ 
+-static void aml_write_userdata(AM_USERDATA_Device_t *dev, uint8_t *buffer, int buffer_len, uint32_t
++static void aml_write_userdata(AM_USERDATA_Device_t *dev, uint8_t *buffer, int buffer_len, uint64_t
+ 	pts, int pts_valid, uint32_t duration)
+ {
+ 	uint32_t *pts_in_buffer;
+@@ -387,7 +392,7 @@ static void aml_flush_cc_data(AM_USERDATA_Device_t *dev)
+ 			}
+ 		}
+ 
+-		AM_DEBUG(AM_DEBUG_LEVEL, "cc_write_package decode:%s", buf);
++		AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "cc_write_package decode:%s", buf);
+ 
+ 		aml_write_userdata(dev, cc->buf, cc->size, cc->pts, cc->pts_valid, cc->duration);
+ 
+@@ -400,7 +405,7 @@ static void aml_flush_cc_data(AM_USERDATA_Device_t *dev)
+ 	ud->curr_poc = -1;
+ }
+ 
+-static void aml_add_cc_data(AM_USERDATA_Device_t *dev, int poc, int type, uint8_t *p, int len, uint32_t
++static void aml_add_cc_data(AM_USERDATA_Device_t *dev, int poc, int type, uint8_t *p, int len, uint64_t
+ 	pts, int pts_valid, uint32_t duration)
+ {
+ 	AM_UDDrvData *ud = dev->drv_data;
+@@ -432,10 +437,10 @@ static void aml_add_cc_data(AM_USERDATA_Device_t *dev, int poc, int type, uint8_
+ 		}
+ 	}
+ 
+-	AM_DEBUG(AM_DEBUG_LEVEL, "CC poc:%d ptype:%d data:%s", poc, type, buf);
++	AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "CC poc:%d ptype:%d data:%s", poc, type, buf);
+ 
+ 	pcc = &ud->cc_list;
+-	if (*pcc && poc < ((*pcc)->poc - 30))
++	if (*pcc && ((*pcc)->poc) < (poc - 30))
+ 		aml_flush_cc_data(dev);
+ 
+ 	while ((cc = *pcc)) {
+@@ -486,7 +491,7 @@ static void aml_add_cc_data(AM_USERDATA_Device_t *dev, int poc, int type, uint8_
+ }
+ 
+ static void aml_mpeg_userdata_package(AM_USERDATA_Device_t *dev, int poc, int type, uint8_t *p, int
+-len, uint32_t pts, int pts_valid, uint32_t duration)
++len, uint64_t pts, int pts_valid, uint32_t duration)
+ {
+ 	AM_UDDrvData *ud = dev->drv_data;
+ #if 0
+@@ -547,7 +552,7 @@ static int aml_process_scte_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ 	int left_bits;
+ 	uint32_t v;
+ 	int flags;
+-	uint32_t pts;
++	uint64_t pts;
+ 	int top_bit_value, top_bit_valid;
+ 	AM_UDDrvData *ud = dev->drv_data;
+ 
+@@ -556,7 +561,7 @@ static int aml_process_scte_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ #endif
+ 
+ 	flags = meta_info->flags;
+-	pts = meta_info->vpts;
++	pts = meta_info->padding_data[0] << 32 | meta_info->vpts;
+ 
+ 	if (ud->scte_enable != 1)
+ 		return len;
+@@ -630,8 +635,7 @@ static int aml_process_scte_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ 		GET(mark, 1);
+ 		if (field == 3)
+ 			field = 1;
+-		AM_DEBUG(AM_DEBUG_LEVEL, "loop %d field %d line %d cc1 %x cc2 %x",
+-			i, field, line, cc1, cc2);
++		AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "loop %d field %d line %d cc1 %x cc2 %x", i, field, line, cc1, cc2);
+ 		if (field == 1)
+ 			line = (top_bit_value)?line+10:line+273;
+ 		else if (field == 2)
+@@ -683,10 +687,10 @@ static int aml_process_mpeg_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ 	int package_count = 0;
+ 	int userdata_length;
+ 	int flag;
+-	uint32_t pts;
++	uint64_t pts;
+ 
+ 	flag = meta_info->flags;
+-	pts = meta_info->vpts;
++	pts = meta_info->padding_data[0] << 32 | meta_info->vpts;
+ 
+ 	while (left >= (int)sizeof(aml_ud_header_t)) {
+ 		aml_ud_header_t *hdr = (aml_ud_header_t*)pd;
+@@ -734,7 +738,7 @@ static int aml_process_mpeg_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ 	return r;
+ }
+ 
+-static void aml_h264_userdata_package(AM_USERDATA_Device_t *dev, int poc, int type, uint8_t *p, int len, uint32_t
++static void aml_h264_userdata_package(AM_USERDATA_Device_t *dev, int poc, int type, uint8_t *p, int len, uint64_t
+ 	pts, int pts_valid, uint32_t duration)
+ {
+ 	AM_UDDrvData *ud = dev->drv_data;
+@@ -747,7 +751,7 @@ static void aml_h264_userdata_package(AM_USERDATA_Device_t *dev, int poc, int ty
+ 
+ 	cc = ud->cc_list;
+ 	while (cc) {
+-		if (am_get_video_pts() > cc->pts)
++		if ((am_get_video_pts(ud) - cc->pts) > 0)
+ 		{
+ 			aml_write_userdata(dev, cc->buf, cc->size, cc->pts, cc->pts_valid, cc->duration);
+ 
+@@ -795,10 +799,10 @@ static int aml_process_h264_userdata(AM_USERDATA_Device_t *dev, uint8_t *data, i
+ 	int left = len;
+ 	int r = 0;
+ 	int poc;
+-	uint32_t pts;
++	uint64_t pts;
+ 
+ 	poc = meta_info->poc_number;
+-	pts = meta_info->vpts;
++	pts = meta_info->padding_data[0] << 32 | meta_info->vpts;
+ 
+ 	while (left >= 8) {
+ 		if (MOD_ON_CC(ud->mode)
+@@ -860,9 +864,13 @@ static void* aml_userdata_thread (void *arg)
+ 	char display_buffer[10*1024];
+ #endif
+ 	int left = 0;
++	int readerror = 0;
+ 	int flush = 1;
+ 	int vdec_ids;
+ 	int read_vdec_id;
++	int debug_fd = -1;
++	int write_len = 0;
++	char temp_buf[28] = {0};
+ 	struct userdata_param_t user_para_info;
+ 
+ 	pfd.events = POLLIN|POLLERR;
+@@ -872,9 +880,9 @@ static void* aml_userdata_thread (void *arg)
+ 		//If scte and mpeg both exist, we need to ignore scte cc data,
+ 		//so we need to check cc type every time.
+ 		left = 0;
+-
++        readerror = 0;
+ 		ret = poll(&pfd, 1, USERDATA_POLL_TIMEOUT);
+-		AM_DEBUG(AM_DEBUG_LEVEL, "userdata after poll ret %d", ret);
++		AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "userdata after poll ret %d", ret);
+ 		if (!ud->running)
+ 			break;
+ 		if (ret != 1)
+@@ -886,10 +894,10 @@ static void* aml_userdata_thread (void *arg)
+ 		vdec_ids = 0;
+ 
+ 		if (-1 == ioctl(fd, AMSTREAM_IOC_UD_AVAIBLE_VDEC, &vdec_ids)) {
+-			AM_DEBUG(AM_DEBUG_LEVEL, "get avaible vdec failed");
++			AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "get avaible vdec failed");
+ 			continue;
+ 		} else {
+-			AM_DEBUG(AM_DEBUG_LEVEL, "get avaible vdec OK: 0x%x\n", vdec_ids);
++			AM_DEBUG(AM_DEBUG_LEVEL_DEBUG, "get avaible vdec OK: 0x%x\n", vdec_ids);
+ 		}
+ 
+ 		read_vdec_id = ffs(vdec_ids) - 1;
+@@ -904,22 +912,33 @@ static void* aml_userdata_thread (void *arg)
+ 			if (!ud->running)
+ 				break;
+ 
+-			if (left < 8) {
++			if (left <= 8)
++			{
+ 				memset(&user_para_info, 0, sizeof(struct userdata_param_t));
+-				user_para_info.pbuf_addr = (void*)(size_t)data;
+-				user_para_info.buf_len = sizeof(data);
++				user_para_info.pbuf_addr = (void*)(data + left);
++				user_para_info.buf_len = sizeof(data) - left;
+ 				user_para_info.instance_id = read_vdec_id;
+ 
+ 				if (-1 == ioctl(fd, AMSTREAM_IOC_UD_BUF_READ, &user_para_info))
+-					AM_DEBUG(0, "call AMSTREAM_IOC_UD_BUF_READ failed\n");
++				{
++				    if (readerror++)
++				    {
++				        AM_DEBUG(0, "call AMSTREAM_IOC_UD_BUF_READ failed\n");
++				        break;
++				    }
++				    poll(&pfd, 1, USERDATA_POLL_TIMEOUT);
++				    continue;
++				}
++                readerror = 0;
+ 	//			AM_DEBUG(0, "vdec_id %d real_id %d ioctl left data: %d",
+ 	//			vdec_ids, read_vdec_id, user_para_info.meta_info.records_in_que);
+ 
+ 				r = user_para_info.data_size;
+-				r = (r > MAX_CC_DATA_LEN) ? MAX_CC_DATA_LEN : r;
++				r = (r  + left > MAX_CC_DATA_LEN) ? MAX_CC_DATA_LEN - left: r;
+ 
+ 				if (r <= 0)
+ 					continue;
++
+ 				aml_swap_data(data + left, r);
+ 				left += r;
+ 				pd = data;
+@@ -961,13 +980,14 @@ static void* aml_userdata_thread (void *arg)
+ 				r = left;
+ 			}
+ 
+-		if ((data != pd + r) && (r < left)) {
+-			memmove(data, pd + r, left - r);
+-		}
++			if ((data != pd + r) && (r < left)) {
++			    memmove(data, pd + r, left - r);
++			}
+ 
+-		left -= r;
++			left -= r;
+ 		}while(user_para_info.meta_info.records_in_que > 1 || (left >= 8));
+ 	}
++
+ 	AM_DEBUG(0, "aml userdata thread exit");
+ 	return NULL;
+ }
+@@ -996,19 +1016,23 @@ static AM_ErrorCode_t aml_open(AM_USERDATA_Device_t *dev, const AM_USERDATA_Open
+ 	ud->cc_num	= 0;
+ 	ud->curr_poc  = -1;
+ 	ud->scte_enable = 1;
++	ud->timestamp_func = para->timestamp_fn;
++	ud->timestamp_userdata = para->timestamp_userdata;
+ 	if (!para->cc_default_stop)
+ 		ud->mode = AM_USERDATA_MODE_CC;
++    
++	dev->drv_data = ud; /* bugfix: dev is used in aml_userdata_thread so populate this before thread create. */
+ 
+ 	r = pthread_create(&ud->th, NULL, aml_userdata_thread, (void*)dev);
+ 	if (r) {
+ 		AM_DEBUG(0, "create userdata thread failed");
+ 		close(ud->fd);
+ 		free(ud);
++		dev->drv_data = NULL;
+ 		return AM_USERDATA_ERR_SYS;
+ 	}
+ 	AM_SigHandlerInit();
+ 
+-	dev->drv_data = ud;
+ 	return AM_SUCCESS;
+ }
+ 
+diff --git a/am_mw/am_cc/am_cc.c b/am_mw/am_cc/am_cc.c
+index cf776081..3556e189 100644
+--- a/am_mw/am_cc/am_cc.c
++++ b/am_mw/am_cc/am_cc.c
+@@ -784,6 +784,9 @@ static void *am_cc_data_thread(void *arg)
+ 	AM_TIME_GetClock(&last);
+ 	last_switch = last;
+ 
++	int debug_fd = -1;
++	int write_len = 0;
++
+ 	while (cc->running)
+ 	{
+ 		cc_data_cnt = AM_USERDATA_Read(ud_dev_no, cc_buffer, sizeof(cc_buffer), CC_POLL_TIMEOUT);
+diff --git a/include/am_adp/am_userdata.h b/include/am_adp/am_userdata.h
+index 6aca4e5a..93b22b23 100644
+--- a/include/am_adp/am_userdata.h
++++ b/include/am_adp/am_userdata.h
+@@ -61,12 +61,16 @@ enum AM_USERDATA_Mode
+ 	AM_USERDATA_MODE_AFD = 0x2,
+ };
+ 
++typedef uint64_t (*AM_USERDATA_TimestampFunc_t) (void *user_data);
++
+ /**\brief MPEG user data device open parameters*/
+ typedef struct
+ {
+ 	int    foo;
+ 	int vfmt;
+ 	int cc_default_stop;
++	AM_USERDATA_TimestampFunc_t timestamp_fn; /**< Function to get the current video timestamp.*/
++	void *timestamp_userdata;				  /**< User defined data used as timestamp_fn's parameter.*/
+ } AM_USERDATA_OpenPara_t;
+ 
+ typedef struct
+-- 
+2.31.1
+

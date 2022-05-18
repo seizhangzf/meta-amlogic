@@ -20,6 +20,7 @@ PATCHTOOL= "git"
 #For common patches
 TDIR = "tdk"
 TDIR_g12a = "tdk"
+TDIR_s4 = "tdk-3.8"
 TDIR_sc2 = "tdk-3.8"
 TDIR_t7 = "tdk-3.8"
 TDIR_t5w = "tdk-3.8"

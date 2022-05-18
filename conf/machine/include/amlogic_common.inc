@@ -31,20 +31,17 @@ TDK_VERSION_s4 = "v3.8/dev/S905Y4"
 TDK_VERSION_t7 = "v3.8/dev/A311D2"
 TDK_VERSION_t5w = "v3.8"
 
-#AML_GIT_ROOT ?= "git.myamlogic.com"
-#AML_GIT_PROTOCOL ?= "git"
-#AML_GIT_ROOT_YOCTO_SUFFIX ?= "/yocto"
-#AML_GIT_ROOT_PR ?= "git.myamlogic.com"
-#AML_GIT_ROOT_PROTOCOL ?= "git"
+#AML_GIT_ROOT ?= "git@openlinux.amlogic.com/yocto"
+#AML_GIT_PROTOCOL ?= "ssh"
+AML_GIT_ROOT ?= "code.rdkcentral.com/r/collaboration/soc/amlogic"
+AML_GIT_PROTOCOL ?= "https"
 
-AML_GIT_ROOT = "git@openlinux.amlogic.com/yocto"
-AML_GIT_PROTOCOL = "ssh"
-AML_GIT_ROOT_YOCTO_SUFFIX = ""
+AML_GIT_ROOT_YOCTO_SUFFIX ?= ""
+AML_META_LAYER ?= "meta-amlogic"
 AML_GIT_ROOT_OP = "git@openlinux.amlogic.com"
 AML_GIT_ROOT_PROTOCOL = "ssh"
 
 
-AML_META_LAYER ?= "meta-meson"
 
 #check connectivity using bing
 #CONNECTIVITY_CHECK_URIS = "https://www.bing.com/"

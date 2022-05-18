@@ -1,0 +1,169 @@
+From 8588bcb46c9fd3734ed32d31d5bd147bbfd7e126 Mon Sep 17 00:00:00 2001
+From: Evoke Zhang <evoke.zhang@amlogic.com>
+Date: Sun, 24 Apr 2022 11:34:12 +0800
+Subject: [PATCH] lcd: fix lcd clk mistake for vmode change with fr_adj_type 4
+ [1/2]
+
+PD#SWPL-75290
+
+Problem:
+lcd clk mistake when frame rate 59.94hz->60hz with fr_adj_type 4
+
+Solution:
+fix lcd clk mistake for vmode change with fr_adj_type 4
+
+Verify:
+ar301
+
+Change-Id: I7e4194bd70734b3fa7c7b60c60ec590c27dce79f
+Signed-off-by: Evoke Zhang <evoke.zhang@amlogic.com>
+---
+ drivers/display/lcd/aml_lcd_clk_config.c |  9 +++++-
+ drivers/display/lcd/aml_lcd_common.c     | 41 ++++++++++--------------
+ drivers/display/lcd/aml_lcd_common.h     |  3 +-
+ 3 files changed, 27 insertions(+), 26 deletions(-)
+
+diff --git a/drivers/display/lcd/aml_lcd_clk_config.c b/drivers/display/lcd/aml_lcd_clk_config.c
+index e7cd8586556..450b83839ec 100644
+--- a/drivers/display/lcd/aml_lcd_clk_config.c
++++ b/drivers/display/lcd/aml_lcd_clk_config.c
+@@ -2881,6 +2881,7 @@ lcd_set_ss_end:
+ void lcd_clk_update(struct lcd_config_s *pconf)
+ {
+ 	struct lcd_clk_ctrl_s *table;
++	unsigned int val;
+ 	int i = 0;
+ 
+ 	if (clk_conf.data == NULL) {
+@@ -2897,13 +2898,19 @@ void lcd_clk_update(struct lcd_config_s *pconf)
+ 		if (table[i].flag == LCD_CLK_CTRL_END)
+ 			break;
+ 		if (table[i].flag == LCD_CLK_CTRL_FRAC) {
++			val = lcd_hiu_read(table[i].reg);
+ 			lcd_hiu_setb(table[i].reg, clk_conf.pll_frac,
+ 				table[i].bit, table[i].len);
++			if (lcd_debug_print_flag) {
++				LCDPR("%s: pll_frac reg 0x%x: 0x%08x->0x%08x\n",
++					__func__, table[i].reg,
++					val, lcd_hiu_read(table[i].reg));
++			}
+ 		}
+ 		i++;
+ 	}
+ 
+-	LCDPR("%s\n", __func__);
++	LCDPR("%s: pll_frac=0x%x\n", __func__, clk_conf.pll_frac);
+ }
+ 
+ /* for timing change */
+diff --git a/drivers/display/lcd/aml_lcd_common.c b/drivers/display/lcd/aml_lcd_common.c
+index 677f29f2a89..67989dc0714 100644
+--- a/drivers/display/lcd/aml_lcd_common.c
++++ b/drivers/display/lcd/aml_lcd_common.c
+@@ -947,11 +947,9 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 			temp = duration_num;
+ 			temp = temp * h_period * v_period;
+ 			pclk = lcd_do_div(temp, duration_den);
+-			if (pconf->lcd_timing.lcd_clk != pclk) {
+-				pconf->lcd_timing.clk_change =
+-					LCD_CLK_FRAC_UPDATE;
+-			}
+ 		}
++		if (pconf->lcd_timing.lcd_clk != pclk)
++			pconf->lcd_timing.clk_change = LCD_CLK_FRAC_UPDATE;
+ 		break;
+ 	case 2: /* vtotal adjust */
+ 		temp = pclk;
+@@ -964,11 +962,9 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 			temp = duration_num;
+ 			temp = temp * h_period * v_period;
+ 			pclk = lcd_do_div(temp, duration_den);
+-			if (pconf->lcd_timing.lcd_clk != pclk) {
+-				pconf->lcd_timing.clk_change =
+-					LCD_CLK_FRAC_UPDATE;
+-			}
+ 		}
++		if (pconf->lcd_timing.lcd_clk != pclk)
++			pconf->lcd_timing.clk_change = LCD_CLK_FRAC_UPDATE;
+ 		break;
+ 	case 3: /* free adjust, use min/max range to calculate */
+ 		temp = pclk;
+@@ -986,12 +982,11 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 				temp = duration_num;
+ 				temp = temp * h_period * v_period;
+ 				pclk = lcd_do_div(temp, duration_den);
++				if (pclk > pclk_max) {
++					LCDERR("%s: invalid vmode\n", __func__);
++					return -1;
++				}
+ 				if (pconf->lcd_timing.lcd_clk != pclk) {
+-					if (pclk > pclk_max) {
+-						pclk = pclk_max;
+-						LCDERR("invalid vmode\n");
+-						return -1;
+-					}
+ 					pconf->lcd_timing.clk_change =
+ 						LCD_CLK_PLL_CHANGE;
+ 				}
+@@ -1006,12 +1001,11 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 				temp = duration_num;
+ 				temp = temp * h_period * v_period;
+ 				pclk = lcd_do_div(temp, duration_den);
++				if (pclk < pclk_min) {
++					LCDERR("%s: invalid vmode\n", __func__);
++					return -1;
++				}
+ 				if (pconf->lcd_timing.lcd_clk != pclk) {
+-					if (pclk < pclk_min) {
+-						pclk = pclk_min;
+-						LCDERR("invalid vmode\n");
+-						return -1;
+-					}
+ 					pconf->lcd_timing.clk_change =
+ 						LCD_CLK_PLL_CHANGE;
+ 				}
+@@ -1051,11 +1045,9 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 				temp = duration_num;
+ 				temp = temp * h_period * v_period;
+ 				pclk = lcd_do_div(temp, duration_den);
+-				if (pconf->lcd_timing.lcd_clk != pclk) {
+-					pconf->lcd_timing.clk_change =
+-						LCD_CLK_FRAC_UPDATE;
+-				}
+ 			}
++			if (pconf->lcd_timing.lcd_clk != pclk)
++				pconf->lcd_timing.clk_change = LCD_CLK_FRAC_UPDATE;
+ 		}
+ 		break;
+ 	default:
+@@ -1080,10 +1072,11 @@ int lcd_vmode_change(struct lcd_config_s *pconf)
+ 	if (pconf->lcd_timing.lcd_clk != pclk) {
+ 		if (len > 0)
+ 			len += sprintf(str+len, ", ");
+-		len += sprintf(str+len, "pclk %u.%03uMHz->%u.%03uMHz",
++		len += sprintf(str + len, "pclk %u.%03uMHz->%u.%03uMHz, clk_change:%d",
+ 			(pconf->lcd_timing.lcd_clk / 1000000),
+ 			((pconf->lcd_timing.lcd_clk / 1000) % 1000),
+-			(pclk / 1000000), ((pclk / 1000) % 1000));
++			(pclk / 1000000), ((pclk / 1000) % 1000),
++			pconf->lcd_timing.clk_change);
+ 		pconf->lcd_timing.lcd_clk = pclk;
+ 	}
+ 	if (lcd_debug_print_flag) {
+diff --git a/drivers/display/lcd/aml_lcd_common.h b/drivers/display/lcd/aml_lcd_common.h
+index 7e285fb221a..d0370de2df1 100644
+--- a/drivers/display/lcd/aml_lcd_common.h
++++ b/drivers/display/lcd/aml_lcd_common.h
+@@ -48,7 +48,8 @@
+ /* 20211009: add t5w support*/
+ /* 20211210: support load tcon bin by ioctl*/
+ /* 20211229: update multi lut init and switch flow*/
+-#define LCD_DRV_VERSION    "20211229"
++/* 20220421: fix lcd clk mistake for vmode change with fr_adj_type 4*/
++#define LCD_DRV_VERSION    "20220421"
+ 
+ #define LCD_STATUS_IF_ON      (1 << 0)
+ #define LCD_STATUS_ENCL_ON    (1 << 1)
+-- 
+2.31.0
+

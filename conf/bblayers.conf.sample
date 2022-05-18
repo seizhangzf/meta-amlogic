@@ -9,7 +9,7 @@ BBLAYERS ?= " \
   ##OEROOT##/poky/meta \
   ##OEROOT##/poky/meta-poky \
   ##OEROOT##/poky/meta-yocto-bsp \
-  ##OEROOT##/meta-meson \
+  ##OEROOT##/meta-amlogic \
   ##OEROOT##/meta-openembedded/meta-oe \
   ##OEROOT##/meta-openembedded/meta-filesystems \
   ##OEROOT##/meta-qt5 \

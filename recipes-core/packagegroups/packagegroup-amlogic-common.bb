@@ -69,6 +69,7 @@ RDEPENDS_packagegroup-amlogic-common = "\
                                     zram \
                                     modules-load \
                                     system-config \
+                                    aml-secmem \
                                     simulate-key \
                                     vulkan-loader \
                                     volume-ctl \

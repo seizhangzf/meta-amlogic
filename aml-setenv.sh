@@ -62,7 +62,6 @@ function choose_type()
     DEFAULT_NUM=2
     DEFAULT_VALUE="mesong12a_u212.conf"
 
-    export TARGET_MACHINE=
     local ANSWER
     while [ -z $TARGET_MACHINE ]
     do
@@ -108,7 +107,7 @@ function choose_type()
 function lunch()
 {
     if [ -n "$TARGET_MACHINE" ]; then
-        MACHINE=$TARGET_MACHINE source meta-meson/setup-environment $BUILD_DIR
+        MACHINE=$TARGET_MACHINE source meta-amlogic/setup-environment $BUILD_DIR
         export MACHINE=$TARGET_MACHINE
         echo "==========================================="
 		echo

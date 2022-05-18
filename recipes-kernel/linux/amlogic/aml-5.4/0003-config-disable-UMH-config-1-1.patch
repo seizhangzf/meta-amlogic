@@ -1,0 +1,37 @@
+From ba5bb9af0254e89c403890b44d16ca63701a833a Mon Sep 17 00:00:00 2001
+From: "song.han" <song.han@amlogic.com>
+Date: Tue, 22 Mar 2022 16:28:53 +0800
+Subject: [PATCH 3/3] config: disable UMH config [1/1]
+
+PD#SWPL-75240
+
+Problem:
+Core dumps to script cant work
+
+Solution:
+disable umh
+
+Verify:
+ah212
+
+Change-Id: I4decedbd7832455f6c2439bff2ab717fc23acc66
+Signed-off-by: song.han <song.han@amlogic.com>
+---
+ arch/arm64/configs/meson64_a64_R_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm64/configs/meson64_a64_R_defconfig b/arch/arm64/configs/meson64_a64_R_defconfig
+index c34853d4c468..c50b414d365d 100644
+--- a/arch/arm64/configs/meson64_a64_R_defconfig
++++ b/arch/arm64/configs/meson64_a64_R_defconfig
+@@ -716,7 +716,6 @@ CONFIG_SECURITY_NETWORK=y
+ CONFIG_HARDENED_USERCOPY=y
+ # CONFIG_HARDENED_USERCOPY_FALLBACK is not set
+ CONFIG_FORTIFY_SOURCE=y
+-CONFIG_STATIC_USERMODEHELPER=y
+ CONFIG_STATIC_USERMODEHELPER_PATH=""
+ CONFIG_SECURITY_SELINUX=y
+ # CONFIG_SECURITY_SELINUX_AVC_STATS is not set
+-- 
+2.31.1
+

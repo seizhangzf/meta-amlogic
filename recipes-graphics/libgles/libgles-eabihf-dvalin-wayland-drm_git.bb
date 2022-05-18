@@ -20,7 +20,7 @@ RPROVIDES_${PN} += "libwayland-egl.so"
 SRC_URI = "git://${AML_GIT_ROOT}/linux/amlogic/meson_mali.git;protocol=${AML_GIT_PROTOCOL};branch=master;"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/vendor/amlogic/meson_mali')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 SRCREV ?= "${AUTOREV}"
 PV = "git${SRCPV}"

@@ -8,7 +8,7 @@ PROVIDES = "libamavutils"
 SRC_URI = "git://${AML_GIT_ROOT}/platform/packages/amlogic/LibPlayer.git;protocol=${AML_GIT_PROTOCOL};branch=buildroot-libplayer"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libplayer/src')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic')}"
 
 SRCREV ?="${AUTOREV}"
 PV = "git${SRCPV}"
@@ -28,6 +28,7 @@ do_install () {
 	install -d ${D}/usr/lib
 	install -d ${D}${includedir}
     install -m 0644 ${S}/amavutils/include/*.h ${D}${includedir}
+    install -m 0644 ${S}/amsubdec/amstream.h ${D}${includedir}
     install -m 0644 -D ${S}/amavutils/libamavutils.so ${D}/usr/lib/libamavutils.so
 }
 

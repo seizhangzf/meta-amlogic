@@ -1,0 +1,56 @@
+From 26881b50f5ffd9377f18d0734b84831a2d28fbfc Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 20 Jan 2022 15:05:39 -0800
+Subject: [PATCH 4/4] rdk: adjust boot args for rdk
+
+PD#SWPL-70893
+
+Problem:
+cant boot to rdk
+
+Solution:
+add missing args
+
+Verify:
+an400
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I2414545d2cb33a6c8a6b17395c7fdbe11d3c6a6d
+---
+ board/amlogic/configs/t7_an400_lpddr4x.h | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/board/amlogic/configs/t7_an400_lpddr4x.h b/board/amlogic/configs/t7_an400_lpddr4x.h
+index 6539851b96f..bad438f8afb 100644
+--- a/board/amlogic/configs/t7_an400_lpddr4x.h
++++ b/board/amlogic/configs/t7_an400_lpddr4x.h
+@@ -389,7 +389,7 @@
+         "lcd1_ctrl=0x00000000\0" \
+         "lcd2_ctrl=0x00000000\0" \
+         "lcd_debug=0x00000000\0" \
+-        "outputmode=panel1\0" \
++	"outputmode=1080p60hz\0" \
+         "outputmode2=1080p60hz\0" \
+         "hdmimode=1080p60hz\0" \
+         "cvbsmode=dummy_l\0" \
+@@ -574,7 +574,16 @@
+                 "if test ${active_slot} != normal; then "\
+                     "setenv bootargs ${bootargs} androidboot.slot_suffix=${active_slot};"\
+                 "fi;"\
+-                "setenv bootargs ${bootargs} androidboot.rollback=${rollback_flag};"\
++		"if test ${avb2} = 1; then "\
++			"if test ${active_slot} = _a; then "\
++				"setenv bootargs ${bootargs} root=/dev/system_a;"\
++			"else if test ${active_slot} = _b; then "\
++				"setenv bootargs ${bootargs} root=/dev/system_b;"\
++			"else if test ${active_slot} = normal; then "\
++				"setenv bootargs ${bootargs} root=/dev/system;"\
++			"fi;fi;fi;"\
++		"fi;"\
++		"setenv bootargs ${bootargs} androidboot.rollback=${rollback_flag};"\
+                 "if fdt addr ${dtb_mem_addr}; then else echo retry common dtb; run common_dtb_load; fi;"\
+                 "setenv loadaddr ${loadaddr_kernel};"\
+                 "if imgread kernel ${boot_part} ${loadaddr}; then bootm ${loadaddr}; fi;"\
+-- 
+2.31.1
+

@@ -8,8 +8,9 @@ do_compile[noexec] = "1"
 do_populate_lic[noexec] = "1"
 
 PROVIDES = "widevine"
+PATCHTOOL = "git"
 
-SRC_URI = "git://${AML_GIT_ROOT_OP}/yocto/vendor/widevine;protocol=${AML_GIT_PROTOCOL};branch=amlogic-linux;destsuffix=git/widevine-bin"
+SRC_URI = "git://${AML_GIT_ROOT_OP}/yocto/vendor/widevine;protocol=${AML_GIT_ROOT_PROTOCOL};branch=amlogic-linux;destsuffix=git/widevine-bin"
 
 #For common patches
 SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/libmediadrm/widevine-bin')}"

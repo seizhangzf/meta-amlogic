@@ -56,10 +56,10 @@ BBLAYERS =+ "\${RDKROOT}/meta-rdk-bsp-amlogic"
 EOF
 fi
 
-# Add meta-meson only if a machine configuration choosed from different layer
-if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-meson[^-]') -eq 0 ]; then
+# Add meta-amlogic only if a machine configuration choosed from different layer
+if [ $(grep '^BBLAYERS' conf/bblayers.conf | grep -c 'meta-amlogic[^-]') -eq 0 ]; then
     cat >> conf/bblayers.conf <<EOF
-BBLAYERS =+ "\${RDKROOT}/meta-meson"
+BBLAYERS =+ "\${RDKROOT}/meta-amlogic"
 EOF
 fi
 
@@ -136,7 +136,7 @@ DEFAULTTUNE_virtclass-multilib-lib32 = "armv7athf-neon"
 EOF
 fi
 
-. $RDK_ROOT_PATH/meta-meson/scripts/setup-environment-internal
+. $RDK_ROOT_PATH/meta-amlogic/scripts/setup-environment-internal
 
 # Copy <manifest>.conf file to auto.conf for revision lock
 if [ -L $RDK_ROOT_PATH/.repo/manifest.xml ] ; then

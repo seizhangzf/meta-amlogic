@@ -1,0 +1,43 @@
+From 962f12dad0c1c899f533f7a60b506a9a6255ac82 Mon Sep 17 00:00:00 2001
+From: Xueling Li <xueling.li@amlogic.com>
+Date: Mon, 19 Jul 2021 12:03:50 +0000
+Subject: [PATCH 3/4] RDK: remove _a/_b extension from part_name in
+ splitFilePath() [1/1]
+
+PD#SWPL-51970
+
+Problem:
+  - uboot load dolby_fw.bin from a/b partition, but RDK data NOT has a/b
+  partition
+
+Solution:
+  - remove _a/_b extension from part_name in splitFilePath()
+
+Verify:
+  - dolby_fw can be load normally in uboot
+
+Signed-off-by: Xueling Li <xueling.li@amlogic.com>
+Change-Id: Ie50532e5f0a7e0adbe0fe2a4a7ea28fb3be979d7
+---
+ cmd/amlogic/ini/ini_platform.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/cmd/amlogic/ini/ini_platform.c b/cmd/amlogic/ini/ini_platform.c
+index 7ff904965d1..22a71f55fc7 100644
+--- a/cmd/amlogic/ini/ini_platform.c
++++ b/cmd/amlogic/ini/ini_platform.c
+@@ -66,6 +66,11 @@ static int splitFilePath(const char *file_path, char part_name[], char file_name
+         //ALOGD("%s, partition name is %s\n", __FUNCTION__, part_name);
+     }
+ 
++    if (!strcmp(part_name, "data_a") || !strcmp(part_name, "data_b")) {
++        printf("RDK change part_name %s to data\n", part_name);
++        snprintf(part_name, CC_MAX_INI_FILE_NAME_LEN, "%s", "data");
++    }
++
+     tmp_start_ptr = tmp_end_ptr;
+ 
+     i = 0;
+-- 
+2.31.1
+

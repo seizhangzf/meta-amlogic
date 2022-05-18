@@ -8,7 +8,7 @@ SRCREV ?= "${AUTOREV}"
 PV = "${SRCPV}"
 
 #For common patches
-SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/../aml-patches/multimedia/aml_audio_hal')}"
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/')}"
 EXTRA_OEMAKE = "TARGET_DIR=${D} STAGING_DIR=${D}"
 
 DEPENDS += "liblog aml-amaudioutils alsa-lib libamavutils  aml-mediahal-sdk"

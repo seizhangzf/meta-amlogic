@@ -1,0 +1,36 @@
+From 72d2dfcf51a77e05b1778431ff6a3a2f5125403b Mon Sep 17 00:00:00 2001
+From: "zhenyu.gao" <zhenyu.gao@amlogic.com>
+Date: Fri, 6 May 2022 21:49:01 +0800
+Subject: [PATCH] Add default manifest
+
+---
+ rtos_sdk_manifest.xml | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+ create mode 100644 rtos_sdk_manifest.xml
+
+diff --git a/rtos_sdk_manifest.xml b/rtos_sdk_manifest.xml
+new file mode 100644
+index 0000000..35b1350
+--- /dev/null
++++ b/rtos_sdk_manifest.xml
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<manifest>
++<remote name="origin" fetch="ssh://scgit.amlogic.com:29418/" review="https://scgit.amlogic.com/" />
++
++<project name="rtos_sdk/arch/riscv" path="bl30/rtos_sdk/arch/riscv" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/boards/riscv" path="bl30/rtos_sdk/boards/riscv" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/build" path="bl30/rtos_sdk/build_system" remote="amlogic" revision="refs/tags/220120">
++<copyfile src="Makefile" dest="bl30/rtos_sdk/Makefile"/>
++</project>
++<project name="rtos_sdk/drivers_aocpu" path="bl30/rtos_sdk/drivers_aocpu" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/freertos" path="bl30/rtos_sdk/kernel/freertos" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/libc" path="bl30/rtos_sdk/libs/libc" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/product/aocpu" path="bl30/rtos_sdk/products/aocpu" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/scripts" path="bl30/rtos_sdk/scripts" remote="amlogic" revision="refs/tags/220120" />
++<project name="rtos_sdk/soc/riscv" path="bl30/rtos_sdk/soc/riscv" remote="amlogic" revision="refs/tags/220120" />
++
++</manifest>
+-- 
+2.31.0
+

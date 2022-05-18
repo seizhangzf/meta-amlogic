@@ -1,0 +1,32 @@
+From 02f182f4a8838fea7f7d8f0f9d52540f4d45244c Mon Sep 17 00:00:00 2001
+From: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Date: Thu, 20 Jan 2022 20:13:32 -0800
+Subject: [PATCH] rdk: t7 build break fix
+
+Signed-off-by: Pradeep Sriram <pradeep.sriram@amlogic.com>
+Change-Id: I599d7c2804f0697b646143f3ce1f433c44a3fa32
+---
+ Makefile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 74ec626..6b33e37 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-OUTPUT_FILES := libamdvr.so am_fend_test am_dmx_test am_smc_test dvr_wrapper_test
++OUTPUT_FILES := libamdvr.so am_fend_test am_dmx_test dvr_wrapper_test
+ 
+ CFLAGS  := -Wall -O2 -fPIC -Iinclude
+ LDFLAGS := -L$(TARGET_DIR)/usr/lib -lmediahal_tsplayer -laudio_client -llog -lpthread -ldl
+@@ -69,7 +69,6 @@ install: $(OUTPUT_FILES)
+ 	install -m 0644 ./include/* $(STAGING_DIR)/usr/include/libdvr
+ 	install -m 0755 am_fend_test $(STAGING_DIR)/usr/bin
+ 	install -m 0755 am_dmx_test $(STAGING_DIR)/usr/bin
+-	install -m 0755 am_smc_test $(STAGING_DIR)/usr/bin
+ 	install -m 0755 dvr_wrapper_test $(STAGING_DIR)/usr/bin
+ 
+ clean:
+-- 
+2.31.1
+

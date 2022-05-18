@@ -10,7 +10,7 @@ SRC_URI_append = " ${@get_patch_list_with_path('${COREBASE}/aml-patches/vendor/v
 
 SRCREV ?= "${AUTOREV}"
 S = "${WORKDIR}/git"
-LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-meson/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
+LIC_FILES_CHKSUM = "file://${COREBASE}/../meta-amlogic/license/AMLOGIC;md5=6c70138441c57c9e1edb9fde685bd3c8"
 
 VMX_REL_PATH = "TBD"
 VMX_REL_PATH_sc2 = "s905x4_linux"

@@ -19,13 +19,13 @@ IPC_TYPE = "TV_BINDER"
 EXTRA_OEMAKE="STAGING_DIR=${STAGING_DIR_TARGET} \
               TV_IPC_TYPE=${IPC_TYPE} \
               TARGET_DIR=${D} \
-             " 
+             "
 do_compile() {
     cd ${S}
     oe_runmake  all
 }
 do_install() {
-   install -d ${D}${libdir} 
+   install -d ${D}${libdir}
    install -d ${D}${bindir}
    install -d ${D}${includedir}
 
