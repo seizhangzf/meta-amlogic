@@ -21,7 +21,7 @@ MACHINE_ESSENTIAL_EXTRA_RRECOMMENDS += " \
 #brcm-tools
 #wififw-ap6398
 
-KERNEL_DEVICETREE = "sc2_s905x4_ah212_linux.dtb"
+KERNEL_DEVICETREE = "sc2_s905x4_ah212_linux_sei.dtb"
 KERNEL_MODULE_AUTOLOAD += " btqca"
 KERNEL_MODULE_PROBECONF += "btqca"
 KERNEL_MODULE_AUTOLOAD += " hci_uart"

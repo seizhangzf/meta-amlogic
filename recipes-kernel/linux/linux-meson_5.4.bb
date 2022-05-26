@@ -29,6 +29,10 @@ SRC_URI_append_sc2 = " file://sc2.cfg"
 KDIR = "aml-5.4"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/${KDIR}')}"
 
+
+#For sei patches
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/sei/${KDIR}')}"
+
 DEPENDS += "rsync-native"
 
 LINUX_VERSION ?= "5.4.125"
