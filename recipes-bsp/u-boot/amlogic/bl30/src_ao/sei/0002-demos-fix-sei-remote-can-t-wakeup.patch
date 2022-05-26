@@ -1,0 +1,25 @@
+From 066cf56b9ce40c9b04a372044504d73cee5ec112 Mon Sep 17 00:00:00 2001
+From: zhangzf <zhangzf@seirobotics.net>
+Date: Thu, 26 May 2022 20:32:52 +0800
+Subject: [PATCH] [demos] fix sei remote can't wakeup
+
+---
+ demos/amlogic/n200/sc2/sc2_ah212/power.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/demos/amlogic/n200/sc2/sc2_ah212/power.c b/demos/amlogic/n200/sc2/sc2_ah212/power.c
+index e0e97c3..0a7bcf2 100755
+--- a/demos/amlogic/n200/sc2/sc2_ah212/power.c
++++ b/demos/amlogic/n200/sc2/sc2_ah212/power.c
+@@ -48,7 +48,7 @@ static TaskHandle_t cecTask = NULL;
+ static int vdd_ee;
+ 
+ static IRPowerKey_t prvPowerKeyList[] = {
+-	{ 0x0000fe01, IR_NORMAL}, /* ref tv pwr */
++	{ 0xff00fe01, IR_NORMAL}, /* ref tv pwr */
+ 	{ 0xba45bd02, IR_NORMAL}, /* small ir pwr */
+ 	{ 0xef10fb04, IR_NORMAL}, /* old ref tv pwr */
+ 	{ 0xf20dfe01, IR_NORMAL},
+-- 
+2.7.4
+
