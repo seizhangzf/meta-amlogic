@@ -47,6 +47,8 @@ PATCHTOOL="git"
 #For common patch
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl33/v2019', 'bl33/v2019')}"
 SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/fip', 'fip')}"
+#For sei patch in bl30
+SRC_URI_append = " ${@get_patch_list_with_path('${THISDIR}/amlogic/bl30/src_ao/sei', 'bl30/src_ao')}"
 #can not patch bl binaries due to permission issue bl binary repos
 
 do_configure[noexec] = "1"

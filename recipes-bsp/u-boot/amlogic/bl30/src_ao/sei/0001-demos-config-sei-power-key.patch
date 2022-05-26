@@ -1,0 +1,28 @@
+From 2b20b20cc4776fad49ecfaffa7ef25b9342be06a Mon Sep 17 00:00:00 2001
+From: zhangzf <zhangzf@seirobotics.net>
+Date: Thu, 26 May 2022 17:37:29 +0800
+Subject: [PATCH] [demos] config sei power key
+
+---
+ demos/amlogic/n200/sc2/sc2_ah212/power.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 demos/amlogic/n200/sc2/sc2_ah212/power.c
+
+diff --git a/demos/amlogic/n200/sc2/sc2_ah212/power.c b/demos/amlogic/n200/sc2/sc2_ah212/power.c
+old mode 100644
+new mode 100755
+index 7f70aa1..e0e97c3
+--- a/demos/amlogic/n200/sc2/sc2_ah212/power.c
++++ b/demos/amlogic/n200/sc2/sc2_ah212/power.c
+@@ -48,7 +48,7 @@ static TaskHandle_t cecTask = NULL;
+ static int vdd_ee;
+ 
+ static IRPowerKey_t prvPowerKeyList[] = {
+-	{ 0xef10fe01, IR_NORMAL}, /* ref tv pwr */
++	{ 0x0000fe01, IR_NORMAL}, /* ref tv pwr */
+ 	{ 0xba45bd02, IR_NORMAL}, /* small ir pwr */
+ 	{ 0xef10fb04, IR_NORMAL}, /* old ref tv pwr */
+ 	{ 0xf20dfe01, IR_NORMAL},
+-- 
+2.7.4
+
