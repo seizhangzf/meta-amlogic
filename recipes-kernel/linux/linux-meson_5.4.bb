@@ -8,7 +8,7 @@ SRCTREECOVEREDTASKS_remove = "do_patch"
 FILESEXTRAPATHS_prepend := "${THISDIR}/5.4:"
 
 KBRANCH = "openlinux/rdk-firebolt-dunfell-20220430"
-SRC_URI = "git://${AML_GIT_ROOT}/kernel/common.git;protocol=${AML_GIT_PROTOCOL};branch=${KBRANCH};"
+SRC_URI = "git://github.com/seizhangzf/rdk-amlogic-kernel-common.git;protocol=${AML_GIT_PROTOCOL};branch=rdk_sei_202204"
 #SRC_URI_append = " file://defconfig"
 SRC_URI_append = " file://gki-read_ext_module_config.sh"
 SRC_URI_append = " file://gki-read_ext_module_predefine.sh"
